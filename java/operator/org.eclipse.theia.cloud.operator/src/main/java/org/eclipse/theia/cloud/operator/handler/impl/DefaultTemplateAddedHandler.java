@@ -39,8 +39,11 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentList;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressList;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 
@@ -48,9 +51,12 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(DefaultTemplateAddedHandler.class);
 
+    protected static final String TEMPLATE_INGRESS_YAML = "/templateIngress.yaml";
     protected static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     protected static final String TEMPLATE_DEPLOYMENT_YAML = "/templateDeployment.yaml";
 
+    protected static final String PLACEHOLDER_INGRESSNAME = "placeholder-ingressname";
+    protected static final String PLACEHOLDER_HOST = "placeholder-host";
     protected static final String PLACEHOLDER_SERVICENAME = "placeholder-servicename";
     protected static final String PLACEHOLDER_APP = "placeholder-app";
     protected static final String PLACEHOLDER_DEPLOYMENTNAME = "placeholder-depname";
@@ -58,6 +64,7 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
     protected static final String PLACEHOLDER_TEMPLATENAME = "placeholder-templatename";
     protected static final String PLACEHOLDER_IMAGE = "placeholder-image";
 
+    protected static final String INGRESS_NAME = "-ingress";
     protected static final String SERVICE_NAME = "-service-";
     protected static final String DEPLOYMENT_NAME = "-deployment-";
 
@@ -72,6 +79,16 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	String templateID = spec.getName();
 	String image = spec.getImage();
 	int instances = spec.getInstances();
+	String host = spec.getHost();
+
+	/* Create ingress if not existing */
+	if (!hasExistingIngress(client, namespace, templateResourceName, templateResourceUID)) {
+	    LOGGER.trace(formatLogMessage(correlationId, "No existing Ingress"));
+	    createAndApplyIngress(client, namespace, correlationId, templateResourceName, templateResourceUID,
+		    templateID, host);
+	} else {
+	    LOGGER.trace(formatLogMessage(correlationId, "Ingress available already"));
+	}
 
 	/* Get existing services for this template */
 	List<Service> existingServices = getExistingServices(client, namespace, templateResourceName,
@@ -99,6 +116,15 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	    }
 	}
 	return false;
+    }
+
+    protected boolean hasExistingIngress(DefaultKubernetesClient client, String namespace, String templateResourceName,
+	    String templateResourceUID) {
+	return client.network().v1().ingresses().list().getItems().stream()//
+		.filter(ingress -> hasThisTemplateOwnerReference(ingress.getMetadata().getOwnerReferences(),
+			templateResourceUID, templateResourceName))//
+		.findAny()//
+		.isPresent();
     }
 
     protected List<Service> getExistingServices(DefaultKubernetesClient client, String namespace,
@@ -185,6 +211,39 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	}
     }
 
+    protected void createAndApplyIngress(DefaultKubernetesClient client, String namespace, String correlationId,
+	    String templateResourceName, String templateResourceUID, String templateID, String host) {
+	/* create yaml based on template */
+	Map<String, String> replacements = getIngressReplacements(templateID, namespace, host);
+	String ingressYaml;
+	try {
+	    ingressYaml = ResourceUtil.readResourceAndReplacePlaceholders(DefaultTemplateAddedHandler.class,
+		    TEMPLATE_INGRESS_YAML, replacements, correlationId);
+	} catch (IOException | URISyntaxException e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for ingress."), e);
+	    return;
+	}
+
+	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(ingressYaml.getBytes())) {
+	    /* prepare new ingress */
+	    NonNamespaceOperation<Ingress, IngressList, Resource<Ingress>> ingresses = client.network().v1().ingresses()
+		    .inNamespace(namespace);
+	    LOGGER.trace(formatLogMessage(correlationId, "Loading new ingress:\n" + ingressYaml));
+	    Ingress newIngress = ingresses.load(inputStream).get();
+	    newIngress.getMetadata().getOwnerReferences().get(0).setUid(templateResourceUID);
+	    newIngress.getMetadata().getOwnerReferences().get(0).setName(templateResourceName);
+
+	    /* apply new deployment */
+	    LOGGER.trace(formatLogMessage(correlationId, "Creating new ingress."));
+	    ingresses.create(newIngress);
+	    LOGGER.info(formatLogMessage(correlationId, "Created a new ingress"));
+	} catch (IOException e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error with template stream"), e);
+	    return;
+	}
+	return;
+    }
+
     protected void createAndApplyService(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String templateResourceName, String templateResourceUID, String templateID, int instance) {
 	/* create yaml based on template */
@@ -257,6 +316,14 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	    return;
 	}
 	return;
+    }
+
+    protected Map<String, String> getIngressReplacements(String templateID, String namespace, String host) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(PLACEHOLDER_INGRESSNAME, templateID + INGRESS_NAME);
+	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
+	replacements.put(PLACEHOLDER_HOST, host);
+	return replacements;
     }
 
     protected Map<String, String> getServiceReplacements(String templateID, int instance, String namespace) {

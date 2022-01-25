@@ -25,7 +25,7 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v1alpha")
+@Version("v2alpha")
 @Group("theia.cloud")
 @Singular("template")
 @Plural("templates")
