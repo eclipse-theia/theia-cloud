@@ -14,19 +14,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.resource.util;
+package org.eclipse.theia.cloud.operator.di;
 
-import io.fabric8.kubernetes.client.CustomResource;
+import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.impl.DefaultTemplateAddedHandler;
 
-public final class ResourceUtil {
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 
-    private ResourceUtil() {
+public class TheiaCloudOperatorModule extends AbstractModule {
+
+    @Override
+    protected void configure() {
+	bind(TemplateAddedHandler.class).to(bindTemplateAddedHandler()).in(Singleton.class);
     }
 
-    public static <S, T> String customResourcetoString(CustomResource<S, T> resource) {
-	String name = resource.getMetadata() != null ? resource.getMetadata().getName() : "unknown";
-	String version = resource.getMetadata() != null ? resource.getMetadata().getResourceVersion() : "unknown";
-	return "name=" + name + " version=" + version + " value=" + resource.getSpec();
+    protected Class<DefaultTemplateAddedHandler> bindTemplateAddedHandler() {
+	return DefaultTemplateAddedHandler.class;
     }
 
 }

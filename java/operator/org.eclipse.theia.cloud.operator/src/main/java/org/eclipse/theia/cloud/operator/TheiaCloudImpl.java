@@ -23,11 +23,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
+import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
 import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResource;
 import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResourceList;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -42,17 +48,24 @@ public class TheiaCloudImpl implements TheiaCloud {
     private final Map<String, TemplateSpecResource> templateCache = new ConcurrentHashMap<>();
     private final Map<String, WorkspaceSpecResource> workspaceCache = new ConcurrentHashMap<>();
 
-    @SuppressWarnings("unused")
     private final String namespace;
+    private final Injector injector;
+    private final DefaultKubernetesClient client;
     private final NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient;
     private final NonNamespaceOperation<WorkspaceSpecResource, WorkspaceSpecResourceList, Resource<WorkspaceSpecResource>> workspaceResourceClient;
 
-    public TheiaCloudImpl(String namespace,
+    private TemplateAddedHandler templateAddedHandler;
+
+    public TheiaCloudImpl(String namespace, TheiaCloudOperatorModule module, DefaultKubernetesClient client,
 	    NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient,
 	    NonNamespaceOperation<WorkspaceSpecResource, WorkspaceSpecResourceList, Resource<WorkspaceSpecResource>> workspaceResourceClient) {
 	this.namespace = namespace;
+	this.injector = Guice.createInjector(module);
+	this.client = client;
 	this.templateResourceClient = templateResourceClient;
 	this.workspaceResourceClient = workspaceResourceClient;
+
+	this.templateAddedHandler = injector.getInstance(TemplateAddedHandler.class);
     }
 
     @Override
@@ -83,8 +96,9 @@ public class TheiaCloudImpl implements TheiaCloud {
     }
 
     private void templateAdded(TemplateSpecResource template, String correlationId) {
-	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_TEMPLATEPREFIX, correlationId, "templateAdded not implemented"));
+	LOGGER.trace(formatLogMessage(COR_ID_TEMPLATEPREFIX, correlationId,
+		"Delegating templateAdded to " + templateAddedHandler.getClass().getName()));
+	templateAddedHandler.handle(client, template, namespace, correlationId);
     }
 
     private void templateDeleted(TemplateSpecResource template, String correlationId) {

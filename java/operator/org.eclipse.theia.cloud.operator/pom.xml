@@ -11,6 +11,7 @@
 	<description>The k8s operator for Theia.Cloud</description>
 
 	<properties>
+		<guice.version>5.0.1</guice.version>
 		<kubernetes-client.version>5.11.2</kubernetes-client.version>
 		<log4j.version>2.17.1</log4j.version>
 		<maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
@@ -19,11 +20,21 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>${guice.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>io.fabric8</groupId>
 			<artifactId>kubernetes-client</artifactId>
 			<version>${kubernetes-client.version}</version>
 		</dependency>
-
+        <!-- To fix a dependency issue with kubernetes-client -->
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+            <version>1.14.0</version>
+        </dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>

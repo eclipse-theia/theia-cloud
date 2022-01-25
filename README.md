@@ -1,5 +1,9 @@
 # Theia Cloud
 
+## Housekeeping
+
+`kubectl delete deployments --all && kubectl delete services --all`
+
 ## Running
 
 ### Local Setup with Minikube

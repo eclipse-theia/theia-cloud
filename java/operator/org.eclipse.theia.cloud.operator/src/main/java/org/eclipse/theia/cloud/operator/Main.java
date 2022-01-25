@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.operator.util.LogMessageUtil.formatLogMess
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
@@ -41,6 +42,10 @@ public class Main {
     static final String COR_ID_INIT = "init";
 
     public static void main(String[] args) throws InterruptedException {
+	new Main().runMain(args);
+    }
+
+    public void runMain(String[] args) throws InterruptedException {
 	Config config = new ConfigBuilder().build();
 
 	/*
@@ -76,7 +81,10 @@ public class Main {
 		.orElseThrow(() -> new RuntimeException(
 			"Deployment error: Custom resource definition Workspace for Theia.Cloud not found."));
 
-	TheiaCloud theiaCloud = new TheiaCloudImpl(namespace,
+	TheiaCloudOperatorModule module = createModule(args);
+	LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
+
+	TheiaCloud theiaCloud = new TheiaCloudImpl(namespace, module, client,
 		client.customResources(TemplateSpecResource.class, TemplateSpecResourceList.class)
 			.inNamespace(namespace),
 		client.customResources(WorkspaceSpecResource.class, WorkspaceSpecResourceList.class)
@@ -84,6 +92,10 @@ public class Main {
 
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Launching Theia Cloud Now"));
 	theiaCloud.start();
+    }
+
+    protected TheiaCloudOperatorModule createModule(String[] args) {
+	return new TheiaCloudOperatorModule();
     }
 
     private static boolean isTemplateCRD(CustomResourceDefinition crd) {
