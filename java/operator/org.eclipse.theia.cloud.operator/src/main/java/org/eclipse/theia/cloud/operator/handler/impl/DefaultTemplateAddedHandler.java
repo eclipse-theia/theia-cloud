@@ -29,12 +29,12 @@ import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.util.ResourceUtil;
 
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -51,6 +51,10 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(DefaultTemplateAddedHandler.class);
 
+    public static final String INGRESS_NAME = "-ingress";
+    public static final String SERVICE_NAME = "-service-";
+    public static final String DEPLOYMENT_NAME = "-deployment-";
+
     protected static final String TEMPLATE_INGRESS_YAML = "/templateIngress.yaml";
     protected static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     protected static final String TEMPLATE_DEPLOYMENT_YAML = "/templateDeployment.yaml";
@@ -63,10 +67,6 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
     protected static final String PLACEHOLDER_NAMESPACE = "placeholder-namespace";
     protected static final String PLACEHOLDER_TEMPLATENAME = "placeholder-templatename";
     protected static final String PLACEHOLDER_IMAGE = "placeholder-image";
-
-    protected static final String INGRESS_NAME = "-ingress";
-    protected static final String SERVICE_NAME = "-service-";
-    protected static final String DEPLOYMENT_NAME = "-deployment-";
 
     @Override
     public void handle(DefaultKubernetesClient client, TemplateSpecResource template, String namespace,
@@ -91,7 +91,7 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	}
 
 	/* Get existing services for this template */
-	List<Service> existingServices = getExistingServices(client, namespace, templateResourceName,
+	List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, templateResourceName,
 		templateResourceUID);
 
 	/* Create missing services for this template */
@@ -99,7 +99,7 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 		instances, existingServices);
 
 	/* Get existing deployments for this template */
-	List<Deployment> existingDeployments = getExistingDeployments(client, namespace, templateResourceName,
+	List<Deployment> existingDeployments = K8sUtil.getExistingDeployments(client, namespace, templateResourceName,
 		templateResourceUID);
 
 	/* Create missing deployments for this template */
@@ -107,40 +107,9 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 		templateID, image, instances, existingDeployments);
     }
 
-    private static boolean hasThisTemplateOwnerReference(List<OwnerReference> ownerReferences,
-	    String templateResourceUID, String templateResourceName) {
-	for (OwnerReference ownerReference : ownerReferences) {
-	    if (templateResourceUID.equals(ownerReference.getUid())
-		    && templateResourceName.equals(ownerReference.getName())) {
-		return true;
-	    }
-	}
-	return false;
-    }
-
     protected boolean hasExistingIngress(DefaultKubernetesClient client, String namespace, String templateResourceName,
 	    String templateResourceUID) {
-	return client.network().v1().ingresses().list().getItems().stream()//
-		.filter(ingress -> hasThisTemplateOwnerReference(ingress.getMetadata().getOwnerReferences(),
-			templateResourceUID, templateResourceName))//
-		.findAny()//
-		.isPresent();
-    }
-
-    protected List<Service> getExistingServices(DefaultKubernetesClient client, String namespace,
-	    String templateResourceName, String templateResourceUID) {
-	return client.services().inNamespace(namespace).list().getItems().stream()//
-		.filter(service -> hasThisTemplateOwnerReference(service.getMetadata().getOwnerReferences(),
-			templateResourceUID, templateResourceName))//
-		.collect(Collectors.toList());
-    }
-
-    protected List<Deployment> getExistingDeployments(DefaultKubernetesClient client, String namespace,
-	    String templateResourceName, String templateResourceUID) {
-	return client.apps().deployments().inNamespace(namespace).list().getItems().stream()//
-		.filter(deployment -> hasThisTemplateOwnerReference(deployment.getMetadata().getOwnerReferences(),
-			templateResourceUID, templateResourceName))//
-		.collect(Collectors.toList());
+	return K8sUtil.getExistingIngress(client, namespace, templateResourceName, templateResourceUID).isPresent();
     }
 
     protected void createMissingServices(DefaultKubernetesClient client, String namespace, String correlationId,

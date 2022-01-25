@@ -15,6 +15,8 @@ Remove old Minikube clusters with `minikube delete`.
 Start a new Minikube instance:\
 `minikube start --addons=ingress --vm=true --memory=8192 --cpus=6 --disk-size=75g --vm-driver=virtualbox`
 
+Update `host: 192.168.99.113.nip.io` in `k8s/operator-k8s-yaml/template-spec-resource.yaml` with the IP received from `minikube ip`.
+
 Create a new namespace and switch to it:\
 `kubectl create namespace theiacloud`\
 `kubectl config set-context --current --namespace=theiacloud`

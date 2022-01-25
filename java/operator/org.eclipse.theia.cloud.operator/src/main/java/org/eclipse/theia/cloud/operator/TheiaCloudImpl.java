@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
 import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResource;
@@ -55,6 +56,7 @@ public class TheiaCloudImpl implements TheiaCloud {
     private final NonNamespaceOperation<WorkspaceSpecResource, WorkspaceSpecResourceList, Resource<WorkspaceSpecResource>> workspaceResourceClient;
 
     private TemplateAddedHandler templateAddedHandler;
+    private WorkspaceAddedHandler workspaceAddedHandler;
 
     public TheiaCloudImpl(String namespace, TheiaCloudOperatorModule module, DefaultKubernetesClient client,
 	    NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient,
@@ -66,6 +68,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 	this.workspaceResourceClient = workspaceResourceClient;
 
 	this.templateAddedHandler = injector.getInstance(TemplateAddedHandler.class);
+	this.workspaceAddedHandler = injector.getInstance(WorkspaceAddedHandler.class);
     }
 
     @Override
@@ -143,8 +146,9 @@ public class TheiaCloudImpl implements TheiaCloud {
     }
 
     private void workspaceAdded(WorkspaceSpecResource workspace, String correlationId) {
-	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceAdded not implemented"));
+	LOGGER.trace(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId,
+		"Delegating workspaceAdded to " + workspaceAddedHandler.getClass().getName()));
+	workspaceAddedHandler.handle(client, workspace, namespace, correlationId);
     }
 
     private void workspaceDeleted(WorkspaceSpecResource workspace, String correlationId) {
