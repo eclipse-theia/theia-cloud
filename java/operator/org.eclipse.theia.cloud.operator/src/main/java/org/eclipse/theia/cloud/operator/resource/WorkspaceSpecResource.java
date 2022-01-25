@@ -16,7 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.resource;
 
-import org.eclipse.theia.cloud.operator.resource.util.ResourceUtil;
+import org.eclipse.theia.cloud.operator.resource.util.K8sResourceUtil;
 
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
@@ -35,7 +35,7 @@ public class WorkspaceSpecResource extends CustomResource<WorkspaceSpec, Void> i
 
     @Override
     public String toString() {
-	return ResourceUtil.customResourcetoString(this);
+	return K8sResourceUtil.customResourcetoString(this);
     }
 
 }
