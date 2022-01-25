@@ -2,7 +2,7 @@
 
 ## Housekeeping
 
-`kubectl delete deployments --all && kubectl delete services --all`
+`kubectl delete deployments --all && kubectl delete services --all && kubectl delete ingresses --all`
 
 ## Running
 
@@ -26,6 +26,6 @@ Install custom resource definitions (from git root directory):\
 Launch operator from Eclipse.
 
 Install sample template (from git root directory):\
-`kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-teplate-spec.yaml`\
+`kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-template-spec.yaml`\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-workspace-1.yaml`\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-workspace-2.yaml`
