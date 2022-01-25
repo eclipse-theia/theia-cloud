@@ -14,7 +14,7 @@ metadata:
 spec:
   rules:
     - host: placeholder-host
-      # http:
+      http:
       #   paths:
       #     - path: /
       #       pathType: Prefix
