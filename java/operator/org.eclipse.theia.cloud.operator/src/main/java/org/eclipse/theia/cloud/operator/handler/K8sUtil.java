@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -51,6 +52,14 @@ public final class K8sUtil {
 	    String templateResourceName, String templateResourceUID) {
 	return client.apps().deployments().inNamespace(namespace).list().getItems().stream()//
 		.filter(deployment -> hasThisTemplateOwnerReference(deployment.getMetadata().getOwnerReferences(),
+			templateResourceUID, templateResourceName))//
+		.collect(Collectors.toList());
+    }
+
+    public static List<ConfigMap> getExistingConfigMaps(DefaultKubernetesClient client, String namespace,
+	    String templateResourceName, String templateResourceUID) {
+	return client.configMaps().inNamespace(namespace).list().getItems().stream()//
+		.filter(configMap -> hasThisTemplateOwnerReference(configMap.getMetadata().getOwnerReferences(),
 			templateResourceUID, templateResourceName))//
 		.collect(Collectors.toList());
     }

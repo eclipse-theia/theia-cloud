@@ -31,6 +31,9 @@ public class TemplateSpec {
     @JsonProperty("image")
     private String image;
 
+    @JsonProperty("port")
+    private int port;
+
     @JsonProperty("instances")
     private int instances;
 
@@ -45,6 +48,10 @@ public class TemplateSpec {
 	return image;
     }
 
+    public int getPort() {
+	return port;
+    }
+
     public int getInstances() {
 	return instances;
     }
@@ -55,7 +62,8 @@ public class TemplateSpec {
 
     @Override
     public String toString() {
-	return "TemplateSpec [name=" + name + ", image=" + image + ", instances=" + instances + ", host=" + host + "]";
+	return "TemplateSpec [name=" + name + ", image=" + image + ", port=" + port + ", instances=" + instances
+		+ ", host=" + host + "]";
     }
 
 }

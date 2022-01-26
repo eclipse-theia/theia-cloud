@@ -13,7 +13,7 @@ metadata:
 spec:
   ports:
     - name: http
-      port: 3000 
+      port: placeholder-port 
       protocol: TCP
       targetPort: web
   selector:
