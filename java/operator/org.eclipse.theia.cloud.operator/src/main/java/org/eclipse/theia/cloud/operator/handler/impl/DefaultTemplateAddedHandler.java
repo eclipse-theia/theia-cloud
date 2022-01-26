@@ -35,6 +35,8 @@ import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.util.ResourceUtil;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapList;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -54,11 +56,18 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
     public static final String INGRESS_NAME = "-ingress";
     public static final String SERVICE_NAME = "-service-";
     public static final String DEPLOYMENT_NAME = "-deployment-";
+    public static final String CONFIGMAP_NAME = "-config-";
 
+    protected static final String OAUTH2_PROXY_CONFIGMAP_NAME = "oauth2-proxy-config";
+    protected static final String OAUTH2_PROXY_CFG = "oauth2-proxy.cfg";
+
+    protected static final String TEMPLATE_CONFIGMAP_YAML = "/templateConfigmap.yaml";
     protected static final String TEMPLATE_INGRESS_YAML = "/templateIngress.yaml";
     protected static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     protected static final String TEMPLATE_DEPLOYMENT_YAML = "/templateDeployment.yaml";
 
+    protected static final String PLACEHOLDER_PORT = "placeholder-port";
+    protected static final String PLACEHOLDER_CONFIGNAME = "placeholder-configname";
     protected static final String PLACEHOLDER_INGRESSNAME = "placeholder-ingressname";
     protected static final String PLACEHOLDER_HOST = "placeholder-host";
     protected static final String PLACEHOLDER_SERVICENAME = "placeholder-servicename";
@@ -67,6 +76,9 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
     protected static final String PLACEHOLDER_NAMESPACE = "placeholder-namespace";
     protected static final String PLACEHOLDER_TEMPLATENAME = "placeholder-templatename";
     protected static final String PLACEHOLDER_IMAGE = "placeholder-image";
+
+    protected static final String CONFIGMAP_DATA_PLACEHOLDER_HOST = "https://placeholder";
+    protected static final String CONFIGMAP_DATA_PLACEHOLDER_PORT = "placeholder-port";
 
     @Override
     public void handle(DefaultKubernetesClient client, TemplateSpecResource template, String namespace,
@@ -80,6 +92,7 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	String image = spec.getImage();
 	int instances = spec.getInstances();
 	String host = spec.getHost();
+	int port = spec.getPort();
 
 	/* Create ingress if not existing */
 	if (!hasExistingIngress(client, namespace, templateResourceName, templateResourceUID)) {
@@ -96,7 +109,15 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 
 	/* Create missing services for this template */
 	createMissingServices(client, namespace, correlationId, templateResourceName, templateResourceUID, templateID,
-		instances, existingServices);
+		instances, port, existingServices);
+
+	/* Get existing configmaps for this template */
+	List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client, namespace, templateResourceName,
+		templateResourceUID);
+
+	/* Create missing configmaps for this template */
+	createMissingConfigMaps(client, namespace, correlationId, templateResourceName, templateResourceUID, templateID,
+		image, instances, host, port, existingConfigMaps);
 
 	/* Get existing deployments for this template */
 	List<Deployment> existingDeployments = K8sUtil.getExistingDeployments(client, namespace, templateResourceName,
@@ -104,7 +125,7 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 
 	/* Create missing deployments for this template */
 	createMissingDeployments(client, namespace, correlationId, templateResourceName, templateResourceUID,
-		templateID, image, instances, existingDeployments);
+		templateID, image, instances, port, existingDeployments);
     }
 
     protected boolean hasExistingIngress(DefaultKubernetesClient client, String namespace, String templateResourceName,
@@ -113,13 +134,13 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
     }
 
     protected void createMissingServices(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String templateResourceName, String templateResourceUID, String templateID, int instances,
+	    String templateResourceName, String templateResourceUID, String templateID, int instances, int port,
 	    List<Service> existingServices) {
 	if (existingServices.size() == 0) {
 	    LOGGER.trace(formatLogMessage(correlationId, "No existing Services"));
 	    for (int i = 1; i <= instances; i++) {
 		createAndApplyService(client, namespace, correlationId, templateResourceName, templateResourceUID,
-			templateID, i);
+			templateID, i, port);
 	    }
 	} else {
 	    List<Integer> missingInstances = IntStream.rangeClosed(1, instances).boxed().collect(Collectors.toList());
@@ -141,19 +162,19 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	    }
 	    for (int i : missingInstances) {
 		createAndApplyService(client, namespace, correlationId, templateResourceName, templateResourceUID,
-			templateID, i);
+			templateID, i, port);
 	    }
 	}
     }
 
     protected void createMissingDeployments(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String templateResourceName, String templateResourceUID, String templateID, String image, int instances,
-	    List<Deployment> existingDeployments) {
+	    int port, List<Deployment> existingDeployments) {
 	if (existingDeployments.size() == 0) {
 	    LOGGER.trace(formatLogMessage(correlationId, "No existing Deployments"));
 	    for (int i = 1; i <= instances; i++) {
 		createAndApplyDeployment(client, namespace, correlationId, templateResourceName, templateResourceUID,
-			templateID, image, i);
+			templateID, image, i, port);
 	    }
 	} else {
 	    List<Integer> missingDeployments = IntStream.rangeClosed(1, instances).boxed().collect(Collectors.toList());
@@ -175,7 +196,41 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	    }
 	    for (int i : missingDeployments) {
 		createAndApplyDeployment(client, namespace, correlationId, templateResourceName, templateResourceUID,
-			templateID, image, i);
+			templateID, image, i, port);
+	    }
+	}
+    }
+
+    protected void createMissingConfigMaps(DefaultKubernetesClient client, String namespace, String correlationId,
+	    String templateResourceName, String templateResourceUID, String templateID, String image, int instances,
+	    String host, int port, List<ConfigMap> existingConfigMaps) {
+	if (existingConfigMaps.size() == 0) {
+	    LOGGER.trace(formatLogMessage(correlationId, "No existing Config Maps"));
+	    for (int i = 1; i <= instances; i++) {
+		createAndApplyConfigMap(client, namespace, correlationId, templateResourceName, templateResourceUID,
+			templateID, image, i, host, port);
+	    }
+	} else {
+	    List<Integer> missingConfigMaps = IntStream.rangeClosed(1, instances).boxed().collect(Collectors.toList());
+	    int namePrefixLength = (templateID + CONFIGMAP_NAME).length();
+	    for (ConfigMap configMap : existingConfigMaps) {
+		String name = configMap.getMetadata().getName();
+		String instance = name.substring(namePrefixLength);
+		try {
+		    missingConfigMaps.remove(Integer.valueOf(instance));
+		} catch (NumberFormatException e) {
+		    LOGGER.error(formatLogMessage(correlationId, "Error while getting integer value of " + instance),
+			    e);
+		}
+	    }
+	    if (missingConfigMaps.isEmpty()) {
+		LOGGER.trace(formatLogMessage(correlationId, "All Config Maps existing already"));
+	    } else {
+		LOGGER.trace(formatLogMessage(correlationId, "Some Config Maps need to be created"));
+	    }
+	    for (int i : missingConfigMaps) {
+		createAndApplyConfigMap(client, namespace, correlationId, templateResourceName, templateResourceUID,
+			templateID, image, i, host, port);
 	    }
 	}
     }
@@ -214,9 +269,9 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
     }
 
     protected void createAndApplyService(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String templateResourceName, String templateResourceUID, String templateID, int instance) {
+	    String templateResourceName, String templateResourceUID, String templateID, int instance, int port) {
 	/* create yaml based on template */
-	Map<String, String> replacements = getServiceReplacements(templateID, instance, namespace);
+	Map<String, String> replacements = getServiceReplacements(templateID, instance, port, namespace);
 	String serviceYaml;
 	try {
 	    serviceYaml = ResourceUtil.readResourceAndReplacePlaceholders(DefaultTemplateAddedHandler.class,
@@ -251,9 +306,10 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
     }
 
     protected void createAndApplyDeployment(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String templateResourceName, String templateResourceUID, String templateID, String image, int instance) {
+	    String templateResourceName, String templateResourceUID, String templateID, String image, int instance,
+	    int port) {
 	/* create yaml based on template */
-	Map<String, String> replacements = getDeploymentsReplacements(templateID, image, instance, namespace);
+	Map<String, String> replacements = getDeploymentsReplacements(templateID, image, instance, port, namespace);
 	String deploymentYaml;
 	try {
 	    deploymentYaml = ResourceUtil.readResourceAndReplacePlaceholders(DefaultTemplateAddedHandler.class,
@@ -287,6 +343,54 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	return;
     }
 
+    protected void createAndApplyConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,
+	    String templateResourceName, String templateResourceUID, String templateID, String image, int instance,
+	    String templateHost, int port) {
+	/* create yaml based on template */
+	Map<String, String> replacements = getConfigMapReplacements(templateID, image, instance, namespace);
+	String configMapYaml;
+	try {
+	    configMapYaml = ResourceUtil.readResourceAndReplacePlaceholders(DefaultTemplateAddedHandler.class,
+		    TEMPLATE_CONFIGMAP_YAML, replacements, correlationId);
+	} catch (IOException | URISyntaxException e) {
+	    LOGGER.error(
+		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
+		    e);
+	    return;
+	}
+
+	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(configMapYaml.getBytes())) {
+	    /* prepare new configmap */
+	    NonNamespaceOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> configMaps = client.configMaps()
+		    .inNamespace(namespace);
+	    LOGGER.trace(formatLogMessage(correlationId,
+		    "Loading new config map for instance number " + instance + " :\n" + configMapYaml));
+	    ConfigMap newConfigMap = configMaps.load(inputStream).get();
+	    newConfigMap.getMetadata().getOwnerReferences().get(0).setUid(templateResourceUID);
+	    newConfigMap.getMetadata().getOwnerReferences().get(0).setName(templateResourceName);
+
+	    /* get data from global config and update host */
+	    String host = templateID + "." + instance + "." + templateHost;
+	    ConfigMap templateConfigMap = client.configMaps().inNamespace(namespace)
+		    .withName(OAUTH2_PROXY_CONFIGMAP_NAME).get();
+	    Map<String, String> data = new LinkedHashMap<>(templateConfigMap.getData());
+	    data.put(OAUTH2_PROXY_CFG, data.get(OAUTH2_PROXY_CFG)//
+		    .replace(CONFIGMAP_DATA_PLACEHOLDER_HOST, "https://" + host)//
+		    .replace(CONFIGMAP_DATA_PLACEHOLDER_PORT, String.valueOf(port)));
+	    newConfigMap.setData(data);
+
+	    /* apply new config map */
+	    LOGGER.trace(formatLogMessage(correlationId, "Creating new config map for instance number " + instance));
+	    configMaps.create(newConfigMap);
+	    LOGGER.info(formatLogMessage(correlationId, "Created a new config map for instance number " + instance));
+	} catch (IOException e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error with template stream for instance number " + instance),
+		    e);
+	    return;
+	}
+	return;
+    }
+
     protected Map<String, String> getIngressReplacements(String templateID, String namespace, String host) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_INGRESSNAME, templateID + INGRESS_NAME);
@@ -295,15 +399,16 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	return replacements;
     }
 
-    protected Map<String, String> getServiceReplacements(String templateID, int instance, String namespace) {
+    protected Map<String, String> getServiceReplacements(String templateID, int instance, int port, String namespace) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_SERVICENAME, templateID + SERVICE_NAME + instance);
 	replacements.put(PLACEHOLDER_APP, templateID + "-" + instance);
 	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
+	replacements.put(PLACEHOLDER_PORT, String.valueOf(port));
 	return replacements;
     }
 
-    protected Map<String, String> getDeploymentsReplacements(String templateID, String image, int instance,
+    protected Map<String, String> getDeploymentsReplacements(String templateID, String image, int instance, int port,
 	    String namespace) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_DEPLOYMENTNAME, templateID + DEPLOYMENT_NAME + instance);
@@ -311,6 +416,16 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	replacements.put(PLACEHOLDER_APP, templateID + "-" + instance);
 	replacements.put(PLACEHOLDER_TEMPLATENAME, templateID);
 	replacements.put(PLACEHOLDER_IMAGE, image);
+	replacements.put(PLACEHOLDER_CONFIGNAME, templateID + CONFIGMAP_NAME + instance);
+	replacements.put(PLACEHOLDER_PORT, String.valueOf(port));
+	return replacements;
+    }
+
+    protected Map<String, String> getConfigMapReplacements(String templateID, String image, int instance,
+	    String namespace) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(PLACEHOLDER_CONFIGNAME, templateID + CONFIGMAP_NAME + instance);
+	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }
 

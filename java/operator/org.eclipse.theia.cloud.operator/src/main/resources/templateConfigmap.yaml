@@ -4,8 +4,8 @@ metadata:
   name: placeholder-configname
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v1alpha
-      kind: Workspace
+    - apiVersion: theia.cloud/v2alpha
+      kind: Template
       name: placeholder
       uid: placeholder
 data:

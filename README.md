@@ -2,7 +2,7 @@
 
 ## Housekeeping
 
-`kubectl delete deployments --all && kubectl delete services --all && kubectl delete ingresses --all && kubectl delete configmap foo-foo-workspace-oauth2-proxy-config bar-bar-workspace-oauth2-proxy-config`
+`kubectl delete deployments --all && kubectl delete services --all && kubectl delete ingresses --all && kubectl delete configmap coffee-editor-config-1 && kubectl delete configmap coffee-editor-config-2`
 
 ## Running
 
@@ -40,11 +40,11 @@ echo ""
 
 Follow https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#keycloak-oidc-auth-provider
 
-Valid Redirect URL: `https://*.192.168.99.113.nip.io/oauth2/callback` (IP comes from `minikube ip`)
+Valid Redirect URL: `https://*.192.168.99.115.nip.io/oauth2/callback` (IP comes from `minikube ip`)
 
 ##### Run Theia.Cloud
 
-Update `host: 192.168.99.113.nip.io` in `k8s/operator-k8s-yaml/template-spec-resource.yaml` with the IP received from `minikube ip`.
+Update `host: 192.168.99.115.nip.io` in `k8s/operator-k8s-yaml/template-spec-resource.yaml` with the IP received from `minikube ip`.
 
 Create a new namespace and switch to it:\
 `kubectl create namespace theiacloud`\
