@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: placeholder-configname
+  namespace: placeholder-namespace
+  ownerReferences:
+    - apiVersion: theia.cloud/v1alpha
+      kind: Workspace
+      name: placeholder
+      uid: placeholder
+data:

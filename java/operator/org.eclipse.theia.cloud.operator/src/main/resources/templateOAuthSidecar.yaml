@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: depname
+  namespace: namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: oauth2-proxy
+          image: quay.io/oauth2-proxy/oauth2-proxy
+          imagePullPolicy: Always
+          args:
+            - --config=/etc/oauth2-proxy.cfg
+          ports:
+            - containerPort: 5000
+              name: web
+          volumeMounts:
+            - name: oauth2-proxy-config
+              mountPath: /etc/oauth2-proxy.cfg
+              subPath: oauth2-proxy.cfg
+            - name: oauth2-templates
+              mountPath: /templates
+      volumes:
+        - name: oauth2-proxy-config
+          configMap:
+            name: placeholder-configname
+        - name: oauth2-templates
+          configMap:
+            name: oauth2-templates
