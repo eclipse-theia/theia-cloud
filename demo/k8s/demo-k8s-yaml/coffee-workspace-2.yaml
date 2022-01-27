@@ -5,4 +5,4 @@ metadata:
 spec:
   name: bar-workspace
   template: coffee-editor
-  user: bar
+  user: bar@bar.bar

@@ -56,17 +56,24 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
     public static final String INGRESS_NAME = "-ingress";
     public static final String SERVICE_NAME = "-service-";
     public static final String DEPLOYMENT_NAME = "-deployment-";
-    public static final String CONFIGMAP_NAME = "-config-";
+    public static final String CONFIGMAP_PROXY_NAME = "-config-";
+    public static final String CONFIGMAP_EMAIL_NAME = "-emailconfig-";
+
+    public static final String LABEL_KEY = "theiacloud";
+    public static final String LABEL_VALUE_PROXY = "proxy";
+    public static final String LABEL_VALUE_EMAILS = "emails";
 
     protected static final String OAUTH2_PROXY_CONFIGMAP_NAME = "oauth2-proxy-config";
     protected static final String OAUTH2_PROXY_CFG = "oauth2-proxy.cfg";
 
     protected static final String TEMPLATE_CONFIGMAP_YAML = "/templateConfigmap.yaml";
+    protected static final String TEMPLATE_CONFIGMAP_EMAILS_YAML = "/templateConfigmapEmails.yaml";
     protected static final String TEMPLATE_INGRESS_YAML = "/templateIngress.yaml";
     protected static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     protected static final String TEMPLATE_DEPLOYMENT_YAML = "/templateDeployment.yaml";
 
     protected static final String PLACEHOLDER_PORT = "placeholder-port";
+    protected static final String PLACEHOLDER_EMAILSCONFIGNAME = "placeholder-emailsconfigname";
     protected static final String PLACEHOLDER_CONFIGNAME = "placeholder-configname";
     protected static final String PLACEHOLDER_INGRESSNAME = "placeholder-ingressname";
     protected static final String PLACEHOLDER_HOST = "placeholder-host";
@@ -204,15 +211,34 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
     protected void createMissingConfigMaps(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String templateResourceName, String templateResourceUID, String templateID, String image, int instances,
 	    String host, int port, List<ConfigMap> existingConfigMaps) {
+
+	List<ConfigMap> existingProxyConfigMaps = existingConfigMaps.stream()//
+		.filter(configmap -> LABEL_VALUE_PROXY.equals(configmap.getMetadata().getLabels().get(LABEL_KEY)))//
+		.collect(Collectors.toList());
+
+	createMissingProxyConfigMaps(client, namespace, correlationId, templateResourceName, templateResourceUID,
+		templateID, image, instances, host, port, existingProxyConfigMaps);
+
+	List<ConfigMap> existingEmailsConfigMaps = existingConfigMaps.stream()//
+		.filter(configmap -> LABEL_VALUE_EMAILS.equals(configmap.getMetadata().getLabels().get(LABEL_KEY)))//
+		.collect(Collectors.toList());
+
+	createMissingEmailsConfigMaps(client, namespace, correlationId, templateResourceName, templateResourceUID,
+		templateID, image, instances, host, port, existingEmailsConfigMaps);
+    }
+
+    protected void createMissingProxyConfigMaps(DefaultKubernetesClient client, String namespace, String correlationId,
+	    String templateResourceName, String templateResourceUID, String templateID, String image, int instances,
+	    String host, int port, List<ConfigMap> existingConfigMaps) {
 	if (existingConfigMaps.size() == 0) {
-	    LOGGER.trace(formatLogMessage(correlationId, "No existing Config Maps"));
+	    LOGGER.trace(formatLogMessage(correlationId, "No existing Proxy Config Maps"));
 	    for (int i = 1; i <= instances; i++) {
-		createAndApplyConfigMap(client, namespace, correlationId, templateResourceName, templateResourceUID,
-			templateID, image, i, host, port);
+		createAndApplyProxyConfigMap(client, namespace, correlationId, templateResourceName,
+			templateResourceUID, templateID, image, i, host, port);
 	    }
 	} else {
 	    List<Integer> missingConfigMaps = IntStream.rangeClosed(1, instances).boxed().collect(Collectors.toList());
-	    int namePrefixLength = (templateID + CONFIGMAP_NAME).length();
+	    int namePrefixLength = (templateID + CONFIGMAP_PROXY_NAME).length();
 	    for (ConfigMap configMap : existingConfigMaps) {
 		String name = configMap.getMetadata().getName();
 		String instance = name.substring(namePrefixLength);
@@ -224,13 +250,47 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 		}
 	    }
 	    if (missingConfigMaps.isEmpty()) {
-		LOGGER.trace(formatLogMessage(correlationId, "All Config Maps existing already"));
+		LOGGER.trace(formatLogMessage(correlationId, "All Proxy Config Maps existing already"));
 	    } else {
-		LOGGER.trace(formatLogMessage(correlationId, "Some Config Maps need to be created"));
+		LOGGER.trace(formatLogMessage(correlationId, "Some Proxy Config Maps need to be created"));
 	    }
 	    for (int i : missingConfigMaps) {
-		createAndApplyConfigMap(client, namespace, correlationId, templateResourceName, templateResourceUID,
-			templateID, image, i, host, port);
+		createAndApplyProxyConfigMap(client, namespace, correlationId, templateResourceName,
+			templateResourceUID, templateID, image, i, host, port);
+	    }
+	}
+    }
+
+    protected void createMissingEmailsConfigMaps(DefaultKubernetesClient client, String namespace, String correlationId,
+	    String templateResourceName, String templateResourceUID, String templateID, String image, int instances,
+	    String host, int port, List<ConfigMap> existingConfigMaps) {
+	if (existingConfigMaps.size() == 0) {
+	    LOGGER.trace(formatLogMessage(correlationId, "No existing Email Config Maps"));
+	    for (int i = 1; i <= instances; i++) {
+		createAndApplyEmailConfigMap(client, namespace, correlationId, templateResourceName,
+			templateResourceUID, templateID, image, i, host, port);
+	    }
+	} else {
+	    List<Integer> missingConfigMaps = IntStream.rangeClosed(1, instances).boxed().collect(Collectors.toList());
+	    int namePrefixLength = (templateID + CONFIGMAP_EMAIL_NAME).length();
+	    for (ConfigMap configMap : existingConfigMaps) {
+		String name = configMap.getMetadata().getName();
+		String instance = name.substring(namePrefixLength);
+		try {
+		    missingConfigMaps.remove(Integer.valueOf(instance));
+		} catch (NumberFormatException e) {
+		    LOGGER.error(formatLogMessage(correlationId, "Error while getting integer value of " + instance),
+			    e);
+		}
+	    }
+	    if (missingConfigMaps.isEmpty()) {
+		LOGGER.trace(formatLogMessage(correlationId, "All Email Config Maps existing already"));
+	    } else {
+		LOGGER.trace(formatLogMessage(correlationId, "Some Email Config Maps need to be created"));
+	    }
+	    for (int i : missingConfigMaps) {
+		createAndApplyEmailConfigMap(client, namespace, correlationId, templateResourceName,
+			templateResourceUID, templateID, image, i, host, port);
 	    }
 	}
     }
@@ -343,11 +403,11 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	return;
     }
 
-    protected void createAndApplyConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,
+    protected void createAndApplyProxyConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String templateResourceName, String templateResourceUID, String templateID, String image, int instance,
 	    String templateHost, int port) {
 	/* create yaml based on template */
-	Map<String, String> replacements = getConfigMapReplacements(templateID, image, instance, namespace);
+	Map<String, String> replacements = getProxyConfigMapReplacements(templateID, image, instance, namespace);
 	String configMapYaml;
 	try {
 	    configMapYaml = ResourceUtil.readResourceAndReplacePlaceholders(DefaultTemplateAddedHandler.class,
@@ -364,7 +424,7 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	    NonNamespaceOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> configMaps = client.configMaps()
 		    .inNamespace(namespace);
 	    LOGGER.trace(formatLogMessage(correlationId,
-		    "Loading new config map for instance number " + instance + " :\n" + configMapYaml));
+		    "Loading new proxy config map for instance number " + instance + " :\n" + configMapYaml));
 	    ConfigMap newConfigMap = configMaps.load(inputStream).get();
 	    newConfigMap.getMetadata().getOwnerReferences().get(0).setUid(templateResourceUID);
 	    newConfigMap.getMetadata().getOwnerReferences().get(0).setName(templateResourceName);
@@ -380,9 +440,51 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	    newConfigMap.setData(data);
 
 	    /* apply new config map */
-	    LOGGER.trace(formatLogMessage(correlationId, "Creating new config map for instance number " + instance));
+	    LOGGER.trace(
+		    formatLogMessage(correlationId, "Creating new proxy config map for instance number " + instance));
 	    configMaps.create(newConfigMap);
-	    LOGGER.info(formatLogMessage(correlationId, "Created a new config map for instance number " + instance));
+	    LOGGER.info(
+		    formatLogMessage(correlationId, "Created a new proxy config map for instance number " + instance));
+	} catch (IOException e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error with template stream for instance number " + instance),
+		    e);
+	    return;
+	}
+	return;
+    }
+
+    protected void createAndApplyEmailConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,
+	    String templateResourceName, String templateResourceUID, String templateID, String image, int instance,
+	    String templateHost, int port) {
+	/* create yaml based on template */
+	Map<String, String> replacements = getEmailConfigMapReplacements(templateID, image, instance, namespace);
+	String configMapYaml;
+	try {
+	    configMapYaml = ResourceUtil.readResourceAndReplacePlaceholders(DefaultTemplateAddedHandler.class,
+		    TEMPLATE_CONFIGMAP_EMAILS_YAML, replacements, correlationId);
+	} catch (IOException | URISyntaxException e) {
+	    LOGGER.error(
+		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
+		    e);
+	    return;
+	}
+
+	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(configMapYaml.getBytes())) {
+	    /* prepare new configmap */
+	    NonNamespaceOperation<ConfigMap, ConfigMapList, Resource<ConfigMap>> configMaps = client.configMaps()
+		    .inNamespace(namespace);
+	    LOGGER.trace(formatLogMessage(correlationId,
+		    "Loading new email config map for instance number " + instance + " :\n" + configMapYaml));
+	    ConfigMap newConfigMap = configMaps.load(inputStream).get();
+	    newConfigMap.getMetadata().getOwnerReferences().get(0).setUid(templateResourceUID);
+	    newConfigMap.getMetadata().getOwnerReferences().get(0).setName(templateResourceName);
+
+	    /* apply new config map */
+	    LOGGER.trace(
+		    formatLogMessage(correlationId, "Creating new email config map for instance number " + instance));
+	    configMaps.create(newConfigMap);
+	    LOGGER.info(
+		    formatLogMessage(correlationId, "Created a new email config map for instance number " + instance));
 	} catch (IOException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error with template stream for instance number " + instance),
 		    e);
@@ -416,15 +518,24 @@ public class DefaultTemplateAddedHandler implements TemplateAddedHandler {
 	replacements.put(PLACEHOLDER_APP, templateID + "-" + instance);
 	replacements.put(PLACEHOLDER_TEMPLATENAME, templateID);
 	replacements.put(PLACEHOLDER_IMAGE, image);
-	replacements.put(PLACEHOLDER_CONFIGNAME, templateID + CONFIGMAP_NAME + instance);
+	replacements.put(PLACEHOLDER_CONFIGNAME, templateID + CONFIGMAP_PROXY_NAME + instance);
+	replacements.put(PLACEHOLDER_EMAILSCONFIGNAME, templateID + CONFIGMAP_EMAIL_NAME + instance);
 	replacements.put(PLACEHOLDER_PORT, String.valueOf(port));
 	return replacements;
     }
 
-    protected Map<String, String> getConfigMapReplacements(String templateID, String image, int instance,
+    protected Map<String, String> getProxyConfigMapReplacements(String templateID, String image, int instance,
 	    String namespace) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_CONFIGNAME, templateID + CONFIGMAP_NAME + instance);
+	replacements.put(PLACEHOLDER_CONFIGNAME, templateID + CONFIGMAP_PROXY_NAME + instance);
+	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
+	return replacements;
+    }
+
+    protected Map<String, String> getEmailConfigMapReplacements(String templateID, String image, int instance,
+	    String namespace) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(PLACEHOLDER_EMAILSCONFIGNAME, templateID + CONFIGMAP_EMAIL_NAME + instance);
 	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }

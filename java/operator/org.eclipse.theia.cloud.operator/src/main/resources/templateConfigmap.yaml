@@ -2,9 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: placeholder-configname
+  labels:
+    theiacloud: proxy
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v2alpha
+    - apiVersion: theia.cloud/v3alpha
       kind: Template
       name: placeholder
       uid: placeholder

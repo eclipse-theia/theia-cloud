@@ -8,11 +8,11 @@ data:
     # Provider config
     provider="keycloak-oidc"
     redirect_url="https://placeholder/oauth2/callback"
-    oidc_issuer_url="https://keycloak.192.168.99.115.nip.io/auth/realms/TheiaCloud"
+    oidc_issuer_url="https://keycloak-eclipse-che.192.168.39.3.nip.io/auth/realms/TheiaCloud"
     ssl_insecure_skip_verify=true
     # Client config
     client_id="theia-cloud"
-    client_secret="C2lP1nxF6jlnmvI9BBWhjWrWZdMVpIQx"
+    client_secret="d8bfd514-8199-4732-8d71-5f4af5270ed1"
     cookie_secret="OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
     cookie_secure="false"
     #proxy_prefix=""
@@ -24,7 +24,7 @@ data:
     skip_auth_routes=["/health.*"]
     skip_provider_button="true"
     reverse_proxy="true"
-    email_domains=["*"]
-    cookie_domains=[".192.168.99.115.nip.io"]
-    whitelist_domains=[".192.168.99.115.nip.io:*",".google.com:*"]
+    # email_domains=["*"]
+    cookie_domains=[".192.168.39.3.nip.io"]
+    whitelist_domains=[".192.168.39.3.nip.io:*",".google.com:*"]
     custom_templates_dir="/templates"

@@ -5,4 +5,4 @@ metadata:
 spec:
   name: foo-workspace
   template: coffee-editor
-  user: foo
+  user: foo@foo.foo
