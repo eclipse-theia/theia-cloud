@@ -2,7 +2,7 @@
 
 ## Housekeeping
 
-`kubectl delete deployments --all && kubectl delete services --all && kubectl delete ingresses --all && kubectl delete configmap coffee-editor-config-1 && kubectl delete configmap coffee-editor-config-2`
+`kubectl delete deployments --all -n theiacloud && kubectl delete services --all -n theiacloud && kubectl delete ingresses --all -n theiacloud && kubectl delete configmap coffee-editor-config-1 -n theiacloud && kubectl delete configmap coffee-editor-config-2 -n theiacloud && kubectl delete configmap coffee-editor-emailconfig-1 -n theiacloud && kubectl delete configmap coffee-editor-emailconfig-2 -n theiacloud`
 
 ## Running
 
@@ -13,7 +13,8 @@
 Remove old Minikube clusters with `minikube delete`.
 
 Start a new Minikube instance:\
-`minikube start --addons=ingress --vm=true --memory=8192 --cpus=6 --disk-size=75g --vm-driver=virtualbox`
+`minikube start --addons=ingress --vm=true --memory=8192 --cpus=6 --disk-size=75g`
+
 
 ##### Install Keycloak
 
@@ -40,11 +41,11 @@ echo ""
 
 Follow https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#keycloak-oidc-auth-provider
 
-Valid Redirect URL: `https://*.192.168.99.115.nip.io/oauth2/callback` (IP comes from `minikube ip`)
+Valid Redirect URL: `https://*.192.168.39.3.nip.io/oauth2/callback` (IP comes from `minikube ip`)
 
 ##### Run Theia.Cloud
 
-Update `host: 192.168.99.115.nip.io` in `k8s/operator-k8s-yaml/template-spec-resource.yaml` with the IP received from `minikube ip`.
+Update `host: 192.168.39.3.nip.io` in `k8s/operator-k8s-yaml/template-spec-resource.yaml` with the IP received from `minikube ip`.
 
 Create a new namespace and switch to it:\
 `kubectl create namespace theiacloud`\
@@ -61,4 +62,9 @@ Install sample template (from git root directory):\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-workspace-1.yaml`\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-workspace-2.yaml`\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-oauth2proxy-keycloak.yaml`\
-`kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-htmlpage.yaml`
+`kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-htmlpage.yaml`\
+`kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-emails.yaml`
+
+# Docker
+
+`docker build -t theia-cloud-operator -f dockerfiles/operator/Dockerfile .`

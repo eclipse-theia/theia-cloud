@@ -4,7 +4,7 @@ metadata:
   name: placeholder-depname
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v2alpha
+    - apiVersion: theia.cloud/v3alpha
       kind: Template
       name: placeholder
       uid: placeholder
@@ -25,6 +25,7 @@ spec:
           imagePullPolicy: Always
           args:
             - --config=/etc/oauth2-proxy.cfg
+            - --authenticated-emails-file=/emails/authenticated-emails-list
           ports:
             - containerPort: 5000
               name: web
@@ -34,6 +35,8 @@ spec:
               subPath: oauth2-proxy.cfg
             - name: oauth2-templates
               mountPath: /templates
+            - name: oauth2-emails
+              mountPath: /emails
         - name: placeholder-templatename
           image: placeholder-image
           ports:
@@ -55,3 +58,6 @@ spec:
         - name: oauth2-templates
           configMap:
             name: oauth2-templates
+        - name: oauth2-emails
+          configMap:
+            name: placeholder-emailsconfigname

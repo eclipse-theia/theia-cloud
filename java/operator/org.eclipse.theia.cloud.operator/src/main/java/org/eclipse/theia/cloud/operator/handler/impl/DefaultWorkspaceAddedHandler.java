@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.operator.handler.impl;
 
 import static org.eclipse.theia.cloud.operator.util.LogMessageUtil.formatLogMessage;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -50,6 +51,8 @@ public class DefaultWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(DefaultWorkspaceAddedHandler.class);
 
+    protected static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
+
     @Override
     public boolean handle(DefaultKubernetesClient client, WorkspaceSpecResource workspace, String namespace,
 	    String correlationId) {
@@ -60,6 +63,7 @@ public class DefaultWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	String workspaceResourceUID = workspace.getMetadata().getUid();
 
 	String templateID = spec.getTemplate();
+	String userEmail = spec.getUser();
 
 	/* find template for workspace */
 	Optional<TemplateSpecResource> template = client
@@ -115,6 +119,20 @@ public class DefaultWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
 		    + (templateID + DefaultTemplateAddedHandler.DEPLOYMENT_NAME + instance)), e);
+	    return false;
+	}
+
+	/* add user to allowed emails */
+	try {
+	    client.configMaps().inNamespace(namespace)
+		    .withName(templateID + DefaultTemplateAddedHandler.CONFIGMAP_EMAIL_NAME + instance)
+		    .edit(configmap -> {
+			configmap.setData(Collections.singletonMap(FILENAME_AUTHENTICATED_EMAILS_LIST, userEmail));
+			return configmap;
+		    });
+	} catch (KubernetesClientException e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error while editing email configmap "
+		    + (templateID + DefaultTemplateAddedHandler.CONFIGMAP_EMAIL_NAME + instance)), e);
 	    return false;
 	}
 

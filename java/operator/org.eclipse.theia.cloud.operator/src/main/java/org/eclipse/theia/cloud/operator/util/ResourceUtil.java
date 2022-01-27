@@ -18,13 +18,14 @@ package org.eclipse.theia.cloud.operator.util;
 
 import static org.eclipse.theia.cloud.operator.util.LogMessageUtil.formatLogMessage;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,15 +39,18 @@ public final class ResourceUtil {
 
     public static String readResourceAndReplacePlaceholders(Class<?> clazz, String resourceName,
 	    Map<String, String> replacements, String correlationId) throws IOException, URISyntaxException {
-	String template = Files.readString(Paths.get(clazz.getResource(resourceName).toURI()), StandardCharsets.UTF_8);
-	LOGGER.trace(formatLogMessage(correlationId, "Updating template read with classloader " + clazz.getName()
-		+ " from " + resourceName + " :\n" + template));
-	for (Entry<String, String> replacement : replacements.entrySet()) {
-	    template = template.replace(replacement.getKey(), replacement.getValue());
-	    LOGGER.trace(formatLogMessage(correlationId,
-		    "Replaced " + replacement.getKey() + " with " + replacement.getValue() + " :\n" + template));
+	try (InputStream inputStream = ResourceUtil.class.getResourceAsStream(resourceName)) {
+	    String template = new BufferedReader(new InputStreamReader(inputStream)).lines().parallel()
+		    .collect(Collectors.joining("\n"));
+	    LOGGER.trace(formatLogMessage(correlationId, "Updating template read with classloader " + clazz.getName()
+		    + " from " + resourceName + " :\n" + template));
+	    for (Entry<String, String> replacement : replacements.entrySet()) {
+		template = template.replace(replacement.getKey(), replacement.getValue());
+		LOGGER.trace(formatLogMessage(correlationId,
+			"Replaced " + replacement.getKey() + " with " + replacement.getValue() + " :\n" + template));
+	    }
+	    return template;
 	}
-	return template;
     }
 
 }
