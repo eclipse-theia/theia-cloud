@@ -26,17 +26,18 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
+import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
+import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
+import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
+import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
+import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
 import org.eclipse.theia.cloud.operator.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaUtil;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -47,9 +48,13 @@ import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
-public class DefaultWorkspaceAddedHandler implements WorkspaceAddedHandler {
+/**
+ * A {@link WorkspaceAddedHandler} that relies on the fact that the template
+ * handler created spare deployments to use.
+ */
+public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
-    private static final Logger LOGGER = LogManager.getLogger(DefaultWorkspaceAddedHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(EagerStartWorkspaceAddedHandler.class);
 
     protected static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
 
@@ -66,11 +71,8 @@ public class DefaultWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	String userEmail = spec.getUser();
 
 	/* find template for workspace */
-	Optional<TemplateSpecResource> template = client
-		.customResources(TemplateSpecResource.class, TemplateSpecResourceList.class).inNamespace(namespace)
-		.list().getItems().stream()//
-		.filter(templateSpecResource -> templateID.equals(templateSpecResource.getSpec().getName()))//
-		.findAny();
+	Optional<TemplateSpecResource> template = TheiaCloudHandlerUtil.getTemplateSpecForWorkspace(client, namespace,
+		templateID);
 	if (template.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No Template with name " + templateID + " found."));
 	    return false;
@@ -100,45 +102,40 @@ public class DefaultWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    LOGGER.error(formatLogMessage(correlationId, "No Service for template " + templateID + " found."));
 	}
 
-	/* get the deployment for the service */
-	int namePrefixLength = (templateID + DefaultTemplateAddedHandler.SERVICE_NAME).length();
-	String instanceString = serviceToUse.get().getMetadata().getName().substring(namePrefixLength);
-	Integer instance;
-	try {
-	    instance = Integer.valueOf(serviceToUse.get().getMetadata().getName().substring(namePrefixLength));
-	} catch (NumberFormatException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while getting integer value of " + instanceString), e);
+	/* get the deployment for the service and add as owner */
+	Integer instance = TheiaCloudServiceUtil.getId(correlationId, template.get(), serviceToUse.get());
+	if (instance == null) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error while getting instance from Service"));
 	    return false;
 	}
 
 	try {
 	    client.apps().deployments().inNamespace(namespace)
-		    .withName(templateID + DefaultTemplateAddedHandler.DEPLOYMENT_NAME + instance)
-		    .edit(deployment -> addOwnerReferenceToDeployment(correlationId, workspaceResourceName,
-			    workspaceResourceUID, deployment));
+		    .withName(TheiaCloudDeploymentUtil.getDeploymentName(template.get(), instance))
+		    .edit(deployment -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId,
+			    workspaceResourceName, workspaceResourceUID, deployment));
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
-		    + (templateID + DefaultTemplateAddedHandler.DEPLOYMENT_NAME + instance)), e);
+		    + (templateID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
 	    return false;
 	}
 
 	/* add user to allowed emails */
 	try {
 	    client.configMaps().inNamespace(namespace)
-		    .withName(templateID + DefaultTemplateAddedHandler.CONFIGMAP_EMAIL_NAME + instance)
-		    .edit(configmap -> {
+		    .withName(TheiaCloudConfigMapUtil.getEmailConfigName(template.get(), instance)).edit(configmap -> {
 			configmap.setData(Collections.singletonMap(FILENAME_AUTHENTICATED_EMAILS_LIST, userEmail));
 			return configmap;
 		    });
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while editing email configmap "
-		    + (templateID + DefaultTemplateAddedHandler.CONFIGMAP_EMAIL_NAME + instance)), e);
+		    + (templateID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)), e);
 	    return false;
 	}
 
 	/* adjust the ingress */
 	try {
-	    updateIngress(client, namespace, ingress, serviceToUse, templateID, instance, port);
+	    updateIngress(client, namespace, ingress, serviceToUse, templateID, instance, port, template.get());
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
@@ -154,34 +151,22 @@ public class DefaultWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, templateResourceName,
 		templateResourceUID);
 
-	Optional<Service> alreadyReservedService = existingServices.stream()//
-		.filter(service -> {
-		    if (isUnusedService(service)) {
-			return false;
-		    }
-		    for (OwnerReference ownerReference : service.getMetadata().getOwnerReferences()) {
-			if (workspaceResourceName.equals(ownerReference.getName())
-				&& workspaceResourceUID.equals(ownerReference.getUid())) {
-			    return true;
-			}
-		    }
-		    return false;
-		})//
-		.findAny();
+	Optional<Service> alreadyReservedService = TheiaCloudServiceUtil
+		.getServiceOwnedByWorkspace(workspaceResourceName, workspaceResourceUID, existingServices);
 	if (alreadyReservedService.isPresent()) {
 	    return JavaUtil.tuple(alreadyReservedService, true);
 	}
 
-	Optional<Service> serviceToUse = existingServices.stream()//
-		.filter(DefaultWorkspaceAddedHandler::isUnusedService)//
-		.findAny();
+	Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingServices);
 	if (serviceToUse.isEmpty()) {
 	    return JavaUtil.tuple(serviceToUse, false);
 	}
+
+	/* add our workspace as owner to the service */
 	try {
 	    client.services().inNamespace(namespace).withName(serviceToUse.get().getMetadata().getName())
-		    .edit(service -> addOwnerReferenceToService(correlationId, workspaceResourceName,
-			    workspaceResourceUID, serviceToUse, service));
+		    .edit(service -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, workspaceResourceName,
+			    workspaceResourceUID, service));
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing service " + (serviceToUse.get().getMetadata().getName())), e);
@@ -191,15 +176,14 @@ public class DefaultWorkspaceAddedHandler implements WorkspaceAddedHandler {
     }
 
     protected synchronized void updateIngress(DefaultKubernetesClient client, String namespace,
-	    Optional<Ingress> ingress, Optional<Service> serviceToUse, String templateID, int instance, int port) {
+	    Optional<Ingress> ingress, Optional<Service> serviceToUse, String templateID, int instance, int port,
+	    TemplateSpecResource template) {
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.get().getMetadata().getName())
 		.edit(ingressToUpdate -> {
-		    IngressRule firstIngressRule = ingressToUpdate.getSpec().getRules().get(0);
-
 		    IngressRule ingressRule = new IngressRule();
 		    ingressToUpdate.getSpec().getRules().add(ingressRule);
 
-		    String host = templateID + "." + instance + "." + firstIngressRule.getHost();
+		    String host = TheiaCloudIngressUtil.getHostName(template, instance);
 		    ingressRule.setHost(host);
 
 		    HTTPIngressRuleValue http = new HTTPIngressRuleValue();
@@ -223,37 +207,6 @@ public class DefaultWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
 		    return ingressToUpdate;
 		});
-    }
-
-    protected Deployment addOwnerReferenceToDeployment(String correlationId, String workspaceResourceName,
-	    String workspaceResourceUID, Deployment deployment) {
-	OwnerReference ownerReference = createOwnerReference(workspaceResourceName, workspaceResourceUID);
-	LOGGER.info(formatLogMessage(correlationId,
-		"Adding a new owner reference to deployment " + deployment.getMetadata().getName()));
-	deployment.addOwnerReference(ownerReference);
-	return deployment;
-    }
-
-    protected Service addOwnerReferenceToService(String correlationId, String workspaceResourceName,
-	    String workspaceResourceUID, Optional<Service> serviceToUse, Service service) {
-	OwnerReference serviceOwnerReference = createOwnerReference(workspaceResourceName, workspaceResourceUID);
-	LOGGER.info(formatLogMessage(correlationId,
-		"Adding a new owner reference to service " + serviceToUse.get().getMetadata().getName()));
-	service.getMetadata().getOwnerReferences().add(serviceOwnerReference);
-	return service;
-    }
-
-    protected OwnerReference createOwnerReference(String workspaceResourceName, String workspaceResourceUID) {
-	OwnerReference ownerReference = new OwnerReference();
-	ownerReference.setApiVersion(HasMetadata.getApiVersion(WorkspaceSpecResource.class));
-	ownerReference.setKind(WorkspaceSpec.KIND);
-	ownerReference.setName(workspaceResourceName);
-	ownerReference.setUid(workspaceResourceUID);
-	return ownerReference;
-    }
-
-    protected static boolean isUnusedService(Service service) {
-	return service.getMetadata().getOwnerReferences().size() == 1;
     }
 
 }

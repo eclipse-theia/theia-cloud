@@ -30,16 +30,16 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class ResourceUtil {
+public final class JavaResourceUtil {
 
-    private static final Logger LOGGER = LogManager.getLogger(ResourceUtil.class);
+    private static final Logger LOGGER = LogManager.getLogger(JavaResourceUtil.class);
 
-    private ResourceUtil() {
+    private JavaResourceUtil() {
     }
 
     public static String readResourceAndReplacePlaceholders(Class<?> clazz, String resourceName,
 	    Map<String, String> replacements, String correlationId) throws IOException, URISyntaxException {
-	try (InputStream inputStream = ResourceUtil.class.getResourceAsStream(resourceName)) {
+	try (InputStream inputStream = JavaResourceUtil.class.getResourceAsStream(resourceName)) {
 	    String template = new BufferedReader(new InputStreamReader(inputStream)).lines().parallel()
 		    .collect(Collectors.joining("\n"));
 	    LOGGER.trace(formatLogMessage(correlationId, "Updating template read with classloader " + clazz.getName()

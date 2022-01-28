@@ -18,8 +18,8 @@ package org.eclipse.theia.cloud.operator.di;
 
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
-import org.eclipse.theia.cloud.operator.handler.impl.DefaultTemplateAddedHandler;
-import org.eclipse.theia.cloud.operator.handler.impl.DefaultWorkspaceAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.impl.EagerStartTemplateAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.impl.EagerStartWorkspaceAddedHandler;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
@@ -32,12 +32,12 @@ public class TheiaCloudOperatorModule extends AbstractModule {
 	bind(WorkspaceAddedHandler.class).to(bindWorkspaceAddedHandler()).in(Singleton.class);
     }
 
-    protected Class<DefaultTemplateAddedHandler> bindTemplateAddedHandler() {
-	return DefaultTemplateAddedHandler.class;
+    protected Class<EagerStartTemplateAddedHandler> bindTemplateAddedHandler() {
+	return EagerStartTemplateAddedHandler.class;
     }
 
-    protected Class<DefaultWorkspaceAddedHandler> bindWorkspaceAddedHandler() {
-	return DefaultWorkspaceAddedHandler.class;
+    protected Class<EagerStartWorkspaceAddedHandler> bindWorkspaceAddedHandler() {
+	return EagerStartWorkspaceAddedHandler.class;
     }
 
 }
