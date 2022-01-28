@@ -62,8 +62,7 @@ Install sample template (from git root directory):\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-workspace-1.yaml`\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-workspace-2.yaml`\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-oauth2proxy-keycloak.yaml`\
-`kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-htmlpage.yaml`\
-`kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-emails.yaml`
+`kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-htmlpage.yaml`
 
 # Docker
 
