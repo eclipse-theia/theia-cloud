@@ -14,28 +14,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.util;
+package org.eclipse.theia.cloud.common.k8s.resource.util;
 
-import java.text.MessageFormat;
-import java.util.UUID;
+import io.fabric8.kubernetes.client.CustomResource;
 
-public final class LogMessageUtil {
+public final class K8sResourceUtil {
 
-    private static final String LOG_MSG_PATTERN = "[{0}] {1}";
-
-    private LogMessageUtil() {
+    private K8sResourceUtil() {
     }
 
-    public static String generateCorrelationId() {
-	return UUID.randomUUID().toString();
-    }
-
-    public static String formatLogMessage(String prefix, String correlationID, String message) {
-	return MessageFormat.format(LOG_MSG_PATTERN, (prefix + correlationID), message);
-    }
-
-    public static String formatLogMessage(String correlationID, String message) {
-	return MessageFormat.format(LOG_MSG_PATTERN, correlationID, message);
+    public static <S, T> String customResourcetoString(CustomResource<S, T> resource) {
+	String name = resource.getMetadata() != null ? resource.getMetadata().getName() : "unknown";
+	String version = resource.getMetadata() != null ? resource.getMetadata().getResourceVersion() : "unknown";
+	return "name=" + name + " version=" + version + " value=" + resource.getSpec();
     }
 
 }

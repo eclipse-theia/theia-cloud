@@ -16,17 +16,17 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator;
 
-import static org.eclipse.theia.cloud.operator.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
 import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpec;
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResource;
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResourceList;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
@@ -52,7 +52,6 @@ public class Main {
 	 * Don't close the client resource here, because this would also stop any
 	 * threads
 	 */
-	@SuppressWarnings("resource")
 	DefaultKubernetesClient client = new DefaultKubernetesClient(config);
 
 	String namespace = client.getNamespace();
@@ -62,10 +61,10 @@ public class Main {
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Registering TemplateSpecResource in version " + templateAPIVersion));
 	KubernetesDeserializer.registerCustomKind(templateAPIVersion, TemplateSpec.KIND, TemplateSpecResource.class);
 
-	String workspaceAPIVersion = HasMetadata.getApiVersion(WorkspaceSpecResource.class);
+	String workspaceAPIVersion = HasMetadata.getApiVersion(Workspace.class);
 	LOGGER.info(
 		formatLogMessage(COR_ID_INIT, "Registering WorkspaceSpecResource in version " + workspaceAPIVersion));
-	KubernetesDeserializer.registerCustomKind(workspaceAPIVersion, WorkspaceSpec.KIND, WorkspaceSpecResource.class);
+	KubernetesDeserializer.registerCustomKind(workspaceAPIVersion, WorkspaceSpec.KIND, Workspace.class);
 
 	/* Check if custom resource definition for template is registered */
 	client.apiextensions().v1().customResourceDefinitions().list().getItems().stream()//
@@ -87,8 +86,7 @@ public class Main {
 	TheiaCloud theiaCloud = new TheiaCloudImpl(namespace, module, client,
 		client.customResources(TemplateSpecResource.class, TemplateSpecResourceList.class)
 			.inNamespace(namespace),
-		client.customResources(WorkspaceSpecResource.class, WorkspaceSpecResourceList.class)
-			.inNamespace(namespace));
+		client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace));
 
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Launching Theia Cloud Now"));
 	theiaCloud.start();

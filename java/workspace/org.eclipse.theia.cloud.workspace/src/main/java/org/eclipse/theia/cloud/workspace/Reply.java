@@ -14,28 +14,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.resource;
+package org.eclipse.theia.cloud.workspace;
 
-import org.eclipse.theia.cloud.operator.resource.util.K8sResourceUtil;
+public class Reply {
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
+    public boolean success;
+    public String url;
+    public String error;
 
-@Version("v1alpha")
-@Group("theia.cloud")
-@Singular("workspace")
-@Plural("workspaces")
-public class WorkspaceSpecResource extends CustomResource<WorkspaceSpec, Void> implements Namespaced {
+    public Reply() {
+    }
 
-    private static final long serialVersionUID = 4518092300237069237L;
-
-    @Override
-    public String toString() {
-	return K8sResourceUtil.customResourcetoString(this);
+    public Reply(boolean success, String url, String error) {
+	this.success = success;
+	this.url = url;
+	this.error = error;
     }
 
 }
