@@ -14,5 +14,5 @@
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="operator"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="operator"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dlog4j2.configurationFile=${project_loc}/log4j2.xml"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dlog4j2.configurationFile=log4j2.xml"/>
 </launchConfiguration>

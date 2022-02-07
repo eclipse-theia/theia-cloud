@@ -16,7 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler.impl;
 
-import static org.eclipse.theia.cloud.operator.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +25,8 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
@@ -33,8 +35,6 @@ import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpec;
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaUtil;
 
 import io.fabric8.kubernetes.api.model.Service;
@@ -59,7 +59,7 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
     protected static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
 
     @Override
-    public boolean handle(DefaultKubernetesClient client, WorkspaceSpecResource workspace, String namespace,
+    public boolean handle(DefaultKubernetesClient client, Workspace workspace, String namespace,
 	    String correlationId) {
 	WorkspaceSpec spec = workspace.getSpec();
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));

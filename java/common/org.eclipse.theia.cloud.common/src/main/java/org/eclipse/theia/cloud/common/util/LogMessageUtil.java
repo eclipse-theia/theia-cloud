@@ -14,48 +14,28 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.resource;
+package org.eclipse.theia.cloud.common.util;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.text.MessageFormat;
+import java.util.UUID;
 
-@JsonDeserialize()
-public class WorkspaceSpec {
+public final class LogMessageUtil {
 
-    public static final String KIND = "Workspace";
-    public static final String CRD_NAME = "workspaces.theia.cloud";
+    private static final String LOG_MSG_PATTERN = "[{0}] {1}";
 
-    @JsonProperty("name")
-    private String name;
-
-    @JsonProperty("template")
-    private String template;
-
-    @JsonProperty("user")
-    private String user;
-
-    @JsonProperty("url")
-    private String url;
-
-    public String getName() {
-	return name;
+    private LogMessageUtil() {
     }
 
-    public String getTemplate() {
-	return template;
+    public static String generateCorrelationId() {
+	return UUID.randomUUID().toString();
     }
 
-    public String getUser() {
-	return user;
+    public static String formatLogMessage(String prefix, String correlationID, String message) {
+	return MessageFormat.format(LOG_MSG_PATTERN, (prefix + correlationID), message);
     }
 
-    public String getUrl() {
-	return url;
-    }
-
-    @Override
-    public String toString() {
-	return "WorkspaceSpec [name=" + name + ", template=" + template + ", user=" + user + ", url=" + url + "]";
+    public static String formatLogMessage(String correlationID, String message) {
+	return MessageFormat.format(LOG_MSG_PATTERN, correlationID, message);
     }
 
 }

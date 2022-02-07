@@ -16,7 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
-import static org.eclipse.theia.cloud.operator.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,10 +27,10 @@ import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpec;
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResource;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -82,7 +82,7 @@ public final class TheiaCloudHandlerUtil {
 
     public static OwnerReference createOwnerReference(String workspaceResourceName, String workspaceResourceUID) {
 	OwnerReference ownerReference = new OwnerReference();
-	ownerReference.setApiVersion(HasMetadata.getApiVersion(WorkspaceSpecResource.class));
+	ownerReference.setApiVersion(HasMetadata.getApiVersion(Workspace.class));
 	ownerReference.setKind(WorkspaceSpec.KIND);
 	ownerReference.setName(workspaceResourceName);
 	ownerReference.setUid(workspaceResourceUID);

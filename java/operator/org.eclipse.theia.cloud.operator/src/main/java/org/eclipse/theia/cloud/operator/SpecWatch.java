@@ -16,8 +16,8 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator;
 
-import static org.eclipse.theia.cloud.operator.util.LogMessageUtil.formatLogMessage;
-import static org.eclipse.theia.cloud.operator.util.LogMessageUtil.generateCorrelationId;
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
 
 import java.util.Map;
 

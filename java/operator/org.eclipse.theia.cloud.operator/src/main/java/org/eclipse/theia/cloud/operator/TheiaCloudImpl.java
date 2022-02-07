@@ -16,20 +16,20 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator;
 
-import static org.eclipse.theia.cloud.operator.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
 import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResource;
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResourceList;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -47,20 +47,20 @@ public class TheiaCloudImpl implements TheiaCloud {
     private static final String COR_ID_WORKSPACEPREFIX = "workspace-watch-";
 
     private final Map<String, TemplateSpecResource> templateCache = new ConcurrentHashMap<>();
-    private final Map<String, WorkspaceSpecResource> workspaceCache = new ConcurrentHashMap<>();
+    private final Map<String, Workspace> workspaceCache = new ConcurrentHashMap<>();
 
     private final String namespace;
     private final Injector injector;
     private final DefaultKubernetesClient client;
     private final NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient;
-    private final NonNamespaceOperation<WorkspaceSpecResource, WorkspaceSpecResourceList, Resource<WorkspaceSpecResource>> workspaceResourceClient;
+    private final NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaceResourceClient;
 
     private TemplateAddedHandler templateAddedHandler;
     private WorkspaceAddedHandler workspaceAddedHandler;
 
     public TheiaCloudImpl(String namespace, TheiaCloudOperatorModule module, DefaultKubernetesClient client,
 	    NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient,
-	    NonNamespaceOperation<WorkspaceSpecResource, WorkspaceSpecResourceList, Resource<WorkspaceSpecResource>> workspaceResourceClient) {
+	    NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaceResourceClient) {
 	this.namespace = namespace;
 	this.injector = Guice.createInjector(module);
 	this.client = client;
@@ -125,7 +125,7 @@ public class TheiaCloudImpl implements TheiaCloud {
     }
 
     private void handleWorkspaceEvent(Watcher.Action action, String uid, String correlationId) {
-	WorkspaceSpecResource workspace = workspaceCache.get(uid);
+	Workspace workspace = workspaceCache.get(uid);
 	switch (action) {
 	case ADDED:
 	    workspaceAdded(workspace, correlationId);
@@ -145,28 +145,28 @@ public class TheiaCloudImpl implements TheiaCloud {
 	}
     }
 
-    private void workspaceAdded(WorkspaceSpecResource workspace, String correlationId) {
+    private void workspaceAdded(Workspace workspace, String correlationId) {
 	LOGGER.trace(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId,
 		"Delegating workspaceAdded to " + workspaceAddedHandler.getClass().getName()));
 	workspaceAddedHandler.handle(client, workspace, namespace, correlationId);
     }
 
-    private void workspaceDeleted(WorkspaceSpecResource workspace, String correlationId) {
+    private void workspaceDeleted(Workspace workspace, String correlationId) {
 	// TODO
 	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceDeleted not implemented"));
     }
 
-    private void workspaceModified(WorkspaceSpecResource workspace, String correlationId) {
+    private void workspaceModified(Workspace workspace, String correlationId) {
 	// TODO
 	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceModified not implemented"));
     }
 
-    private void workspaceErrored(WorkspaceSpecResource workspace, String correlationId) {
+    private void workspaceErrored(Workspace workspace, String correlationId) {
 	// TODO
 	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceErrored not implemented"));
     }
 
-    private void workspaceBookmarked(WorkspaceSpecResource workspace, String correlationId) {
+    private void workspaceBookmarked(Workspace workspace, String correlationId) {
 	// TODO
 	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceBookmarked not implemented"));
     }
@@ -191,7 +191,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 	    workspaceResourceClient.list().getItems().forEach(this::initWorkspace);
 
 	    /* watch for changes */
-	    workspaceResourceClient.watch(new SpecWatch<WorkspaceSpecResource>(workspaceCache,
+	    workspaceResourceClient.watch(new SpecWatch<Workspace>(workspaceCache,
 		    this::handleWorkspaceEvent, "Workspace", COR_ID_WORKSPACEPREFIX));
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing workspace watch"), e);
@@ -205,7 +205,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 	handleTemplateEvent(Watcher.Action.ADDED, uid, Main.COR_ID_INIT);
     }
 
-    private void initWorkspace(WorkspaceSpecResource resource) {
+    private void initWorkspace(Workspace resource) {
 	workspaceCache.put(resource.getMetadata().getUid(), resource);
 	String uid = resource.getMetadata().getUid();
 	handleWorkspaceEvent(Watcher.Action.ADDED, uid, Main.COR_ID_INIT);

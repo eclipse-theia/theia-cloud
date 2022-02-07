@@ -22,4 +22,6 @@ createApp(App, {
   keycloakAuthUrl: "https://keycloak-eclipse-che.192.168.39.3.nip.io/auth/",
   keycloakRealm: "TheiaCloud",
   keycloakClientId: "theia-cloud",
+  workspaceServiceUrl: "http://localhost:8081",
+  workspaceTemplate: "coffee-editor",
 }).mount("#app");

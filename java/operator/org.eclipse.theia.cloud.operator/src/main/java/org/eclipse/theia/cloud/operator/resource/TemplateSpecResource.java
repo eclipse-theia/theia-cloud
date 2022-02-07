@@ -16,7 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.resource;
 
-import org.eclipse.theia.cloud.operator.resource.util.K8sResourceUtil;
+import org.eclipse.theia.cloud.common.k8s.resource.util.K8sResourceUtil;
 
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;

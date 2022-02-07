@@ -5,11 +5,28 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import axios from "axios";
 
 export default defineComponent({
   name: "WorkspaceLancher",
   props: {
+    workspaceServiceUrl: String,
+    workspaceTemplate: String,
     email: String,
+  },
+  watch: {
+    email() {
+      if (this.email) {
+        axios
+          .post(this.workspaceServiceUrl + "/workspaces", {
+            template: this.workspaceTemplate,
+            user: this.email,
+          })
+          .then((response) => {
+            console.log(response.data);
+          });
+      }
+    },
   },
 });
 </script>

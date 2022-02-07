@@ -16,13 +16,13 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.operator.resource.WorkspaceSpecResource;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 
 public interface WorkspaceAddedHandler {
 
-    boolean handle(DefaultKubernetesClient client, WorkspaceSpecResource workspace, String namespace,
+    boolean handle(DefaultKubernetesClient client, Workspace workspace, String namespace,
 	    String correlationId);
 
 }

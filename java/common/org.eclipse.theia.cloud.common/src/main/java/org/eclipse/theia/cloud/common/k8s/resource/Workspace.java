@@ -14,19 +14,28 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.resource.util;
+package org.eclipse.theia.cloud.common.k8s.resource;
 
+import org.eclipse.theia.cloud.common.k8s.resource.util.K8sResourceUtil;
+
+import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
+import io.fabric8.kubernetes.model.annotation.Group;
+import io.fabric8.kubernetes.model.annotation.Plural;
+import io.fabric8.kubernetes.model.annotation.Singular;
+import io.fabric8.kubernetes.model.annotation.Version;
 
-public final class K8sResourceUtil {
+@Version("v1alpha")
+@Group("theia.cloud")
+@Singular("workspace")
+@Plural("workspaces")
+public class Workspace extends CustomResource<WorkspaceSpec, Void> implements Namespaced {
 
-    private K8sResourceUtil() {
-    }
+    private static final long serialVersionUID = 4518092300237069237L;
 
-    public static <S, T> String customResourcetoString(CustomResource<S, T> resource) {
-	String name = resource.getMetadata() != null ? resource.getMetadata().getName() : "unknown";
-	String version = resource.getMetadata() != null ? resource.getMetadata().getResourceVersion() : "unknown";
-	return "name=" + name + " version=" + version + " value=" + resource.getSpec();
+    @Override
+    public String toString() {
+	return K8sResourceUtil.customResourcetoString(this);
     }
 
 }

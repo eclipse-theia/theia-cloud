@@ -1,6 +1,10 @@
 <template>
   <img alt="Theia logo" src="./assets/logo.png" />
-  <WorkspaceLancher :email="email" />
+  <WorkspaceLancher
+    :workspaceServiceUrl="workspaceServiceUrl"
+    :workspaceTemplate="workspaceTemplate"
+    :email="email"
+  />
 </template>
 
 <script lang="ts">
@@ -14,6 +18,8 @@ export default defineComponent({
     keycloakAuthUrl: String,
     keycloakRealm: String,
     keycloakClientId: String,
+    workspaceServiceUrl: String,
+    workspaceTemplate: String,
   },
   components: {
     WorkspaceLancher,

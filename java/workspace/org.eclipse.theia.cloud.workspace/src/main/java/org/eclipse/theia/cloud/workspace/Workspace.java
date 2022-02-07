@@ -14,12 +14,24 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.resource;
+package org.eclipse.theia.cloud.workspace;
 
-import io.fabric8.kubernetes.client.CustomResourceList;
+public class Workspace {
 
-public class WorkspaceSpecResourceList extends CustomResourceList<WorkspaceSpecResource> {
+    public String template;
+    public String user;
 
-    private static final long serialVersionUID = -4808662679268313876L;
+    public Workspace() {
+    }
+
+    public Workspace(String template, String user) {
+	this.template = template;
+	this.user = user;
+    }
+
+    @Override
+    public String toString() {
+	return "Workspace [template=" + template + ", user=" + user + "]";
+    }
 
 }
