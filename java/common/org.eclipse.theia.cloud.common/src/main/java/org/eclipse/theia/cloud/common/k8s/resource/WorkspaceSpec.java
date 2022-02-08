@@ -62,6 +62,10 @@ public class WorkspaceSpec {
 	return url;
     }
 
+    public void setUrl(String url) {
+	this.url = url;
+    }
+
     @Override
     public String toString() {
 	return "WorkspaceSpec [name=" + name + ", template=" + template + ", user=" + user + ", url=" + url + "]";

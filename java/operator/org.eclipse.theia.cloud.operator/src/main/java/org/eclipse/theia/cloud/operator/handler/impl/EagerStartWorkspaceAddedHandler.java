@@ -25,8 +25,9 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
@@ -59,8 +60,7 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
     protected static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
 
     @Override
-    public boolean handle(DefaultKubernetesClient client, Workspace workspace, String namespace,
-	    String correlationId) {
+    public boolean handle(DefaultKubernetesClient client, Workspace workspace, String namespace, String correlationId) {
 	WorkspaceSpec spec = workspace.getSpec();
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));
 
@@ -134,11 +134,26 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	}
 
 	/* adjust the ingress */
+	String host;
 	try {
-	    updateIngress(client, namespace, ingress, serviceToUse, templateID, instance, port, template.get());
+	    host = updateIngress(client, namespace, ingress, serviceToUse, templateID, instance, port, template.get());
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
+	    return false;
+	}
+
+	/* Update workspace resource */
+	try {
+	    client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
+		    .withName(workspace.getMetadata().getName())//
+		    .edit(ws -> {
+			ws.getSpec().setUrl(host);
+			return ws;
+		    });
+	} catch (KubernetesClientException e) {
+	    LOGGER.error(formatLogMessage(correlationId,
+		    "Error while editing workspace " + workspace.getMetadata().getName()), e);
 	    return false;
 	}
 
@@ -175,15 +190,15 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	return JavaUtil.tuple(serviceToUse, false);
     }
 
-    protected synchronized void updateIngress(DefaultKubernetesClient client, String namespace,
+    protected synchronized String updateIngress(DefaultKubernetesClient client, String namespace,
 	    Optional<Ingress> ingress, Optional<Service> serviceToUse, String templateID, int instance, int port,
 	    TemplateSpecResource template) {
+	String host = TheiaCloudIngressUtil.getHostName(template, instance);
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.get().getMetadata().getName())
 		.edit(ingressToUpdate -> {
 		    IngressRule ingressRule = new IngressRule();
 		    ingressToUpdate.getSpec().getRules().add(ingressRule);
 
-		    String host = TheiaCloudIngressUtil.getHostName(template, instance);
 		    ingressRule.setHost(host);
 
 		    HTTPIngressRuleValue http = new HTTPIngressRuleValue();
@@ -207,6 +222,7 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
 		    return ingressToUpdate;
 		});
+	return host;
     }
 
 }

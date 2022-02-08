@@ -23,7 +23,11 @@ export default defineComponent({
             user: this.email,
           })
           .then((response) => {
-            console.log(response.data);
+            if (response.data.success) {
+              location.replace("https://" + response.data.url);
+            } else {
+              console.error(response.data.error);
+            }
           });
       }
     },

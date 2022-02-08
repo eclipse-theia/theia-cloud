@@ -18,6 +18,10 @@ package org.eclipse.theia.cloud.workspace;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
@@ -28,6 +32,9 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.Watch;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
@@ -76,9 +83,43 @@ public final class K8sUtil {
 	WorkspaceSpec workspaceSpec = new WorkspaceSpec(name, template, user);
 	workspaceSpecResource.setSpec(workspaceSpec);
 
-	/* Workspace created = */ workspaces.create(workspaceSpecResource);
+	Workspace created = workspaces.create(workspaceSpecResource);
+	String createSpecName = created.getSpec().getName();
 
-	return new Reply(false, "", "Not implemented yet");
+	AtomicReference<String> atomicReference = new AtomicReference<String>(null);
+	CountDownLatch latch = new CountDownLatch(1);
+
+	Watch watch = workspaces.watch(new Watcher<Workspace>() {
+
+	    @Override
+	    public void eventReceived(Action action, Workspace resource) {
+		LOGGER.trace(
+			formatLogMessage(correlationId, "Received workspace event " + action + " for " + resource));
+		if (createSpecName.equals(resource.getSpec().getName())) {
+		    if (resource.getSpec().getUrl() != null) {
+			LOGGER.info(formatLogMessage(correlationId, "Received URL for " + resource));
+			atomicReference.set(resource.getSpec().getUrl());
+			latch.countDown();
+		    }
+		}
+	    }
+
+	    @Override
+	    public void onClose(WatcherException cause) {
+	    }
+
+	});
+
+	try {
+	    latch.await(1, TimeUnit.MINUTES);
+	} catch (InterruptedException e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Timeout while waiting for URL for " + name), e);
+	    return new Reply(false, "", "Unable to start workspace");
+	} finally {
+	    watch.close();
+	}
+
+	return new Reply(true, atomicReference.get(), "");
 
     }
 
