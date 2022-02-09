@@ -160,7 +160,8 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
-		TemplateSpec.API, TemplateSpec.KIND, templateResourceName, templateResourceUID, 0);
+		TemplateSpec.API, TemplateSpec.KIND, templateResourceName, templateResourceUID, 0, deployment -> {
+		});
     }
 
     protected void createAndApplyProxyConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,

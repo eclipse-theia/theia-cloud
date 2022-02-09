@@ -1,5 +1,6 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -29,16 +30,21 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
+import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
+import org.eclipse.theia.cloud.operator.handler.TheiaCloudPersistentVolumeUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
+import com.google.inject.Inject;
+
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
@@ -55,6 +61,13 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(LazyStartWorkspaceAddedHandler.class);
 
+    protected PersistentVolumeHandler persistentVolumeHandler;
+
+    @Inject
+    public LazyStartWorkspaceAddedHandler(PersistentVolumeHandler persistentVolumeHandler) {
+	this.persistentVolumeHandler = persistentVolumeHandler;
+    }
+
     @Override
     public boolean handle(DefaultKubernetesClient client, Workspace workspace, String namespace, String correlationId) {
 
@@ -70,6 +83,14 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	if (optionalTemplate.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No Template with name " + templateID + " found."));
 	    return false;
+	}
+
+	/* create persistent volume if not present already */
+	String pvcName = TheiaCloudPersistentVolumeUtil.getPersistentVolumeName(workspace);
+	Optional<PersistentVolume> volume = K8sUtil.getPersistentVolume(client, namespace, pvcName);
+	if (volume.isEmpty()) {
+	    persistentVolumeHandler.createAndApplyPersistentVolume(client, namespace, correlationId, workspace);
+	    persistentVolumeHandler.createAndApplyPersistentVolumeClaim(client, namespace, correlationId, workspace);
 	}
 
 	/* find ingress */
@@ -119,7 +140,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    return true;
 	}
 	createAndApplyDeployment(client, namespace, correlationId, workspaceResourceName, workspaceResourceUID,
-		workspace, optionalTemplate.get());
+		workspace, optionalTemplate.get(), pvcName);
 
 	/* adjust the ingress */
 	String host;
@@ -202,7 +223,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
     protected void createAndApplyDeployment(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String workspaceResourceName, String workspaceResourceUID, Workspace workspace,
-	    TemplateSpecResource template) {
+	    TemplateSpecResource template, String pvName) {
 	Map<String, String> replacements = TheiaCloudDeploymentUtil.getDeploymentsReplacements(namespace, workspace,
 		template);
 	String deploymentYaml;
@@ -215,7 +236,9 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
-		WorkspaceSpec.API, WorkspaceSpec.KIND, workspaceResourceName, workspaceResourceUID, 0);
+		WorkspaceSpec.API, WorkspaceSpec.KIND, workspaceResourceName, workspaceResourceUID, 0, deployment -> {
+		    persistentVolumeHandler.addVolumeClaim(deployment, pvName);
+		});
     }
 
     protected synchronized String updateIngress(DefaultKubernetesClient client, String namespace,
