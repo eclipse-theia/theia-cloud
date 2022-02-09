@@ -32,6 +32,10 @@ import org.apache.logging.log4j.Logger;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.PersistentVolume;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
+import io.fabric8.kubernetes.api.model.PersistentVolumeList;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -90,6 +94,12 @@ public final class K8sUtil {
 		client.configMaps().inNamespace(namespace).list().getItems());
     }
 
+    public static Optional<PersistentVolume> getPersistentVolume(DefaultKubernetesClient client, String namespace,
+	    String volumeName) {
+	Resource<PersistentVolume> pv = client.persistentVolumes().withName(volumeName);
+	return pv.get() == null ? Optional.empty() : Optional.of(pv.get());
+    }
+
     private static <T extends HasMetadata> List<T> getExistingTypes(DefaultKubernetesClient client, String namespace,
 	    String ownerName, String ownerUid, List<T> items) {
 	return getExistingTypesStream(client, namespace, ownerName, ownerUid, items)//
@@ -141,11 +151,48 @@ public final class K8sUtil {
 
     public static Optional<Deployment> loadAndCreateDeploymentWithOwnerReference(DefaultKubernetesClient client,
 	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-	    String ownerName, String ownerUid, int ownerReferenceIndex) {
+	    String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<Deployment> additionalModification) {
 	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
 		ownerName, ownerUid, ownerReferenceIndex, DEPLOYMENT,
-		client.apps().deployments().inNamespace(namespace), item -> {
-		});
+		client.apps().deployments().inNamespace(namespace), additionalModification);
+    }
+
+    public static Optional<PersistentVolumeClaim> loadAndCreatePersistentVolumeClaim(DefaultKubernetesClient client,
+	    String namespace, String correlationId, String yaml) {
+	NonNamespaceOperation<PersistentVolumeClaim, PersistentVolumeClaimList, Resource<PersistentVolumeClaim>> items = client
+		.persistentVolumeClaims().inNamespace(namespace);
+	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
+	    LOGGER.trace(formatLogMessage(correlationId, "Loading new PersistentVolumeClaim:\n" + yaml));
+	    PersistentVolumeClaim newItem = items.load(inputStream).get();
+
+	    LOGGER.trace(formatLogMessage(correlationId, "Creating new PersistentVolumeClaim"));
+	    items.create(newItem);
+	    LOGGER.info(formatLogMessage(correlationId, "Created a new PersistentVolumeClaim"));
+
+	    return Optional.of(newItem);
+	} catch (IOException e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error while reading yaml byte stream"), e);
+	}
+	return Optional.empty();
+    }
+
+    public static Optional<PersistentVolume> loadAndCreatePersistentVolume(DefaultKubernetesClient client,
+	    String namespace, String correlationId, String yaml) {
+	NonNamespaceOperation<PersistentVolume, PersistentVolumeList, Resource<PersistentVolume>> items = client
+		.persistentVolumes();
+	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
+	    LOGGER.trace(formatLogMessage(correlationId, "Loading new PersistentVolume:\n" + yaml));
+	    PersistentVolume newItem = items.load(inputStream).get();
+
+	    LOGGER.trace(formatLogMessage(correlationId, "Creating new PersistentVolume"));
+	    items.create(newItem);
+	    LOGGER.info(formatLogMessage(correlationId, "Created a new PersistentVolume"));
+
+	    return Optional.of(newItem);
+	} catch (IOException e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error while reading yaml byte stream"), e);
+	}
+	return Optional.empty();
     }
 
     public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(DefaultKubernetesClient client,
