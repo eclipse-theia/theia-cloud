@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -43,11 +44,19 @@ public final class TheiaCloudServiceUtil {
     }
 
     public static String getServiceName(TemplateSpecResource template, int instance) {
-	return getServiceNamePrefix(template) + instance;
+	return K8sUtil.validString(getServiceNamePrefix(template) + instance);
+    }
+
+    public static String getServiceName(Workspace workspace) {
+	return K8sUtil.validString(getServiceNamePrefix(workspace) + workspace.getMetadata().getUid());
     }
 
     private static String getServiceNamePrefix(TemplateSpecResource template) {
 	return template.getSpec().getName() + SERVICE_NAME;
+    }
+
+    private static String getServiceNamePrefix(Workspace workspace) {
+	return workspace.getSpec().getName() + SERVICE_NAME;
     }
 
     public static Integer getId(String correlationId, TemplateSpecResource template, Service service) {
@@ -76,6 +85,15 @@ public final class TheiaCloudServiceUtil {
 		TheiaCloudHandlerUtil.getAppSelector(template, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
+	return replacements;
+    }
+
+    public static Map<String, String> getServiceReplacements(String namespace, Workspace workspace, int port) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(PLACEHOLDER_SERVICENAME, getServiceName(workspace));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(workspace));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(port));
 	return replacements;
     }
 

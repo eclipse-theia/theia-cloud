@@ -27,7 +27,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
@@ -56,8 +55,6 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(EagerStartWorkspaceAddedHandler.class);
-
-    protected static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
 
     @Override
     public boolean handle(DefaultKubernetesClient client, Workspace workspace, String namespace, String correlationId) {
@@ -124,7 +121,8 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	try {
 	    client.configMaps().inNamespace(namespace)
 		    .withName(TheiaCloudConfigMapUtil.getEmailConfigName(template.get(), instance)).edit(configmap -> {
-			configmap.setData(Collections.singletonMap(FILENAME_AUTHENTICATED_EMAILS_LIST, userEmail));
+			configmap.setData(
+				Collections.singletonMap(AddedHandler.FILENAME_AUTHENTICATED_EMAILS_LIST, userEmail));
 			return configmap;
 		    });
 	} catch (KubernetesClientException e) {
@@ -145,12 +143,7 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
 	/* Update workspace resource */
 	try {
-	    client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
-		    .withName(workspace.getMetadata().getName())//
-		    .edit(ws -> {
-			ws.getSpec().setUrl(host);
-			return ws;
-		    });
+	    AddedHandler.updateWorkspaceURL(client, workspace, namespace, host);
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing workspace " + workspace.getMetadata().getName()), e);

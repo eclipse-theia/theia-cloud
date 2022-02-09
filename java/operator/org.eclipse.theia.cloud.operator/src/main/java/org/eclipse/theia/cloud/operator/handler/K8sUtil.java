@@ -51,6 +51,20 @@ public final class K8sUtil {
     private K8sUtil() {
     }
 
+    /**
+     * make sure string has max length of 62 and starts and ends with an
+     * alphanumeric character
+     */
+    public static String validString(String originalString) {
+	String string;
+	if (originalString.length() <= 60) {
+	    string = originalString;
+	} else {
+	    string = originalString.substring(originalString.length() - 60, originalString.length());
+	}
+	return "t" + string.replace(".", "-") + "c";
+    }
+
     public static Optional<Ingress> getExistingIngress(DefaultKubernetesClient client, String namespace,
 	    String ownerName, String ownerUid) {
 	return getExistingTypesStream(client, namespace, ownerName, ownerUid,
@@ -100,48 +114,52 @@ public final class K8sUtil {
     }
 
     public static Optional<Ingress> loadAndCreateIngressWithOwnerReference(DefaultKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerName, String ownerUid,
-	    int ownerReferenceIndex) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerName, ownerUid,
-		ownerReferenceIndex, INGRESS, client.network().v1().ingresses().inNamespace(namespace), item -> {
+	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+	    String ownerName, String ownerUid, int ownerReferenceIndex) {
+	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+		ownerName, ownerUid, ownerReferenceIndex, INGRESS,
+		client.network().v1().ingresses().inNamespace(namespace), item -> {
 		});
     }
 
     public static Optional<Service> loadAndCreateServiceWithOwnerReference(DefaultKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerName, String ownerUid,
-	    int ownerReferenceIndex) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerName, ownerUid,
-		ownerReferenceIndex, SERVICE, client.services().inNamespace(namespace), item -> {
+	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+	    String ownerName, String ownerUid, int ownerReferenceIndex) {
+	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+		ownerName, ownerUid, ownerReferenceIndex, SERVICE, client.services().inNamespace(namespace), item -> {
 		});
     }
 
     public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(DefaultKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerName, String ownerUid,
-	    int ownerReferenceIndex) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerName, ownerUid,
-		ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace), item -> {
+	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+	    String ownerName, String ownerUid, int ownerReferenceIndex) {
+	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+		ownerName, ownerUid, ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace),
+		item -> {
 		});
     }
 
     public static Optional<Deployment> loadAndCreateDeploymentWithOwnerReference(DefaultKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerName, String ownerUid,
-	    int ownerReferenceIndex) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerName, ownerUid,
-		ownerReferenceIndex, DEPLOYMENT, client.apps().deployments().inNamespace(namespace), item -> {
+	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+	    String ownerName, String ownerUid, int ownerReferenceIndex) {
+	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+		ownerName, ownerUid, ownerReferenceIndex, DEPLOYMENT,
+		client.apps().deployments().inNamespace(namespace), item -> {
 		});
     }
 
     public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(DefaultKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerName, String ownerUid,
-	    int ownerReferenceIndex, Consumer<ConfigMap> additionalModification) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerName, ownerUid,
-		ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace), additionalModification);
+	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+	    String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<ConfigMap> additionalModification) {
+	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+		ownerName, ownerUid, ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace),
+		additionalModification);
     }
 
     private static <T extends HasMetadata, U, V extends Resource<T>> Optional<T> loadAndCreateTypeWithOwnerReference(
-	    DefaultKubernetesClient client, String namespace, String correlationId, String yaml, String ownerName,
-	    String ownerUid, int ownerReferenceIndex, String typeName, NonNamespaceOperation<T, U, V> items,
-	    Consumer<T> additionalModification) {
+	    DefaultKubernetesClient client, String namespace, String correlationId, String yaml, String ownerAPIVersion,
+	    String ownerKind, String ownerName, String ownerUid, int ownerReferenceIndex, String typeName,
+	    NonNamespaceOperation<T, U, V> items, Consumer<T> additionalModification) {
 
 	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
 
@@ -151,6 +169,8 @@ public final class K8sUtil {
 	    if (newItem.getMetadata().getOwnerReferences().size() > ownerReferenceIndex && ownerReferenceIndex >= 0) {
 		LOGGER.trace(
 			formatLogMessage(correlationId, "Updating owner reference at index " + ownerReferenceIndex));
+		newItem.getMetadata().getOwnerReferences().get(ownerReferenceIndex).setApiVersion(ownerAPIVersion);
+		newItem.getMetadata().getOwnerReferences().get(ownerReferenceIndex).setKind(ownerKind);
 		newItem.getMetadata().getOwnerReferences().get(ownerReferenceIndex).setUid(ownerUid);
 		newItem.getMetadata().getOwnerReferences().get(ownerReferenceIndex).setName(ownerName);
 	    } else {
