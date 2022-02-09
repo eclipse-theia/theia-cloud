@@ -19,6 +19,7 @@ package org.eclipse.theia.cloud.operator.handler;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -42,11 +43,16 @@ public final class TheiaCloudIngressUtil {
     }
 
     public static String getIngressName(TemplateSpecResource template) {
-	return template.getSpec().getName() + INGRESS_NAME_POSTFIX;
+	return K8sUtil.validString(template.getSpec().getName() + INGRESS_NAME_POSTFIX);
     }
 
     public static String getHostName(TemplateSpecResource template, int instance) {
 	return template.getSpec().getName() + "." + instance + "." + template.getSpec().getHost();
+    }
+
+    public static String getHostName(TemplateSpecResource template, Workspace workspace) {
+	return workspace.getSpec().getName() + "." + workspace.getMetadata().getUid() + "."
+		+ template.getSpec().getHost();
     }
 
     public static Map<String, String> getIngressReplacements(String namespace, TemplateSpecResource template) {

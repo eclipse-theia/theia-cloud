@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -46,8 +47,16 @@ public final class TheiaCloudDeploymentUtil {
 	return template.getSpec().getName() + DEPLOYMENT_NAME;
     }
 
+    private static String getDeploymentNamePrefix(Workspace workspace) {
+	return workspace.getSpec().getName() + DEPLOYMENT_NAME;
+    }
+
     public static String getDeploymentName(TemplateSpecResource template, int instance) {
-	return getDeploymentNamePrefix(template) + instance;
+	return K8sUtil.validString(getDeploymentNamePrefix(template) + instance);
+    }
+
+    public static String getDeploymentName(Workspace workspace) {
+	return K8sUtil.validString(getDeploymentNamePrefix(workspace) + workspace.getMetadata().getUid());
     }
 
     public static Integer getId(String correlationId, TemplateSpecResource template, Deployment deployment) {
@@ -81,6 +90,22 @@ public final class TheiaCloudDeploymentUtil {
 		TheiaCloudConfigMapUtil.getProxyConfigName(template, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
 		TheiaCloudConfigMapUtil.getEmailConfigName(template, instance));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
+	return replacements;
+    }
+
+    public static Map<String, String> getDeploymentsReplacements(String namespace, Workspace workspace,
+	    TemplateSpecResource template) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(PLACEHOLDER_DEPLOYMENTNAME, getDeploymentName(workspace));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(workspace));
+	replacements.put(PLACEHOLDER_TEMPLATENAME, template.getSpec().getName());
+	replacements.put(PLACEHOLDER_IMAGE, template.getSpec().getImage());
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME,
+		TheiaCloudConfigMapUtil.getProxyConfigName(workspace));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
+		TheiaCloudConfigMapUtil.getEmailConfigName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
 	return replacements;
     }

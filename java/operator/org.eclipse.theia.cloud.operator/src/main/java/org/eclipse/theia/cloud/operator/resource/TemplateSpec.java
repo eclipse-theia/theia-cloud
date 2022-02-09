@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class TemplateSpec {
 
+    public static final String API = "theia.cloud/v3alpha";
     public static final String KIND = "Template";
     public static final String CRD_NAME = "templates.theia.cloud";
 

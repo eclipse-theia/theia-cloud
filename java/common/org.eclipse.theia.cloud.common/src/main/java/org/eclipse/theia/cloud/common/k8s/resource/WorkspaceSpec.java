@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class WorkspaceSpec {
 
+    public static final String API = "theia.cloud/v1alpha";
     public static final String KIND = "Workspace";
     public static final String CRD_NAME = "workspaces.theia.cloud";
 

@@ -20,7 +20,6 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,18 +54,6 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
     public static final String LABEL_VALUE_PROXY = "proxy";
     public static final String LABEL_VALUE_EMAILS = "emails";
 
-    protected static final String OAUTH2_PROXY_CONFIGMAP_NAME = "oauth2-proxy-config";
-    protected static final String OAUTH2_PROXY_CFG = "oauth2-proxy.cfg";
-
-    protected static final String TEMPLATE_CONFIGMAP_YAML = "/templateConfigmap.yaml";
-    protected static final String TEMPLATE_CONFIGMAP_EMAILS_YAML = "/templateConfigmapEmails.yaml";
-    protected static final String TEMPLATE_INGRESS_YAML = "/templateIngress.yaml";
-    protected static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
-    protected static final String TEMPLATE_DEPLOYMENT_YAML = "/templateDeployment.yaml";
-
-    protected static final String CONFIGMAP_DATA_PLACEHOLDER_HOST = "https://placeholder";
-    protected static final String CONFIGMAP_DATA_PLACEHOLDER_PORT = "placeholder-port";
-
     @Override
     public void handle(DefaultKubernetesClient client, TemplateSpecResource template, String namespace,
 	    String correlationId) {
@@ -80,8 +67,8 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	/* Create ingress if not existing */
 	if (!TheiaCloudIngressUtil.hasExistingIngress(client, namespace, template)) {
 	    LOGGER.trace(formatLogMessage(correlationId, "No existing Ingress"));
-	    createAndApplyIngress(client, namespace, correlationId, templateResourceName, templateResourceUID,
-		    template);
+	    AddedHandler.createAndApplyIngress(client, namespace, correlationId, templateResourceName,
+		    templateResourceUID, template);
 	} else {
 	    LOGGER.trace(formatLogMessage(correlationId, "Ingress available already"));
 	}
@@ -141,36 +128,21 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	}
     }
 
-    protected void createAndApplyIngress(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String templateResourceName, String templateResourceUID, TemplateSpecResource template) {
-	Map<String, String> replacements = TheiaCloudIngressUtil.getIngressReplacements(namespace, template);
-	String ingressYaml;
-	try {
-	    ingressYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(EagerStartTemplateAddedHandler.class,
-		    TEMPLATE_INGRESS_YAML, replacements, correlationId);
-	} catch (IOException | URISyntaxException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for ingress."), e);
-	    return;
-	}
-	K8sUtil.loadAndCreateIngressWithOwnerReference(client, namespace, correlationId, ingressYaml,
-		templateResourceName, templateResourceUID, 0);
-    }
-
     protected void createAndApplyService(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String templateResourceName, String templateResourceUID, int instance, TemplateSpecResource template) {
 	Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(namespace, template, instance);
 	String serviceYaml;
 	try {
 	    serviceYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(EagerStartTemplateAddedHandler.class,
-		    TEMPLATE_SERVICE_YAML, replacements, correlationId);
+		    AddedHandler.TEMPLATE_SERVICE_YAML, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
 		    e);
 	    return;
 	}
-	K8sUtil.loadAndCreateServiceWithOwnerReference(client, namespace, correlationId, serviceYaml,
-		templateResourceName, templateResourceUID, 0);
+	K8sUtil.loadAndCreateServiceWithOwnerReference(client, namespace, correlationId, serviceYaml, TemplateSpec.API,
+		TemplateSpec.KIND, templateResourceName, templateResourceUID, 0);
     }
 
     protected void createAndApplyDeployment(DefaultKubernetesClient client, String namespace, String correlationId,
@@ -180,7 +152,7 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	String deploymentYaml;
 	try {
 	    deploymentYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(EagerStartTemplateAddedHandler.class,
-		    TEMPLATE_DEPLOYMENT_YAML, replacements, correlationId);
+		    AddedHandler.TEMPLATE_DEPLOYMENT_YAML, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
@@ -188,16 +160,17 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
-		templateResourceName, templateResourceUID, 0);
+		TemplateSpec.API, TemplateSpec.KIND, templateResourceName, templateResourceUID, 0);
     }
 
     protected void createAndApplyProxyConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String templateResourceName, String templateResourceUID, int instance, TemplateSpecResource template) {
-	Map<String, String> replacements = TheiaCloudConfigMapUtil.getProxyConfigMapReplacements(namespace, template, instance);
+	Map<String, String> replacements = TheiaCloudConfigMapUtil.getProxyConfigMapReplacements(namespace, template,
+		instance);
 	String configMapYaml;
 	try {
 	    configMapYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(EagerStartTemplateAddedHandler.class,
-		    TEMPLATE_CONFIGMAP_YAML, replacements, correlationId);
+		    AddedHandler.TEMPLATE_CONFIGMAP_YAML, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
@@ -205,25 +178,21 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
-		templateResourceName, templateResourceUID, 0, configMap -> {
+		TemplateSpec.API, TemplateSpec.KIND, templateResourceName, templateResourceUID, 0, configMap -> {
 		    String host = TheiaCloudIngressUtil.getHostName(template, instance);
-		    ConfigMap templateConfigMap = client.configMaps().inNamespace(namespace)
-			    .withName(OAUTH2_PROXY_CONFIGMAP_NAME).get();
-		    Map<String, String> data = new LinkedHashMap<>(templateConfigMap.getData());
-		    data.put(OAUTH2_PROXY_CFG, data.get(OAUTH2_PROXY_CFG)//
-			    .replace(CONFIGMAP_DATA_PLACEHOLDER_HOST, "https://" + host)//
-			    .replace(CONFIGMAP_DATA_PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort())));
-		    configMap.setData(data);
+		    int port = template.getSpec().getPort();
+		    AddedHandler.updateProxyConfigMap(client, namespace, configMap, host, port);
 		});
     }
 
     protected void createAndApplyEmailConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String templateResourceName, String templateResourceUID, int instance, TemplateSpecResource template) {
-	Map<String, String> replacements = TheiaCloudConfigMapUtil.getEmailConfigMapReplacements(namespace, template, instance);
+	Map<String, String> replacements = TheiaCloudConfigMapUtil.getEmailConfigMapReplacements(namespace, template,
+		instance);
 	String configMapYaml;
 	try {
 	    configMapYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(EagerStartTemplateAddedHandler.class,
-		    TEMPLATE_CONFIGMAP_EMAILS_YAML, replacements, correlationId);
+		    AddedHandler.TEMPLATE_CONFIGMAP_EMAILS_YAML, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
@@ -231,7 +200,7 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
-		templateResourceName, templateResourceUID, 0);
+		TemplateSpec.API, TemplateSpec.KIND, templateResourceName, templateResourceUID, 0);
     }
 
 }

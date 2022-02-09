@@ -27,8 +27,8 @@ import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
 
@@ -59,7 +59,11 @@ public final class TheiaCloudHandlerUtil {
     }
 
     public static String getAppSelector(TemplateSpecResource template, int instance) {
-	return template.getSpec().getName() + "-" + instance;
+	return K8sUtil.validString(template.getSpec().getName() + "-" + instance);
+    }
+
+    public static String getAppSelector(Workspace workspace) {
+	return K8sUtil.validString(workspace.getSpec().getName() + "-" + workspace.getMetadata().getUid());
     }
 
     public static Optional<TemplateSpecResource> getTemplateSpecForWorkspace(DefaultKubernetesClient client,

@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -40,19 +41,35 @@ public final class TheiaCloudConfigMapUtil {
     }
 
     public static String getProxyConfigName(TemplateSpecResource template, int instance) {
-	return getProxyConfigNamePrefix(template) + instance;
+	return K8sUtil.validString(getProxyConfigNamePrefix(template) + instance);
+    }
+
+    public static String getProxyConfigName(Workspace workspace) {
+	return K8sUtil.validString(getProxyConfigNamePrefix(workspace) + workspace.getMetadata().getUid());
     }
 
     public static String getEmailConfigName(TemplateSpecResource template, int instance) {
-	return getEmailConfigNamePrefix(template) + instance;
+	return K8sUtil.validString(getEmailConfigNamePrefix(template) + instance);
+    }
+
+    public static String getEmailConfigName(Workspace workspace) {
+	return K8sUtil.validString(getEmailConfigNamePrefix(workspace) + workspace.getMetadata().getUid());
     }
 
     private static String getProxyConfigNamePrefix(TemplateSpecResource template) {
 	return template.getSpec().getName() + CONFIGMAP_PROXY_NAME;
     }
 
+    private static String getProxyConfigNamePrefix(Workspace workspace) {
+	return workspace.getSpec().getName() + CONFIGMAP_PROXY_NAME;
+    }
+
     private static String getEmailConfigNamePrefix(TemplateSpecResource template) {
 	return template.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
+    }
+
+    public static String getEmailConfigNamePrefix(Workspace workspace) {
+	return workspace.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
     }
 
     public static Integer getProxyId(String correlationId, TemplateSpecResource template, ConfigMap item) {
@@ -92,21 +109,33 @@ public final class TheiaCloudConfigMapUtil {
     }
 
     public static Map<String, String> getProxyConfigMapReplacements(String namespace, TemplateSpecResource template,
-            int instance) {
-        Map<String, String> replacements = new LinkedHashMap<String, String>();
-        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME,
-        	getProxyConfigName(template, instance));
-        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-        return replacements;
+	    int instance) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(template, instance));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+	return replacements;
+    }
+
+    public static Map<String, String> getProxyConfigMapReplacements(String namespace, Workspace workspace) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(workspace));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+	return replacements;
     }
 
     public static Map<String, String> getEmailConfigMapReplacements(String namespace, TemplateSpecResource template,
-            int instance) {
-        Map<String, String> replacements = new LinkedHashMap<String, String>();
-        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
-        	getEmailConfigName(template, instance));
-        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-        return replacements;
+	    int instance) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(template, instance));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+	return replacements;
+    }
+
+    public static Map<String, String> getEmailConfigMapReplacements(String namespace, Workspace workspace) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(workspace));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+	return replacements;
     }
 
 }

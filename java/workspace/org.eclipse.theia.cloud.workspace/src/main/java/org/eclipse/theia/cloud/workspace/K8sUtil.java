@@ -74,17 +74,23 @@ public final class K8sUtil {
 	NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaces = CLIENT
 		.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(K8sUtil.NAMESPACE);
 
-	Workspace workspaceSpecResource = new Workspace();
+	String createSpecName;
+	Resource<Workspace> existingWorkspace = workspaces.withName(name);
+	if (existingWorkspace.get() == null) {
+	    Workspace workspaceSpecResource = new Workspace();
 
-	ObjectMeta metadata = new ObjectMeta();
-	workspaceSpecResource.setMetadata(metadata);
-	metadata.setName(name);
+	    ObjectMeta metadata = new ObjectMeta();
+	    workspaceSpecResource.setMetadata(metadata);
+	    metadata.setName(name);
 
-	WorkspaceSpec workspaceSpec = new WorkspaceSpec(name, template, user);
-	workspaceSpecResource.setSpec(workspaceSpec);
+	    WorkspaceSpec workspaceSpec = new WorkspaceSpec(name, template, user);
+	    workspaceSpecResource.setSpec(workspaceSpec);
 
-	Workspace created = workspaces.create(workspaceSpecResource);
-	String createSpecName = created.getSpec().getName();
+	    Workspace created = workspaces.create(workspaceSpecResource);
+	    createSpecName = created.getSpec().getName();
+	} else {
+	    createSpecName = existingWorkspace.get().getSpec().getName();
+	}
 
 	AtomicReference<String> atomicReference = new AtomicReference<String>(null);
 	CountDownLatch latch = new CountDownLatch(1);
