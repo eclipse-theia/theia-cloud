@@ -69,3 +69,9 @@ Install sample template (from git root directory):\
 # Docker
 
 `docker build -t theia-cloud-operator -f dockerfiles/operator/Dockerfile .`
+
+`docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile .`
+
+# GKE
+
+`kubectl apply -f k8s/landing-page-k8s-yaml/landing-page.yaml`

@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    acme.cert-manager.io/http01-edit-in-place: "true"
+  labels:
+    app: keycloak
+  namespace: manual-keycloak
+spec:
+  tls: # < placing a host in the TLS config will indicate a certificate should be created
+  - hosts:
+    - 34.120.110.14.nip.io
+    secretName: keycloak-cert-secret # < cert-manager will store the created certificate in this secret
+  rules:
+  - host: 34.120.110.14.nip.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: keycloak
+            port:
+              number: 8080
+        path: /*
+        pathType: ImplementationSpecific

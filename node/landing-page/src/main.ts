@@ -17,11 +17,32 @@
 
 import { createApp } from "vue";
 import App from "./App.vue";
+declare global {
+  interface Window { theiaCloudConfig: any; }
+}
+
+function theiaCloudConfig() {
+  if (typeof window.theiaCloudConfig === "object") {
+    return window.theiaCloudConfig || {};
+  }
+
+  return {};
+}
+
+const config = Object.freeze({
+  ...theiaCloudConfig(),
+});
+
+console.log(config.keycloakAuthUrl);
+console.log(config.keycloakRealm);
+console.log(config.keycloakClientId);
+console.log(config.workspaceServiceUrl);
+console.log(config.workspaceTemplate);
 
 createApp(App, {
-  keycloakAuthUrl: "https://keycloak-eclipse-che.192.168.39.3.nip.io/auth/",
-  keycloakRealm: "TheiaCloud",
-  keycloakClientId: "theia-cloud",
-  workspaceServiceUrl: "http://localhost:8081",
-  workspaceTemplate: "coffee-editor",
+  keycloakAuthUrl: config.keycloakAuthUrl,
+  keycloakRealm: config.keycloakRealm,
+  keycloakClientId: config.keycloakClientId,
+  workspaceServiceUrl: config.workspaceServiceUrl,
+  workspaceTemplate: config.workspaceTemplate,
 }).mount("#app");
