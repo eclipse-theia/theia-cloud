@@ -29,6 +29,14 @@ spec:
             port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
+        volumeMounts:
+          - name: landing-page-config
+            mountPath: /usr/share/nginx/html/config.js
+            subPath: config.js
+      volumes:
+        - name: landing-page-config
+          configMap:
+            name: landing-page-config
 ---
 apiVersion: v1
 kind: Service

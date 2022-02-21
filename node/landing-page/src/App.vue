@@ -30,12 +30,6 @@ export default defineComponent({
     };
   },
   created() {
-    console.log(this.keycloakAuthUrl);
-    console.log(this.keycloakRealm);
-    console.log(this.keycloakClientId);
-    console.log(this.workspaceServiceUrl);
-    console.log(this.workspaceTemplate);
-
     const keycloakConfig: KeycloakConfig = {
       url: this.keycloakAuthUrl,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

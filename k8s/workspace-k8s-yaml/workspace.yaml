@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workspace-deployment
+  labels:
+    app: workspace
+  namespace: theiacloud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workspace
+  template:
+    metadata:
+      labels:
+        app: workspace
+    spec:
+      # we need to be able to create and read workspaces
+      automountServiceAccountToken: true
+      serviceAccountName: workspace-api-service-account
+      containers:
+      - name: workspace-container
+        image: gcr.io/kubernetes-238012/theia-cloud-workspace
+        ports:
+        - name: http
+          containerPort: 8081
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workspace-service
+  labels:
+    app: workspace
+  namespace: theiacloud
+spec:
+  type: ClusterIP
+  selector:
+    app: workspace
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8081
+      targetPort: 8081

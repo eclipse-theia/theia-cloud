@@ -33,12 +33,6 @@ const config = Object.freeze({
   ...theiaCloudConfig(),
 });
 
-console.log(config.keycloakAuthUrl);
-console.log(config.keycloakRealm);
-console.log(config.keycloakClientId);
-console.log(config.workspaceServiceUrl);
-console.log(config.workspaceTemplate);
-
 createApp(App, {
   keycloakAuthUrl: config.keycloakAuthUrl,
   keycloakRealm: config.keycloakRealm,

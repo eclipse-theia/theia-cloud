@@ -66,11 +66,15 @@ Install sample template (from git root directory):\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-oauth2proxy-keycloak.yaml`\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-htmlpage.yaml`
 
+`kubectl create serviceaccount workspace-api-service-account -n theiacloud`
+
 # Docker
 
 `docker build -t theia-cloud-operator -f dockerfiles/operator/Dockerfile .`
 
 `docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile .`
+
+`docker build -t theia-cloud-workspace -f dockerfiles/workspace/Dockerfile .`
 
 # GKE
 
