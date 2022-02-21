@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: landing-page-config
+  namespace: theiacloud
+data:
+  config.js: |
+    window.theiaCloudConfig = {
+      keycloakAuthUrl: "https://34.120.110.14.nip.io/auth/",
+      keycloakRealm: "TheiaCloud",
+      keycloakClientId: "theia-cloud",
+      workspaceServiceUrl: "https://34.149.147.106.nip.io",
+      workspaceTemplate: "coffee-editor",
+    };

@@ -1,0 +1,27 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: workspace-api-access
+  namespace: theiacloud
+rules:
+  -
+    apiGroups:
+      - ""
+      - theia.cloud
+    resources:
+      - workspaces
+    verbs: ["get", "create", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: workspace-api-access
+  namespace: theiacloud
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: workspace-api-access
+subjects:
+- kind: ServiceAccount
+  name: workspace-api-service-account
+  namespace: theiacloud
