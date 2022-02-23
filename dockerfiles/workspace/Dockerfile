@@ -7,8 +7,7 @@ RUN cd /workspace/common/maven-conf && \
     cd /workspace/common/org.eclipse.theia.cloud.common && \
     mvn clean install && \
     cd /workspace/workspace/org.eclipse.theia.cloud.workspace && \
-    mvn clean package -Dquarkus.package.type=uber-jar && \
-    ls -al target
+    mvn clean package -Dquarkus.package.type=uber-jar
 
 FROM openjdk:11-jre-slim-buster
 WORKDIR /workspace

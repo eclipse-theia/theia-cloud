@@ -19,9 +19,9 @@ package org.eclipse.theia.cloud.operator.di;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.impl.GKEPersistentVolumeHandlerImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartTemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartWorkspaceAddedHandler;
-import org.eclipse.theia.cloud.operator.handler.impl.PersistentVolumeHandlerImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
@@ -36,7 +36,7 @@ public class TheiaCloudOperatorModule extends AbstractModule {
     }
 
     protected Class<? extends PersistentVolumeHandler> bindPersistentVolumeHandler() {
-	return PersistentVolumeHandlerImpl.class;
+	return GKEPersistentVolumeHandlerImpl.class;
     }
 
     protected Class<? extends TemplateAddedHandler> bindTemplateAddedHandler() {

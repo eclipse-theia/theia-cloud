@@ -67,10 +67,11 @@ Install sample template (from git root directory):\
 `kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-htmlpage.yaml`
 
 `kubectl create serviceaccount workspace-api-service-account -n theiacloud`
+`kubectl create serviceaccount operator-api-service-account -n theiacloud`
 
 # Docker
 
-`docker build -t theia-cloud-operator -f dockerfiles/operator/Dockerfile .`
+`docker build -t gcr.io/kubernetes-238012/theia-cloud-operator -f dockerfiles/operator/Dockerfile .`
 
 `docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile .`
 
