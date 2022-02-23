@@ -94,10 +94,11 @@ public final class K8sUtil {
 		client.configMaps().inNamespace(namespace).list().getItems());
     }
 
-    public static Optional<PersistentVolume> getPersistentVolume(DefaultKubernetesClient client, String namespace,
-	    String volumeName) {
-	Resource<PersistentVolume> pv = client.persistentVolumes().withName(volumeName);
-	return pv.get() == null ? Optional.empty() : Optional.of(pv.get());
+    public static Optional<PersistentVolumeClaim> getPersistentVolumeClaim(DefaultKubernetesClient client,
+	    String namespace, String volumeName) {
+	Resource<PersistentVolumeClaim> pvc = client.persistentVolumeClaims().inNamespace(namespace)
+		.withName(volumeName);
+	return pvc.get() == null ? Optional.empty() : Optional.of(pvc.get());
     }
 
     private static <T extends HasMetadata> List<T> getExistingTypes(DefaultKubernetesClient client, String namespace,

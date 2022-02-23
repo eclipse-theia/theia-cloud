@@ -44,7 +44,7 @@ import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.PersistentVolume;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
@@ -87,8 +87,10 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
 	/* create persistent volume if not present already */
 	String pvcName = TheiaCloudPersistentVolumeUtil.getPersistentVolumeName(workspace);
-	Optional<PersistentVolume> volume = K8sUtil.getPersistentVolume(client, namespace, pvcName);
+	Optional<PersistentVolumeClaim> volume = K8sUtil.getPersistentVolumeClaim(client, namespace, pvcName);
 	if (volume.isEmpty()) {
+	    LOGGER.debug(formatLogMessage(correlationId,
+		    "No Volumce Claim with name " + pvcName + " was found. Creating claims."));
 	    persistentVolumeHandler.createAndApplyPersistentVolume(client, namespace, correlationId, workspace);
 	    persistentVolumeHandler.createAndApplyPersistentVolumeClaim(client, namespace, correlationId, workspace);
 	}

@@ -26,6 +26,7 @@ spec:
           args:
             - --config=/etc/oauth2-proxy.cfg
             - --authenticated-emails-file=/emails/authenticated-emails-list
+            - --gcp-healthchecks
           ports:
             - containerPort: 5000
               name: web
@@ -46,6 +47,11 @@ spec:
           #     name: theia-direct
           #   - name: shared-data
           #     mountPath: "/csiptools"
+      
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
       volumes:
         # - name: shared-data
         #   emptyDir: {}
