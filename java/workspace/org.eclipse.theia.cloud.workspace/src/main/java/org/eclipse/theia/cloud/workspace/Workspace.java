@@ -20,18 +20,20 @@ public class Workspace {
 
     public String template;
     public String user;
+    public String appId;
 
     public Workspace() {
     }
 
-    public Workspace(String template, String user) {
+    public Workspace(String template, String user, String appId) {
 	this.template = template;
 	this.user = user;
+	this.appId = appId;
     }
 
     @Override
     public String toString() {
-	return "Workspace [template=" + template + ", user=" + user + "]";
+	return "Workspace [template=" + template + ", user=" + user + ", appId=" + appId + "]";
     }
 
 }

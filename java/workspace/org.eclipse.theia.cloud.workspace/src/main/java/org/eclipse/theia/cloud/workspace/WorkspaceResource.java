@@ -29,12 +29,31 @@ public class WorkspaceResource {
 
     private static final Logger LOGGER = Logger.getLogger(WorkspaceResource.class);
 
+    private static final String THEIA_CLOUD_APP_ID = "theia.cloud.app.id";
+    private static final String INIT = "INIT";
+
+    private String appId;
+
+    public WorkspaceResource() {
+	appId = System.getProperty(THEIA_CLOUD_APP_ID, "");
+	LOGGER.info(formatLogMessage(INIT, "App Id: " + appId));
+    }
+
     @POST
     public Reply launchWorkspace(Workspace workspace) {
 	String correlationId = generateCorrelationId();
+	if (wrongAppId(workspace)) {
+	    LOGGER.info(formatLogMessage(correlationId,
+		    "Launching workspace call without matching appId: " + workspace.appId));
+	    return new Reply(false, "", "AppId is not matching.");
+	}
 	LOGGER.info(formatLogMessage(correlationId, "Launching workspace " + workspace));
 	return K8sUtil.launchWorkspace(correlationId, generateWorkspaceName(workspace), workspace.template,
 		workspace.user);
+    }
+
+    private boolean wrongAppId(Workspace workspace) {
+	return !appId.equals(workspace.appId);
     }
 
     private static String generateWorkspaceName(Workspace workspace) {

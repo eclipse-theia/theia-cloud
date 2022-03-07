@@ -1,10 +1,10 @@
 apiVersion: theia.cloud/v3alpha
 kind: Template
 metadata:
-  name: coffee-template
+  name: theia-cloud.demo
 spec:
-  name: coffee-editor
-  image: eu.gcr.io/kubernetes-238012/coffee-editor:v0.7.0
+  name: theia-cloud.demo
+  image: gcr.io/kubernetes-238012/theia-cloud-demo
   port: 3000
   instances: 2
   host: 34.159.179.89.nip.io

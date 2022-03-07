@@ -8,9 +8,11 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@types/uuid": "^8.3.2",
     "axios": "^0.25.0",
     "core-js": "^3.6.5",
     "keycloak-js": "^16.1.1",
+    "uuid": "^8.3.2",
     "vue": "^3.0.0"
   },
   "devDependencies": {
