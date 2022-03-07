@@ -6,9 +6,11 @@ metadata:
 data:
   config.js: |
     window.theiaCloudConfig = {
-      keycloakAuthUrl: "https://34.120.110.14.nip.io/auth/",
+      appId: "qAtLthvURpbBHhG5",
+      useKeycloak: false,
+      keycloakAuthUrl: "https://keycloak.url/auth/",
       keycloakRealm: "TheiaCloud",
       keycloakClientId: "theia-cloud",
-      workspaceServiceUrl: "https://34.149.147.106.nip.io",
-      workspaceTemplate: "coffee-editor",
+      workspaceServiceUrl: "https://workspace.34.107.166.228.nip.io",
+      workspaceTemplate: "theia-cloud.demo",
     };

@@ -1,5 +1,5 @@
 <template>
-  <div>Hello {{ email }}. Please wait while we get your workspace ready.</div>
+  <div>Please wait while we get your workspace ready.</div>
   <div class="loader"></div>
 </template>
 
@@ -13,23 +13,36 @@ export default defineComponent({
     workspaceServiceUrl: String,
     workspaceTemplate: String,
     email: String,
+    appId: String,
+  },
+  created() {
+    if (this.email) {
+      this.startWorkspace();
+    }
   },
   watch: {
     email() {
       if (this.email) {
-        axios
-          .post(this.workspaceServiceUrl + "/workspaces", {
-            template: this.workspaceTemplate,
-            user: this.email,
-          })
-          .then((response) => {
-            if (response.data.success) {
-              location.replace("https://" + response.data.url);
-            } else {
-              console.error(response.data.error);
-            }
-          });
+        this.startWorkspace();
       }
+    },
+  },
+  methods: {
+    startWorkspace() {
+      console.log("Calling to " + (this.workspaceServiceUrl + "/workspaces"));
+      axios
+        .post(this.workspaceServiceUrl + "/workspaces", {
+          template: this.workspaceTemplate,
+          user: this.email,
+          appId: this.appId,
+        })
+        .then((response) => {
+          if (response.data.success) {
+            location.replace("https://" + response.data.url);
+          } else {
+            console.error(response.data.error);
+          }
+        });
     },
   },
 });

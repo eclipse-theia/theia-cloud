@@ -12,5 +12,6 @@ RUN cd /workspace/common/maven-conf && \
 FROM openjdk:11-jre-slim-buster
 WORKDIR /workspace
 COPY --from=builder /workspace/workspace/org.eclipse.theia.cloud.workspace/target/workspace-0.7.0-SNAPSHOT-runner.jar .
-ENTRYPOINT [ "java", "-jar", "./workspace-0.7.0-SNAPSHOT-runner.jar" ]
+ENV APPID default-app-id
+ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} -jar ./workspace-0.7.0-SNAPSHOT-runner.jar
 CMD [ "" ]

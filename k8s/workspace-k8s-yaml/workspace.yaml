@@ -25,6 +25,9 @@ spec:
         - name: http
           containerPort: 8081
           protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: workspace-config
 ---
 apiVersion: v1
 kind: Service

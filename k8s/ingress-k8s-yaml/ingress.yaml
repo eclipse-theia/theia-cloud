@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: workspace-and-landing-page-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: theia-cloud-landing-page-ip
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    acme.cert-manager.io/http01-edit-in-place: "true"
+  namespace: theiacloud
+spec:
+  tls: 
+  - hosts:
+    - workspace.34.107.166.228.nip.io
+    secretName: workspace-cert-secret
+  - hosts:
+    - theia.cloud.34.107.166.228.nip.io
+    secretName: landing-page-cert-secret
+  rules:
+  - host: workspace.34.107.166.228.nip.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: workspace-service
+            port:
+              number: 8081
+        path: /workspaces
+        pathType: ImplementationSpecific
+  - host: theia.cloud.34.107.166.228.nip.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: landing-page-service
+            port:
+              number: 80
+        path: /*
+        pathType: ImplementationSpecific

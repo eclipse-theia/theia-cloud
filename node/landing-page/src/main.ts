@@ -17,23 +17,32 @@
 
 import { createApp } from "vue";
 import App from "./App.vue";
+import { TheiaCloudConfig } from "./iconfig";
 declare global {
-  interface Window { theiaCloudConfig: any; }
+  interface Window {
+    theiaCloudConfig: TheiaCloudConfig;
+  }
 }
 
-function theiaCloudConfig() {
+function theiaCloudConfig(): TheiaCloudConfig {
   if (typeof window.theiaCloudConfig === "object") {
     return window.theiaCloudConfig || {};
   }
-
-  return {};
+  return {
+    appId: "",
+    useKeycloak: false,
+    workspaceServiceUrl: "",
+    workspaceTemplate: "",
+  };
 }
 
-const config = Object.freeze({
+const config: TheiaCloudConfig = Object.freeze({
   ...theiaCloudConfig(),
 });
 
 createApp(App, {
+  appId: config.appId,
+  useKeycloak: config.useKeycloak,
   keycloakAuthUrl: config.keycloakAuthUrl,
   keycloakRealm: config.keycloakRealm,
   keycloakClientId: config.keycloakClientId,

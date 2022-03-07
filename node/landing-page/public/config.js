@@ -1,7 +1,9 @@
 window.theiaCloudConfig = {
-    keycloakAuthUrl: "https://34.120.110.14.nip.io/auth/",
-    keycloakRealm: "TheiaCloud",
-    keycloakClientId: "theia-cloud",
-    workspaceServiceUrl: "http://localhost:8081",
-    workspaceTemplate: "coffee-editor",
+  appId: "1234-5678-9012-3456",
+  useKeycloak: false,
+  //   keycloakAuthUrl: "https://keycloak.url/auth/",
+  //   keycloakRealm: "TheiaCloud",
+  //   keycloakClientId: "theia-cloud",
+  workspaceServiceUrl: "http://workspace.service:8081",
+  workspaceTemplate: "theia-cloud.demo",
 };

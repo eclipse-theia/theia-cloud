@@ -46,7 +46,7 @@ metadata:
     app: landing-page
   namespace: theiacloud
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: landing-page
   ports:
@@ -54,21 +54,3 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: landing-page-service
-#   labels:
-#     app: landing-page
-#   namespace: theiacloud
-# spec:
-#   type: LoadBalancer
-#   selector:
-#     app: landing-page
-#   ports:
-#     - name: http
-#       protocol: TCP
-#       port: 80
-#       targetPort: 80
-#   sessionAffinity: None
-#   externalTrafficPolicy: Cluster

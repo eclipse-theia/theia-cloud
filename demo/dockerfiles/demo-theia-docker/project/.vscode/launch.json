@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "[java] Launch App",
+            "request": "launch",
+            "mainClass": "com.example.App",
+            "projectName": "demo"
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "[typescript] Launch Program",
+            "program": "${workspaceFolder}/typescript/out/helloworld.js"
+        },
+    ]
+}
