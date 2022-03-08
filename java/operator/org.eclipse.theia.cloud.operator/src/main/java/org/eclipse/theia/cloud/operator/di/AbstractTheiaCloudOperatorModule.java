@@ -20,13 +20,11 @@ import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.GKEPersistentVolumeHandlerImpl;
-import org.eclipse.theia.cloud.operator.handler.impl.LazyStartTemplateAddedHandler;
-import org.eclipse.theia.cloud.operator.handler.impl.LazyStartWorkspaceAddedHandler;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
-public class TheiaCloudOperatorModule extends AbstractModule {
+public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
     @Override
     protected void configure() {
@@ -39,12 +37,8 @@ public class TheiaCloudOperatorModule extends AbstractModule {
 	return GKEPersistentVolumeHandlerImpl.class;
     }
 
-    protected Class<? extends TemplateAddedHandler> bindTemplateAddedHandler() {
-	return LazyStartTemplateAddedHandler.class;
-    }
+    protected abstract Class<? extends TemplateAddedHandler> bindTemplateAddedHandler();
 
-    protected Class<? extends WorkspaceAddedHandler> bindWorkspaceAddedHandler() {
-	return LazyStartWorkspaceAddedHandler.class;
-    }
+    protected abstract Class<? extends WorkspaceAddedHandler> bindWorkspaceAddedHandler();
 
 }

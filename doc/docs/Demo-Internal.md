@@ -19,12 +19,20 @@ docker push gcr.io/kubernetes-238012/theia-cloud-landing-page:latest
 
 ```
 
-Build and pish the workspace REST service with:
+Build and push the workspace REST service with:
 
 ```bash
 docker build -t theia-cloud-workspace -f dockerfiles/workspace/Dockerfile .
 docker tag theia-cloud-workspace:latest gcr.io/kubernetes-238012/theia-cloud-workspace:latest
 docker push gcr.io/kubernetes-238012/theia-cloud-workspace:latest
+```
+
+Build and push the operator with:
+
+```bash
+docker build -t theia-cloud-operator -f dockerfiles/operator/Dockerfile .
+docker tag theia-cloud-operator:latest gcr.io/kubernetes-238012/theia-cloud-operator:latest
+docker push gcr.io/kubernetes-238012/theia-cloud-operator:latest
 ```
 
 ## Kubernetes
@@ -57,7 +65,7 @@ kubectl apply -f k8s/workspace-k8s-yaml/workspace.yaml
 
 # Update k8s/landing-page-k8s-yaml/landing-page-config-map.yaml
 # then create the config map
-kubectl apply -f k8s/landing-page-k8s-yaml/landing-page-config-map.yam
+kubectl apply -f k8s/landing-page-k8s-yaml/landing-page-config-map.yaml
 
 # Create landing page service and deployment
 kubectl apply -f k8s/landing-page-k8s-yaml/landing-page.yaml
@@ -65,4 +73,14 @@ kubectl apply -f k8s/landing-page-k8s-yaml/landing-page.yaml
 # Update hostnames/static-ip (only available on Google) in k8s/ingress-k8s-yaml/ingress.yaml
 # Create ingress to expose workspace service and webpage
 kubectl apply -f k8s/ingress-k8s-yaml/ingress.yaml
+
+# Create service account for operator
+kubectl create serviceaccount operator-api-service-account -n theiacloud
+
+# create cluster role and cluster role binding
+kubectl apply -f k8s/operator-k8s-yaml/operator-role.yaml
+
+# adjust the args in k8s/operator-k8s-yaml/operator.yaml if desired
+# create operator deployment
+kubectl apply -f k8s/operator-k8s-yaml/operator.yaml
 ```

@@ -27,6 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
@@ -36,6 +37,8 @@ import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaUtil;
+
+import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
@@ -55,6 +58,13 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(EagerStartWorkspaceAddedHandler.class);
+
+    private TheiaCloudArguments arguments;
+
+    @Inject
+    public EagerStartWorkspaceAddedHandler(TheiaCloudArguments arguments) {
+	this.arguments = arguments;
+    }
 
     @Override
     public boolean handle(DefaultKubernetesClient client, Workspace workspace, String namespace, String correlationId) {
@@ -117,18 +127,21 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    return false;
 	}
 
-	/* add user to allowed emails */
-	try {
-	    client.configMaps().inNamespace(namespace)
-		    .withName(TheiaCloudConfigMapUtil.getEmailConfigName(template.get(), instance)).edit(configmap -> {
-			configmap.setData(
-				Collections.singletonMap(AddedHandler.FILENAME_AUTHENTICATED_EMAILS_LIST, userEmail));
-			return configmap;
-		    });
-	} catch (KubernetesClientException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while editing email configmap "
-		    + (templateID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)), e);
-	    return false;
+	if (arguments.isUseKeycloak()) {
+	    /* add user to allowed emails */
+	    try {
+		client.configMaps().inNamespace(namespace)
+			.withName(TheiaCloudConfigMapUtil.getEmailConfigName(template.get(), instance))
+			.edit(configmap -> {
+			    configmap.setData(Collections.singletonMap(AddedHandler.FILENAME_AUTHENTICATED_EMAILS_LIST,
+				    userEmail));
+			    return configmap;
+			});
+	    } catch (KubernetesClientException e) {
+		LOGGER.error(formatLogMessage(correlationId, "Error while editing email configmap "
+			+ (templateID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)), e);
+		return false;
+	    }
 	}
 
 	/* adjust the ingress */

@@ -25,10 +25,4 @@
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 	</properties>
 
-<!-- 	<modules>
-		<module>../../common/org.eclipse.theia.cloud.common</module>
-		<module>../../operator/org.eclipse.theia.cloud.operator</module>
-		<module>../../workspace/org.eclipse.theia.cloud.workspace</module>
-	</modules> -->
-
 </project>

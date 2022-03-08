@@ -1,9 +1,9 @@
 apiVersion: theia.cloud/v3alpha
 kind: Template
 metadata:
-  name: theia-cloud.demo
+  name: theia-cloud-demo
 spec:
-  name: theia-cloud.demo
+  name: theia-cloud-demo
   image: gcr.io/kubernetes-238012/theia-cloud-demo
   port: 3000
   instances: 2

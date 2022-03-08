@@ -12,5 +12,5 @@ data:
       keycloakRealm: "TheiaCloud",
       keycloakClientId: "theia-cloud",
       workspaceServiceUrl: "https://workspace.34.107.166.228.nip.io",
-      workspaceTemplate: "theia-cloud.demo",
+      workspaceTemplate: "theia-cloud-demo",
     };
