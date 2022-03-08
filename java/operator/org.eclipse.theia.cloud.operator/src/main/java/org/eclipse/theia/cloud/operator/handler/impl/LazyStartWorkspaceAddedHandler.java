@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
@@ -62,15 +63,17 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
     private static final Logger LOGGER = LogManager.getLogger(LazyStartWorkspaceAddedHandler.class);
 
     protected PersistentVolumeHandler persistentVolumeHandler;
+    protected TheiaCloudArguments arguments;
 
     @Inject
-    public LazyStartWorkspaceAddedHandler(PersistentVolumeHandler persistentVolumeHandler) {
+    public LazyStartWorkspaceAddedHandler(PersistentVolumeHandler persistentVolumeHandler,
+	    TheiaCloudArguments arguments) {
 	this.persistentVolumeHandler = persistentVolumeHandler;
+	this.arguments = arguments;
     }
 
     @Override
     public boolean handle(DefaultKubernetesClient client, Workspace workspace, String namespace, String correlationId) {
-
 	/* workspace information */
 	String workspaceResourceName = workspace.getMetadata().getName();
 	String workspaceResourceUID = workspace.getMetadata().getUid();
@@ -85,14 +88,21 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    return false;
 	}
 
-	/* create persistent volume if not present already */
-	String pvcName = TheiaCloudPersistentVolumeUtil.getPersistentVolumeName(workspace);
-	Optional<PersistentVolumeClaim> volume = K8sUtil.getPersistentVolumeClaim(client, namespace, pvcName);
-	if (volume.isEmpty()) {
-	    LOGGER.debug(formatLogMessage(correlationId,
-		    "No Volumce Claim with name " + pvcName + " was found. Creating claims."));
-	    persistentVolumeHandler.createAndApplyPersistentVolume(client, namespace, correlationId, workspace);
-	    persistentVolumeHandler.createAndApplyPersistentVolumeClaim(client, namespace, correlationId, workspace);
+	/* handle storage */
+	Optional<String> pvcName;
+	if (arguments.isEphemeralStorage()) {
+	    pvcName = Optional.empty();
+	} else {
+	    /* create persistent volume if not present already */
+	    pvcName = Optional.of(TheiaCloudPersistentVolumeUtil.getPersistentVolumeName(workspace));
+	    Optional<PersistentVolumeClaim> volume = K8sUtil.getPersistentVolumeClaim(client, namespace, pvcName.get());
+	    if (volume.isEmpty()) {
+		LOGGER.debug(formatLogMessage(correlationId,
+			"No Volumce Claim with name " + pvcName.get() + " was found. Creating claims."));
+		persistentVolumeHandler.createAndApplyPersistentVolume(client, namespace, correlationId, workspace);
+		persistentVolumeHandler.createAndApplyPersistentVolumeClaim(client, namespace, correlationId,
+			workspace);
+	    }
 	}
 
 	/* find ingress */
@@ -114,24 +124,26 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    return true;
 	}
 	Optional<Service> serviceToUse = createAndApplyService(client, namespace, correlationId, workspaceResourceName,
-		workspaceResourceUID, workspace, optionalTemplate.get().getSpec().getPort());
+		workspaceResourceUID, workspace, optionalTemplate.get().getSpec().getPort(), arguments.isUseKeycloak());
 	if (serviceToUse.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "Unable to create service for workspace " + workspaceSpec));
 	    return false;
 	}
 
-	/* Create config maps for this workspace */
-	List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client, namespace, workspaceResourceName,
-		workspaceResourceUID);
-	if (!existingConfigMaps.isEmpty()) {
-	    LOGGER.warn(formatLogMessage(correlationId,
-		    "Existing configmaps for " + workspaceSpec + ". Workspace already running?"));
-	    return true;
+	if (arguments.isUseKeycloak()) {
+	    /* Create config maps for this workspace */
+	    List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client, namespace, workspaceResourceName,
+		    workspaceResourceUID);
+	    if (!existingConfigMaps.isEmpty()) {
+		LOGGER.warn(formatLogMessage(correlationId,
+			"Existing configmaps for " + workspaceSpec + ". Workspace already running?"));
+		return true;
+	    }
+	    createAndApplyEmailConfigMap(client, namespace, correlationId, workspaceResourceName, workspaceResourceUID,
+		    workspace);
+	    createAndApplyProxyConfigMap(client, namespace, correlationId, workspaceResourceName, workspaceResourceUID,
+		    workspace, optionalTemplate.get());
 	}
-	createAndApplyEmailConfigMap(client, namespace, correlationId, workspaceResourceName, workspaceResourceUID,
-		workspace);
-	createAndApplyProxyConfigMap(client, namespace, correlationId, workspaceResourceName, workspaceResourceUID,
-		workspace, optionalTemplate.get());
 
 	/* Create deployment for this workspace */
 	List<Deployment> existingDeployments = K8sUtil.getExistingDeployments(client, namespace, workspaceResourceName,
@@ -142,7 +154,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    return true;
 	}
 	createAndApplyDeployment(client, namespace, correlationId, workspaceResourceName, workspaceResourceUID,
-		workspace, optionalTemplate.get(), pvcName);
+		workspace, optionalTemplate.get(), pvcName, arguments.isUseKeycloak());
 
 	/* adjust the ingress */
 	String host;
@@ -168,12 +180,14 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
     protected Optional<Service> createAndApplyService(DefaultKubernetesClient client, String namespace,
 	    String correlationId, String workspaceResourceName, String workspaceResourceUID, Workspace workspace,
-	    int port) {
+	    int port, boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(namespace, workspace, port);
+	String templateYaml = useOAuth2Proxy ? AddedHandler.TEMPLATE_SERVICE_YAML
+		: AddedHandler.TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML;
 	String serviceYaml;
 	try {
 	    serviceYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(LazyStartWorkspaceAddedHandler.class,
-		    AddedHandler.TEMPLATE_SERVICE_YAML, replacements, correlationId);
+		    templateYaml, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for workspace " + workspace),
 		    e);
@@ -225,13 +239,15 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
     protected void createAndApplyDeployment(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String workspaceResourceName, String workspaceResourceUID, Workspace workspace,
-	    TemplateSpecResource template, String pvName) {
+	    TemplateSpecResource template, Optional<String> pvName, boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudDeploymentUtil.getDeploymentsReplacements(namespace, workspace,
 		template);
+	String templateYaml = useOAuth2Proxy ? AddedHandler.TEMPLATE_DEPLOYMENT_YAML
+		: AddedHandler.TEMPLATE_DEPLOYMENT_WITHOUT_AOUTH2_PROXY_YAML;
 	String deploymentYaml;
 	try {
 	    deploymentYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(LazyStartWorkspaceAddedHandler.class,
-		    AddedHandler.TEMPLATE_DEPLOYMENT_YAML, replacements, correlationId);
+		    templateYaml, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for workspace " + workspace),
 		    e);
@@ -239,7 +255,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
 		WorkspaceSpec.API, WorkspaceSpec.KIND, workspaceResourceName, workspaceResourceUID, 0, deployment -> {
-		    persistentVolumeHandler.addVolumeClaim(deployment, pvName);
+		    pvName.ifPresent(name -> persistentVolumeHandler.addVolumeClaim(deployment, name));
 		});
     }
 

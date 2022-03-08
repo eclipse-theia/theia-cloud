@@ -42,22 +42,11 @@ spec:
           image: placeholder-image
           ports:
             - containerPort: placeholder-port
-          # volumeMounts:
-          #   - mountPath: "/projects"
-          #     name: theia-direct
-          #   - name: shared-data
-          #     mountPath: "/csiptools"
-      
       securityContext:
         runAsUser: 1001
         runAsGroup: 1001
         fsGroup: 1001
       volumes:
-        # - name: shared-data
-        #   emptyDir: {}
-        # - name: theia-direct
-        #   persistentVolumeClaim:
-        #     claimName: gm-cpptheia-direct1
         - name: oauth2-proxy-config
           configMap:
             name: placeholder-configname

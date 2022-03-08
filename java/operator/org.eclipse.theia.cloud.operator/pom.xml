@@ -15,13 +15,17 @@
 		<relativePath>../../common/maven-conf/</relativePath>
 	</parent>
 
+	<properties>
+		<picocli.version>4.6.3</picocli.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.theia.cloud</groupId>
 			<artifactId>common</artifactId>
 			<version>0.7.0-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
@@ -41,6 +45,12 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli</artifactId>
+			<version>${picocli.version}</version>
 		</dependency>
 	</dependencies>
 

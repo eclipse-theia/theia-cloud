@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
@@ -36,6 +37,8 @@ import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
+
+import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Service;
@@ -53,6 +56,13 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
     public static final String LABEL_KEY = "theiacloud";
     public static final String LABEL_VALUE_PROXY = "proxy";
     public static final String LABEL_VALUE_EMAILS = "emails";
+
+    private TheiaCloudArguments arguments;
+
+    @Inject
+    public EagerStartTemplateAddedHandler(TheiaCloudArguments arguments) {
+	this.arguments = arguments;
+    }
 
     @Override
     public void handle(DefaultKubernetesClient client, TemplateSpecResource template, String namespace,
@@ -84,33 +94,35 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	/* Create missing services for this template */
 	for (int instance : missingServiceIds) {
 	    createAndApplyService(client, namespace, correlationId, templateResourceName, templateResourceUID, instance,
-		    template);
+		    template, arguments.isUseKeycloak());
 	}
 
-	/* Get existing configmaps for this template */
-	List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client, namespace, templateResourceName,
-		templateResourceUID);
-	List<ConfigMap> existingProxyConfigMaps = existingConfigMaps.stream()//
-		.filter(configmap -> LABEL_VALUE_PROXY.equals(configmap.getMetadata().getLabels().get(LABEL_KEY)))//
-		.collect(Collectors.toList());
-	List<ConfigMap> existingEmailsConfigMaps = existingConfigMaps.stream()//
-		.filter(configmap -> LABEL_VALUE_EMAILS.equals(configmap.getMetadata().getLabels().get(LABEL_KEY)))//
-		.collect(Collectors.toList());
+	if (arguments.isUseKeycloak()) {
+	    /* Get existing configmaps for this template */
+	    List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client, namespace, templateResourceName,
+		    templateResourceUID);
+	    List<ConfigMap> existingProxyConfigMaps = existingConfigMaps.stream()//
+		    .filter(configmap -> LABEL_VALUE_PROXY.equals(configmap.getMetadata().getLabels().get(LABEL_KEY)))//
+		    .collect(Collectors.toList());
+	    List<ConfigMap> existingEmailsConfigMaps = existingConfigMaps.stream()//
+		    .filter(configmap -> LABEL_VALUE_EMAILS.equals(configmap.getMetadata().getLabels().get(LABEL_KEY)))//
+		    .collect(Collectors.toList());
 
-	/* Compute missing configmaps */
-	Set<Integer> missingProxyIds = TheiaCloudConfigMapUtil.computeIdsOfMissingProxyConfigMaps(template,
-		correlationId, instances, existingProxyConfigMaps);
-	Set<Integer> missingEmailIds = TheiaCloudConfigMapUtil.computeIdsOfMissingEmailConfigMaps(template,
-		correlationId, instances, existingEmailsConfigMaps);
+	    /* Compute missing configmaps */
+	    Set<Integer> missingProxyIds = TheiaCloudConfigMapUtil.computeIdsOfMissingProxyConfigMaps(template,
+		    correlationId, instances, existingProxyConfigMaps);
+	    Set<Integer> missingEmailIds = TheiaCloudConfigMapUtil.computeIdsOfMissingEmailConfigMaps(template,
+		    correlationId, instances, existingEmailsConfigMaps);
 
-	/* Create missing configmaps for this template */
-	for (int instance : missingProxyIds) {
-	    createAndApplyProxyConfigMap(client, namespace, correlationId, templateResourceName, templateResourceUID,
-		    instance, template);
-	}
-	for (int instance : missingEmailIds) {
-	    createAndApplyEmailConfigMap(client, namespace, correlationId, templateResourceName, templateResourceUID,
-		    instance, template);
+	    /* Create missing configmaps for this template */
+	    for (int instance : missingProxyIds) {
+		createAndApplyProxyConfigMap(client, namespace, correlationId, templateResourceName,
+			templateResourceUID, instance, template);
+	    }
+	    for (int instance : missingEmailIds) {
+		createAndApplyEmailConfigMap(client, namespace, correlationId, templateResourceName,
+			templateResourceUID, instance, template);
+	    }
 	}
 
 	/* Get existing deployments for this template */
@@ -124,17 +136,20 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	/* Create missing deployments for this template */
 	for (int instance : missingDeploymentIds) {
 	    createAndApplyDeployment(client, namespace, correlationId, templateResourceName, templateResourceUID,
-		    instance, template);
+		    instance, template, arguments.isUseKeycloak());
 	}
     }
 
     protected void createAndApplyService(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String templateResourceName, String templateResourceUID, int instance, TemplateSpecResource template) {
+	    String templateResourceName, String templateResourceUID, int instance, TemplateSpecResource template,
+	    boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(namespace, template, instance);
+	String templateYaml = useOAuth2Proxy ? AddedHandler.TEMPLATE_SERVICE_YAML
+		: AddedHandler.TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML;
 	String serviceYaml;
 	try {
 	    serviceYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(EagerStartTemplateAddedHandler.class,
-		    AddedHandler.TEMPLATE_SERVICE_YAML, replacements, correlationId);
+		    templateYaml, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
@@ -146,13 +161,16 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
     }
 
     protected void createAndApplyDeployment(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String templateResourceName, String templateResourceUID, int instance, TemplateSpecResource template) {
+	    String templateResourceName, String templateResourceUID, int instance, TemplateSpecResource template,
+	    boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudDeploymentUtil.getDeploymentsReplacements(namespace, template,
 		instance);
+	String templateYaml = useOAuth2Proxy ? AddedHandler.TEMPLATE_DEPLOYMENT_YAML
+		: AddedHandler.TEMPLATE_DEPLOYMENT_WITHOUT_AOUTH2_PROXY_YAML;
 	String deploymentYaml;
 	try {
 	    deploymentYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(EagerStartTemplateAddedHandler.class,
-		    AddedHandler.TEMPLATE_DEPLOYMENT_YAML, replacements, correlationId);
+		    templateYaml, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),

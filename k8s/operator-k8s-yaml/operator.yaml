@@ -21,3 +21,4 @@ spec:
       containers:
       - name: operator-container
         image: gcr.io/kubernetes-238012/theia-cloud-operator
+        args: ["--ephemeralStorage", "--cloudProvider", "GKE"]

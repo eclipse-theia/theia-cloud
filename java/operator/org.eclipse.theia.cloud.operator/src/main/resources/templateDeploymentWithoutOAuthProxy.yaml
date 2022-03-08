@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: placeholder-depname
+  namespace: placeholder-namespace
+  ownerReferences:
+    - apiVersion: theia.cloud/v3alpha
+      kind: Template
+      name: placeholder
+      uid: placeholder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: placeholder-app
+  template:
+    metadata:
+      labels:
+        app: placeholder-app
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: placeholder-templatename
+          image: placeholder-image
+          ports:
+            - containerPort: placeholder-port
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001

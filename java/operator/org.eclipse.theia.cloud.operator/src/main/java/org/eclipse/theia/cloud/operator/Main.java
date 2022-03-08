@@ -23,7 +23,8 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
-import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
+import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
+import org.eclipse.theia.cloud.operator.di.DefaultTheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
@@ -34,6 +35,7 @@ import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.internal.KubernetesDeserializer;
+import picocli.CommandLine;
 
 public class Main {
 
@@ -80,7 +82,7 @@ public class Main {
 		.orElseThrow(() -> new RuntimeException(
 			"Deployment error: Custom resource definition Workspace for Theia.Cloud not found."));
 
-	TheiaCloudOperatorModule module = createModule(args);
+	AbstractTheiaCloudOperatorModule module = createModule(args);
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
 
 	TheiaCloud theiaCloud = new TheiaCloudImpl(namespace, module, client,
@@ -92,8 +94,17 @@ public class Main {
 	theiaCloud.start();
     }
 
-    protected TheiaCloudOperatorModule createModule(String[] args) {
-	return new TheiaCloudOperatorModule();
+    protected AbstractTheiaCloudOperatorModule createModule(String[] args) {
+	TheiaCloudArguments arguments = new TheiaCloudArguments();
+	CommandLine commandLine = new CommandLine(arguments).setTrimQuotes(true);
+	commandLine.parseArgs(args);
+
+	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: keycloak " + arguments.isUseKeycloak()));
+	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: eagerStart " + arguments.isEagerStart()));
+	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: ephemeralStorage " + arguments.isEphemeralStorage()));
+	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: cloudProvider " + arguments.getCloudProvider()));
+
+	return new DefaultTheiaCloudOperatorModule(arguments);
     }
 
     private static boolean isTemplateCRD(CustomResourceDefinition crd) {

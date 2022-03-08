@@ -25,7 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
-import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
+import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
@@ -58,7 +58,7 @@ public class TheiaCloudImpl implements TheiaCloud {
     private TemplateAddedHandler templateAddedHandler;
     private WorkspaceAddedHandler workspaceAddedHandler;
 
-    public TheiaCloudImpl(String namespace, TheiaCloudOperatorModule module, DefaultKubernetesClient client,
+    public TheiaCloudImpl(String namespace, AbstractTheiaCloudOperatorModule module, DefaultKubernetesClient client,
 	    NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient,
 	    NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaceResourceClient) {
 	this.namespace = namespace;
