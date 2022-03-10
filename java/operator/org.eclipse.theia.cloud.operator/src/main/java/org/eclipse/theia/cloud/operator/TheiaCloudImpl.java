@@ -28,6 +28,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.WorkspaceRemovedHandler;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
 
@@ -57,6 +58,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 
     private TemplateAddedHandler templateAddedHandler;
     private WorkspaceAddedHandler workspaceAddedHandler;
+    private WorkspaceRemovedHandler workspaceRemovedHandler;
 
     public TheiaCloudImpl(String namespace, AbstractTheiaCloudOperatorModule module, DefaultKubernetesClient client,
 	    NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient,
@@ -69,6 +71,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 
 	this.templateAddedHandler = injector.getInstance(TemplateAddedHandler.class);
 	this.workspaceAddedHandler = injector.getInstance(WorkspaceAddedHandler.class);
+	this.workspaceRemovedHandler = injector.getInstance(WorkspaceRemovedHandler.class);
     }
 
     @Override
@@ -152,8 +155,9 @@ public class TheiaCloudImpl implements TheiaCloud {
     }
 
     private void workspaceDeleted(Workspace workspace, String correlationId) {
-	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceDeleted not implemented"));
+	LOGGER.trace(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId,
+		"Delegating workspaceDeleted to " + workspaceRemovedHandler.getClass().getName()));
+	workspaceRemovedHandler.handle(client, workspace, namespace, correlationId);
     }
 
     private void workspaceModified(Workspace workspace, String correlationId) {
@@ -191,8 +195,8 @@ public class TheiaCloudImpl implements TheiaCloud {
 	    workspaceResourceClient.list().getItems().forEach(this::initWorkspace);
 
 	    /* watch for changes */
-	    workspaceResourceClient.watch(new SpecWatch<Workspace>(workspaceCache,
-		    this::handleWorkspaceEvent, "Workspace", COR_ID_WORKSPACEPREFIX));
+	    workspaceResourceClient.watch(new SpecWatch<Workspace>(workspaceCache, this::handleWorkspaceEvent,
+		    "Workspace", COR_ID_WORKSPACEPREFIX));
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing workspace watch"), e);
 	    System.exit(-1);

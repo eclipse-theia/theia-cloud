@@ -46,9 +46,12 @@ kubectl apply -f k8s/operator-k8s-yaml/workspace-spec-resource.yaml
 # Then create the template
 kubectl apply -f demo/k8s/demo-k8s-yaml/theia-template-spec.yaml
 
-#Create a new namespace and switch to it
+# Create a new namespace and switch to it
 kubectl create namespace theiacloud
 kubectl config set-context --current --namespace=theiacloud
+
+# Create workspaces ingress
+kubectl apply -f demo/k8s/demo-k8s-yaml/theia-cloud-demo-ws-ingress.yaml
 
 # create service account for the workspace service
 kubectl create serviceaccount workspace-api-service-account -n theiacloud

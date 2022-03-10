@@ -14,28 +14,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.resource;
+package org.eclipse.theia.cloud.operator.handler.impl;
 
-import org.eclipse.theia.cloud.common.k8s.resource.util.K8sResourceUtil;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
+import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
-
-@Version("v4alpha")
-@Group("theia.cloud")
-@Singular("template")
-@Plural("templates")
-public class TemplateSpecResource extends CustomResource<TemplateSpec, Void> implements Namespaced {
-
-    private static final long serialVersionUID = 8749670583218521755L;
+public class IngressPathProviderImpl implements IngressPathProvider {
 
     @Override
-    public String toString() {
-	return K8sResourceUtil.customResourcetoString(this);
+    public String getPath(TemplateSpecResource template, int instance) {
+	return "/" + template.getSpec() + "-" + instance;
+    }
+
+    @Override
+    public String getPath(TemplateSpecResource template, Workspace workspace) {
+	return "/" + workspace.getMetadata().getUid();
     }
 
 }

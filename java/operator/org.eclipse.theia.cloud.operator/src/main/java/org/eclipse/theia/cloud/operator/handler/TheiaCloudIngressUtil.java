@@ -16,17 +16,29 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.operator.handler.impl.AddedHandler;
+import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
+import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
+import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 
 public final class TheiaCloudIngressUtil {
 
-    public static final String INGRESS_NAME_POSTFIX = "-ingress";
+    private static final Logger LOGGER = LogManager.getLogger(TheiaCloudIngressUtil.class);
 
     public static final String PLACEHOLDER_INGRESSNAME = "placeholder-ingressname";
     public static final String PLACEHOLDER_HOST = "placeholder-host";
@@ -34,25 +46,27 @@ public final class TheiaCloudIngressUtil {
     private TheiaCloudIngressUtil() {
     }
 
-    public static boolean hasExistingIngress(DefaultKubernetesClient client, String namespace,
-	    TemplateSpecResource template) {
-	return K8sUtil
-		.getExistingIngress(client, namespace, template.getMetadata().getName(),
-			template.getMetadata().getUid())//
-		.isPresent();
+    public static boolean checkForExistingIngressAndAddOwnerReferencesIfMissing(DefaultKubernetesClient client,
+	    String namespace, TemplateSpecResource template, String correlationId) {
+	Optional<Ingress> existingIngressWithParentTemplate = K8sUtil.getExistingIngress(client, namespace,
+		template.getMetadata().getName(), template.getMetadata().getUid());
+	if (existingIngressWithParentTemplate.isPresent()) {
+	    return true;
+	}
+	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, template.getSpec().getIngressname());
+	if (ingress.isPresent()) {
+	    OwnerReference ownerReference = new OwnerReference();
+	    ownerReference.setApiVersion(HasMetadata.getApiVersion(TemplateSpecResource.class));
+	    ownerReference.setKind(TemplateSpec.KIND);
+	    ownerReference.setName(template.getMetadata().getName());
+	    ownerReference.setUid(template.getMetadata().getUid());
+	    addOwnerReferenceToIngress(client, namespace, ingress.get(), ownerReference);
+	}
+	return ingress.isPresent();
     }
 
     public static String getIngressName(TemplateSpecResource template) {
-	return K8sUtil.validString(template.getSpec().getName() + INGRESS_NAME_POSTFIX);
-    }
-
-    public static String getHostName(TemplateSpecResource template, int instance) {
-	return template.getSpec().getName() + "." + instance + "." + template.getSpec().getHost();
-    }
-
-    public static String getHostName(TemplateSpecResource template, Workspace workspace) {
-	return workspace.getSpec().getName() + "." + workspace.getMetadata().getUid() + "."
-		+ template.getSpec().getHost();
+	return template.getSpec().getIngressname();
     }
 
     public static Map<String, String> getIngressReplacements(String namespace, TemplateSpecResource template) {
@@ -61,6 +75,44 @@ public final class TheiaCloudIngressUtil {
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(PLACEHOLDER_HOST, template.getSpec().getHost());
 	return replacements;
+    }
+
+    public static void addOwnerReferenceToIngress(DefaultKubernetesClient client, String namespace, Ingress ingress,
+	    OwnerReference ownerReference) {
+	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName())
+		.edit(ingressToEdit -> {
+		    ingressToEdit.getMetadata().getOwnerReferences().add(ownerReference);
+		    return ingressToEdit;
+		});
+    }
+
+    public static void removeIngressRule(DefaultKubernetesClient client, String namespace, Ingress ingress, String path,
+	    String correlationId) {
+	String ingressPath = path + AddedHandler.INGRESS_REWRITE_PATH;
+	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName())
+		.edit(ingressToEdit -> {
+		    IngressRule ruleToDelete = null;
+		    for (IngressRule rule : ingressToEdit.getSpec().getRules()) {
+			HTTPIngressRuleValue ingressRuleValue = rule.getHttp();
+			if (ingressRuleValue == null) {
+			    continue;
+			}
+			for (HTTPIngressPath httpIngressPath : ingressRuleValue.getPaths()) {
+			    if (ingressPath.equals(httpIngressPath.getPath())) {
+				ruleToDelete = rule;
+				break;
+			    } else {
+				LOGGER.trace(formatLogMessage(correlationId,
+					httpIngressPath.getPath() + " is NOT " + ingressPath));
+			    }
+			}
+		    }
+		    if (ruleToDelete != null) {
+			LOGGER.info(formatLogMessage(correlationId, "Removing ingress rule for path " + path));
+			ingressToEdit.getSpec().getRules().remove(ruleToDelete);
+		    }
+		    return ingressToEdit;
+		});
     }
 
 }

@@ -19,10 +19,12 @@ package org.eclipse.theia.cloud.operator.di;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.WorkspaceRemovedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.EagerStartTemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.EagerStartWorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartTemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartWorkspaceAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.impl.LazyStartWorkspaceRemovedHandler;
 
 public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorModule {
 
@@ -53,6 +55,15 @@ public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorM
 	    return EagerStartWorkspaceAddedHandler.class;
 	} else {
 	    return LazyStartWorkspaceAddedHandler.class;
+	}
+    }
+
+    @Override
+    protected Class<? extends WorkspaceRemovedHandler> bindWorkspaceRemovedHandler() {
+	if (arguments.isEagerStart()) {
+	    throw new UnsupportedOperationException("Not implemented yet");
+	} else {
+	    return LazyStartWorkspaceRemovedHandler.class;
 	}
     }
 
