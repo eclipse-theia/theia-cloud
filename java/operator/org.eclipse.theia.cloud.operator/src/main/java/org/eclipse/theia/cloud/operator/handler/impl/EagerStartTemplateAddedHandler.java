@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
+import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
@@ -57,11 +58,13 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
     public static final String LABEL_VALUE_PROXY = "proxy";
     public static final String LABEL_VALUE_EMAILS = "emails";
 
-    private TheiaCloudArguments arguments;
+    protected TheiaCloudArguments arguments;
+    protected IngressPathProvider ingressPathProvider;
 
     @Inject
-    public EagerStartTemplateAddedHandler(TheiaCloudArguments arguments) {
+    public EagerStartTemplateAddedHandler(TheiaCloudArguments arguments, IngressPathProvider ingressPathProvider) {
 	this.arguments = arguments;
+	this.ingressPathProvider = ingressPathProvider;
     }
 
     @Override
@@ -75,7 +78,8 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	int instances = spec.getInstances();
 
 	/* Create ingress if not existing */
-	if (!TheiaCloudIngressUtil.hasExistingIngress(client, namespace, template)) {
+	if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client, namespace, template,
+		correlationId)) {
 	    LOGGER.trace(formatLogMessage(correlationId, "No existing Ingress"));
 	    AddedHandler.createAndApplyIngress(client, namespace, correlationId, templateResourceName,
 		    templateResourceUID, template);
@@ -198,7 +202,7 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
 		TemplateSpec.API, TemplateSpec.KIND, templateResourceName, templateResourceUID, 0, configMap -> {
-		    String host = TheiaCloudIngressUtil.getHostName(template, instance);
+		    String host = template.getSpec().getHost() + ingressPathProvider.getPath(template, instance);
 		    int port = template.getSpec().getPort();
 		    AddedHandler.updateProxyConfigMap(client, namespace, configMap, host, port);
 		});

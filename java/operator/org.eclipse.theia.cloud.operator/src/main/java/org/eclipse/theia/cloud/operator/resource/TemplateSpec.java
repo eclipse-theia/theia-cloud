@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class TemplateSpec {
 
-    public static final String API = "theia.cloud/v3alpha";
+    public static final String API = "theia.cloud/v4alpha";
     public static final String KIND = "Template";
     public static final String CRD_NAME = "templates.theia.cloud";
 
@@ -40,6 +40,9 @@ public class TemplateSpec {
 
     @JsonProperty("host")
     private String host;
+
+    @JsonProperty("ingressname")
+    private String ingressname;
 
     public String getName() {
 	return name;
@@ -61,10 +64,14 @@ public class TemplateSpec {
 	return host;
     }
 
+    public String getIngressname() {
+	return ingressname;
+    }
+
     @Override
     public String toString() {
 	return "TemplateSpec [name=" + name + ", image=" + image + ", port=" + port + ", instances=" + instances
-		+ ", host=" + host + "]";
+		+ ", host=" + host + ", ingressname=" + ingressname + "]";
     }
 
 }

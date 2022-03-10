@@ -11,9 +11,31 @@ spec:
     singular: template
   scope: Namespaced
   versions:
-    - name : v3alpha
+    - name : v4alpha
       served: true
       storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                port:
+                  type: integer
+                instances:
+                  type: integer
+                host:
+                  type: string
+                ingressname:
+                  type: string
+    - name : v3alpha
+      served: false
+      storage: false
       schema:
         openAPIV3Schema:
           type: object

@@ -70,6 +70,13 @@ public final class K8sUtil {
     }
 
     public static Optional<Ingress> getExistingIngress(DefaultKubernetesClient client, String namespace,
+	    String ingressName) {
+	return client.network().v1().ingresses().inNamespace(namespace).list().getItems().stream()//
+		.filter(ingress -> ingressName.equals(ingress.getMetadata().getName()))//
+		.findAny();
+    }
+
+    public static Optional<Ingress> getExistingIngress(DefaultKubernetesClient client, String namespace,
 	    String ownerName, String ownerUid) {
 	return getExistingTypesStream(client, namespace, ownerName, ownerUid,
 		client.network().v1().ingresses().list().getItems())//

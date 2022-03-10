@@ -4,7 +4,7 @@ metadata:
   name: placeholder-depname
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v3alpha
+    - apiVersion: theia.cloud/v4alpha
       kind: Template
       name: placeholder
       uid: placeholder
@@ -24,7 +24,3 @@ spec:
           image: placeholder-image
           ports:
             - containerPort: placeholder-port
-      securityContext:
-        runAsUser: 1001
-        runAsGroup: 1001
-        fsGroup: 1001

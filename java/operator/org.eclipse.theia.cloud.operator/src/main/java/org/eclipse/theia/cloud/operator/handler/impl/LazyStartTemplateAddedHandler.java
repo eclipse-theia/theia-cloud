@@ -41,7 +41,8 @@ public class LazyStartTemplateAddedHandler implements TemplateAddedHandler {
 	String templateResourceUID = template.getMetadata().getUid();
 
 	/* Create ingress if not existing */
-	if (!TheiaCloudIngressUtil.hasExistingIngress(client, namespace, template)) {
+	if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client, namespace, template,
+		correlationId)) {
 	    LOGGER.trace(formatLogMessage(correlationId, "No existing Ingress"));
 	    AddedHandler.createAndApplyIngress(client, namespace, correlationId, templateResourceName,
 		    templateResourceUID, template);

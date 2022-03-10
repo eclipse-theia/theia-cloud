@@ -3,7 +3,7 @@ RUN apt-get update && apt-get install -y libxkbfile-dev libsecret-1-dev
 WORKDIR /home/theia
 ADD package.json ./package.json
 RUN yarn --pure-lockfile && \
-    NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
+    NODE_OPTIONS="--max_old_space_size=4096" yarn theia build --mode development && \
     yarn theia download:plugins && \
     yarn --production && \
     yarn autoclean --init && \

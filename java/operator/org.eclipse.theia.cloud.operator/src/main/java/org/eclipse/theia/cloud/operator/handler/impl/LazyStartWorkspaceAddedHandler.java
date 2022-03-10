@@ -30,12 +30,12 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
+import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
-import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudPersistentVolumeUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
@@ -63,12 +63,14 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
     private static final Logger LOGGER = LogManager.getLogger(LazyStartWorkspaceAddedHandler.class);
 
     protected PersistentVolumeHandler persistentVolumeHandler;
+    protected IngressPathProvider ingressPathProvider;
     protected TheiaCloudArguments arguments;
 
     @Inject
     public LazyStartWorkspaceAddedHandler(PersistentVolumeHandler persistentVolumeHandler,
-	    TheiaCloudArguments arguments) {
+	    IngressPathProvider ingressPathProvider, TheiaCloudArguments arguments) {
 	this.persistentVolumeHandler = persistentVolumeHandler;
+	this.ingressPathProvider = ingressPathProvider;
 	this.arguments = arguments;
     }
 
@@ -168,7 +170,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
 	/* Update workspace resource */
 	try {
-	    AddedHandler.updateWorkspaceURL(client, workspace, namespace, host);
+	    AddedHandler.updateWorkspaceURLAsync(client, workspace, namespace, host, correlationId);
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing workspace " + workspace.getMetadata().getName()), e);
@@ -231,7 +233,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
 		WorkspaceSpec.API, WorkspaceSpec.KIND, workspaceResourceName, workspaceResourceUID, 0, configMap -> {
-		    String host = TheiaCloudIngressUtil.getHostName(template, workspace);
+		    String host = template.getSpec().getHost() + ingressPathProvider.getPath(template, workspace);
 		    int port = template.getSpec().getPort();
 		    AddedHandler.updateProxyConfigMap(client, namespace, configMap, host, port);
 		});
@@ -262,7 +264,8 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
     protected synchronized String updateIngress(DefaultKubernetesClient client, String namespace,
 	    Optional<Ingress> ingress, Optional<Service> serviceToUse, Workspace workspace,
 	    TemplateSpecResource template) {
-	String host = TheiaCloudIngressUtil.getHostName(template, workspace);
+	String host = template.getSpec().getHost();
+	String path = ingressPathProvider.getPath(template, workspace);
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.get().getMetadata().getName())
 		.edit(ingressToUpdate -> {
 		    IngressRule ingressRule = new IngressRule();
@@ -275,7 +278,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
 		    HTTPIngressPath httpIngressPath = new HTTPIngressPath();
 		    http.getPaths().add(httpIngressPath);
-		    httpIngressPath.setPath("/");
+		    httpIngressPath.setPath(path + AddedHandler.INGRESS_REWRITE_PATH);
 		    httpIngressPath.setPathType("Prefix");
 
 		    IngressBackend ingressBackend = new IngressBackend();
@@ -291,7 +294,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
 		    return ingressToUpdate;
 		});
-	return host;
+	return host + path + "/";
     }
 
 }

@@ -19,9 +19,13 @@ package org.eclipse.theia.cloud.operator.handler.impl;
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,6 +44,8 @@ public final class AddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(AddedHandler.class);
 
+    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+
     public static final String TEMPLATE_INGRESS_YAML = "/templateIngress.yaml";
     public static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     public static final String TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML = "/templateServiceWithoutOAuthProxy.yaml";
@@ -57,6 +63,8 @@ public final class AddedHandler {
 
     public static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
 
+    public static final String INGRESS_REWRITE_PATH = "(/|$)(.*)";
+
     private AddedHandler() {
     }
 
@@ -68,7 +76,6 @@ public final class AddedHandler {
 	    ingressYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(AddedHandler.class, TEMPLATE_INGRESS_YAML,
 		    replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for ingress."), e);
 	    return;
 	}
 	K8sUtil.loadAndCreateIngressWithOwnerReference(client, namespace, correlationId, ingressYaml, TemplateSpec.API,
@@ -86,14 +93,52 @@ public final class AddedHandler {
 	configMap.setData(data);
     }
 
-    public static void updateWorkspaceURL(DefaultKubernetesClient client, Workspace workspace, String namespace,
-	    String host) {
-	client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
-		.withName(workspace.getMetadata().getName())//
-		.edit(ws -> {
-		    ws.getSpec().setUrl(host);
-		    return ws;
-		});
+    public static void updateWorkspaceURLAsync(DefaultKubernetesClient client, Workspace workspace, String namespace,
+	    String url, String correlationId) {
+	EXECUTOR.execute(() -> {
+	    for (int i = 1; i <= 60; i++) {
+		try {
+		    Thread.sleep(i * 1000);
+		} catch (InterruptedException e) {
+		    /* silent */
+		}
+
+		HttpURLConnection connection;
+		try {
+		    connection = (HttpURLConnection) new URL("https://" + url).openConnection();
+		} catch (IOException e) {
+		    LOGGER.error(formatLogMessage(correlationId, "Error while checking workspace availability."), e);
+		    continue;
+		}
+		int code;
+
+		try {
+		    connection.connect();
+		    code = connection.getResponseCode();
+		} catch (IOException e) {
+		    LOGGER.trace(formatLogMessage(correlationId, url + " is NOT available yet."));
+		    break;
+		}
+
+		LOGGER.trace(formatLogMessage(correlationId, url + " has response code " + code));
+
+		if (code == 200) {
+		    LOGGER.info(formatLogMessage(correlationId, url + " is available."));
+		    client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
+			    .withName(workspace.getMetadata().getName())//
+			    .edit(ws -> {
+				ws.getSpec().setUrl(url);
+				return ws;
+			    });
+		    break;
+		} else {
+		    LOGGER.trace(formatLogMessage(correlationId, url + " is NOT available yet."));
+		}
+
+	    }
+
+	});
+
     }
 
 }
