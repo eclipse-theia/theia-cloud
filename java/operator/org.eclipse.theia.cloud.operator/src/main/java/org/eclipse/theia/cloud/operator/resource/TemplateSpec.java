@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class TemplateSpec {
 
-    public static final String API = "theia.cloud/v4alpha";
+    public static final String API = "theia.cloud/v5alpha";
     public static final String KIND = "Template";
     public static final String CRD_NAME = "templates.theia.cloud";
 
@@ -35,14 +35,32 @@ public class TemplateSpec {
     @JsonProperty("port")
     private int port;
 
-    @JsonProperty("instances")
-    private int instances;
-
     @JsonProperty("host")
     private String host;
 
     @JsonProperty("ingressname")
     private String ingressname;
+
+    @JsonProperty("minInstances")
+    private int minInstances;
+
+    @JsonProperty("maxInstances")
+    private int maxInstances;
+
+    @JsonProperty("killAfter")
+    private int killAfter;
+
+    @JsonProperty("requestsMemory")
+    private String requestsMemory;
+
+    @JsonProperty("requestsCpu")
+    private String requestsCpu;
+
+    @JsonProperty("limitsMemory")
+    private String limitsMemory;
+
+    @JsonProperty("limitsCpu")
+    private String limitsCpu;
 
     public String getName() {
 	return name;
@@ -56,10 +74,6 @@ public class TemplateSpec {
 	return port;
     }
 
-    public int getInstances() {
-	return instances;
-    }
-
     public String getHost() {
 	return host;
     }
@@ -68,10 +82,40 @@ public class TemplateSpec {
 	return ingressname;
     }
 
+    public int getMinInstances() {
+	return minInstances;
+    }
+
+    public int getMaxInstances() {
+	return maxInstances;
+    }
+
+    public int getKillAfter() {
+	return killAfter;
+    }
+
+    public String getRequestsMemory() {
+	return requestsMemory;
+    }
+
+    public String getRequestsCpu() {
+	return requestsCpu;
+    }
+
+    public String getLimitsMemory() {
+	return limitsMemory;
+    }
+
+    public String getLimitsCpu() {
+	return limitsCpu;
+    }
+
     @Override
     public String toString() {
-	return "TemplateSpec [name=" + name + ", image=" + image + ", port=" + port + ", instances=" + instances
-		+ ", host=" + host + ", ingressname=" + ingressname + "]";
+	return "TemplateSpec [name=" + name + ", image=" + image + ", port=" + port + ", host=" + host
+		+ ", ingressname=" + ingressname + ", minInstances=" + minInstances + ", maxInstances=" + maxInstances
+		+ ", killAfter=" + killAfter + ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu
+		+ ", limitsMemory=" + limitsMemory + ", limitsCpu=" + limitsCpu + "]";
     }
 
 }
