@@ -75,7 +75,7 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 
 	String templateResourceName = template.getMetadata().getName();
 	String templateResourceUID = template.getMetadata().getUid();
-	int instances = spec.getInstances();
+	int instances = spec.getMinInstances();
 
 	/* Create ingress if not existing */
 	if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client, namespace, template,

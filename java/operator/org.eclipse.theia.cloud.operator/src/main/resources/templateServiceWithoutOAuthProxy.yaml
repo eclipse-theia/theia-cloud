@@ -6,7 +6,7 @@ metadata:
     app: placeholder-app
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v4alpha
+    - apiVersion: theia.cloud/v5alpha
       kind: Template
       name: placeholder
       uid: placeholder
