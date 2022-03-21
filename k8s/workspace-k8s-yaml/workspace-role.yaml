@@ -10,7 +10,7 @@ rules:
       - theia.cloud
     resources:
       - workspaces
-    verbs: ["get", "create", "watch"]
+    verbs: ["get", "create", "watch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

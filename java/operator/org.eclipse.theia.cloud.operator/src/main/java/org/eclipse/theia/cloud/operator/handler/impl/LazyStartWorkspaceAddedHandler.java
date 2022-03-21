@@ -36,6 +36,7 @@ import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
+import org.eclipse.theia.cloud.operator.handler.TheiaCloudK8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudPersistentVolumeUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
@@ -87,6 +88,16 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 		namespace, templateID);
 	if (optionalTemplate.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No Template with name " + templateID + " found."));
+	    return false;
+	}
+
+	/* check if max instances reached already */
+	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client, namespace, workspaceSpec,
+		optionalTemplate.get().getSpec(), correlationId)) {
+	    LOGGER.info(formatLogMessage(correlationId,
+		    "Max instances for " + templateID + " reached. Cannot create " + workspaceSpec));
+	    AddedHandler.updateWorkspaceError(client, workspace, namespace,
+		    "Max instances reached. Could not create workspace", correlationId);
 	    return false;
 	}
 

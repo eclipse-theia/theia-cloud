@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class WorkspaceSpec {
 
-    public static final String API = "theia.cloud/v1alpha";
+    public static final String API = "theia.cloud/v2alpha";
     public static final String KIND = "Workspace";
     public static final String CRD_NAME = "workspaces.theia.cloud";
 
@@ -37,6 +37,9 @@ public class WorkspaceSpec {
 
     @JsonProperty("url")
     private String url;
+
+    @JsonProperty("error")
+    private String error;
 
     public WorkspaceSpec() {
     }
@@ -67,9 +70,18 @@ public class WorkspaceSpec {
 	this.url = url;
     }
 
+    public String getError() {
+	return error;
+    }
+
+    public void setError(String error) {
+	this.error = error;
+    }
+
     @Override
     public String toString() {
-	return "WorkspaceSpec [name=" + name + ", template=" + template + ", user=" + user + ", url=" + url + "]";
+	return "WorkspaceSpec [name=" + name + ", template=" + template + ", user=" + user + ", url=" + url + ", error="
+		+ error + "]";
     }
 
 }

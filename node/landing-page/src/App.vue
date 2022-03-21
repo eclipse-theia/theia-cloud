@@ -1,6 +1,6 @@
 <template>
   <img alt="Theia logo" src="./assets/logo.png" />
-  <WorkspaceLancher
+  <WorkspaceLauncher
     :workspaceServiceUrl="workspaceServiceUrl"
     :workspaceTemplate="workspaceTemplate"
     :email="email"
@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import WorkspaceLancher from "./components/WorkspaceLancher.vue";
+import WorkspaceLauncher from "./components/WorkspaceLauncher.vue";
 import Keycloak, { KeycloakConfig } from "keycloak-js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -30,7 +30,7 @@ export default defineComponent({
     workspaceTemplate: String,
   },
   components: {
-    WorkspaceLancher,
+    WorkspaceLauncher,
   },
   data() {
     return {

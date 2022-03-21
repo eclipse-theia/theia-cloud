@@ -93,6 +93,16 @@ public final class AddedHandler {
 	configMap.setData(data);
     }
 
+    public static void updateWorkspaceError(DefaultKubernetesClient client, Workspace workspace, String namespace,
+	    String error, String correlationId) {
+	client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
+		.withName(workspace.getMetadata().getName())//
+		.edit(ws -> {
+		    ws.getSpec().setError(error);
+		    return ws;
+		});
+    }
+
     public static void updateWorkspaceURLAsync(DefaultKubernetesClient client, Workspace workspace, String namespace,
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {
