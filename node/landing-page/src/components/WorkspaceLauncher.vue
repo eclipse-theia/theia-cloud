@@ -1,6 +1,6 @@
 <template>
-  <div>Please wait while we get your workspace ready.</div>
-  <div class="loader"></div>
+  <div>{{ text }}</div>
+  <div class="loader" v-if="showSpinner"></div>
 </template>
 
 <script lang="ts">
@@ -8,7 +8,7 @@ import { defineComponent } from "vue";
 import axios from "axios";
 
 export default defineComponent({
-  name: "WorkspaceLancher",
+  name: "WorkspaceLauncher",
   props: {
     workspaceServiceUrl: String,
     workspaceTemplate: String,
@@ -19,6 +19,12 @@ export default defineComponent({
     if (this.email) {
       this.startWorkspace();
     }
+  },
+  data() {
+    return {
+      text: "Please wait while we get your Theia workspace ready...",
+      showSpinner: true,
+    };
   },
   watch: {
     email() {
@@ -40,6 +46,8 @@ export default defineComponent({
           if (response.data.success) {
             location.replace("https://" + response.data.url);
           } else {
+            this.text = response.data.error;
+            this.showSpinner = false;
             console.error(response.data.error);
           }
         });

@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v1alpha
+apiVersion: theia.cloud/v2alpha
 kind: Workspace
 metadata:
   name: coffee-workspace-2
