@@ -24,3 +24,10 @@ spec:
           image: placeholder-image
           ports:
             - containerPort: placeholder-port
+          resources:
+            limits:
+              cpu: placeholder-cpu-limits
+              memory: placeholder-memory-limits
+            requests:
+              cpu: placeholder-cpu-requests
+              memory: placeholder-memory-requests

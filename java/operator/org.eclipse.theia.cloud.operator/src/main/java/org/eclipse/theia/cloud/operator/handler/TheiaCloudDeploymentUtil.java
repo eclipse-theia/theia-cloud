@@ -39,6 +39,10 @@ public final class TheiaCloudDeploymentUtil {
     public static final String PLACEHOLDER_DEPLOYMENTNAME = "placeholder-depname";
     public static final String PLACEHOLDER_TEMPLATENAME = "placeholder-templatename";
     public static final String PLACEHOLDER_IMAGE = "placeholder-image";
+    public static final String PLACEHOLDER_CPU_LIMITS = "placeholder-cpu-limits";
+    public static final String PLACEHOLDER_MEMORY_LIMITS = "placeholder-memory-limits";
+    public static final String PLACEHOLDER_CPU_REQUESTS = "placeholder-cpu-requests";
+    public static final String PLACEHOLDER_MEMORY_REQUESTS = "placeholder-memory-requests";
 
     private TheiaCloudDeploymentUtil() {
     }
@@ -91,6 +95,10 @@ public final class TheiaCloudDeploymentUtil {
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
 		TheiaCloudConfigMapUtil.getEmailConfigName(template, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
+	replacements.put(PLACEHOLDER_CPU_LIMITS, template.getSpec().getLimitsCpu());
+	replacements.put(PLACEHOLDER_MEMORY_LIMITS, template.getSpec().getLimitsMemory());
+	replacements.put(PLACEHOLDER_CPU_REQUESTS, template.getSpec().getRequestsCpu());
+	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, template.getSpec().getRequestsMemory());
 	return replacements;
     }
 
@@ -107,6 +115,10 @@ public final class TheiaCloudDeploymentUtil {
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
 		TheiaCloudConfigMapUtil.getEmailConfigName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
+	replacements.put(PLACEHOLDER_CPU_LIMITS, template.getSpec().getLimitsCpu());
+	replacements.put(PLACEHOLDER_MEMORY_LIMITS, template.getSpec().getLimitsMemory());
+	replacements.put(PLACEHOLDER_CPU_REQUESTS, template.getSpec().getRequestsCpu());
+	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, template.getSpec().getRequestsMemory());
 	return replacements;
     }
 
