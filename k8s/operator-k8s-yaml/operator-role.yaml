@@ -21,7 +21,7 @@ rules:
       - services
       - configmaps
       - deployments
-    verbs: ["list", "create", "watch", "get", "patch"]
+    verbs: ["list", "create", "watch", "get", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
