@@ -20,6 +20,9 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +44,8 @@ import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class TheiaCloudImpl implements TheiaCloud {
+
+    private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudImpl.class);
 
@@ -78,6 +83,9 @@ public class TheiaCloudImpl implements TheiaCloud {
     public void start() {
 	initTemplatesAndWatchForChanges();
 	initWorkspacesAndWatchForChanges();
+
+	EXECUTOR.scheduleWithFixedDelay(new KillAfterRunnable(templateResourceClient, workspaceResourceClient), 1, 1,
+		TimeUnit.MINUTES);
     }
 
     private void handleTemplateEvent(Watcher.Action action, String uid, String correlationId) {
