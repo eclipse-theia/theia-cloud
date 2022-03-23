@@ -14,28 +14,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.resource;
+package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.common.k8s.resource.util.K8sResourceUtil;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
+public interface BandwidthLimiter {
 
-@Version("v6alpha")
-@Group("theia.cloud")
-@Singular("template")
-@Plural("templates")
-public class TemplateSpecResource extends CustomResource<TemplateSpec, Void> implements Namespaced {
-
-    private static final long serialVersionUID = 8749670583218521755L;
-
-    @Override
-    public String toString() {
-	return K8sResourceUtil.customResourcetoString(this);
-    }
+    void limit(Deployment deployment, int downlinkLimit, int uplinkLimit, String correlationId);
 
 }

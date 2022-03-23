@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
+import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
@@ -60,11 +61,14 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 
     protected TheiaCloudArguments arguments;
     protected IngressPathProvider ingressPathProvider;
+    protected BandwidthLimiter bandwidthLimiter;
 
     @Inject
-    public EagerStartTemplateAddedHandler(TheiaCloudArguments arguments, IngressPathProvider ingressPathProvider) {
+    public EagerStartTemplateAddedHandler(TheiaCloudArguments arguments, IngressPathProvider ingressPathProvider,
+	    BandwidthLimiter bandwidthLimiter) {
 	this.arguments = arguments;
 	this.ingressPathProvider = ingressPathProvider;
+	this.bandwidthLimiter = bandwidthLimiter;
     }
 
     @Override
@@ -183,6 +187,8 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
 		TemplateSpec.API, TemplateSpec.KIND, templateResourceName, templateResourceUID, 0, deployment -> {
+		    bandwidthLimiter.limit(deployment, template.getSpec().getDownlinkLimit(),
+			    template.getSpec().getUplinkLimit(), correlationId);
 		});
     }
 

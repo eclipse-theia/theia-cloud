@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v5alpha
+apiVersion: theia.cloud/v6alpha
 kind: Template
 metadata:
   name: theia-cloud-demo
@@ -15,3 +15,5 @@ spec:
   requestsCpu: 100m
   limitsMemory: 2000M
   limitsCpu: 200m
+  downlinkLimit: 2000
+  uplinkLimit: 2000

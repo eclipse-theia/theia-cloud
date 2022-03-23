@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class TemplateSpec {
 
-    public static final String API = "theia.cloud/v5alpha";
+    public static final String API = "theia.cloud/v6alpha";
     public static final String KIND = "Template";
     public static final String CRD_NAME = "templates.theia.cloud";
 
@@ -61,6 +61,12 @@ public class TemplateSpec {
 
     @JsonProperty("limitsCpu")
     private String limitsCpu;
+
+    @JsonProperty("downlinkLimit")
+    private int downlinkLimit;// kilobits per second
+
+    @JsonProperty("uplinkLimit")
+    private int uplinkLimit;// kilobits per second
 
     public String getName() {
 	return name;
@@ -110,12 +116,21 @@ public class TemplateSpec {
 	return limitsCpu;
     }
 
+    public int getDownlinkLimit() {
+	return downlinkLimit;
+    }
+
+    public int getUplinkLimit() {
+	return uplinkLimit;
+    }
+
     @Override
     public String toString() {
 	return "TemplateSpec [name=" + name + ", image=" + image + ", port=" + port + ", host=" + host
 		+ ", ingressname=" + ingressname + ", minInstances=" + minInstances + ", maxInstances=" + maxInstances
 		+ ", killAfter=" + killAfter + ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu
-		+ ", limitsMemory=" + limitsMemory + ", limitsCpu=" + limitsCpu + "]";
+		+ ", limitsMemory=" + limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit
+		+ ", uplinkLimit=" + uplinkLimit + "]";
     }
 
 }

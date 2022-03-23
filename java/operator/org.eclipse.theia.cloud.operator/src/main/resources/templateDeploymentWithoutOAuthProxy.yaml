@@ -4,7 +4,7 @@ metadata:
   name: placeholder-depname
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v5alpha
+    - apiVersion: theia.cloud/v6alpha
       kind: Template
       name: placeholder
       uid: placeholder
@@ -19,6 +19,13 @@ spec:
         app: placeholder-app
     spec:
       automountServiceAccountToken: false
+      # initContainers:
+      # - name: wondershaper-init
+      #   image: gcr.io/kubernetes-238012/theia-cloud-wondershaper
+      #   securityContext:
+      #     capabilities:
+      #       add:
+      #       - NET_ADMIN
       containers:
         - name: placeholder-templatename
           image: placeholder-image
