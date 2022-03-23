@@ -24,6 +24,10 @@ public class TheiaCloudArguments {
 	GKE
     }
 
+    public enum BandwidthLimiter {
+	K8SANNOTATION, WONDERSHAPER, K8SANNOTATIONANDWONDERSHAPER
+    }
+
     @Option(names = { "--keycloak" }, description = "Whether to use keycloak", required = false)
     private boolean useKeycloak;
 
@@ -37,6 +41,10 @@ public class TheiaCloudArguments {
     @Option(names = {
 	    "--cloudProvider" }, description = "The cloud provider where Theia.Cloud is deployed", required = false)
     private CloudProvider cloudProvider;
+
+    @Option(names = {
+	    "--bandwidthLimiter" }, description = "The method of limiting network bandwidth", required = false)
+    private BandwidthLimiter bandwidthLimiter;
 
     public boolean isUseKeycloak() {
 	return useKeycloak;
@@ -54,10 +62,15 @@ public class TheiaCloudArguments {
 	return cloudProvider;
     }
 
+    public BandwidthLimiter getBandwidthLimiter() {
+	return bandwidthLimiter;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
 	int result = 1;
+	result = prime * result + ((bandwidthLimiter == null) ? 0 : bandwidthLimiter.hashCode());
 	result = prime * result + ((cloudProvider == null) ? 0 : cloudProvider.hashCode());
 	result = prime * result + (eagerStart ? 1231 : 1237);
 	result = prime * result + (ephemeralStorage ? 1231 : 1237);
@@ -74,6 +87,8 @@ public class TheiaCloudArguments {
 	if (getClass() != obj.getClass())
 	    return false;
 	TheiaCloudArguments other = (TheiaCloudArguments) obj;
+	if (bandwidthLimiter != other.bandwidthLimiter)
+	    return false;
 	if (cloudProvider != other.cloudProvider)
 	    return false;
 	if (eagerStart != other.eagerStart)
@@ -88,7 +103,8 @@ public class TheiaCloudArguments {
     @Override
     public String toString() {
 	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", ephemeralStorage="
-		+ ephemeralStorage + ", cloudProvider=" + cloudProvider + "]";
+		+ ephemeralStorage + ", cloudProvider=" + cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter
+		+ "]";
     }
 
 }

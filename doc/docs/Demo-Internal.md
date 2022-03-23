@@ -2,6 +2,14 @@
 
 ## Docker
 
+Build and push the wondershaper init-container with:
+
+```bash
+docker build -t theia-cloud-wondershaper -f dockerfiles/wondershaper/Dockerfile .
+docker tag theia-cloud-wondershaper:latest gcr.io/kubernetes-238012/theia-cloud-wondershaper:latest
+docker push gcr.io/kubernetes-238012/theia-cloud-wondershaper:latest
+```
+
 Build and push the Theia Demo application with:
 
 ```bash

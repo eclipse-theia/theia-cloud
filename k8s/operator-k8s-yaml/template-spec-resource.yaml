@@ -11,9 +11,47 @@ spec:
     singular: template
   scope: Namespaced
   versions:
-    - name : v5alpha
+    - name : v6alpha
       served: true
       storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                port:
+                  type: integer
+                host:
+                  type: string
+                ingressname:
+                  type: string
+                minInstances:
+                  type: integer
+                maxInstances:
+                  type: integer
+                killAfter:
+                  type: integer
+                requestsMemory:
+                  type: string
+                requestsCpu:
+                  type: string
+                limitsMemory:
+                  type: string
+                limitsCpu:
+                  type: string
+                downlinkLimit:
+                  type: integer
+                uplinkLimit:
+                  type: integer
+    - name : v5alpha
+      served: false
+      storage: false
       schema:
         openAPIV3Schema:
           type: object

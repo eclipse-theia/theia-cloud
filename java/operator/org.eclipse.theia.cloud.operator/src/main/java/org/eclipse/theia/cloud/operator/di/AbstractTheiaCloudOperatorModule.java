@@ -16,11 +16,13 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.di;
 
+import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceRemovedHandler;
+import org.eclipse.theia.cloud.operator.handler.impl.BandwidthLimiterImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.GKEPersistentVolumeHandlerImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.IngressPathProviderImpl;
 
@@ -31,12 +33,17 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
     @Override
     protected void configure() {
+	bind(BandwidthLimiter.class).to(bindBandwidthLimiter()).in(Singleton.class);
 	bind(PersistentVolumeHandler.class).to(bindPersistentVolumeHandler()).in(Singleton.class);
 	bind(IngressPathProvider.class).to(bindIngressPathProvider()).in(Singleton.class);
 	bind(TemplateAddedHandler.class).to(bindTemplateAddedHandler()).in(Singleton.class);
 	bind(WorkspaceAddedHandler.class).to(bindWorkspaceAddedHandler()).in(Singleton.class);
 	bind(WorkspaceRemovedHandler.class).to(bindWorkspaceRemovedHandler()).in(Singleton.class);
 
+    }
+
+    protected Class<? extends BandwidthLimiter> bindBandwidthLimiter() {
+	return BandwidthLimiterImpl.class;
     }
 
     protected Class<? extends PersistentVolumeHandler> bindPersistentVolumeHandler() {

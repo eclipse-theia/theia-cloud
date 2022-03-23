@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
+import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
@@ -66,13 +67,15 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
     protected PersistentVolumeHandler persistentVolumeHandler;
     protected IngressPathProvider ingressPathProvider;
     protected TheiaCloudArguments arguments;
+    protected BandwidthLimiter bandwidthLimiter;
 
     @Inject
     public LazyStartWorkspaceAddedHandler(PersistentVolumeHandler persistentVolumeHandler,
-	    IngressPathProvider ingressPathProvider, TheiaCloudArguments arguments) {
+	    IngressPathProvider ingressPathProvider, TheiaCloudArguments arguments, BandwidthLimiter bandwidthLimiter) {
 	this.persistentVolumeHandler = persistentVolumeHandler;
 	this.ingressPathProvider = ingressPathProvider;
 	this.arguments = arguments;
+	this.bandwidthLimiter = bandwidthLimiter;
     }
 
     @Override
@@ -269,6 +272,8 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
 		WorkspaceSpec.API, WorkspaceSpec.KIND, workspaceResourceName, workspaceResourceUID, 0, deployment -> {
 		    pvName.ifPresent(name -> persistentVolumeHandler.addVolumeClaim(deployment, name));
+		    bandwidthLimiter.limit(deployment, template.getSpec().getDownlinkLimit(),
+			    template.getSpec().getUplinkLimit(), correlationId);
 		});
     }
 
