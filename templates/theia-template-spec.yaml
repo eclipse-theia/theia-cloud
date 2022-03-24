@@ -1,0 +1,19 @@
+apiVersion: theia.cloud/v6alpha
+kind: Template
+metadata:
+  name: theia-cloud-demo
+spec:
+  name: theia-cloud-demo
+  image: eu.gcr.io/kubernetes-238012/theia-cloud-demo
+  port: 3000
+  host: {{ .Values.hosts.instance }}
+  ingressname: theia-cloud-demo-ws-ingress
+  minInstances: 0
+  maxInstances: 3
+  killAfter: 10
+  requestsMemory: 1200M
+  limitsMemory: 2000M
+  requestsCpu: "0.5"
+  limitsCpu: "1"
+  downlinkLimit: 10000
+  uplinkLimit: 10000

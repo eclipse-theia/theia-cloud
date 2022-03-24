@@ -1,0 +1,162 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: templates.theia.cloud
+spec:
+  group: theia.cloud
+  names:
+    kind: Template
+    listKind: TemplateList
+    plural: templates
+    singular: template
+  scope: Namespaced
+  versions:
+    - name : v6alpha
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                port:
+                  type: integer
+                host:
+                  type: string
+                ingressname:
+                  type: string
+                minInstances:
+                  type: integer
+                maxInstances:
+                  type: integer
+                killAfter:
+                  type: integer
+                requestsMemory:
+                  type: string
+                requestsCpu:
+                  type: string
+                limitsMemory:
+                  type: string
+                limitsCpu:
+                  type: string
+                downlinkLimit:
+                  type: integer
+                uplinkLimit:
+                  type: integer
+    - name : v5alpha
+      served: false
+      storage: false
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                port:
+                  type: integer
+                host:
+                  type: string
+                ingressname:
+                  type: string
+                minInstances:
+                  type: integer
+                maxInstances:
+                  type: integer
+                killAfter:
+                  type: integer
+                requestsMemory:
+                  type: string
+                requestsCpu:
+                  type: string
+                limitsMemory:
+                  type: string
+                limitsCpu:
+                  type: string
+    - name : v4alpha
+      served: false
+      storage: false
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                port:
+                  type: integer
+                instances:
+                  type: integer
+                host:
+                  type: string
+                ingressname:
+                  type: string
+    - name : v3alpha
+      served: false
+      storage: false
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                port:
+                  type: integer
+                instances:
+                  type: integer
+                host:
+                  type: string
+    - name : v2alpha
+      served: false
+      storage: false
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                instances:
+                  type: integer
+                host:
+                  type: string
+    - name : v1alpha
+      served: false
+      storage: false
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                instances:
+                  type: integer
+                  
