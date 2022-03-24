@@ -189,6 +189,7 @@ public class EagerStartTemplateAddedHandler implements TemplateAddedHandler {
 		TemplateSpec.API, TemplateSpec.KIND, templateResourceName, templateResourceUID, 0, deployment -> {
 		    bandwidthLimiter.limit(deployment, template.getSpec().getDownlinkLimit(),
 			    template.getSpec().getUplinkLimit(), correlationId);
+		    AddedHandler.removeEmptyResources(deployment);
 		});
     }
 

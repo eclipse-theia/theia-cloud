@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: operator-deployment
+  labels:
+    app: operator
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: operator
+  template:
+    metadata:
+      labels:
+        app: operator
+    spec:
+      # we need to be able to create and read operators
+      automountServiceAccountToken: true
+      serviceAccountName: operator-api-service-account
+      containers:
+      - name: operator-container
+        image: {{ .Values.operator.image }}
+        args:
+          {{ if .Values.keycloak.enable }}- "--keycloak"{{ end }}
+          {{ if .Values.operator.eagerStart }}- "--eagerStart"{{ end }}
+          {{ if .Values.operator.ephemeralStorage }}- "--ephemeralStorage"{{ end }}
+          - "--cloudProvider"
+          - {{ .Values.operator.cloudProvider }}
+          - "--bandwidthLimiter"
+          - {{ .Values.operator.bandwidthLimiter }}

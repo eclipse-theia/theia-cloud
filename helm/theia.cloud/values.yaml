@@ -1,0 +1,25 @@
+appId: asdfghjkl
+
+issuer:
+  email: mmorlock@example.com
+
+hosts:
+  workspace: workspace.192.168.39.173.nip.io
+  landing: theia.cloud.192.168.39.173.nip.io
+  instance: ws.192.168.39.173.nip.io
+
+landingPage:
+  template: "theia-cloud-demo"
+
+keycloak:
+  enable: false
+  authUrl: "https://keycloak.url/auth/"
+  realm: "TheiaCloud"
+  clientId: "theia-cloud"
+
+operator:
+  image: eu.gcr.io/kubernetes-238012/theia-cloud-operator
+  eagerStart: false
+  ephemeralStorage: true
+  cloudProvider: "K8S"
+  bandwidthLimiter: "K8SANNOTATION"

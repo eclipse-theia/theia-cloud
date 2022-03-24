@@ -76,6 +76,7 @@ public final class K8sUtil {
 
 	String createSpecName;
 	Resource<Workspace> existingWorkspace = workspaces.withName(name);
+	WorkspaceSpec existingWorkspaceSpec = null;
 	if (existingWorkspace.get() == null) {
 	    Workspace workspaceSpecResource = new Workspace();
 
@@ -90,38 +91,55 @@ public final class K8sUtil {
 	    createSpecName = created.getSpec().getName();
 	} else {
 	    createSpecName = existingWorkspace.get().getSpec().getName();
+	    existingWorkspaceSpec = existingWorkspace.get().getSpec();
 	}
 
 	AtomicReference<String> atomicReferenceURL = new AtomicReference<String>(null);
 	AtomicReference<String> atomicReferenceError = new AtomicReference<String>(null);
 	CountDownLatch latch = new CountDownLatch(1);
 
-	Watch watch = workspaces.watch(new Watcher<Workspace>() {
+	Watch watch = null;
+	if (existingWorkspaceSpec != null
+		&& ((existingWorkspaceSpec.getUrl() != null && !existingWorkspaceSpec.getUrl().isBlank())
+			|| (existingWorkspaceSpec.getError() != null && !existingWorkspaceSpec.getError().isBlank()))) {
+	    LOGGER.info(formatLogMessage(correlationId, "Workspace existing with result"));
+	    if (existingWorkspaceSpec.getUrl() != null && !existingWorkspaceSpec.getUrl().isBlank()) {
+		atomicReferenceURL.set(existingWorkspaceSpec.getUrl());
+		latch.countDown();
+	    }
+	    if (existingWorkspaceSpec.getError() != null && !existingWorkspaceSpec.getError().isBlank()) {
+		atomicReferenceError.set(existingWorkspaceSpec.getError());
+		workspaces.withName(name).delete();
+		latch.countDown();
+	    }
+	} else {
+	    watch = workspaces.watch(new Watcher<Workspace>() {
 
-	    @Override
-	    public void eventReceived(Action action, Workspace resource) {
-		LOGGER.trace(
-			formatLogMessage(correlationId, "Received workspace event " + action + " for " + resource));
-		if (createSpecName.equals(resource.getSpec().getName())) {
-		    if (resource.getSpec().getUrl() != null && !resource.getSpec().getUrl().isBlank()) {
-			LOGGER.info(formatLogMessage(correlationId, "Received URL for " + resource));
-			atomicReferenceURL.set(resource.getSpec().getUrl());
-			latch.countDown();
-		    } else if (resource.getSpec().getError() != null && !resource.getSpec().getError().isBlank()) {
-			LOGGER.info(formatLogMessage(correlationId,
-				"Received Error for " + resource + ". Deleting workspace again."));
-			atomicReferenceError.set(resource.getSpec().getError());
-			workspaces.withName(name).delete();
-			latch.countDown();
+		@Override
+		public void eventReceived(Action action, Workspace resource) {
+		    LOGGER.trace(
+			    formatLogMessage(correlationId, "Received workspace event " + action + " for " + resource));
+		    if (createSpecName.equals(resource.getSpec().getName())) {
+			if (resource.getSpec().getUrl() != null && !resource.getSpec().getUrl().isBlank()) {
+			    LOGGER.info(formatLogMessage(correlationId, "Received URL for " + resource));
+			    atomicReferenceURL.set(resource.getSpec().getUrl());
+			    latch.countDown();
+			} else if (resource.getSpec().getError() != null && !resource.getSpec().getError().isBlank()) {
+			    LOGGER.info(formatLogMessage(correlationId,
+				    "Received Error for " + resource + ". Deleting workspace again."));
+			    atomicReferenceError.set(resource.getSpec().getError());
+			    workspaces.withName(name).delete();
+			    latch.countDown();
+			}
 		    }
 		}
-	    }
 
-	    @Override
-	    public void onClose(WatcherException cause) {
-	    }
+		@Override
+		public void onClose(WatcherException cause) {
+		}
 
-	});
+	    });
+	}
 
 	try {
 	    latch.await(1, TimeUnit.MINUTES);
@@ -129,7 +147,9 @@ public final class K8sUtil {
 	    LOGGER.error(formatLogMessage(correlationId, "Timeout while waiting for URL for " + name), e);
 	    return new Reply(false, "", "Unable to start workspace");
 	} finally {
-	    watch.close();
+	    if (watch != null) {
+		watch.close();
+	    }
 	}
 
 	return new Reply(atomicReferenceURL.get() != null, atomicReferenceURL.get(), atomicReferenceError.get());

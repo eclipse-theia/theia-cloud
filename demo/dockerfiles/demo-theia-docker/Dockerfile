@@ -19,12 +19,17 @@ RUN chmod g+rw /home && \
     mkdir -p /home/project && \
     chown -R theia:theia /home/theia && \
     chown -R theia:theia /home/project;
-RUN apt-get update && apt-get install -y git openssh-client openssh-server bash libsecret-1-0 default-jdk maven && \
+RUN apt-get update && apt-get install -y wget apt-transport-https && \
+    wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | tee /usr/share/keyrings/adoptium.asc && \
+    echo "deb [signed-by=/usr/share/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list && \
+    apt-get update && apt-get install -y git openssh-client openssh-server bash libsecret-1-0 temurin-17-jdk maven && \
+    apt-get purge -y wget && \
     apt-get clean
 ENV HOME /home/theia
 WORKDIR /home/theia
 COPY --from=build-stage --chown=theia:theia /home/theia /home/theia
 COPY --chown=theia:theia project /home/project
+COPY --chown=theia:theia settings.json /home/theia/.theia/settings.json
 EXPOSE 3000
 ENV SHELL=/bin/bash \
     THEIA_DEFAULT_PLUGINS=local-dir:/home/theia/plugins

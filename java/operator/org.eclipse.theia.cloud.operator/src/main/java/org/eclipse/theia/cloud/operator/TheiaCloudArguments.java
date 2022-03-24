@@ -21,7 +21,7 @@ import picocli.CommandLine.Option;
 public class TheiaCloudArguments {
 
     public enum CloudProvider {
-	GKE
+	K8S, GKE
     }
 
     public enum BandwidthLimiter {

@@ -95,10 +95,10 @@ public final class TheiaCloudDeploymentUtil {
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
 		TheiaCloudConfigMapUtil.getEmailConfigName(template, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
-	replacements.put(PLACEHOLDER_CPU_LIMITS, template.getSpec().getLimitsCpu());
-	replacements.put(PLACEHOLDER_MEMORY_LIMITS, template.getSpec().getLimitsMemory());
-	replacements.put(PLACEHOLDER_CPU_REQUESTS, template.getSpec().getRequestsCpu());
-	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, template.getSpec().getRequestsMemory());
+	replacements.put(PLACEHOLDER_CPU_LIMITS, orEmpty(template.getSpec().getLimitsCpu()));
+	replacements.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(template.getSpec().getLimitsMemory()));
+	replacements.put(PLACEHOLDER_CPU_REQUESTS, orEmpty(template.getSpec().getRequestsCpu()));
+	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, orEmpty(template.getSpec().getRequestsMemory()));
 	return replacements;
     }
 
@@ -115,11 +115,15 @@ public final class TheiaCloudDeploymentUtil {
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
 		TheiaCloudConfigMapUtil.getEmailConfigName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
-	replacements.put(PLACEHOLDER_CPU_LIMITS, template.getSpec().getLimitsCpu());
-	replacements.put(PLACEHOLDER_MEMORY_LIMITS, template.getSpec().getLimitsMemory());
-	replacements.put(PLACEHOLDER_CPU_REQUESTS, template.getSpec().getRequestsCpu());
-	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, template.getSpec().getRequestsMemory());
+	replacements.put(PLACEHOLDER_CPU_LIMITS, orEmpty(template.getSpec().getLimitsCpu()));
+	replacements.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(template.getSpec().getLimitsMemory()));
+	replacements.put(PLACEHOLDER_CPU_REQUESTS, orEmpty(template.getSpec().getRequestsCpu()));
+	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, orEmpty(template.getSpec().getRequestsMemory()));
 	return replacements;
+    }
+
+    private static String orEmpty(String string) {
+	return string == null ? "" : string;
     }
 
 }
