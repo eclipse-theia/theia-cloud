@@ -19,11 +19,11 @@ package org.eclipse.theia.cloud.operator.handler.impl;
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,8 +36,13 @@ import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
+import org.jsoup.Jsoup;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 
 public final class AddedHandler {
@@ -103,6 +108,7 @@ public final class AddedHandler {
 		});
     }
 
+    @SuppressWarnings("deprecation")
     public static void updateWorkspaceURLAsync(DefaultKubernetesClient client, Workspace workspace, String namespace,
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {
@@ -113,42 +119,58 @@ public final class AddedHandler {
 		    /* silent */
 		}
 
-		HttpURLConnection connection;
 		try {
-		    connection = (HttpURLConnection) new URL("https://" + url).openConnection();
+		    // TODO we need a nicer way to deal with self signed tls certificates during
+		    // development
+		    Jsoup.connect("https://" + url).validateTLSCertificates(false).get();
 		} catch (IOException e) {
-		    LOGGER.error(formatLogMessage(correlationId, "Error while checking workspace availability."), e);
+		    LOGGER.info(formatLogMessage(correlationId, url + " is NOT available yet."));
 		    continue;
 		}
-		int code;
-
-		try {
-		    connection.connect();
-		    code = connection.getResponseCode();
-		} catch (IOException e) {
-		    LOGGER.trace(formatLogMessage(correlationId, url + " is NOT available yet."));
-		    break;
-		}
-
-		LOGGER.trace(formatLogMessage(correlationId, url + " has response code " + code));
-
-		if (code == 200) {
-		    LOGGER.info(formatLogMessage(correlationId, url + " is available."));
-		    client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
-			    .withName(workspace.getMetadata().getName())//
-			    .edit(ws -> {
-				ws.getSpec().setUrl(url);
-				return ws;
-			    });
-		    break;
-		} else {
-		    LOGGER.trace(formatLogMessage(correlationId, url + " is NOT available yet."));
-		}
+		LOGGER.info(formatLogMessage(correlationId, url + " is available."));
+		client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
+			.withName(workspace.getMetadata().getName())//
+			.edit(ws -> {
+			    ws.getSpec().setUrl(url);
+			    return ws;
+			});
+		break;
 
 	    }
 
 	});
 
+    }
+
+    public static void removeEmptyResources(Deployment deployment) {
+	for (Container container : deployment.getSpec().getTemplate().getSpec().getContainers()) {
+	    ResourceRequirements resources = container.getResources();
+	    if (resources == null) {
+		continue;
+	    }
+	    Map<String, Quantity> limits = resources.getLimits();
+	    if (limits != null) {
+		Set<String> toRemove = new LinkedHashSet<>();
+		for (String key : limits.keySet()) {
+		    Quantity quantity = limits.get(key);
+		    if (quantity == null) {
+			toRemove.add(key);
+		    }
+		}
+		toRemove.forEach(limits::remove);
+	    }
+	    Map<String, Quantity> requests = resources.getRequests();
+	    if (requests != null) {
+		Set<String> toRemove = new LinkedHashSet<>();
+		for (String key : requests.keySet()) {
+		    Quantity quantity = requests.get(key);
+		    if (quantity == null) {
+			toRemove.add(key);
+		    }
+		}
+		toRemove.forEach(requests::remove);
+	    }
+	}
     }
 
 }

@@ -274,6 +274,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 		    pvName.ifPresent(name -> persistentVolumeHandler.addVolumeClaim(deployment, name));
 		    bandwidthLimiter.limit(deployment, template.getSpec().getDownlinkLimit(),
 			    template.getSpec().getUplinkLimit(), correlationId);
+		    AddedHandler.removeEmptyResources(deployment);
 		});
     }
 

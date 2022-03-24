@@ -6,7 +6,7 @@ spec:
   name: theia-cloud-demo
   image: eu.gcr.io/kubernetes-238012/theia-cloud-demo
   port: 3000
-  host: 34.159.179.89.nip.io
+  host: {{ .Values.hosts.instance }}
   ingressname: theia-cloud-demo-ws-ingress
   minInstances: 0
   maxInstances: 3

@@ -1,6 +1,8 @@
 <template>
-  <div>{{ text }}</div>
-  <div class="loader" v-if="showSpinner"></div>
+  <div>
+    <div>{{ text }}</div>
+    <div class="loader" v-if="showSpinner"></div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -17,7 +19,7 @@ export default defineComponent({
   },
   created() {
     if (this.email) {
-      this.startWorkspace();
+      this.startWorkspace(10);
     }
   },
   data() {
@@ -29,16 +31,16 @@ export default defineComponent({
   watch: {
     email() {
       if (this.email) {
-        this.startWorkspace();
+        this.startWorkspace(10);
       }
     },
   },
   methods: {
-    startWorkspace() {
-      console.log("Calling to " + (this.workspaceServiceUrl + "/workspaces"));
+    startWorkspace(retries: number) {
+      console.log("Calling to " + this.workspaceServiceUrl);
       axios
         .post(
-          this.workspaceServiceUrl + "/workspaces",
+          this.workspaceServiceUrl + "",
           {
             template: this.workspaceTemplate,
             user: this.email,
@@ -57,9 +59,9 @@ export default defineComponent({
             console.error(response.data.error);
           }
         })
-        .catch(() => {
-          this.text = "Network error. Please try again.";
-          this.showSpinner = false;
+        .catch((error) => {
+          console.error(error.message);
+          this.startWorkspace(retries - 1);
         });
     },
   },

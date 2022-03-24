@@ -12,7 +12,7 @@
     <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.theia.cloud.operator.Main"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="operator"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--ephemeralStorage --cloudProvider GKE --bandwidthLimiter K8SANNOTATIONANDWONDERSHAPER"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--keycloak --ephemeralStorage --cloudProvider GKE --bandwidthLimiter K8SANNOTATIONANDWONDERSHAPER"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="operator"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dlog4j2.configurationFile=log4j2.xml"/>
