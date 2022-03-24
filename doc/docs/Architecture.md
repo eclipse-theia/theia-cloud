@@ -11,19 +11,39 @@ The Theia.Cloud Operator listens for changes to custom resources inside the clus
 
 ![Operator Diagram](operator.png "Operator")
 
+## Operator configuration options
+
+|Option|Type|Used for|
+|---|---|---|
+|--keycloak|boolean|Whether workspaces will be created with a reverse proxy authing against keycloak|
+|--eagerStart|boolean|Whether workspaces will be created before there is a user to speed up starts (not (fully) supported yet)|
+|--ephemeralStorage|boolean|Whether workspaces get persisted storage assigned|
+|--cloudProvider|null, GKE|Cloud Provider specific configs|
+|--bandwidthLimiter|null, K8SANNOTATION, WONDERSHAPER, K8SANNOTATIONANDWONDERSHAPER|How to limit ingress/egress bandwidth|
+
 ## Custom Resources
 
 ### Template
 
-A template describing a specific type of a workspace.
+A template describing a specific type of a workspace.\
+(Not all properties may be supported by any operator configuration)
 
 |Property|Type|Used for|
 |---|---|---|
 |name|string|Used to identify the template|
 |image|string|The container image launched in every workspace of this template type|
 |port|integer|port to expose|
-|instances|integer|Max number of instances. Currently will be eagerly launched even without workspace requests (will change)|
 |host|string|Domain where the workspaces will be available|
+|ingressname|string|Name of the ingress where the rules for workspaces will be added|
+|minInstances|integer|Instances that should be started eagerly without an existing user|
+|maxInstances|integer|Upper bound for number of workspaces that will be launched.|
+|killAfter|integer|Workspaces will be killed after this amount of minutes|
+|requestsMemory|string|K8s memory requests|
+|requestsCpu|string|K8s CPU requests|
+|limitsMemory|string|K8s memory limits|
+|limitsCpu|string|K8s CPU limits|
+|downlinkLimit|integer|Downlink bandwidth limit (kilobits per second)|
+|uplinkLimit|integer|Uplink bandwidth limit (kilobits per second)|
 
 ### Workspace
 
@@ -34,7 +54,8 @@ A concrete workspace associated with a user
 |name|string|Used to identify the workspace|
 |template|string|The template name on which this workspace is based|
 |user|string|The user ID based on which AuthN/Z will be done|
-|url|string|The Operator may fill this field with the URL where the workspace is available (not implemented yet)|
+|url|string|The Operator may fill this field with the URL where the workspace is available|
+|error|string|The Operator may fill this field with an error message if there was a problem|
 
 ## Used technologies in Cluster
 
