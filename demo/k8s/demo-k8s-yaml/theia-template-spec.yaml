@@ -15,5 +15,5 @@ spec:
   requestsCpu: 100m
   limitsMemory: 2000M
   limitsCpu: 200m
-  downlinkLimit: 2000
-  uplinkLimit: 2000
+  downlinkLimit: 4000
+  uplinkLimit: 4000

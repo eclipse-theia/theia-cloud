@@ -37,11 +37,17 @@ export default defineComponent({
     startWorkspace() {
       console.log("Calling to " + (this.workspaceServiceUrl + "/workspaces"));
       axios
-        .post(this.workspaceServiceUrl + "/workspaces", {
-          template: this.workspaceTemplate,
-          user: this.email,
-          appId: this.appId,
-        })
+        .post(
+          this.workspaceServiceUrl + "/workspaces",
+          {
+            template: this.workspaceTemplate,
+            user: this.email,
+            appId: this.appId,
+          },
+          {
+            timeout: 300000,
+          }
+        )
         .then((response) => {
           if (response.data.success) {
             location.replace("https://" + response.data.url);
@@ -50,6 +56,10 @@ export default defineComponent({
             this.showSpinner = false;
             console.error(response.data.error);
           }
+        })
+        .catch(() => {
+          this.text = "Network error. Please try again.";
+          this.showSpinner = false;
         });
     },
   },
