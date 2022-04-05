@@ -12,13 +12,13 @@ landingPage:
   template: "theia-cloud-demo"
 
 keycloak:
-  enable: false
-  authUrl: "https://keycloak.url/auth/"
+  enable: true
+  authUrl: "https://34.120.110.14.nip.io/auth/"
   realm: "TheiaCloud"
   clientId: "theia-cloud"
   clientSecret: "RZdfb7bbhy26C6EObmvlHiZcZhar34O0"
   cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
-  
+
 operator:
   image: eu.gcr.io/kubernetes-238012/theia-cloud-operator
   eagerStart: false

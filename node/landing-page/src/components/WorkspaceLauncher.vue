@@ -52,6 +52,7 @@ export default defineComponent({
         )
         .then((response) => {
           if (response.data.success) {
+            console.log("Redirect to : https://" + response.data.url)
             location.replace("https://" + response.data.url);
           } else {
             this.text = response.data.error;

@@ -27,6 +27,7 @@ spec:
             - --config=/etc/oauth2-proxy.cfg
             - --authenticated-emails-file=/emails/authenticated-emails-list
             - --gcp-healthchecks
+            - --reverse-proxy
           ports:
             - containerPort: 5000
               name: web
@@ -49,10 +50,10 @@ spec:
             requests:
               cpu: placeholder-cpu-requests
               memory: placeholder-memory-requests
-      securityContext:
-        runAsUser: 1001
-        runAsGroup: 1001
-        fsGroup: 1001
+      # securityContext:
+      #   runAsUser: 1001
+      #   runAsGroup: 1001
+      #   fsGroup: 1001
       volumes:
         - name: oauth2-proxy-config
           configMap:
