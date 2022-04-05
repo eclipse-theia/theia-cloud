@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oauth2-proxy-config
+  namespace: {{ .Release.Namespace }}
+data:
+  oauth2-proxy.cfg: |+
+    # Provider config
+    provider="keycloak-oidc"
+    redirect_url="https://placeholder/oauth2/callback"
+    oidc_issuer_url="{{ .Values.keycloak.authUrl }}realms/{{ .Values.keycloak.realm }}"
+    ssl_insecure_skip_verify=true
+    # Client config
+    client_id="{{ .Values.keycloak.clientId }}"
+    client_secret="{{ .Values.keycloak.clientSecret }}"
+    cookie_secret="{{ .Values.keycloak.cookieSecret }}"
+    cookie_secure="false"
+    #proxy_prefix=""
+    # Upstream config
+    http_address="0.0.0.0:5000"
+    upstreams="http://127.0.0.1:placeholder-port/"
+    # Proxy Config
+    #user_id_claim="preferred_username"
+    skip_auth_routes=["/health.*"]
+    skip_provider_button="true"
+    reverse_proxy="true"
+    # email_domains=["*"]
+    cookie_domains=["{{ .Values.hosts.instance }}"]
+    whitelist_domains=["{{ .Values.hosts.instance }}:*",".google.com:*"]
+    custom_templates_dir="/templates"
