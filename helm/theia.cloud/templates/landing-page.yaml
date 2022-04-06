@@ -18,7 +18,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: landing-page-container
-        image: eu.gcr.io/kubernetes-238012/theia-cloud-landing-page
+        image: {{ .Values.landingPage.image }}
         ports:
         - name: http
           containerPort: 80

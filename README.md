@@ -1,82 +1,45 @@
-# Theia Cloud
+# Theia.cloud
 
-## Housekeeping
+Theia.cloud
 
-`kubectl delete deployments --all -n theiacloud && kubectl delete services --all -n theiacloud && kubectl delete ingresses --all -n theiacloud && kubectl delete configmap coffee-editor-config-1 -n theiacloud && kubectl delete configmap coffee-editor-config-2 -n theiacloud && kubectl delete configmap coffee-editor-emailconfig-1 -n theiacloud && kubectl delete configmap coffee-editor-emailconfig-2 -n theiacloud`
+The goal of Theia.cloud is to simplify the deployment of Theia-based (and similar) products on Kubernetes. We follow a convention over configuration approach allowing users to get started fast. At the same time, we aim for extensibility allowing developers to customize certain aspects of the kubernetes deployment if required.
 
-## Running
+## Components
 
-### Local Setup with Minikube
+Theia.cloud consists of the following components.
 
-#### Initial Setup
+### Kubernetes Custom Resource Definitions and Operator
 
-Remove old Minikube clusters with `minikube delete`.
+Theia.cloud brings simple custom resource definitions (CRDs) that allow to specify the required conifugration, like the docker image of the Theia-based product.\
+A Java-based operator will listen for the creation, modification, and deletion of custom resources based on those CRDs and will manage the application.\
+See [Architecture.md](doc/docs/Architecture.md) for more information on the architecture.
 
-Start a new Minikube instance:\
-`minikube start --addons=ingress --vm=true --memory=8192 --cpus=6 --disk-size=75g`
+### Workspace REST Service
 
-`minikube mount /home/user/tmp/minikube:/data/test --uid 101 --gid 101`
+This REST Service acts as the API for creating and stopping Theia-based products for an authenticated user as well as providing additional information.\
+The workspace service creates, modifies, and deletes the custom resources the operator listens to.
 
+### Dashboard and resusable UI components
 
-##### Install Keycloak
+The UI components communicating with the REST service.
 
-Based on https://www.keycloak.org/getting-started/getting-started-kube
+## Building
 
-Create Keycloak instance in minikube:
+All components are deployed as docker images and may be built with docker. See [Building.md](doc/docs/Building.md) for more information. We offer prebuilt images ready to use.
+
+## Installation
+
+We offer a helm chart under `helm/theia.cloud` which may be used to install Theia.cloud. Please check our getting started guides below as well, which will explain the possible values in more detail.
 
 ```bash
-kubectl create -f https://raw.githubusercontent.com/keycloak/keycloak-quickstarts/latest/kubernetes-examples/keycloak.yaml
+helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace
+# Optional: switch to the newly created namespace
+kubectl config set-context --current --namespace=theiacloud
 
-wget -q -O - https://raw.githubusercontent.com/keycloak/keycloak-quickstarts/latest/kubernetes-examples/keycloak-ingress.yaml | \
-sed "s/KEYCLOAK_HOST/keycloak.$(minikube ip).nip.io/" | \
-kubectl create -f -
-
-KEYCLOAK_URL=https://keycloak.$(minikube ip).nip.io/auth &&
-echo "" &&
-echo "Keycloak:                 $KEYCLOAK_URL" &&
-echo "Keycloak Admin Console:   $KEYCLOAK_URL/admin" &&
-echo "Keycloak Account Console: $KEYCLOAK_URL/realms/myrealm/account" &&
-echo ""
+# Uninstall
+helm uninstall theia-cloud -n theiacloud
 ```
 
-#### Administrate Keycloak
+### Getting started with
 
-Follow https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#keycloak-oidc-auth-provider
-
-Valid Redirect URL: `https://*.192.168.39.3.nip.io/oauth2/callback` (IP comes from `minikube ip`)
-
-##### Run Theia.Cloud
-
-Update `host: 192.168.39.3.nip.io` in `k8s/operator-k8s-yaml/template-spec-resource.yaml` with the IP received from `minikube ip`.
-
-Create a new namespace and switch to it:\
-`kubectl create namespace theiacloud`\
-`kubectl config set-context --current --namespace=theiacloud`
-
-Install custom resource definitions (from git root directory):\
-`kubectl apply -f k8s/operator-k8s-yaml/template-spec-resource.yaml`\
-`kubectl apply -f k8s/operator-k8s-yaml/workspace-spec-resource.yaml`
-
-Launch operator from Eclipse.
-
-Install sample template (from git root directory):\
-`kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-template-spec.yaml`\
-`kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-workspace-1.yaml`\
-`kubectl apply -f demo/k8s/demo-k8s-yaml/coffee-workspace-2.yaml`\
-`kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-oauth2proxy-keycloak.yaml`\
-`kubectl apply -f demo/k8s/demo-k8s-yaml/configmap-htmlpage.yaml`
-
-`kubectl create serviceaccount workspace-api-service-account -n theiacloud`
-`kubectl create serviceaccount operator-api-service-account -n theiacloud`
-
-# Docker
-
-`docker build -t gcr.io/kubernetes-238012/theia-cloud-operator -f dockerfiles/operator/Dockerfile .`
-
-`docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile .`
-
-`docker build -t theia-cloud-workspace -f dockerfiles/workspace/Dockerfile .`
-
-# GKE
-
-`kubectl apply -f k8s/landing-page-k8s-yaml/landing-page.yaml`
+[...Minikube](doc/docs/platforms/Minikube.md)
