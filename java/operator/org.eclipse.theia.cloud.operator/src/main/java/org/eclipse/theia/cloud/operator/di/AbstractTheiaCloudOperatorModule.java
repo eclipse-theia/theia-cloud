@@ -23,8 +23,8 @@ import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceRemovedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.BandwidthLimiterImpl;
-import org.eclipse.theia.cloud.operator.handler.impl.GKEPersistentVolumeHandlerImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.IngressPathProviderImpl;
+import org.eclipse.theia.cloud.operator.handler.impl.PersistentVolumeHandlerImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
@@ -47,7 +47,7 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
     }
 
     protected Class<? extends PersistentVolumeHandler> bindPersistentVolumeHandler() {
-	return GKEPersistentVolumeHandlerImpl.class;
+	return PersistentVolumeHandlerImpl.class;
     }
 
     protected Class<? extends IngressPathProvider> bindIngressPathProvider() {

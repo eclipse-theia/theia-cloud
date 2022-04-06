@@ -41,7 +41,7 @@ public class PersistentVolumeHandlerImpl implements PersistentVolumeHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(PersistentVolumeHandlerImpl.class);
 
-    protected static final String MOUNT_PATH = "/coffee-editor/backend/examples/data";
+    protected static final String MOUNT_PATH = "/home/project/persisted";
     protected static final int THEIA_CONTAINER_INDEX = 1;
     protected static final String USER_DATA = "user-data";
 
