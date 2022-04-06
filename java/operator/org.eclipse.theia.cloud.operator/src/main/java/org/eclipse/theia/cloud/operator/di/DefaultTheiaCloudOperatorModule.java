@@ -17,11 +17,13 @@
 package org.eclipse.theia.cloud.operator.di;
 
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
+import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceRemovedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.EagerStartTemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.EagerStartWorkspaceAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.impl.GKEPersistentVolumeHandlerImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartTemplateAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartWorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartWorkspaceRemovedHandler;
@@ -38,6 +40,23 @@ public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorM
     protected void configure() {
 	bind(TheiaCloudArguments.class).toInstance(arguments);
 	super.configure();
+    }
+
+    @Override
+    protected Class<? extends PersistentVolumeHandler> bindPersistentVolumeHandler() {
+	if (arguments.isEphemeralStorage()) {
+	    return super.bindPersistentVolumeHandler();
+	}
+	if (arguments.getCloudProvider() == null) {
+	    return super.bindPersistentVolumeHandler();
+	}
+	switch (arguments.getCloudProvider()) {
+	case GKE:
+	    return GKEPersistentVolumeHandlerImpl.class;
+	case K8S:
+	default:
+	    return super.bindPersistentVolumeHandler();
+	}
     }
 
     @Override

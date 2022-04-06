@@ -15,7 +15,7 @@ Remove old Minikube clusters with `minikube delete`.
 Start a new Minikube instance:\
 `minikube start --addons=ingress --vm=true --memory=8192 --cpus=6 --disk-size=75g`
 
-`minikube mount /home/user/tmp/minikube:/data/test --uid 1001 --gid 1001`
+`minikube mount /home/user/tmp/minikube:/data/test --uid 101 --gid 101`
 
 
 ##### Install Keycloak
