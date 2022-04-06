@@ -4,9 +4,15 @@
         "frontend": {
             "config": {
                 "applicationName": "Theia.Cloud Example",
+                "warnOnPotentiallyInsecureHostPattern": false,
                 "preferences": {
                     "files.enableTrash": false
                 }
+            }
+        },
+        "backend": {
+            "config": {
+                "warnOnPotentiallyInsecureHostPattern": false
             }
         }
     },
@@ -66,10 +72,16 @@
         "vscjava.vscode-java-debug": "https://open-vsx.org/api/vscjava/vscode-java-debug/0.30.0/file/vscjava.vscode-java-debug-0.30.0.vsix",
         "vscjava.vscode-java-test": "https://open-vsx.org/api/vscjava/vscode-java-test/0.26.1/file/vscjava.vscode-java-test-0.26.1.vsix",
         "vscjava.vscode-maven": "https://open-vsx.org/api/vscjava/vscode-maven/0.21.2/file/vscjava.vscode-maven-0.21.2.vsix",
-        "vscjava.vscode-java-dependency": "https://open-vsx.org/api/vscjava/vscode-java-dependency/0.16.0/file/vscjava.vscode-java-dependency-0.16.0.vsix"
+        "vscjava.vscode-java-dependency": "https://open-vsx.org/api/vscjava/vscode-java-dependency/0.16.0/file/vscjava.vscode-java-dependency-0.16.0.vsix",
+        "redhat.vscode-xml": "https://open-vsx.org/api/redhat/vscode-xml/0.20.0/file/redhat.vscode-xml-0.20.0.vsix",
+        "cdt-gdb-vscode": "https://open-vsx.org/api/eclipse-cdt/cdt-gdb-vscode/0.0.92/file/eclipse-cdt.cdt-gdb-vscode-0.0.92.vsix",
+        "vscode-builtin-cpp": "https://open-vsx.org/api/vscode/cpp/1.62.3/file/vscode.cpp-1.62.3.vsix",
+        "vscode-clangd": "https://open-vsx.org/api/llvm-vs-code-extensions/vscode-clangd/0.1.15/file/llvm-vs-code-extensions.vscode-clangd-0.1.15.vsix",
+        "vscode-cmake": "https://open-vsx.org/api/ms-vscode/cmake-tools/1.9.2/file/ms-vscode.cmake-tools-1.9.2.vsix"
     },
     "theiaPluginsExcludeIds": [
         "vscode.extension-editing",
-        "vscode.microsoft-authentication"
+        "vscode.microsoft-authentication",
+        "vscode.html-language-features"
     ]
 }
