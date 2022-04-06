@@ -9,6 +9,7 @@ hosts:
   instance: ws.192.168.39.173.nip.io
 
 landingPage:
+  image: eu.gcr.io/kubernetes-238012/theia-cloud-landing-page
   template: "theia-cloud-demo"
 
 keycloak:
@@ -22,6 +23,13 @@ keycloak:
 operator:
   image: eu.gcr.io/kubernetes-238012/theia-cloud-operator
   eagerStart: false
-  ephemeralStorage: false
+  ephemeralStorage: true
   cloudProvider: "K8S"
   bandwidthLimiter: "K8SANNOTATION"
+
+workspace:
+  image: eu.gcr.io/kubernetes-238012/theia-cloud-workspace
+
+ingress:
+  instanceName: "theia-cloud-demo-ws-ingress"
+  clusterIssuer: letsencrypt-prod

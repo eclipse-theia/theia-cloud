@@ -20,7 +20,7 @@ spec:
       serviceAccountName: workspace-api-service-account
       containers:
       - name: workspace-container
-        image: eu.gcr.io/kubernetes-238012/theia-cloud-workspace
+        image: {{ .Values.workspace.image }}
         ports:
         - name: http
           containerPort: 8081
