@@ -33,3 +33,4 @@ workspace:
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
   clusterIssuer: letsencrypt-prod
+  theiaCloudCommonName: false
