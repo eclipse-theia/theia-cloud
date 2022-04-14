@@ -4,9 +4,9 @@ issuer:
   email: mmorlock@example.com
 
 hosts:
-  workspace: workspace.192.168.39.173.nip.io
-  landing: theia.cloud.192.168.39.173.nip.io
-  instance: ws.192.168.39.173.nip.io
+  workspace: workspace.192.168.39.3.nip.io
+  landing: theia.cloud.192.168.39.3.nip.io
+  instance: ws.192.168.39.3.nip.io
 
 landingPage:
   image: eu.gcr.io/kubernetes-238012/theia-cloud-landing-page
@@ -14,7 +14,7 @@ landingPage:
 
 keycloak:
   enable: true
-  authUrl: "https://34.120.110.14.nip.io/"
+  authUrl: "https://keycloak.192.168.39.3.nip.io/auth/"
   realm: "TheiaCloud"
   clientId: "theia-cloud"
   clientSecret: "zpF6PUpM3RmfVecInloasXTjn1yc88Dp"
@@ -23,7 +23,7 @@ keycloak:
 operator:
   image: eu.gcr.io/kubernetes-238012/theia-cloud-operator
   eagerStart: false
-  ephemeralStorage: true
+  ephemeralStorage: false
   cloudProvider: "K8S"
   bandwidthLimiter: "K8SANNOTATION"
 
@@ -32,5 +32,5 @@ workspace:
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
-  clusterIssuer: letsencrypt-prod
-  theiaCloudCommonName: false
+  clusterIssuer: theia-cloud-selfsigned-issuer
+  theiaCloudCommonName: true
