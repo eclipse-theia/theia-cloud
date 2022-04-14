@@ -50,10 +50,10 @@ spec:
             requests:
               cpu: placeholder-cpu-requests
               memory: placeholder-memory-requests
-      # securityContext:
-      #   runAsUser: 1001
-      #   runAsGroup: 1001
-      #   fsGroup: 1001
+      securityContext:
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
       volumes:
         - name: oauth2-proxy-config
           configMap:

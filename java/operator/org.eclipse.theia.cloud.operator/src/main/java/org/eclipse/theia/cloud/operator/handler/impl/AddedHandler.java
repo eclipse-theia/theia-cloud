@@ -20,12 +20,24 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +48,6 @@ import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
 import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
-import org.jsoup.Jsoup;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
@@ -70,7 +81,33 @@ public final class AddedHandler {
 
     public static final String INGRESS_REWRITE_PATH = "(/|$)(.*)";
 
+    private static final HostnameVerifier ALL_GOOD_HOSTNAME_VERIFIER = new HostnameVerifier() {
+	@Override
+	public boolean verify(String hostname, SSLSession session) {
+	    return true;
+	}
+    };
+
+    private static final X509TrustManager TRUST_ALL_MANAGER = new X509TrustManager() {
+
+	@Override
+	public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+	    /* no op */
+	}
+
+	@Override
+	public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+	    /* no op */
+	}
+
+	@Override
+	public X509Certificate[] getAcceptedIssuers() {
+	    return new X509Certificate[0];
+	}
+    };
+
     private AddedHandler() {
+
     }
 
     public static void createAndApplyIngress(DefaultKubernetesClient client, String namespace, String correlationId,
@@ -108,7 +145,6 @@ public final class AddedHandler {
 		});
     }
 
-    @SuppressWarnings("deprecation")
     public static void updateWorkspaceURLAsync(DefaultKubernetesClient client, Workspace workspace, String namespace,
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {
@@ -119,22 +155,46 @@ public final class AddedHandler {
 		    /* silent */
 		}
 
+		HttpsURLConnection connection;
 		try {
-		    // TODO we need a nicer way to deal with self signed tls certificates during
-		    // development
-		    Jsoup.connect("https://" + url).validateTLSCertificates(false).get();
+		    connection = (HttpsURLConnection) new URL("https://" + url).openConnection();
 		} catch (IOException e) {
-		    LOGGER.info(formatLogMessage(correlationId, url + " is NOT available yet."));
+		    LOGGER.error(formatLogMessage(correlationId, "Error while checking workspace availability."), e);
 		    continue;
 		}
-		LOGGER.info(formatLogMessage(correlationId, url + " is available."));
-		client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
-			.withName(workspace.getMetadata().getName())//
-			.edit(ws -> {
-			    ws.getSpec().setUrl(url);
-			    return ws;
-			});
-		break;
+		int code;
+
+		try {
+		    connection.setHostnameVerifier(ALL_GOOD_HOSTNAME_VERIFIER);
+		    SSLContext sc = SSLContext.getInstance("SSL");
+		    sc.init(null, new TrustManager[] { TRUST_ALL_MANAGER }, new java.security.SecureRandom());
+		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		    connection.setSSLSocketFactory(sc.getSocketFactory());
+		    connection.connect();
+		    code = connection.getResponseCode();
+		} catch (IOException e) {
+		    LOGGER.error(formatLogMessage(correlationId, url + " is NOT available yet."), e);
+		    continue;
+		} catch (NoSuchAlgorithmException | KeyManagementException e) {
+		    LOGGER.error(formatLogMessage(correlationId,
+			    "Error while checking workspace availability with SSL ignore."), e);
+		    continue;
+		}
+
+		LOGGER.trace(formatLogMessage(correlationId, url + " has response code " + code));
+
+		if (code == 200) {
+		    LOGGER.info(formatLogMessage(correlationId, url + " is available."));
+		    client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
+			    .withName(workspace.getMetadata().getName())//
+			    .edit(ws -> {
+				ws.getSpec().setUrl(url);
+				return ws;
+			    });
+		    break;
+		} else {
+		    LOGGER.trace(formatLogMessage(correlationId, url + " is NOT available yet."));
+		}
 
 	    }
 
