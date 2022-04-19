@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v6alpha
+apiVersion: theia.cloud/v7alpha
 kind: Template
 metadata:
   name: theia-cloud-demo

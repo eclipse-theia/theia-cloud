@@ -4,7 +4,7 @@ metadata:
   name: placeholder-depname
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v6alpha
+    - apiVersion: theia.cloud/v7alpha
       kind: Template
       name: placeholder
       uid: placeholder
@@ -51,9 +51,9 @@ spec:
               cpu: placeholder-cpu-requests
               memory: placeholder-memory-requests
       securityContext:
-        runAsUser: 101
-        runAsGroup: 101
-        fsGroup: 101
+        runAsUser: placeholder-uid
+        runAsGroup: placeholder-uid
+        fsGroup: placeholder-uid
       volumes:
         - name: oauth2-proxy-config
           configMap:
