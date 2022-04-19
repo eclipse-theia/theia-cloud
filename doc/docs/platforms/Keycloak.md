@@ -6,6 +6,8 @@
 
 Follow the steps in https://www.keycloak.org/getting-started/getting-started-kube
 
+Please note that this does not have persisted storage at the moment, so keycloak settings may get lost.
+
 As time of writing, those are:
 
 ```bash

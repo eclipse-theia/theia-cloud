@@ -9,7 +9,11 @@ If minikube is not installed on your system, go to https://minikube.sigs.k8s.io/
 ## Start Minikube
 
 Create a new Minikube cluster using the `minikube start` command. Please adjust the `/home/user/tmp/minikube` part of the start command to point to a directory on your machine.\
-`minikube start --addons=ingress --vm=true --memory=4096 --cpus=2 --mount-string="/home/user/tmp/minikube/:/data/test/" --mount --mount-gid=101 --mount-uid=101`
+`minikube start --addons=ingress --vm=true --memory=4096 --cpus=2 --mount-string="/home/user/tmp/minikube:/data/test" --mount --mount-gid 101 --mount-uid 101`
+
+Please note: If later on the persisted storage mounted at `/persisted` in the example workspace is not writable for you, this may be to a limitation in minikube. Please try\
+`minikube mount /home/user/tmp/minikube:/data/test --uid 101 --gid 101`\
+then. You may need to adjust the firewall on your system however.
 
 ## Install Prerequisites
 
@@ -30,6 +34,8 @@ As of writing this guide the installation command looks like this:\
 
 This is installed in minikube already when started with the `--addons=ingress` argument, so nothing has to be installed for the Minikube Guide.
 
+For other platforms see https://kubernetes.github.io/ingress-nginx/deploy/
+
 ### Optional: Keycloak
 
 See [Keycloak](Keycloak.md)
@@ -41,6 +47,8 @@ First determine the minikube IP. We will use this for our hostnames:
 ```bash
 $ minikube ip
 192.168.39.81
+# for other platforms determine the external nginx ingress controller ip with
+# kubectl get services ingress-nginx-controller -n ingress-nginx'
 
 # Update this in below command to install Theia.Cloud
 
