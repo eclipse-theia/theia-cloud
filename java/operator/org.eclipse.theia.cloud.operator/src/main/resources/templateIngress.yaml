@@ -4,7 +4,7 @@ metadata:
   name: placeholder-ingressname
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v6alpha
+    - apiVersion: theia.cloud/v7alpha
       kind: Template
       name: placeholder
       uid: placeholder

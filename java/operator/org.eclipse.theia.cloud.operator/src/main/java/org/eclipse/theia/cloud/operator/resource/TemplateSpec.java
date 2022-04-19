@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class TemplateSpec {
 
-    public static final String API = "theia.cloud/v6alpha";
+    public static final String API = "theia.cloud/v7alpha";
     public static final String KIND = "Template";
     public static final String CRD_NAME = "templates.theia.cloud";
 
@@ -31,6 +31,9 @@ public class TemplateSpec {
 
     @JsonProperty("image")
     private String image;
+
+    @JsonProperty("uid")
+    private int uid;
 
     @JsonProperty("port")
     private int port;
@@ -74,6 +77,10 @@ public class TemplateSpec {
 
     public String getImage() {
 	return image;
+    }
+
+    public int getUid() {
+	return uid;
     }
 
     public int getPort() {
@@ -126,7 +133,7 @@ public class TemplateSpec {
 
     @Override
     public String toString() {
-	return "TemplateSpec [name=" + name + ", image=" + image + ", port=" + port + ", host=" + host
+	return "TemplateSpec [name=" + name + ", image=" + image + ", uid=" + uid + ", port=" + port + ", host=" + host
 		+ ", ingressname=" + ingressname + ", minInstances=" + minInstances + ", maxInstances=" + maxInstances
 		+ ", killAfter=" + killAfter + ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu
 		+ ", limitsMemory=" + limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit

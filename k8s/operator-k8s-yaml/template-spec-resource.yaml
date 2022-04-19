@@ -11,7 +11,7 @@ spec:
     singular: template
   scope: Namespaced
   versions:
-    - name : v6alpha
+    - name : v7alpha
       served: true
       storage: true
       schema:

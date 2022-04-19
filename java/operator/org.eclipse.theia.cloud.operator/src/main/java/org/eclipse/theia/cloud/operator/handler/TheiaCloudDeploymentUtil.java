@@ -43,6 +43,9 @@ public final class TheiaCloudDeploymentUtil {
     public static final String PLACEHOLDER_MEMORY_LIMITS = "placeholder-memory-limits";
     public static final String PLACEHOLDER_CPU_REQUESTS = "placeholder-cpu-requests";
     public static final String PLACEHOLDER_MEMORY_REQUESTS = "placeholder-memory-requests";
+    public static final String PLACEHOLDER_UID = "placeholder-uid";
+
+    private static final String DEFAULT_UID = "1000";
 
     private TheiaCloudDeploymentUtil() {
     }
@@ -99,6 +102,7 @@ public final class TheiaCloudDeploymentUtil {
 	replacements.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(template.getSpec().getLimitsMemory()));
 	replacements.put(PLACEHOLDER_CPU_REQUESTS, orEmpty(template.getSpec().getRequestsCpu()));
 	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, orEmpty(template.getSpec().getRequestsMemory()));
+	replacements.put(PLACEHOLDER_UID, getUID(template.getSpec().getUid()));
 	return replacements;
     }
 
@@ -119,11 +123,19 @@ public final class TheiaCloudDeploymentUtil {
 	replacements.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(template.getSpec().getLimitsMemory()));
 	replacements.put(PLACEHOLDER_CPU_REQUESTS, orEmpty(template.getSpec().getRequestsCpu()));
 	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, orEmpty(template.getSpec().getRequestsMemory()));
+	replacements.put(PLACEHOLDER_UID, getUID(template.getSpec().getUid()));
 	return replacements;
     }
 
     private static String orEmpty(String string) {
 	return string == null ? "" : string;
+    }
+
+    private static String getUID(int uid) {
+	if (uid < 0) {
+	    return DEFAULT_UID;
+	}
+	return String.valueOf(uid);
     }
 
 }
