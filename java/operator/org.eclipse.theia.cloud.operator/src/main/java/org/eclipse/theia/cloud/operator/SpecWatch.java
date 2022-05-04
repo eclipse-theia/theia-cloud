@@ -19,6 +19,7 @@ package org.eclipse.theia.cloud.operator;
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -56,9 +57,9 @@ final class SpecWatch<S extends CustomResource<?, ?>> implements Watcher<S> {
 	    if (cache.containsKey(uid)) {
 		LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
 			resourceName + " " + uid + " : already known. Check if outdated event"));
-		int knownResourceVersion = Integer.parseInt(cache.get(uid).getMetadata().getResourceVersion());
-		int receivedResourceVersion = Integer.parseInt(resource.getMetadata().getResourceVersion());
-		if (knownResourceVersion > receivedResourceVersion) {
+		BigInteger knownResourceVersion = new BigInteger(cache.get(uid).getMetadata().getResourceVersion());
+		BigInteger receivedResourceVersion = new BigInteger(resource.getMetadata().getResourceVersion());
+		if (knownResourceVersion.compareTo(receivedResourceVersion) >= 1) {
 		    LOGGER.info(formatLogMessage(correlationIdPrefix, correlationId,
 			    resourceName + " " + uid + " : event is outdated"));
 		    return;
