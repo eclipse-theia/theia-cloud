@@ -11,6 +11,10 @@
 			additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>
+		<Logger name="org.eclipse.theia.cloud.operator.KillAfterRunnable" level="warn"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
 		<Logger name="org.eclipse.theia.cloud.operator" level="trace"
 			additivity="false">
 			<AppenderRef ref="Console" />

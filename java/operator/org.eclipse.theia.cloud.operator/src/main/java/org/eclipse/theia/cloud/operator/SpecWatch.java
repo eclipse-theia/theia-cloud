@@ -90,4 +90,16 @@ final class SpecWatch<S extends CustomResource<?, ?>> implements Watcher<S> {
 		cause);
 	System.exit(-1);
     }
+
+    @Override
+    public void onClose() {
+	LOGGER.info(formatLogMessage(correlationIdPrefix, resourceName + " watch closed"));
+	Watcher.super.onClose();
+    }
+
+    @Override
+    public boolean reconnecting() {
+	LOGGER.info(formatLogMessage(correlationIdPrefix, resourceName + " reconnecting"));
+	return Watcher.super.reconnecting();
+    }
 }
