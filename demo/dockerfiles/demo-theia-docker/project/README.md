@@ -10,10 +10,6 @@ The `web` directory contains a simple HTML+CSS+Javascript+Typescript website. Yo
 
 The `java` directory contains a simple Java Problem. Opening a Java file activates the Java support for this project. After activation you may Run/Debug the main method/test cases.
 
-## C++
-
-The `cpp` directory contains a simple C++ CMake project. You may build the project via the CMake integration in the bottom toolbar.
-
 ## XML, JSON
 
 The `files` directory contains sample XML and JSON files with schema-files.

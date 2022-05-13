@@ -10,11 +10,11 @@ spec:
   host: {{ .Values.hosts.instance }}
   ingressname: theia-cloud-demo-ws-ingress
   minInstances: 0
-  maxInstances: 3
-  killAfter: 10
-  requestsMemory: 1200M
-  limitsMemory: 2000M
-  requestsCpu: "0.5"
-  limitsCpu: "1"
-  downlinkLimit: 10000
-  uplinkLimit: 10000
+  maxInstances: 10
+  killAfter: 30
+  requestsMemory: 1000M
+  limitsMemory: 1200M
+  requestsCpu: "100m"
+  limitsCpu: "2"
+  downlinkLimit: 30000
+  uplinkLimit: 30000
