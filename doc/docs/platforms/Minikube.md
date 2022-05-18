@@ -42,7 +42,7 @@ See [Keycloak](Keycloak.md)
 
 ## Install Theia.Cloud
 
-First determine the minikube IP. We will use this for our hostnames:
+We use the Minikube IP for our hostnames:
 
 ```bash
 $ minikube ip
@@ -50,9 +50,9 @@ $ minikube ip
 # for other platforms determine the external nginx ingress controller ip with
 # kubectl get services ingress-nginx-controller -n ingress-nginx'
 
-# Update this in below command to install Theia.Cloud
+# If you don't use Minikube or your shell does not support $(), replace $(minikube ip) with your IP to install Theia.Cloud
 
-helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace --values ./helm/theia.cloud/valuesMinikube.yaml --set hosts.workspace=workspace.192.168.39.81.nip.io --set hosts.landing=theia.cloud.192.168.39.81.nip.io --set hosts.instance=ws.192.168.39.81.nip.io --set keycloak.authUrl=https://keycloak.192.168.39.81.nip.io/
+helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace --values ./helm/theia.cloud/valuesMinikube.yaml --set hosts.workspace=workspace.$(minikube ip).nip.io --set hosts.landing=theia.cloud.$(minikube ip).nip.io --set hosts.instance=ws.$(minikube ip).nip.io --set keycloak.authUrl=https://keycloak.$(minikube ip).nip.io/
 
 # Optional: switch to the newly created namespace
 kubectl config set-context --current --namespace=theiacloud

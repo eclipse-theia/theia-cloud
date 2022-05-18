@@ -12,6 +12,9 @@ docker build -t theia-cloud-demo -f demo/dockerfiles/demo-theia-docker/Dockerfil
 # Build the Landing page/Dashboard with:
 docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile .
 
+# Build the Try Now page with:
+docker build -t theia-cloud-try-now-page -f dockerfiles/try-now-page/Dockerfile .
+
 # Build the workspace REST service with:
 docker build -t theia-cloud-workspace -f dockerfiles/workspace/Dockerfile .
 

@@ -1,0 +1,19 @@
+.Spinner__logo {
+  width: 100px;
+  height: 100px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .Spinner__logo {
+    animation: Spinner__logo--spin infinite 5s linear;
+  }
+}
+
+@keyframes Spinner__logo--spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
