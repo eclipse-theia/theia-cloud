@@ -29,6 +29,15 @@ docker push eu.gcr.io/kubernetes-238012/theia-cloud-landing-page:latest
 
 ```
 
+Build and push the Try Now page with:
+
+```bash
+docker build -t theia-cloud-try-now-page -f dockerfiles/try-now-page/Dockerfile .
+docker tag theia-cloud-try-now-page:latest eu.gcr.io/kubernetes-238012/theia-cloud-try-now-page:latest
+docker push eu.gcr.io/kubernetes-238012/theia-cloud-try-now-page:latest
+
+```
+
 Build and push the workspace REST service with:
 
 ```bash

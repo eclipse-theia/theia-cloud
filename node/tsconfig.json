@@ -1,0 +1,13 @@
+{
+  "extends": "./configs/base.tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+  },
+  "include": [
+    "common/src",
+    "try-now-page/src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

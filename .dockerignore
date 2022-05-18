@@ -1,0 +1,14 @@
+.github/
+.git/
+
+doc/
+helm/
+k8s/
+
+# JS/TS build artifacts
+node/**/node_modules/
+node/**/build/
+node/**/dist/
+
+# Java build artifacts
+java/**/target/
