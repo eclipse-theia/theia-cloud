@@ -46,7 +46,7 @@ function App(): JSX.Element {
       <img src={logo} className='App__logo' alt='logo' />
       <p>
         Powered by{' '}
-        <a href='https://github.com/eclipsesource/theia-cloud' target='_blank' rel='noreferrer'>
+        <a href='http://theia-cloud.io' target='_blank' rel='noreferrer'>
           Theia.Cloud
         </a>
       </p>
