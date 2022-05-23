@@ -96,12 +96,19 @@ public class PersistentVolumeHandlerImpl implements PersistentVolumeHandler {
 	volume.setPersistentVolumeClaim(persistentVolumeClaim);
 	persistentVolumeClaim.setClaimName(pvcName);
 
-	Container theiaContainer = podSpec.getContainers().get(THEIA_CONTAINER_INDEX);
+	Container theiaContainer = getTheiaContainer(podSpec);
 
 	VolumeMount volumeMount = new VolumeMount();
 	theiaContainer.getVolumeMounts().add(volumeMount);
 	volumeMount.setName(USER_DATA);
 	volumeMount.setMountPath(MOUNT_PATH);
+    }
+
+    protected Container getTheiaContainer(PodSpec podSpec) {
+	if (podSpec.getContainers().size() == 1) {
+	    return podSpec.getContainers().get(0);
+	}
+	return podSpec.getContainers().get(THEIA_CONTAINER_INDEX);
     }
 
 }
