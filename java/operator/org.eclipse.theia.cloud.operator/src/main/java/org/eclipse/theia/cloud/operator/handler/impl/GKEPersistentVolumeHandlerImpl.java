@@ -27,6 +27,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudPersistentVolumeUtil;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -41,7 +42,6 @@ public class GKEPersistentVolumeHandlerImpl implements PersistentVolumeHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(GKEPersistentVolumeHandlerImpl.class);
 
-    protected static final String MOUNT_PATH = "/home/project/persisted";
     protected static final int THEIA_CONTAINER_INDEX = 1;
     protected static final String USER_DATA = "user-data";
 
@@ -49,13 +49,13 @@ public class GKEPersistentVolumeHandlerImpl implements PersistentVolumeHandler {
 
     @Override
     public void createAndApplyPersistentVolume(DefaultKubernetesClient client, String namespace, String correlationId,
-	    Session session) {
+	    AppDefinitionSpec appDefinition, Session session) {
 	/* no needed ? */
     }
 
     @Override
     public void createAndApplyPersistentVolumeClaim(DefaultKubernetesClient client, String namespace,
-	    String correlationId, Session session) {
+	    String correlationId, AppDefinitionSpec appDefinition, Session session) {
 
 	Map<String, String> replacements = TheiaCloudPersistentVolumeUtil
 		.getPersistentVolumeClaimReplacements(namespace, session);
@@ -72,7 +72,7 @@ public class GKEPersistentVolumeHandlerImpl implements PersistentVolumeHandler {
     }
 
     @Override
-    public void addVolumeClaim(Deployment deployment, String pvcName) {
+    public void addVolumeClaim(Deployment deployment, String pvcName, AppDefinitionSpec appDefinition) {
 	PodSpec podSpec = deployment.getSpec().getTemplate().getSpec();
 
 	Volume volume = new Volume();
@@ -82,12 +82,12 @@ public class GKEPersistentVolumeHandlerImpl implements PersistentVolumeHandler {
 	volume.setPersistentVolumeClaim(persistentVolumeClaim);
 	persistentVolumeClaim.setClaimName(pvcName);
 
-	Container theiaContainer = podSpec.getContainers().get(THEIA_CONTAINER_INDEX);
+	Container theiaContainer = TheiaCloudPersistentVolumeUtil.getTheiaContainer(podSpec, appDefinition);
 
 	VolumeMount volumeMount = new VolumeMount();
 	theiaContainer.getVolumeMounts().add(volumeMount);
 	volumeMount.setName(USER_DATA);
-	volumeMount.setMountPath(MOUNT_PATH);
+	volumeMount.setMountPath(TheiaCloudPersistentVolumeUtil.getMountPath(appDefinition));
     }
 
 }

@@ -74,6 +74,9 @@ public class AppDefinitionSpec {
     @JsonProperty("uplinkLimit")
     private int uplinkLimit;// kilobits per second
 
+    @JsonProperty("mountPath")
+    private String mountPath;
+
     public String getName() {
 	return name;
     }
@@ -138,13 +141,18 @@ public class AppDefinitionSpec {
 	return uplinkLimit;
     }
 
+    public String getMountPath() {
+	return mountPath;
+    }
+
     @Override
     public String toString() {
 	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", pullSecret=" + pullSecret + ", uid=" + uid
 		+ ", port=" + port + ", host=" + host + ", ingressname=" + ingressname + ", minInstances="
 		+ minInstances + ", maxInstances=" + maxInstances + ", killAfter=" + killAfter + ", requestsMemory="
 		+ requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory=" + limitsMemory + ", limitsCpu="
-		+ limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit=" + uplinkLimit + "]";
+		+ limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit=" + uplinkLimit + ", mountPath="
+		+ mountPath + "]";
     }
 
 }

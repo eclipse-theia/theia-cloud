@@ -53,6 +53,8 @@ spec:
                   type: integer
                 uplinkLimit:
                   type: integer
+                mountPath:
+                  type: string
     - name : v1beta
       served: true
       storage: false
