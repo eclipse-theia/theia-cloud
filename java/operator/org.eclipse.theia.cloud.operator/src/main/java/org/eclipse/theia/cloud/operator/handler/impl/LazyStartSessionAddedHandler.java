@@ -115,8 +115,10 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 	    if (volume.isEmpty()) {
 		LOGGER.debug(formatLogMessage(correlationId,
 			"No Volumce Claim with name " + pvcName.get() + " was found. Creating claims."));
-		persistentVolumeHandler.createAndApplyPersistentVolume(client, namespace, correlationId, session);
-		persistentVolumeHandler.createAndApplyPersistentVolumeClaim(client, namespace, correlationId, session);
+		persistentVolumeHandler.createAndApplyPersistentVolume(client, namespace, correlationId,
+			optionalAppDefinition.get().getSpec(), session);
+		persistentVolumeHandler.createAndApplyPersistentVolumeClaim(client, namespace, correlationId,
+			optionalAppDefinition.get().getSpec(), session);
 	    }
 	}
 
@@ -270,7 +272,8 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
 		SessionSpec.API, SessionSpec.KIND, sessionResourceName, sessionResourceUID, 0, deployment -> {
-		    pvName.ifPresent(name -> persistentVolumeHandler.addVolumeClaim(deployment, name));
+		    pvName.ifPresent(
+			    name -> persistentVolumeHandler.addVolumeClaim(deployment, name, appDefinition.getSpec()));
 		    bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
 			    appDefinition.getSpec().getUplinkLimit(), correlationId);
 		    AddedHandler.removeEmptyResources(deployment);
