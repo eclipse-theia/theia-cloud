@@ -19,3 +19,4 @@ spec:
   limitsCpu: "2"
   downlinkLimit: 30000
   uplinkLimit: 30000
+  mountPath: "/home/project/persisted"
