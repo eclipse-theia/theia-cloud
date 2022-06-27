@@ -17,7 +17,7 @@ keycloak:
   authUrl: "https://keycloak.192.168.39.3.nip.io/auth/"
   realm: "TheiaCloud"
   clientId: "theia-cloud"
-  clientSecret: "zpF6PUpM3RmfVecInloasXTjn1yc88Dp"
+  clientSecret: "publicbutoauth2proxywantsasecret"
   cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
 
 operator:
