@@ -9,4 +9,4 @@ spec:
   capacity:
     storage: 250Mi
   hostPath:
-    path: /data/test/placeholder-pv/
+    path: /tmp/hostpath-provisioner/theia-cloud/placeholder-pv/

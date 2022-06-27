@@ -1,7 +1,5 @@
 # Theia.cloud
 
-Theia.cloud
-
 The goal of Theia.cloud is to simplify the deployment of Theia-based (and similar) products on Kubernetes. We follow a convention over configuration approach allowing users to get started fast. At the same time, we aim for extensibility allowing developers to customize certain aspects of the kubernetes deployment if required.
 
 ## Components
@@ -43,3 +41,5 @@ helm uninstall theia-cloud -n theiacloud
 ### Getting started with
 
 [...Minikube](doc/docs/platforms/Minikube.md)
+
+[...configuring the Keycloak Realm](doc/docs/Keycloak.md)

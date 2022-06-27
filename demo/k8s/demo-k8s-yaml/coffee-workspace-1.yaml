@@ -1,8 +1,0 @@
-apiVersion: theia.cloud/v2alpha
-kind: Workspace
-metadata:
-  name: coffee-workspace-1
-spec:
-  name: foo-workspace
-  template: coffee-editor
-  user: foo@foo.foo
