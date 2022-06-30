@@ -1,35 +1,35 @@
 app:
   id: asdfghjkl
-  name: Theia Blueprint
-  logo: theiablueprint.png
+  name: CDT.cloud Blueprint
+  logo: cdtcloud.png
 
 issuer:
   email: mmorlock@example.com
 
 image:
-  name: theiacloud/theia-cloud-demo
+  name: theiacloud/cdt-blueprint
 
 hosts:
-  workspace: workspace.192.168.39.3.nip.io
-  landing: theia.cloud.192.168.39.3.nip.io
-  instance: ws.192.168.39.3.nip.io
+  workspace: workspace.192.168.39.173.nip.io
+  landing: theia.cloud.192.168.39.173.nip.io
+  instance: ws.192.168.39.173.nip.io
 
 landingPage:
   image: theiacloud/theia-cloud-landing-page
   template: "theia-cloud-demo"
 
 keycloak:
-  enable: true
-  authUrl: "https://keycloak.192.168.39.3.nip.io/auth/"
+  enable: false
+  authUrl: "https://keycloak.url/auth/"
   realm: "TheiaCloud"
   clientId: "theia-cloud"
-  clientSecret: "publicbutoauth2proxywantsasecret"
+  clientSecret: "RZdfb7bbhy26C6EObmvlHiZcZhar34O0"
   cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
 
 operator:
   image: theiacloud/theia-cloud-operator
   eagerStart: false
-  ephemeralStorage: false
+  ephemeralStorage: true
   cloudProvider: "K8S"
   bandwidthLimiter: "K8SANNOTATION"
 
@@ -38,5 +38,5 @@ workspace:
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
-  clusterIssuer: theia-cloud-selfsigned-issuer
-  theiaCloudCommonName: true
+  clusterIssuer: letsencrypt-prod
+  theiaCloudCommonName: false

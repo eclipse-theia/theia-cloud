@@ -1,13 +1,13 @@
 app:
   id: asdfghjkl
-  name: Theia Blueprint
-  logo: theiablueprint.png
+  name: CDT.cloud Blueprint
+  logo: cdtcloud.png
 
 issuer:
   email: mmorlock@example.com
 
 image:
-  name: theiacloud/theia-cloud-demo
+  name: theiacloud/cdt-blueprint
 
 hosts:
   workspace: workspace.192.168.39.3.nip.io
@@ -19,17 +19,17 @@ landingPage:
   template: "theia-cloud-demo"
 
 keycloak:
-  enable: true
+  enable: false
   authUrl: "https://keycloak.192.168.39.3.nip.io/auth/"
   realm: "TheiaCloud"
   clientId: "theia-cloud"
-  clientSecret: "publicbutoauth2proxywantsasecret"
+  clientSecret: "zpF6PUpM3RmfVecInloasXTjn1yc88Dp"
   cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
 
 operator:
   image: theiacloud/theia-cloud-operator
   eagerStart: false
-  ephemeralStorage: false
+  ephemeralStorage: true
   cloudProvider: "K8S"
   bandwidthLimiter: "K8SANNOTATION"
 

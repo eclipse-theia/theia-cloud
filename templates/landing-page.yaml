@@ -17,22 +17,26 @@ spec:
     spec:
       automountServiceAccountToken: false
       containers:
-      - name: landing-page-container
-        image: {{ .Values.landingPage.image }}
-        ports:
-        - name: http
-          containerPort: 80
-          protocol: TCP
-        readinessProbe:
-          httpGet:
-            path: /config.js
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        volumeMounts:
-          - name: landing-page-config
-            mountPath: /usr/share/nginx/html/config.js
-            subPath: config.js
+        - name: landing-page-container
+          image: {{ .Values.landingPage.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /config.js
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: landing-page-config
+              mountPath: /usr/share/nginx/html/config.js
+              subPath: config.js
+            - name: landing-page-config
+              mountPath: /usr/share/nginx/html/logo.png
+              subPath: logo.png
       volumes:
         - name: landing-page-config
           configMap:
