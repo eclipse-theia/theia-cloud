@@ -4,4 +4,4 @@ metadata:
   name: workspace-config
   namespace: {{ .Release.Namespace }}
 data:
-  APPID: {{ .Values.appId }}
+  APPID: {{ .Values.app.id }}

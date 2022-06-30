@@ -4,6 +4,7 @@ export namespace TheiaCloudConfig {
       !!thing &&
       typeof thing === 'object' &&
       typeof thing.appId === 'string' &&
+      typeof thing.appName === 'string' &&
       typeof thing.workspaceServiceUrl === 'string' &&
       typeof thing.workspaceTemplate === 'string' &&
       typeof thing.useKeycloak === 'boolean'
@@ -25,6 +26,7 @@ export namespace KeycloakConfig {
 
 interface BaseTheiaCloudConfig {
   appId: string;
+  appName: string;
   useKeycloak: boolean;
   workspaceServiceUrl: string;
   workspaceTemplate: string;

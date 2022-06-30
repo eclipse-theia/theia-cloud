@@ -1,5 +1,6 @@
 window.theiaCloudConfig = {
   appId: 'asdfghjkl',
+  appName: "Theia Blueprint",
   useKeycloak: false,
   //   keycloakAuthUrl: "https://keycloak.url/auth/",
   //   keycloakRealm: "TheiaCloud",

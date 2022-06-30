@@ -6,7 +6,8 @@ metadata:
 data:
   config.js: |
     window.theiaCloudConfig = {
-      appId: "{{ .Values.appId }}",
+      appId: "{{ .Values.app.id }}",
+      appName: "{{ .Values.app.name }}",
       useKeycloak: {{ .Values.keycloak.enable }},
       keycloakAuthUrl: "{{ .Values.keycloak.authUrl }}",
       keycloakRealm: "{{ .Values.keycloak.realm }}",
@@ -14,3 +15,8 @@ data:
       workspaceServiceUrl: "https://{{ .Values.hosts.workspace }}/workspaces",
       workspaceTemplate: "{{ .Values.landingPage.template }}",
     };
+binaryData:
+  {{ range $path, $bytes := .Files.Glob (printf "logos/%s" .Values.app.logo)}}
+  {{ print "logo.png: "}}{{ $.Files.Get $path | b64enc }}
+  {{ end }}
+

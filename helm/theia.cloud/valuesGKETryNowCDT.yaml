@@ -1,13 +1,13 @@
 app:
   id: asdfghjkl
-  name: Theia Blueprint
-  logo: theiablueprint.png
+  name: CDT.cloud Blueprint
+  logo: cdtcloud.png
 
 issuer:
   email: jfaltermeier@eclipsesource.com
 
 image:
-  name: theiacloud/theia-cloud-demo
+  name: theiacloud/cdt-blueprint
 
 hosts:
   workspace: workspace.34.141.62.32.nip.io
