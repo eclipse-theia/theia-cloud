@@ -29,11 +29,11 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
-import org.eclipse.theia.cloud.operator.handler.TemplateAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.AppDefinitionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceRemovedHandler;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResourceList;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -49,90 +49,94 @@ public class TheiaCloudImpl implements TheiaCloud {
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudImpl.class);
 
-    private static final String COR_ID_TEMPLATEPREFIX = "template-watch-";
+    private static final String COR_ID_APPDEFINITIONPREFIX = "appdefinition-watch-";
     private static final String COR_ID_WORKSPACEPREFIX = "workspace-watch-";
 
-    private final Map<String, TemplateSpecResource> templateCache = new ConcurrentHashMap<>();
+    private final Map<String, AppDefinitionSpecResource> appDefinitionCache = new ConcurrentHashMap<>();
     private final Map<String, Workspace> workspaceCache = new ConcurrentHashMap<>();
 
     private final String namespace;
     private final Injector injector;
     private final DefaultKubernetesClient client;
-    private final NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient;
+    private final NonNamespaceOperation<AppDefinitionSpecResource, AppDefinitionSpecResourceList, Resource<AppDefinitionSpecResource>> appDefinitionResourceClient;
     private final NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaceResourceClient;
 
-    private TemplateAddedHandler templateAddedHandler;
+    private AppDefinitionAddedHandler appDefinitionAddedHandler;
     private WorkspaceAddedHandler workspaceAddedHandler;
     private WorkspaceRemovedHandler workspaceRemovedHandler;
 
     public TheiaCloudImpl(String namespace, AbstractTheiaCloudOperatorModule module, DefaultKubernetesClient client,
-	    NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient,
+	    NonNamespaceOperation<AppDefinitionSpecResource, AppDefinitionSpecResourceList, Resource<AppDefinitionSpecResource>> appDefinitionResourceClient,
 	    NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaceResourceClient) {
 	this.namespace = namespace;
 	this.injector = Guice.createInjector(module);
 	this.client = client;
-	this.templateResourceClient = templateResourceClient;
+	this.appDefinitionResourceClient = appDefinitionResourceClient;
 	this.workspaceResourceClient = workspaceResourceClient;
 
-	this.templateAddedHandler = injector.getInstance(TemplateAddedHandler.class);
+	this.appDefinitionAddedHandler = injector.getInstance(AppDefinitionAddedHandler.class);
 	this.workspaceAddedHandler = injector.getInstance(WorkspaceAddedHandler.class);
 	this.workspaceRemovedHandler = injector.getInstance(WorkspaceRemovedHandler.class);
     }
 
     @Override
     public void start() {
-	initTemplatesAndWatchForChanges();
+	initAppDefinitionsAndWatchForChanges();
 	initWorkspacesAndWatchForChanges();
 
-	EXECUTOR.scheduleWithFixedDelay(new KillAfterRunnable(templateResourceClient, workspaceResourceClient), 1, 1,
-		TimeUnit.MINUTES);
+	EXECUTOR.scheduleWithFixedDelay(new KillAfterRunnable(appDefinitionResourceClient, workspaceResourceClient), 1,
+		1, TimeUnit.MINUTES);
     }
 
-    private void handleTemplateEvent(Watcher.Action action, String uid, String correlationId) {
-	TemplateSpecResource template = templateCache.get(uid);
+    private void handleAppDefnitionEvent(Watcher.Action action, String uid, String correlationId) {
+	AppDefinitionSpecResource appDefinition = appDefinitionCache.get(uid);
 	switch (action) {
 	case ADDED:
-	    templateAdded(template, correlationId);
+	    appDefinitionAdded(appDefinition, correlationId);
 	    break;
 	case DELETED:
-	    templateDeleted(template, correlationId);
+	    appDefinitionDeleted(appDefinition, correlationId);
 	    break;
 	case MODIFIED:
-	    templateModified(template, correlationId);
+	    appDefinitionModified(appDefinition, correlationId);
 	    break;
 	case ERROR:
-	    templateErrored(template, correlationId);
+	    appDefinitionErrored(appDefinition, correlationId);
 	    break;
 	case BOOKMARK:
-	    templateBookmarked(template, correlationId);
+	    appDefinitionBookmarked(appDefinition, correlationId);
 	    break;
 	}
     }
 
-    private void templateAdded(TemplateSpecResource template, String correlationId) {
-	LOGGER.trace(formatLogMessage(COR_ID_TEMPLATEPREFIX, correlationId,
-		"Delegating templateAdded to " + templateAddedHandler.getClass().getName()));
-	templateAddedHandler.handle(client, template, namespace, correlationId);
+    private void appDefinitionAdded(AppDefinitionSpecResource appDefinition, String correlationId) {
+	LOGGER.trace(formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId,
+		"Delegating appDefinitionAdded to " + appDefinitionAddedHandler.getClass().getName()));
+	appDefinitionAddedHandler.handle(client, appDefinition, namespace, correlationId);
     }
 
-    private void templateDeleted(TemplateSpecResource template, String correlationId) {
+    private void appDefinitionDeleted(AppDefinitionSpecResource appDefinition, String correlationId) {
 	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_TEMPLATEPREFIX, correlationId, "templateDeleted not implemented"));
+	LOGGER.warn(
+		formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId, "appDefinitionDeleted not implemented"));
     }
 
-    private void templateModified(TemplateSpecResource template, String correlationId) {
+    private void appDefinitionModified(AppDefinitionSpecResource appDefinition, String correlationId) {
 	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_TEMPLATEPREFIX, correlationId, "templateModified not implemented"));
+	LOGGER.warn(
+		formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId, "appDefinitionModified not implemented"));
     }
 
-    private void templateErrored(TemplateSpecResource template, String correlationId) {
+    private void appDefinitionErrored(AppDefinitionSpecResource appDefinition, String correlationId) {
 	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_TEMPLATEPREFIX, correlationId, "templateErrored not implemented"));
+	LOGGER.warn(
+		formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId, "appDefinitionErrored not implemented"));
     }
 
-    private void templateBookmarked(TemplateSpecResource template, String correlationId) {
+    private void appDefinitionBookmarked(AppDefinitionSpecResource appDefinition, String correlationId) {
 	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_TEMPLATEPREFIX, correlationId, "templateBookmarked not implemented"));
+	LOGGER.warn(
+		formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId, "appDefinitionBookmarked not implemented"));
     }
 
     private void handleWorkspaceEvent(Watcher.Action action, String uid, String correlationId) {
@@ -183,16 +187,16 @@ public class TheiaCloudImpl implements TheiaCloud {
 	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceBookmarked not implemented"));
     }
 
-    private void initTemplatesAndWatchForChanges() {
+    private void initAppDefinitionsAndWatchForChanges() {
 	try {
-	    /* init existing templates */
-	    templateResourceClient.list().getItems().forEach(this::initTemplate);
+	    /* init existing app definitions */
+	    appDefinitionResourceClient.list().getItems().forEach(this::initAppDefinition);
 
 	    /* watch for changes */
-	    templateResourceClient.watch(new SpecWatch<TemplateSpecResource>(templateCache, this::handleTemplateEvent,
-		    "Template", COR_ID_TEMPLATEPREFIX));
+	    appDefinitionResourceClient.watch(new SpecWatch<AppDefinitionSpecResource>(appDefinitionCache,
+		    this::handleAppDefnitionEvent, "App Definition", COR_ID_APPDEFINITIONPREFIX));
 	} catch (Exception e) {
-	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing templates watch"), e);
+	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing app definitions watch"), e);
 	    System.exit(-1);
 	}
     }
@@ -211,10 +215,10 @@ public class TheiaCloudImpl implements TheiaCloud {
 	}
     }
 
-    private void initTemplate(TemplateSpecResource resource) {
-	templateCache.put(resource.getMetadata().getUid(), resource);
+    private void initAppDefinition(AppDefinitionSpecResource resource) {
+	appDefinitionCache.put(resource.getMetadata().getUid(), resource);
 	String uid = resource.getMetadata().getUid();
-	handleTemplateEvent(Watcher.Action.ADDED, uid, Main.COR_ID_INIT);
+	handleAppDefnitionEvent(Watcher.Action.ADDED, uid, Main.COR_ID_INIT);
     }
 
     private void initWorkspace(Workspace resource) {

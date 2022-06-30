@@ -22,15 +22,15 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class WorkspaceSpec {
 
-    public static final String API = "theia.cloud/v2alpha";
+    public static final String API = "theia.cloud/v3alpha";
     public static final String KIND = "Workspace";
     public static final String CRD_NAME = "workspaces.theia.cloud";
 
     @JsonProperty("name")
     private String name;
 
-    @JsonProperty("template")
-    private String template;
+    @JsonProperty("appDefinition")
+    private String appDefinition;
 
     @JsonProperty("user")
     private String user;
@@ -44,9 +44,9 @@ public class WorkspaceSpec {
     public WorkspaceSpec() {
     }
 
-    public WorkspaceSpec(String name, String template, String user) {
+    public WorkspaceSpec(String name, String appDefinition, String user) {
 	this.name = name;
-	this.template = template;
+	this.appDefinition = appDefinition;
 	this.user = user;
     }
 
@@ -54,8 +54,8 @@ public class WorkspaceSpec {
 	return name;
     }
 
-    public String getTemplate() {
-	return template;
+    public String getAppDefinition() {
+	return appDefinition;
     }
 
     public String getUser() {
@@ -80,8 +80,8 @@ public class WorkspaceSpec {
 
     @Override
     public String toString() {
-	return "WorkspaceSpec [name=" + name + ", template=" + template + ", user=" + user + ", url=" + url + ", error="
-		+ error + "]";
+	return "WorkspaceSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
+		+ ", error=" + error + "]";
     }
 
 }

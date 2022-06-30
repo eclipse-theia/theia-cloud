@@ -17,12 +17,12 @@
 package org.eclipse.theia.cloud.operator.handler;
 
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
 public interface IngressPathProvider {
 
-    String getPath(TemplateSpecResource template, int instance);
+    String getPath(AppDefinitionSpecResource appDefinition, int instance);
 
-    String getPath(TemplateSpecResource template, Workspace workspace);
+    String getPath(AppDefinitionSpecResource appDefinition, Workspace workspace);
 
 }

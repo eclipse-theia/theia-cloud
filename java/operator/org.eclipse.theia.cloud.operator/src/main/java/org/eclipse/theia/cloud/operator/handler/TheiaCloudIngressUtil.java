@@ -25,8 +25,8 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.operator.handler.impl.AddedHandler;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -47,33 +47,33 @@ public final class TheiaCloudIngressUtil {
     }
 
     public static boolean checkForExistingIngressAndAddOwnerReferencesIfMissing(DefaultKubernetesClient client,
-	    String namespace, TemplateSpecResource template, String correlationId) {
-	Optional<Ingress> existingIngressWithParentTemplate = K8sUtil.getExistingIngress(client, namespace,
-		template.getMetadata().getName(), template.getMetadata().getUid());
-	if (existingIngressWithParentTemplate.isPresent()) {
+	    String namespace, AppDefinitionSpecResource appDefinition, String correlationId) {
+	Optional<Ingress> existingIngressWithParentAppDefinition = K8sUtil.getExistingIngress(client, namespace,
+		appDefinition.getMetadata().getName(), appDefinition.getMetadata().getUid());
+	if (existingIngressWithParentAppDefinition.isPresent()) {
 	    return true;
 	}
-	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, template.getSpec().getIngressname());
+	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, appDefinition.getSpec().getIngressname());
 	if (ingress.isPresent()) {
 	    OwnerReference ownerReference = new OwnerReference();
-	    ownerReference.setApiVersion(HasMetadata.getApiVersion(TemplateSpecResource.class));
-	    ownerReference.setKind(TemplateSpec.KIND);
-	    ownerReference.setName(template.getMetadata().getName());
-	    ownerReference.setUid(template.getMetadata().getUid());
+	    ownerReference.setApiVersion(HasMetadata.getApiVersion(AppDefinitionSpecResource.class));
+	    ownerReference.setKind(AppDefinitionSpec.KIND);
+	    ownerReference.setName(appDefinition.getMetadata().getName());
+	    ownerReference.setUid(appDefinition.getMetadata().getUid());
 	    addOwnerReferenceToIngress(client, namespace, ingress.get(), ownerReference);
 	}
 	return ingress.isPresent();
     }
 
-    public static String getIngressName(TemplateSpecResource template) {
-	return template.getSpec().getIngressname();
+    public static String getIngressName(AppDefinitionSpecResource appDefinition) {
+	return appDefinition.getSpec().getIngressname();
     }
 
-    public static Map<String, String> getIngressReplacements(String namespace, TemplateSpecResource template) {
+    public static Map<String, String> getIngressReplacements(String namespace, AppDefinitionSpecResource appDefinition) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_INGRESSNAME, getIngressName(template));
+	replacements.put(PLACEHOLDER_INGRESSNAME, getIngressName(appDefinition));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	replacements.put(PLACEHOLDER_HOST, template.getSpec().getHost());
+	replacements.put(PLACEHOLDER_HOST, appDefinition.getSpec().getHost());
 	return replacements;
     }
 

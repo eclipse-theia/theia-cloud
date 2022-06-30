@@ -28,7 +28,7 @@ import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceRemovedHandler;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
 import com.google.inject.Inject;
 
@@ -51,26 +51,27 @@ public class LazyStartWorkspaceRemovedHandler implements WorkspaceRemovedHandler
 	/* workspace information */
 	WorkspaceSpec workspaceSpec = workspace.getSpec();
 
-	/* find template for workspace */
-	String templateID = workspaceSpec.getTemplate();
-	Optional<TemplateSpecResource> optionalTemplate = TheiaCloudHandlerUtil.getTemplateSpecForWorkspace(client,
-		namespace, templateID);
-	if (optionalTemplate.isEmpty()) {
-	    LOGGER.error(formatLogMessage(correlationId, "No Template with name " + templateID + " found."));
+	/* find appDefinition for workspace */
+	String appDefinitionID = workspaceSpec.getAppDefinition();
+	Optional<AppDefinitionSpecResource> optionalAppDefinition = TheiaCloudHandlerUtil
+		.getAppDefinitionSpecForWorkspace(client, namespace, appDefinitionID);
+	if (optionalAppDefinition.isEmpty()) {
+	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;
 	}
 
 	/* find ingress */
-	String templateResourceName = optionalTemplate.get().getMetadata().getName();
-	String templateResourceUID = optionalTemplate.get().getMetadata().getUid();
-	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, templateResourceName,
-		templateResourceUID);
+	String appDefinitionResourceName = optionalAppDefinition.get().getMetadata().getName();
+	String appDefinitionResourceUID = optionalAppDefinition.get().getMetadata().getUid();
+	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, appDefinitionResourceName,
+		appDefinitionResourceUID);
 	if (ingress.isEmpty()) {
-	    LOGGER.error(formatLogMessage(correlationId, "No Ingress for template " + templateID + " found."));
+	    LOGGER.error(
+		    formatLogMessage(correlationId, "No Ingress for app definition " + appDefinitionID + " found."));
 	    return false;
 	}
 
-	String path = ingressPathProvider.getPath(optionalTemplate.get(), workspace);
+	String path = ingressPathProvider.getPath(optionalAppDefinition.get(), workspace);
 	TheiaCloudIngressUtil.removeIngressRule(client, namespace, ingress.get(), path, correlationId);
 
 	return true;

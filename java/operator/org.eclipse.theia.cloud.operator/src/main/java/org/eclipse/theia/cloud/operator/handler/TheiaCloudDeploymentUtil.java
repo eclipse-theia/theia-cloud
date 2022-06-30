@@ -26,7 +26,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 
@@ -37,7 +37,7 @@ public final class TheiaCloudDeploymentUtil {
     public static final String DEPLOYMENT_NAME = "-deployment-";
 
     public static final String PLACEHOLDER_DEPLOYMENTNAME = "placeholder-depname";
-    public static final String PLACEHOLDER_TEMPLATENAME = "placeholder-templatename";
+    public static final String PLACEHOLDER_APPDEFINITIONNAME = "placeholder-definitionname";
     public static final String PLACEHOLDER_IMAGE = "placeholder-image";
     public static final String PLACEHOLDER_CPU_LIMITS = "placeholder-cpu-limits";
     public static final String PLACEHOLDER_MEMORY_LIMITS = "placeholder-memory-limits";
@@ -50,24 +50,24 @@ public final class TheiaCloudDeploymentUtil {
     private TheiaCloudDeploymentUtil() {
     }
 
-    private static String getDeploymentNamePrefix(TemplateSpecResource template) {
-	return template.getSpec().getName() + DEPLOYMENT_NAME;
+    private static String getDeploymentNamePrefix(AppDefinitionSpecResource appDefinition) {
+	return appDefinition.getSpec().getName() + DEPLOYMENT_NAME;
     }
 
     private static String getDeploymentNamePrefix(Workspace workspace) {
 	return workspace.getSpec().getName() + DEPLOYMENT_NAME;
     }
 
-    public static String getDeploymentName(TemplateSpecResource template, int instance) {
-	return K8sUtil.validString(getDeploymentNamePrefix(template) + instance);
+    public static String getDeploymentName(AppDefinitionSpecResource appDefinition, int instance) {
+	return K8sUtil.validString(getDeploymentNamePrefix(appDefinition) + instance);
     }
 
     public static String getDeploymentName(Workspace workspace) {
 	return K8sUtil.validString(getDeploymentNamePrefix(workspace) + workspace.getMetadata().getUid());
     }
 
-    public static Integer getId(String correlationId, TemplateSpecResource template, Deployment deployment) {
-	int namePrefixLength = getDeploymentNamePrefix(template).length();
+    public static Integer getId(String correlationId, AppDefinitionSpecResource appDefinition, Deployment deployment) {
+	int namePrefixLength = getDeploymentNamePrefix(appDefinition).length();
 	String name = deployment.getMetadata().getName();
 	String instance = name.substring(namePrefixLength);
 	try {
@@ -78,52 +78,52 @@ public final class TheiaCloudDeploymentUtil {
 	return null;
     }
 
-    public static Set<Integer> computeIdsOfMissingDeployments(TemplateSpecResource template, String correlationId,
-	    int instances, List<Deployment> existingItems) {
+    public static Set<Integer> computeIdsOfMissingDeployments(AppDefinitionSpecResource appDefinition,
+	    String correlationId, int instances, List<Deployment> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
-		service -> getId(correlationId, template, service));
+		service -> getId(correlationId, appDefinition, service));
     }
 
-    public static Map<String, String> getDeploymentsReplacements(String namespace, TemplateSpecResource template,
-	    int instance) {
+    public static Map<String, String> getDeploymentsReplacements(String namespace,
+	    AppDefinitionSpecResource appDefinition, int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_DEPLOYMENTNAME, getDeploymentName(template, instance));
+	replacements.put(PLACEHOLDER_DEPLOYMENTNAME, getDeploymentName(appDefinition, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP,
-		TheiaCloudHandlerUtil.getAppSelector(template, instance));
-	replacements.put(PLACEHOLDER_TEMPLATENAME, template.getSpec().getName());
-	replacements.put(PLACEHOLDER_IMAGE, template.getSpec().getImage());
+		TheiaCloudHandlerUtil.getAppSelector(appDefinition, instance));
+	replacements.put(PLACEHOLDER_APPDEFINITIONNAME, appDefinition.getSpec().getName());
+	replacements.put(PLACEHOLDER_IMAGE, appDefinition.getSpec().getImage());
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME,
-		TheiaCloudConfigMapUtil.getProxyConfigName(template, instance));
+		TheiaCloudConfigMapUtil.getProxyConfigName(appDefinition, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
-		TheiaCloudConfigMapUtil.getEmailConfigName(template, instance));
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
-	replacements.put(PLACEHOLDER_CPU_LIMITS, orEmpty(template.getSpec().getLimitsCpu()));
-	replacements.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(template.getSpec().getLimitsMemory()));
-	replacements.put(PLACEHOLDER_CPU_REQUESTS, orEmpty(template.getSpec().getRequestsCpu()));
-	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, orEmpty(template.getSpec().getRequestsMemory()));
-	replacements.put(PLACEHOLDER_UID, getUID(template.getSpec().getUid()));
+		TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition, instance));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinition.getSpec().getPort()));
+	replacements.put(PLACEHOLDER_CPU_LIMITS, orEmpty(appDefinition.getSpec().getLimitsCpu()));
+	replacements.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(appDefinition.getSpec().getLimitsMemory()));
+	replacements.put(PLACEHOLDER_CPU_REQUESTS, orEmpty(appDefinition.getSpec().getRequestsCpu()));
+	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, orEmpty(appDefinition.getSpec().getRequestsMemory()));
+	replacements.put(PLACEHOLDER_UID, getUID(appDefinition.getSpec().getUid()));
 	return replacements;
     }
 
     public static Map<String, String> getDeploymentsReplacements(String namespace, Workspace workspace,
-	    TemplateSpecResource template) {
+	    AppDefinitionSpecResource appDefinition) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_DEPLOYMENTNAME, getDeploymentName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(workspace));
-	replacements.put(PLACEHOLDER_TEMPLATENAME, template.getSpec().getName());
-	replacements.put(PLACEHOLDER_IMAGE, template.getSpec().getImage());
+	replacements.put(PLACEHOLDER_APPDEFINITIONNAME, appDefinition.getSpec().getName());
+	replacements.put(PLACEHOLDER_IMAGE, appDefinition.getSpec().getImage());
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME,
 		TheiaCloudConfigMapUtil.getProxyConfigName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
 		TheiaCloudConfigMapUtil.getEmailConfigName(workspace));
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
-	replacements.put(PLACEHOLDER_CPU_LIMITS, orEmpty(template.getSpec().getLimitsCpu()));
-	replacements.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(template.getSpec().getLimitsMemory()));
-	replacements.put(PLACEHOLDER_CPU_REQUESTS, orEmpty(template.getSpec().getRequestsCpu()));
-	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, orEmpty(template.getSpec().getRequestsMemory()));
-	replacements.put(PLACEHOLDER_UID, getUID(template.getSpec().getUid()));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinition.getSpec().getPort()));
+	replacements.put(PLACEHOLDER_CPU_LIMITS, orEmpty(appDefinition.getSpec().getLimitsCpu()));
+	replacements.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(appDefinition.getSpec().getLimitsMemory()));
+	replacements.put(PLACEHOLDER_CPU_REQUESTS, orEmpty(appDefinition.getSpec().getRequestsCpu()));
+	replacements.put(PLACEHOLDER_MEMORY_REQUESTS, orEmpty(appDefinition.getSpec().getRequestsMemory()));
+	replacements.put(PLACEHOLDER_UID, getUID(appDefinition.getSpec().getUid()));
 	return replacements;
     }
 

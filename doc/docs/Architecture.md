@@ -23,15 +23,15 @@ The Theia.Cloud Operator listens for changes to custom resources inside the clus
 
 ## Custom Resources
 
-### Template
+### App Definition
 
-A template describing a specific type of a workspace.\
+A App Definition describing a specific type of a workspace.\
 (Not all properties may be supported by any operator configuration)
 
 |Property|Type|Used for|
 |---|---|---|
-|name|string|Used to identify the template|
-|image|string|The container image launched in every workspace of this template type|
+|name|string|Used to identify the app definition|
+|image|string|The container image launched in every workspace based on this app definition|
 |port|integer|port to expose|
 |host|string|Domain where the workspaces will be available|
 |ingressname|string|Name of the ingress where the rules for workspaces will be added|
@@ -52,7 +52,7 @@ A concrete workspace associated with a user
 |Property|Type|Used for|
 |---|---|---|
 |name|string|Used to identify the workspace|
-|template|string|The template name on which this workspace is based|
+|appDefinition|string|The app definition name on which this workspace is based|
 |user|string|The user ID based on which AuthN/Z will be done|
 |url|string|The Operator may fill this field with the URL where the workspace is available|
 |error|string|The Operator may fill this field with an error message if there was a problem|

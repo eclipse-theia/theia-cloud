@@ -20,11 +20,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize()
-public class TemplateSpec {
+public class AppDefinitionSpec {
 
-    public static final String API = "theia.cloud/v7alpha";
-    public static final String KIND = "Template";
-    public static final String CRD_NAME = "templates.theia.cloud";
+    public static final String API = "theia.cloud/v1beta";
+    public static final String KIND = "AppDefinition";
+    public static final String CRD_NAME = "appdefinitions.theia.cloud";
 
     @JsonProperty("name")
     private String name;
@@ -133,11 +133,11 @@ public class TemplateSpec {
 
     @Override
     public String toString() {
-	return "TemplateSpec [name=" + name + ", image=" + image + ", uid=" + uid + ", port=" + port + ", host=" + host
-		+ ", ingressname=" + ingressname + ", minInstances=" + minInstances + ", maxInstances=" + maxInstances
-		+ ", killAfter=" + killAfter + ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu
-		+ ", limitsMemory=" + limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit
-		+ ", uplinkLimit=" + uplinkLimit + "]";
+	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", uid=" + uid + ", port=" + port + ", host="
+		+ host + ", ingressname=" + ingressname + ", minInstances=" + minInstances + ", maxInstances="
+		+ maxInstances + ", killAfter=" + killAfter + ", requestsMemory=" + requestsMemory + ", requestsCpu="
+		+ requestsCpu + ", limitsMemory=" + limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit="
+		+ downlinkLimit + ", uplinkLimit=" + uplinkLimit + "]";
     }
 
 }

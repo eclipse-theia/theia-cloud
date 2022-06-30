@@ -25,11 +25,11 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v7alpha")
+@Version("v1beta")
 @Group("theia.cloud")
-@Singular("template")
-@Plural("templates")
-public class TemplateSpecResource extends CustomResource<TemplateSpec, Void> implements Namespaced {
+@Singular("appdefinition")
+@Plural("appdefinitions")
+public class AppDefinitionSpecResource extends CustomResource<AppDefinitionSpec, Void> implements Namespaced {
 
     private static final long serialVersionUID = 8749670583218521755L;
 

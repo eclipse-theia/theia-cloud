@@ -33,7 +33,7 @@ function theiaCloudConfig(): TheiaCloudConfig {
     appName: "",
     useKeycloak: false,
     workspaceServiceUrl: "",
-    workspaceTemplate: "",
+    appDefinition: "",
   };
 }
 
@@ -49,5 +49,5 @@ createApp(App, {
   keycloakRealm: config.keycloakRealm,
   keycloakClientId: config.keycloakClientId,
   workspaceServiceUrl: config.workspaceServiceUrl,
-  workspaceTemplate: config.workspaceTemplate,
+  appDefinition: config.appDefinition,
 }).mount("#app");

@@ -41,7 +41,7 @@ import org.eclipse.theia.cloud.operator.handler.TheiaCloudK8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudPersistentVolumeUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import com.google.inject.Inject;
@@ -85,20 +85,20 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	String workspaceResourceUID = workspace.getMetadata().getUid();
 	WorkspaceSpec workspaceSpec = workspace.getSpec();
 
-	/* find template for workspace */
-	String templateID = workspaceSpec.getTemplate();
-	Optional<TemplateSpecResource> optionalTemplate = TheiaCloudHandlerUtil.getTemplateSpecForWorkspace(client,
-		namespace, templateID);
-	if (optionalTemplate.isEmpty()) {
-	    LOGGER.error(formatLogMessage(correlationId, "No Template with name " + templateID + " found."));
+	/* find app definition for workspace */
+	String appDefinitionID = workspaceSpec.getAppDefinition();
+	Optional<AppDefinitionSpecResource> optionalAppDefinition = TheiaCloudHandlerUtil
+		.getAppDefinitionSpecForWorkspace(client, namespace, appDefinitionID);
+	if (optionalAppDefinition.isEmpty()) {
+	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;
 	}
 
 	/* check if max instances reached already */
 	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client, namespace, workspaceSpec,
-		optionalTemplate.get().getSpec(), correlationId)) {
+		optionalAppDefinition.get().getSpec(), correlationId)) {
 	    LOGGER.info(formatLogMessage(correlationId,
-		    "Max instances for " + templateID + " reached. Cannot create " + workspaceSpec));
+		    "Max instances for " + appDefinitionID + " reached. Cannot create " + workspaceSpec));
 	    AddedHandler.updateWorkspaceError(client, workspace, namespace,
 		    "Max instances reached. Could not create workspace", correlationId);
 	    return false;
@@ -122,12 +122,13 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	}
 
 	/* find ingress */
-	String templateResourceName = optionalTemplate.get().getMetadata().getName();
-	String templateResourceUID = optionalTemplate.get().getMetadata().getUid();
-	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, templateResourceName,
-		templateResourceUID);
+	String appDefinitionResourceName = optionalAppDefinition.get().getMetadata().getName();
+	String appDefinitionResourceUID = optionalAppDefinition.get().getMetadata().getUid();
+	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, appDefinitionResourceName,
+		appDefinitionResourceUID);
 	if (ingress.isEmpty()) {
-	    LOGGER.error(formatLogMessage(correlationId, "No Ingress for template " + templateID + " found."));
+	    LOGGER.error(
+		    formatLogMessage(correlationId, "No Ingress for app definition " + appDefinitionID + " found."));
 	    return false;
 	}
 
@@ -140,7 +141,8 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    return true;
 	}
 	Optional<Service> serviceToUse = createAndApplyService(client, namespace, correlationId, workspaceResourceName,
-		workspaceResourceUID, workspace, optionalTemplate.get().getSpec().getPort(), arguments.isUseKeycloak());
+		workspaceResourceUID, workspace, optionalAppDefinition.get().getSpec().getPort(),
+		arguments.isUseKeycloak());
 	if (serviceToUse.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "Unable to create service for workspace " + workspaceSpec));
 	    return false;
@@ -158,7 +160,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    createAndApplyEmailConfigMap(client, namespace, correlationId, workspaceResourceName, workspaceResourceUID,
 		    workspace);
 	    createAndApplyProxyConfigMap(client, namespace, correlationId, workspaceResourceName, workspaceResourceUID,
-		    workspace, optionalTemplate.get());
+		    workspace, optionalAppDefinition.get());
 	}
 
 	/* Create deployment for this workspace */
@@ -170,12 +172,12 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    return true;
 	}
 	createAndApplyDeployment(client, namespace, correlationId, workspaceResourceName, workspaceResourceUID,
-		workspace, optionalTemplate.get(), pvcName, arguments.isUseKeycloak());
+		workspace, optionalAppDefinition.get(), pvcName, arguments.isUseKeycloak());
 
 	/* adjust the ingress */
 	String host;
 	try {
-	    host = updateIngress(client, namespace, ingress, serviceToUse, workspace, optionalTemplate.get());
+	    host = updateIngress(client, namespace, ingress, serviceToUse, workspace, optionalAppDefinition.get());
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
@@ -234,7 +236,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
     protected void createAndApplyProxyConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String workspaceResourceName, String workspaceResourceUID, Workspace workspace,
-	    TemplateSpecResource template) {
+	    AppDefinitionSpecResource appDefinition) {
 	Map<String, String> replacements = TheiaCloudConfigMapUtil.getProxyConfigMapReplacements(namespace, workspace);
 	String configMapYaml;
 	try {
@@ -247,17 +249,18 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
 		WorkspaceSpec.API, WorkspaceSpec.KIND, workspaceResourceName, workspaceResourceUID, 0, configMap -> {
-		    String host = template.getSpec().getHost() + ingressPathProvider.getPath(template, workspace);
-		    int port = template.getSpec().getPort();
+		    String host = appDefinition.getSpec().getHost()
+			    + ingressPathProvider.getPath(appDefinition, workspace);
+		    int port = appDefinition.getSpec().getPort();
 		    AddedHandler.updateProxyConfigMap(client, namespace, configMap, host, port);
 		});
     }
 
     protected void createAndApplyDeployment(DefaultKubernetesClient client, String namespace, String correlationId,
 	    String workspaceResourceName, String workspaceResourceUID, Workspace workspace,
-	    TemplateSpecResource template, Optional<String> pvName, boolean useOAuth2Proxy) {
+	    AppDefinitionSpecResource appDefinition, Optional<String> pvName, boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudDeploymentUtil.getDeploymentsReplacements(namespace, workspace,
-		template);
+		appDefinition);
 	String templateYaml = useOAuth2Proxy ? AddedHandler.TEMPLATE_DEPLOYMENT_YAML
 		: AddedHandler.TEMPLATE_DEPLOYMENT_WITHOUT_AOUTH2_PROXY_YAML;
 	String deploymentYaml;
@@ -272,17 +275,17 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
 		WorkspaceSpec.API, WorkspaceSpec.KIND, workspaceResourceName, workspaceResourceUID, 0, deployment -> {
 		    pvName.ifPresent(name -> persistentVolumeHandler.addVolumeClaim(deployment, name));
-		    bandwidthLimiter.limit(deployment, template.getSpec().getDownlinkLimit(),
-			    template.getSpec().getUplinkLimit(), correlationId);
+		    bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
+			    appDefinition.getSpec().getUplinkLimit(), correlationId);
 		    AddedHandler.removeEmptyResources(deployment);
 		});
     }
 
     protected synchronized String updateIngress(DefaultKubernetesClient client, String namespace,
 	    Optional<Ingress> ingress, Optional<Service> serviceToUse, Workspace workspace,
-	    TemplateSpecResource template) {
-	String host = template.getSpec().getHost();
-	String path = ingressPathProvider.getPath(template, workspace);
+	    AppDefinitionSpecResource appDefinition) {
+	String host = appDefinition.getSpec().getHost();
+	String path = ingressPathProvider.getPath(appDefinition, workspace);
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.get().getMetadata().getName())
 		.edit(ingressToUpdate -> {
 		    IngressRule ingressRule = new IngressRule();
@@ -307,7 +310,7 @@ public class LazyStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
 		    ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
 		    ingressServiceBackend.setPort(serviceBackendPort);
-		    serviceBackendPort.setNumber(template.getSpec().getPort());
+		    serviceBackendPort.setNumber(appDefinition.getSpec().getPort());
 
 		    return ingressToUpdate;
 		});

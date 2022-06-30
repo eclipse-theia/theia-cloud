@@ -6,16 +6,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import axios from "axios";
+import { defineComponent } from 'vue';
+import axios from 'axios';
 
 export default defineComponent({
-  name: "WorkspaceLauncher",
+  name: 'WorkspaceLauncher',
   props: {
     workspaceServiceUrl: String,
-    workspaceTemplate: String,
+    appDefinition: String,
     email: String,
-    appId: String,
+    appId: String
   },
   created() {
     if (this.email) {
@@ -24,8 +24,8 @@ export default defineComponent({
   },
   data() {
     return {
-      text: "Please wait while we get your Theia workspace ready...",
-      showSpinner: true,
+      text: 'Please wait while we get your Theia workspace ready...',
+      showSpinner: true
     };
   },
   watch: {
@@ -33,39 +33,39 @@ export default defineComponent({
       if (this.email) {
         this.startWorkspace(10);
       }
-    },
+    }
   },
   methods: {
     startWorkspace(retries: number) {
-      console.log("Calling to " + this.workspaceServiceUrl);
+      console.log('Calling to ' + this.workspaceServiceUrl);
       axios
         .post(
-          this.workspaceServiceUrl + "",
+          this.workspaceServiceUrl + '',
           {
-            template: this.workspaceTemplate,
+            appDefinition: this.appDefinition,
             user: this.email,
-            appId: this.appId,
+            appId: this.appId
           },
           {
-            timeout: 300000,
+            timeout: 300000
           }
         )
-        .then((response) => {
+        .then(response => {
           if (response.data.success) {
-            console.log("Redirect to : https://" + response.data.url)
-            location.replace("https://" + response.data.url);
+            console.log('Redirect to : https://' + response.data.url);
+            location.replace('https://' + response.data.url);
           } else {
             this.text = response.data.error;
             this.showSpinner = false;
             console.error(response.data.error);
           }
         })
-        .catch((error) => {
+        .catch(error => {
           console.error(error.message);
           this.startWorkspace(retries - 1);
         });
-    },
-  },
+    }
+  }
 });
 </script>
 

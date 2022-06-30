@@ -3,19 +3,19 @@ import { v4 as uuidv4 } from 'uuid';
 
 export interface WorkspaceOptions {
   workspaceServiceUrl: string;
-  workspaceTemplate: string;
+  appDefinition: string;
   appId: string;
   user?: string;
 }
 
 export function startWorkspace(options: WorkspaceOptions, retries = 0): Promise<void> {
-  const { appId, workspaceServiceUrl, workspaceTemplate, user = uuidv4() + '@theia.cloud' } = options;
+  const { appId, workspaceServiceUrl, appDefinition, user = uuidv4() + '@theia.cloud' } = options;
   console.log('Calling to ' + workspaceServiceUrl);
   return axios
     .post(
       workspaceServiceUrl,
       {
-        template: workspaceTemplate,
+        appDefinition: appDefinition,
         user: user,
         appId: appId
       },

@@ -13,7 +13,7 @@ data:
       keycloakRealm: "{{ .Values.keycloak.realm }}",
       keycloakClientId: "{{ .Values.keycloak.clientId }}",
       workspaceServiceUrl: "https://{{ .Values.hosts.workspace }}/workspaces",
-      workspaceTemplate: "{{ .Values.landingPage.template }}",
+      appDefinition: "{{ .Values.landingPage.appDefinition }}",
     };
 binaryData:
   {{ range $path, $bytes := .Files.Glob (printf "logos/%s" .Values.app.logo)}}

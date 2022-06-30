@@ -26,7 +26,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 
@@ -40,40 +40,40 @@ public final class TheiaCloudConfigMapUtil {
     private TheiaCloudConfigMapUtil() {
     }
 
-    public static String getProxyConfigName(TemplateSpecResource template, int instance) {
-	return K8sUtil.validString(getProxyConfigNamePrefix(template) + instance);
+    public static String getProxyConfigName(AppDefinitionSpecResource appDefinition, int instance) {
+	return K8sUtil.validString(getProxyConfigNamePrefix(appDefinition) + instance);
     }
 
     public static String getProxyConfigName(Workspace workspace) {
 	return K8sUtil.validString(getProxyConfigNamePrefix(workspace) + workspace.getMetadata().getUid());
     }
 
-    public static String getEmailConfigName(TemplateSpecResource template, int instance) {
-	return K8sUtil.validString(getEmailConfigNamePrefix(template) + instance);
+    public static String getEmailConfigName(AppDefinitionSpecResource appDefinition, int instance) {
+	return K8sUtil.validString(getEmailConfigNamePrefix(appDefinition) + instance);
     }
 
     public static String getEmailConfigName(Workspace workspace) {
 	return K8sUtil.validString(getEmailConfigNamePrefix(workspace) + workspace.getMetadata().getUid());
     }
 
-    private static String getProxyConfigNamePrefix(TemplateSpecResource template) {
-	return template.getSpec().getName() + CONFIGMAP_PROXY_NAME;
+    private static String getProxyConfigNamePrefix(AppDefinitionSpecResource appDefinition) {
+	return appDefinition.getSpec().getName() + CONFIGMAP_PROXY_NAME;
     }
 
     private static String getProxyConfigNamePrefix(Workspace workspace) {
 	return workspace.getSpec().getName() + CONFIGMAP_PROXY_NAME;
     }
 
-    private static String getEmailConfigNamePrefix(TemplateSpecResource template) {
-	return template.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
+    private static String getEmailConfigNamePrefix(AppDefinitionSpecResource appDefinition) {
+	return appDefinition.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
     }
 
     public static String getEmailConfigNamePrefix(Workspace workspace) {
 	return workspace.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
     }
 
-    public static Integer getProxyId(String correlationId, TemplateSpecResource template, ConfigMap item) {
-	int namePrefixLength = getProxyConfigNamePrefix(template).length();
+    public static Integer getProxyId(String correlationId, AppDefinitionSpecResource appDefinition, ConfigMap item) {
+	int namePrefixLength = getProxyConfigNamePrefix(appDefinition).length();
 	String name = item.getMetadata().getName();
 	String instance = name.substring(namePrefixLength);
 	try {
@@ -84,8 +84,8 @@ public final class TheiaCloudConfigMapUtil {
 	return null;
     }
 
-    public static Integer getEmailId(String correlationId, TemplateSpecResource template, ConfigMap item) {
-	int namePrefixLength = getEmailConfigNamePrefix(template).length();
+    public static Integer getEmailId(String correlationId, AppDefinitionSpecResource appDefinition, ConfigMap item) {
+	int namePrefixLength = getEmailConfigNamePrefix(appDefinition).length();
 	String name = item.getMetadata().getName();
 	String instance = name.substring(namePrefixLength);
 	try {
@@ -96,22 +96,22 @@ public final class TheiaCloudConfigMapUtil {
 	return null;
     }
 
-    public static Set<Integer> computeIdsOfMissingProxyConfigMaps(TemplateSpecResource template, String correlationId,
+    public static Set<Integer> computeIdsOfMissingProxyConfigMaps(AppDefinitionSpecResource appDefinition, String correlationId,
 	    int instances, List<ConfigMap> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
-		service -> getProxyId(correlationId, template, service));
+		service -> getProxyId(correlationId, appDefinition, service));
     }
 
-    public static Set<Integer> computeIdsOfMissingEmailConfigMaps(TemplateSpecResource template, String correlationId,
+    public static Set<Integer> computeIdsOfMissingEmailConfigMaps(AppDefinitionSpecResource appDefinition, String correlationId,
 	    int instances, List<ConfigMap> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
-		service -> getEmailId(correlationId, template, service));
+		service -> getEmailId(correlationId, appDefinition, service));
     }
 
-    public static Map<String, String> getProxyConfigMapReplacements(String namespace, TemplateSpecResource template,
+    public static Map<String, String> getProxyConfigMapReplacements(String namespace, AppDefinitionSpecResource appDefinition,
 	    int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(template, instance));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(appDefinition, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }
@@ -123,10 +123,10 @@ public final class TheiaCloudConfigMapUtil {
 	return replacements;
     }
 
-    public static Map<String, String> getEmailConfigMapReplacements(String namespace, TemplateSpecResource template,
+    public static Map<String, String> getEmailConfigMapReplacements(String namespace, AppDefinitionSpecResource appDefinition,
 	    int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(template, instance));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(appDefinition, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }

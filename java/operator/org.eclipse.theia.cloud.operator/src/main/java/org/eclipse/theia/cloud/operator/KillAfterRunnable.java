@@ -29,8 +29,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResourceList;
 
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -41,13 +41,13 @@ public final class KillAfterRunnable implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(KillAfterRunnable.class);
 
-    private NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient;
+    private NonNamespaceOperation<AppDefinitionSpecResource, AppDefinitionSpecResourceList, Resource<AppDefinitionSpecResource>> appDefinitionResourceClient;
     private NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaceResourceClient;
 
     public KillAfterRunnable(
-	    NonNamespaceOperation<TemplateSpecResource, TemplateSpecResourceList, Resource<TemplateSpecResource>> templateResourceClient,
+	    NonNamespaceOperation<AppDefinitionSpecResource, AppDefinitionSpecResourceList, Resource<AppDefinitionSpecResource>> appDefinitionResourceClient,
 	    NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaceResourceClient) {
-	this.templateResourceClient = templateResourceClient;
+	this.appDefinitionResourceClient = appDefinitionResourceClient;
 	this.workspaceResourceClient = workspaceResourceClient;
     }
 
@@ -57,16 +57,16 @@ public final class KillAfterRunnable implements Runnable {
 
 	try {
 	    Map<String, Integer> killAfterMap = new LinkedHashMap<>();
-	    for (TemplateSpecResource templateSpecResource : templateResourceClient.list().getItems()) {
-		String templateName = templateSpecResource.getSpec().getName();
-		int killAfter = templateSpecResource.getSpec().getKillAfter();
+	    for (AppDefinitionSpecResource appDefinition : appDefinitionResourceClient.list().getItems()) {
+		String appDefinitionName = appDefinition.getSpec().getName();
+		int killAfter = appDefinition.getSpec().getKillAfter();
 		if (killAfter < 1) {
 		    LOGGER.trace(formatLogMessage(COR_ID_KILLPREFIX, correlationId,
-			    "Template " + templateName + " workspaces are not killed."));
+			    "App Definition " + appDefinitionName + " workspaces are not killed."));
 		} else {
-		    LOGGER.trace(formatLogMessage(COR_ID_KILLPREFIX, correlationId, "Template " + templateName
-			    + " workspaces will be killed after " + killAfter + " minutes."));
-		    killAfterMap.put(templateName, killAfter);
+		    LOGGER.trace(formatLogMessage(COR_ID_KILLPREFIX, correlationId, "App Definition "
+			    + appDefinitionName + " workspaces will be killed after " + killAfter + " minutes."));
+		    killAfterMap.put(appDefinitionName, killAfter);
 		}
 	    }
 
@@ -74,9 +74,9 @@ public final class KillAfterRunnable implements Runnable {
 
 	    Instant now = Instant.now();
 	    for (Workspace workspace : workspaceResourceClient.list().getItems()) {
-		String templateName = workspace.getSpec().getTemplate();
-		if (killAfterMap.containsKey(templateName)) {
-		    Integer killAfter = killAfterMap.get(templateName);
+		String appDefinitionName = workspace.getSpec().getAppDefinition();
+		if (killAfterMap.containsKey(appDefinitionName)) {
+		    Integer killAfter = killAfterMap.get(appDefinitionName);
 
 		    String creationTimestamp = workspace.getMetadata().getCreationTimestamp();
 		    Instant parse = Instant.parse(creationTimestamp);

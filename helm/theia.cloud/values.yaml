@@ -37,7 +37,7 @@ landingPage:
   image: theiacloud/theia-cloud-landing-page
 
   # the app id to launch
-  template: "theia-cloud-demo"
+  appDefinition: "theia-cloud-demo"
 
 # Values related to Keycloak
 keycloak:

@@ -11,9 +11,29 @@ spec:
     singular: workspace
   scope: Namespaced
   versions:
-    - name : v2alpha
+    - name : v3alpha
       served: true
       storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                appDefinition:
+                  type: string
+                user:
+                  type: string
+                url:
+                  type: string
+                error:
+                  type: string
+    - name : v2alpha
+      served: true
+      storage: false
       schema:
         openAPIV3Schema:
           type: object
