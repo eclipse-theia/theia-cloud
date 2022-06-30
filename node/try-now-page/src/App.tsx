@@ -3,7 +3,6 @@ import './App.css';
 import { getTheiaCloudConfig, startWorkspace } from '@theia-cloud/common';
 import { useState } from 'react';
 
-import logo from './assets/logo.png';
 import { Spinner } from './components/Spinner';
 
 function App(): JSX.Element {
@@ -19,6 +18,8 @@ function App(): JSX.Element {
       </div>
     );
   }
+
+  document.title = `${config.appName} - Try Now`;
 
   const handleStartWorkspace = (): void => {
     setLoading(true);
@@ -43,7 +44,7 @@ function App(): JSX.Element {
 
   return (
     <div className='App'>
-      <img src={logo} className='App__logo' alt='logo' />
+      <img src={'/logo.png'} className='App__logo' alt='logo' />
       <p>
         Powered by{' '}
         <a href='http://theia-cloud.io' target='_blank' rel='noreferrer'>
@@ -72,7 +73,7 @@ function App(): JSX.Element {
       ) : (
         <p>
           <button disabled={!acceptedTerms} onClick={handleStartWorkspace} className='App__try-now-button'>
-            Launch Theia Blueprint
+            Launch {config.appName}
           </button>
         </p>
       )}

@@ -1,5 +1,5 @@
 <template>
-  <img alt="Theia logo" src="./assets/logo.png" />
+  <img alt="Theia logo" src="/logo.png" />
   <WorkspaceLauncher
     :workspaceServiceUrl="workspaceServiceUrl"
     :workspaceTemplate="workspaceTemplate"
@@ -22,6 +22,7 @@ export default defineComponent({
   name: "App",
   props: {
     appId: String,
+    appName: String,
     useKeycloak: Boolean,
     keycloakAuthUrl: String,
     keycloakRealm: String,

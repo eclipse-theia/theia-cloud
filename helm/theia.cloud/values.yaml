@@ -1,11 +1,18 @@
 # The app id which is used in the communication between website and REST-API 
 # as a spam migitation. This id is public. Please choose an random generated string.
-appId: asdfghjkl
+app:
+  id: asdfghjkl
+  name: Theia Blueprint
+  logo: theiablueprint.png
 
 # Values related to certificates/Cert-manager
 issuer:
   # EMail address of the certificate issuer. 
   email: mmorlock@example.com
+
+# Docker image of the main application
+image:
+  name: theiacloud/theia-cloud-demo
 
 # You may adjust the hostname below.
 hosts:

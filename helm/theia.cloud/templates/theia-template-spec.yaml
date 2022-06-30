@@ -4,7 +4,7 @@ metadata:
   name: theia-cloud-demo
 spec:
   name: theia-cloud-demo
-  image: theiacloud/theia-cloud-demo
+  image: {{ .Values.image.name }}
   uid: 101
   port: 3000
   host: {{ .Values.hosts.instance }}

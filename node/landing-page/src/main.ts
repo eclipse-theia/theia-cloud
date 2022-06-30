@@ -30,6 +30,7 @@ function theiaCloudConfig(): TheiaCloudConfig {
   }
   return {
     appId: "",
+    appName: "",
     useKeycloak: false,
     workspaceServiceUrl: "",
     workspaceTemplate: "",
@@ -42,6 +43,7 @@ const config: TheiaCloudConfig = Object.freeze({
 
 createApp(App, {
   appId: config.appId,
+  appName: config.appName,
   useKeycloak: config.useKeycloak,
   keycloakAuthUrl: config.keycloakAuthUrl,
   keycloakRealm: config.keycloakRealm,
