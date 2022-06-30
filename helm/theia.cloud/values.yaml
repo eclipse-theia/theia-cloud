@@ -1,17 +1,23 @@
-# The app id which is used in the communication between website and REST-API 
-# as a spam migitation. This id is public. Please choose an random generated string.
+# General information about the deployed app
 app:
+  # The app id which is used in the communication between website and REST-API
+  # as a spam migitation. This id is public. Please choose an random generated string.
   id: asdfghjkl
+
+  # The name of the application that should be displayed on the landing pages
   name: Theia Blueprint
+
+  # The logo of the application that should be displayed on the landing pages
   logo: theiablueprint.png
 
 # Values related to certificates/Cert-manager
 issuer:
-  # EMail address of the certificate issuer. 
+  # EMail address of the certificate issuer.
   email: mmorlock@example.com
 
 # Docker image of the main application
 image:
+  # The name of docker image to be used
   name: theiacloud/theia-cloud-demo
 
 # You may adjust the hostname below.
@@ -47,15 +53,15 @@ keycloak:
   # The client-id. Only has to be specified when enable: true
   clientId: "theia-cloud"
 
-  # The oaid client secret. In case you configure your keycloak client as confindential, 
+  # The oaid client secret. In case you configure your keycloak client as confindential,
   # then you may specfiy the secret here.
   # If you stick with our default public client, you may leave below value. For public clients
-  # keycloak does not generate a client-secret, but in order to make oath2-proxy happy, 
+  # keycloak does not generate a client-secret, but in order to make oath2-proxy happy,
   # we will pass a value
   clientSecret: "publicbutoauth2proxywantsasecret"
 
   # The cookie secret. This should not be public! Only has to be specified when enable: true
-  # See https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#generating-a-cookie-secret 
+  # See https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#generating-a-cookie-secret
   # for how to generate a strong cookie secret.
   cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
 
@@ -66,13 +72,13 @@ operator:
 
   # Whether theia applications shall be started eager. This means that the application is already
   # running without a user. When a user requests a new session, one of the already launched ones
-  # is assigned. 
+  # is assigned.
   #
-  # Currently only false is fully supported. 
+  # Currently only false is fully supported.
   eagerStart: false
 
-  # If set to true no persisted storage is attached to the theia application. 
-  # Set to false if you want to use persisted storage. 
+  # If set to true no persisted storage is attached to the theia application.
+  # Set to false if you want to use persisted storage.
   ephemeralStorage: true
 
   # Select your cloude provider. Possible values:
@@ -89,15 +95,13 @@ operator:
 
 # Values of the workspace REST service
 workspace:
-
   # The image to use
   image: theiacloud/theia-cloud-workspace
 
 # Values to influence the ingresses
 ingress:
-
-  # The name of the ingress which will be updated to publish new theia application. 
-  # If this is not existing it will be created. 
+  # The name of the ingress which will be updated to publish new theia application.
+  # If this is not existing it will be created.
   # You may chose to set the ingress up yourself and point theia.cloud to the ingress via
   # the name
   instanceName: "theia-cloud-demo-ws-ingress"
@@ -105,7 +109,7 @@ ingress:
   # The cluster issuer to use
   clusterIssuer: letsencrypt-prod
 
-  # When set to true the cert-manager.io/common-name annotation will be set. 
-  # This is only required when the issued certificate by the cert-manager misses a 
+  # When set to true the cert-manager.io/common-name annotation will be set.
+  # This is only required when the issued certificate by the cert-manager misses a
   # common-name
   theiaCloudCommonName: false

@@ -39,6 +39,7 @@ export default defineComponent({
     } as AppData;
   },
   created() {
+    document.title = this.appName ?? 'Theia.cloud';
     if (this.useKeycloak) {
       const keycloakConfig: KeycloakConfig = {
         url: this.keycloakAuthUrl,
