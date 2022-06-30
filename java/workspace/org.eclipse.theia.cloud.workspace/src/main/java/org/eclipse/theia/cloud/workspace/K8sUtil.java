@@ -69,7 +69,7 @@ public final class K8sUtil {
 	return client;
     }
 
-    public static Reply launchWorkspace(String correlationId, String name, String template, String user) {
+    public static Reply launchWorkspace(String correlationId, String name, String appDefinition, String user) {
 
 	NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaces = CLIENT
 		.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(K8sUtil.NAMESPACE);
@@ -84,7 +84,7 @@ public final class K8sUtil {
 	    workspaceSpecResource.setMetadata(metadata);
 	    metadata.setName(name);
 
-	    WorkspaceSpec workspaceSpec = new WorkspaceSpec(name, template, user);
+	    WorkspaceSpec workspaceSpec = new WorkspaceSpec(name, appDefinition, user);
 	    workspaceSpecResource.setSpec(workspaceSpec);
 
 	    Workspace created = workspaces.create(workspaceSpecResource);

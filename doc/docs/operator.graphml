@@ -13,10 +13,9 @@
   <key attr.name="description" attr.type="string" for="edge" id="d9"/>
   <key for="edge" id="d10" yfiles.type="edgegraphics"/>
   <graph edgedefault="directed" id="G">
-    <data key="d0"/>
+    <data key="d0" xml:space="preserve"/>
     <node id="n0">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="28.0" width="100.0" x="1157.0" y="186.0"/>
@@ -32,7 +31,6 @@
     </node>
     <node id="n1">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="28.0" width="908.0" x="143.5" y="186.0"/>
@@ -48,14 +46,13 @@
     </node>
     <node id="n2">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="43.0" width="187.0" x="633.5" y="281.0"/>
+          <y:Geometry height="43.0" width="220.0" x="617.0" y="281.0"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="34.265625" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="177.48779296875" x="4.756103515625" xml:space="preserve" y="3.0">&lt;&lt;interface&gt;&gt;
-TemplateAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="34.265625" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="209.6513671875" x="5.17431640625" xml:space="preserve" y="3.0">&lt;&lt;interface&gt;&gt;
+AppDefinitionAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel xml:space="preserve"/>
             <y:MethodLabel xml:space="preserve"/>
@@ -65,7 +62,6 @@ TemplateAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:Lab
     </node>
     <node id="n3">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="43.0" width="203.0" x="848.5" y="339.0"/>
@@ -82,13 +78,12 @@ WorkspaceAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:La
     </node>
     <node id="n4">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="28.0" width="264.5" x="1074.75" y="638.0"/>
+          <y:Geometry height="28.0" width="300.23604060913704" x="1039.013959390863" y="638.0"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="247.5595703125" x="8.47021484375" xml:space="preserve" y="3.0">LazyStartTemplateAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="279.72314453125" x="10.256448038943518" xml:space="preserve" y="3.0">LazyStartAppDefinitionAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel xml:space="preserve"/>
             <y:MethodLabel xml:space="preserve"/>
@@ -98,7 +93,6 @@ WorkspaceAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:La
     </node>
     <node id="n5">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="28.0" width="279.0" x="1217.0" y="601.0"/>
@@ -114,7 +108,6 @@ WorkspaceAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:La
     </node>
     <node id="n6">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="28.0" width="279.0" x="699.0" y="638.0"/>
@@ -130,13 +123,12 @@ WorkspaceAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:La
     </node>
     <node id="n7">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="28.0" width="264.5" x="568.5" y="601.0"/>
+          <y:Geometry height="28.0" width="300.23604060913704" x="532.763959390863" y="601.0"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="256.6494140625" x="3.92529296875" xml:space="preserve" y="3.0">EagerStartTemplateAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="288.81298828125" x="5.7115261639435175" xml:space="preserve" y="3.0">EagerStartAppDefinitionAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
             <y:AttributeLabel xml:space="preserve"/>
             <y:MethodLabel xml:space="preserve"/>
@@ -146,7 +138,6 @@ WorkspaceAddedHandler<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:La
     </node>
     <node id="n8">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLNoteNode>
           <y:Geometry height="86.0" width="854.0" x="654.0" y="707.0"/>
@@ -162,7 +153,6 @@ This may share further services, e.g. services to create the kubernetes resource
     </node>
     <node id="n9">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="43.0" width="220.0" x="277.0" y="281.0"/>
@@ -179,13 +169,12 @@ IngressCreationService<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:L
     </node>
     <node id="n10">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="81.0" width="310.0" x="1375.0" y="159.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="34.265625" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="267.28173828125" x="21.359130859375" xml:space="preserve" y="23.3671875">Listens for template/workspace changes
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="34.265625" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="298.3916015625" x="5.80419921875" xml:space="preserve" y="23.3671875">Listens for app definition/workspace changes
 and delegates to handlers<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
           <y:Shape type="ellipse"/>
         </y:ShapeNode>
@@ -193,7 +182,6 @@ and delegates to handlers<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></
     </node>
     <node id="n11">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="43.0" width="220.0" x="44.0" y="281.0"/>
@@ -210,7 +198,6 @@ DeploymentCreationService<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></
     </node>
     <node id="n12">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="28.0" width="246.0" x="277.0" y="453.25"/>
@@ -226,7 +213,6 @@ DeploymentCreationService<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></
     </node>
     <node id="n13">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="28.0" width="327.0" x="-63.0" y="453.25"/>
@@ -242,7 +228,6 @@ DeploymentCreationService<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></
     </node>
     <node id="n14">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLNoteNode>
           <y:Geometry height="54.0" width="687.3333333333333" x="1163.0" y="380.5"/>
@@ -250,13 +235,12 @@ DeploymentCreationService<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="45.90625" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="625.111328125" x="31.111002604166515" xml:space="preserve" y="4.046875">We have a set of Lifycycle Handlers. Those may be implemented in different ways. Code reuse shall be
 possible via helper services
-Those will be called when the state of templates/workspaces has changed<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+Those will be called when the state of app definitions/workspaces has changed<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
         </y:UMLNoteNode>
       </data>
     </node>
     <node id="n15">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLNoteNode>
           <y:Geometry height="203.5" width="279.0" x="-241.0" y="238.25"/>
@@ -277,7 +261,6 @@ between different clusters
       </data>
     </node>
     <edge id="e0" source="n0" target="n1">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -288,7 +271,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e1" source="n0" target="n2">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-21.0" sy="3.0" tx="0.0" ty="0.0">
@@ -301,7 +283,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e2" source="n0" target="n3">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -314,7 +295,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e3" source="n1" target="n2">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="129.5" sy="13.9765625" tx="0.0" ty="0.0"/>
@@ -325,7 +305,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e4" source="n1" target="n3">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="352.5" sy="4.0" tx="0.0" ty="0.0"/>
@@ -336,10 +315,11 @@ between different clusters
       </data>
     </edge>
     <edge id="e5" source="n7" target="n2">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="26.25" sy="-1.0" tx="0.0" ty="0.0"/>
+          <y:Path sx="29.79658248011284" sy="-1.0" tx="0.0" ty="0.0">
+            <y:Point x="727.0" y="592.1421319796955"/>
+          </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="white_delta"/>
           <y:BendStyle smoothed="false"/>
@@ -347,7 +327,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e6" source="n6" target="n3">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="111.5" sy="-14.0234375" tx="0.0" ty="0.0"/>
@@ -358,7 +337,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e7" source="n4" target="n2">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -369,7 +347,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e8" source="n5" target="n3">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="125.5" sy="-3.0" tx="0.0" ty="0.0"/>
@@ -380,7 +357,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e9" source="n0" target="n10">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -391,7 +367,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e10" source="n1" target="n9">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-210.5" sy="14.0078125" tx="0.0" ty="0.0"/>
@@ -402,7 +377,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e11" source="n1" target="n11">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-410.5" sy="0.0" tx="33.0" ty="-2.5"/>
@@ -413,7 +387,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e12" source="n13" target="n11">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="53.5" sy="-13.9921875" tx="0.0" ty="0.0"/>
@@ -424,7 +397,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e13" source="n12" target="n9">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-13.0" sy="3.0" tx="0.0" ty="0.0"/>
@@ -435,7 +407,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e14" source="n13" target="n7">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="28.5" sy="4.0" tx="0.0" ty="0.0">
@@ -448,7 +419,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e15" source="n13" target="n6">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
@@ -461,12 +431,11 @@ between different clusters
       </data>
     </edge>
     <edge id="e16" source="n12" target="n7">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
             <y:Point x="400.0" y="560.0"/>
-            <y:Point x="700.75" y="560.0"/>
+            <y:Point x="682.8819796954315" y="560.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="none"/>
@@ -475,7 +444,6 @@ between different clusters
       </data>
     </edge>
     <edge id="e17" source="n12" target="n6">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="80.0" sy="2.0" tx="39.5" ty="-2.0">

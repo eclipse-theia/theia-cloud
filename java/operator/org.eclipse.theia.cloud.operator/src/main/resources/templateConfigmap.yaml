@@ -6,8 +6,8 @@ metadata:
     theiacloud: proxy
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v7alpha
-      kind: Template
+    - apiVersion: theia.cloud/v1beta
+      kind: AppDefinition
       name: placeholder
       uid: placeholder
 data:

@@ -1,5 +1,5 @@
-apiVersion: theia.cloud/v7alpha
-kind: Template
+apiVersion: theia.cloud/v1beta
+kind: AppDefinition
 metadata:
   name: theia-cloud-demo
 spec:

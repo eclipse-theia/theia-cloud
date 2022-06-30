@@ -2,7 +2,7 @@
   <img alt="Theia logo" src="/logo.png" />
   <WorkspaceLauncher
     :workspaceServiceUrl="workspaceServiceUrl"
-    :workspaceTemplate="workspaceTemplate"
+    :appDefinition="appDefinition"
     :email="email"
     :appId="appId"
   />
@@ -28,7 +28,7 @@ export default defineComponent({
     keycloakRealm: String,
     keycloakClientId: String,
     workspaceServiceUrl: String,
-    workspaceTemplate: String,
+    appDefinition: String,
   },
   components: {
     WorkspaceLauncher,

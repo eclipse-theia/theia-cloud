@@ -25,9 +25,9 @@ import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.di.DefaultTheiaCloudOperatorModule;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResourceList;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.CustomResourceDefinition;
@@ -59,21 +59,23 @@ public class Main {
 	String namespace = client.getNamespace();
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Namespace: " + namespace));
 
-	String templateAPIVersion = HasMetadata.getApiVersion(TemplateSpecResource.class);
-	LOGGER.info(formatLogMessage(COR_ID_INIT, "Registering TemplateSpecResource in version " + templateAPIVersion));
-	KubernetesDeserializer.registerCustomKind(templateAPIVersion, TemplateSpec.KIND, TemplateSpecResource.class);
+	String appDefinitionAPIVersion = HasMetadata.getApiVersion(AppDefinitionSpecResource.class);
+	LOGGER.info(formatLogMessage(COR_ID_INIT,
+		"Registering AppDefinitionSpecResource in version " + appDefinitionAPIVersion));
+	KubernetesDeserializer.registerCustomKind(appDefinitionAPIVersion, AppDefinitionSpec.KIND,
+		AppDefinitionSpecResource.class);
 
 	String workspaceAPIVersion = HasMetadata.getApiVersion(Workspace.class);
 	LOGGER.info(
 		formatLogMessage(COR_ID_INIT, "Registering WorkspaceSpecResource in version " + workspaceAPIVersion));
 	KubernetesDeserializer.registerCustomKind(workspaceAPIVersion, WorkspaceSpec.KIND, Workspace.class);
 
-	/* Check if custom resource definition for template is registered */
+	/* Check if custom resource definition for app definition is registered */
 	client.apiextensions().v1().customResourceDefinitions().list().getItems().stream()//
-		.filter(Main::isTemplateCRD)//
+		.filter(Main::isAppDefinitionCRD)//
 		.findAny()//
 		.orElseThrow(() -> new RuntimeException(
-			"Deployment error: Custom resource definition Template for Theia.Cloud not found."));
+			"Deployment error: Custom resource definition App Definition for Theia.Cloud not found."));
 
 	/* Check if custom resource definition for workspace is registered */
 	client.apiextensions().v1().customResourceDefinitions().list().getItems().stream()//
@@ -86,7 +88,7 @@ public class Main {
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
 
 	TheiaCloud theiaCloud = new TheiaCloudImpl(namespace, module, client,
-		client.customResources(TemplateSpecResource.class, TemplateSpecResourceList.class)
+		client.customResources(AppDefinitionSpecResource.class, AppDefinitionSpecResourceList.class)
 			.inNamespace(namespace),
 		client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace));
 
@@ -108,11 +110,11 @@ public class Main {
 	return new DefaultTheiaCloudOperatorModule(arguments);
     }
 
-    private static boolean isTemplateCRD(CustomResourceDefinition crd) {
+    private static boolean isAppDefinitionCRD(CustomResourceDefinition crd) {
 	String metadataName = crd.getMetadata().getName();
-	LOGGER.trace(
-		formatLogMessage(COR_ID_INIT, "Checking whether " + metadataName + " is " + TemplateSpec.CRD_NAME));
-	return TemplateSpec.CRD_NAME.equals(metadataName);
+	LOGGER.trace(formatLogMessage(COR_ID_INIT,
+		"Checking whether " + metadataName + " is " + AppDefinitionSpec.CRD_NAME));
+	return AppDefinitionSpec.CRD_NAME.equals(metadataName);
     }
 
     private static boolean isWorkspaceCRD(CustomResourceDefinition crd) {

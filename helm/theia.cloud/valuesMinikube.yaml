@@ -16,7 +16,7 @@ hosts:
 
 landingPage:
   image: theiacloud/theia-cloud-landing-page
-  template: "theia-cloud-demo"
+  appDefinition: "theia-cloud-demo"
 
 keycloak:
   enable: true

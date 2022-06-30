@@ -29,8 +29,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResourceList;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResourceList;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -58,22 +58,22 @@ public final class TheiaCloudHandlerUtil {
 	return missing;
     }
 
-    public static String getAppSelector(TemplateSpecResource template, int instance) {
-	return K8sUtil.validString(template.getSpec().getName() + "-" + instance);
+    public static String getAppSelector(AppDefinitionSpecResource appDefinition, int instance) {
+	return K8sUtil.validString(appDefinition.getSpec().getName() + "-" + instance);
     }
 
     public static String getAppSelector(Workspace workspace) {
 	return K8sUtil.validString(workspace.getSpec().getName() + "-" + workspace.getMetadata().getUid());
     }
 
-    public static Optional<TemplateSpecResource> getTemplateSpecForWorkspace(DefaultKubernetesClient client,
-	    String namespace, String templateID) {
-	Optional<TemplateSpecResource> template = client
-		.customResources(TemplateSpecResource.class, TemplateSpecResourceList.class).inNamespace(namespace)
+    public static Optional<AppDefinitionSpecResource> getAppDefinitionSpecForWorkspace(DefaultKubernetesClient client,
+	    String namespace, String appDefinitionID) {
+	Optional<AppDefinitionSpecResource> appDefinition = client
+		.customResources(AppDefinitionSpecResource.class, AppDefinitionSpecResourceList.class).inNamespace(namespace)
 		.list().getItems().stream()//
-		.filter(templateSpecResource -> templateID.equals(templateSpecResource.getSpec().getName()))//
+		.filter(appDefinitionSpecResource -> appDefinitionID.equals(appDefinitionSpecResource.getSpec().getName()))//
 		.findAny();
-	return template;
+	return appDefinition;
     }
 
     public static <T extends HasMetadata> T addOwnerReferenceToItem(String correlationId, String workspaceResourceName,

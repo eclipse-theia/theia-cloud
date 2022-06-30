@@ -48,7 +48,7 @@ public class WorkspaceResource {
 	    return new Reply(false, "", "AppId is not matching.");
 	}
 	LOGGER.info(formatLogMessage(correlationId, "Launching workspace " + workspace));
-	return K8sUtil.launchWorkspace(correlationId, generateWorkspaceName(workspace), workspace.template,
+	return K8sUtil.launchWorkspace(correlationId, generateWorkspaceName(workspace), workspace.appDefinition,
 		workspace.user);
     }
 
@@ -57,6 +57,6 @@ public class WorkspaceResource {
     }
 
     private static String generateWorkspaceName(Workspace workspace) {
-	return ("ws-" + workspace.template + "-" + workspace.user).replace("@", "at").toLowerCase();
+	return ("ws-" + workspace.appDefinition + "-" + workspace.user).replace("@", "at").toLowerCase();
     }
 }

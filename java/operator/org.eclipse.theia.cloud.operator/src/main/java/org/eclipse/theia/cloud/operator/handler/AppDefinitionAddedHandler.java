@@ -14,12 +14,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.resource;
+package org.eclipse.theia.cloud.operator.handler;
 
-import io.fabric8.kubernetes.client.CustomResourceList;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
-public class TemplateSpecResourceList extends CustomResourceList<TemplateSpecResource> {
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 
-    private static final long serialVersionUID = 722136158817065564L;
+public interface AppDefinitionAddedHandler {
+
+    void handle(DefaultKubernetesClient client, AppDefinitionSpecResource appDefinition, String namespace, String correlationId);
 
 }

@@ -27,7 +27,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
@@ -43,24 +43,24 @@ public final class TheiaCloudServiceUtil {
     private TheiaCloudServiceUtil() {
     }
 
-    public static String getServiceName(TemplateSpecResource template, int instance) {
-	return K8sUtil.validString(getServiceNamePrefix(template) + instance);
+    public static String getServiceName(AppDefinitionSpecResource appDefinition, int instance) {
+	return K8sUtil.validString(getServiceNamePrefix(appDefinition) + instance);
     }
 
     public static String getServiceName(Workspace workspace) {
 	return K8sUtil.validString(getServiceNamePrefix(workspace) + workspace.getMetadata().getUid());
     }
 
-    private static String getServiceNamePrefix(TemplateSpecResource template) {
-	return template.getSpec().getName() + SERVICE_NAME;
+    private static String getServiceNamePrefix(AppDefinitionSpecResource appDefinition) {
+	return appDefinition.getSpec().getName() + SERVICE_NAME;
     }
 
     private static String getServiceNamePrefix(Workspace workspace) {
 	return workspace.getSpec().getName() + SERVICE_NAME;
     }
 
-    public static Integer getId(String correlationId, TemplateSpecResource template, Service service) {
-	int namePrefixLength = getServiceNamePrefix(template).length();
+    public static Integer getId(String correlationId, AppDefinitionSpecResource appDefinition, Service service) {
+	int namePrefixLength = getServiceNamePrefix(appDefinition).length();
 	String name = service.getMetadata().getName();
 	String instance = name.substring(namePrefixLength);
 	try {
@@ -71,20 +71,20 @@ public final class TheiaCloudServiceUtil {
 	return null;
     }
 
-    public static Set<Integer> computeIdsOfMissingServices(TemplateSpecResource template, String correlationId,
+    public static Set<Integer> computeIdsOfMissingServices(AppDefinitionSpecResource appDefinition, String correlationId,
 	    int instances, List<Service> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
-		service -> getId(correlationId, template, service));
+		service -> getId(correlationId, appDefinition, service));
     }
 
-    public static Map<String, String> getServiceReplacements(String namespace, TemplateSpecResource template,
+    public static Map<String, String> getServiceReplacements(String namespace, AppDefinitionSpecResource appDefinition,
 	    int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_SERVICENAME, getServiceName(template, instance));
+	replacements.put(PLACEHOLDER_SERVICENAME, getServiceName(appDefinition, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP,
-		TheiaCloudHandlerUtil.getAppSelector(template, instance));
+		TheiaCloudHandlerUtil.getAppSelector(appDefinition, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(template.getSpec().getPort()));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinition.getSpec().getPort()));
 	return replacements;
     }
 

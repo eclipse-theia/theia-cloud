@@ -18,22 +18,22 @@ package org.eclipse.theia.cloud.workspace;
 
 public class Workspace {
 
-    public String template;
+    public String appDefinition;
     public String user;
     public String appId;
 
     public Workspace() {
     }
 
-    public Workspace(String template, String user, String appId) {
-	this.template = template;
+    public Workspace(String appDefinition, String user, String appId) {
+	this.appDefinition = appDefinition;
 	this.user = user;
 	this.appId = appId;
     }
 
     @Override
     public String toString() {
-	return "Workspace [template=" + template + ", user=" + user + ", appId=" + appId + "]";
+	return "Workspace [appDefinition=" + appDefinition + ", user=" + user + ", appId=" + appId + "]";
     }
 
 }

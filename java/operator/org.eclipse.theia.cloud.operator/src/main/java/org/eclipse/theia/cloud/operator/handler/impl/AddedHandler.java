@@ -45,8 +45,8 @@ import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpec;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -111,8 +111,8 @@ public final class AddedHandler {
     }
 
     public static void createAndApplyIngress(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String templateResourceName, String templateResourceUID, TemplateSpecResource template) {
-	Map<String, String> replacements = TheiaCloudIngressUtil.getIngressReplacements(namespace, template);
+	    String templateResourceName, String templateResourceUID, AppDefinitionSpecResource appDefinition) {
+	Map<String, String> replacements = TheiaCloudIngressUtil.getIngressReplacements(namespace, appDefinition);
 	String ingressYaml;
 	try {
 	    ingressYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(AddedHandler.class, TEMPLATE_INGRESS_YAML,
@@ -120,8 +120,8 @@ public final class AddedHandler {
 	} catch (IOException | URISyntaxException e) {
 	    return;
 	}
-	K8sUtil.loadAndCreateIngressWithOwnerReference(client, namespace, correlationId, ingressYaml, TemplateSpec.API,
-		TemplateSpec.KIND, templateResourceName, templateResourceUID, 0);
+	K8sUtil.loadAndCreateIngressWithOwnerReference(client, namespace, correlationId, ingressYaml, AppDefinitionSpec.API,
+		AppDefinitionSpec.KIND, templateResourceName, templateResourceUID, 0);
     }
 
     public static void updateProxyConfigMap(DefaultKubernetesClient client, String namespace, ConfigMap configMap,

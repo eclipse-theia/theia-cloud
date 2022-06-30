@@ -27,7 +27,7 @@ function App(): JSX.Element {
     startWorkspace({
       appId: config.appId,
       workspaceServiceUrl: config.workspaceServiceUrl,
-      workspaceTemplate: config.workspaceTemplate
+      appDefinition: config.appDefinition
     })
       .catch((err: Error) => {
         setError(err.message);

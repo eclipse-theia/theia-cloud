@@ -35,7 +35,7 @@ import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceAddedHandler;
-import org.eclipse.theia.cloud.operator.resource.TemplateSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 import org.eclipse.theia.cloud.operator.util.JavaUtil;
 
 import com.google.inject.Inject;
@@ -52,8 +52,8 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
 /**
- * A {@link WorkspaceAddedHandler} that relies on the fact that the template
- * handler created spare deployments to use.
+ * A {@link WorkspaceAddedHandler} that relies on the fact that the app
+ * definition handler created spare deployments to use.
  */
 public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
@@ -76,43 +76,46 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	String workspaceResourceName = workspace.getMetadata().getName();
 	String workspaceResourceUID = workspace.getMetadata().getUid();
 
-	String templateID = spec.getTemplate();
+	String appDefinitionID = spec.getAppDefinition();
 	String userEmail = spec.getUser();
 
-	/* find template for workspace */
-	Optional<TemplateSpecResource> template = TheiaCloudHandlerUtil.getTemplateSpecForWorkspace(client, namespace,
-		templateID);
-	if (template.isEmpty()) {
-	    LOGGER.error(formatLogMessage(correlationId, "No Template with name " + templateID + " found."));
+	/* find app definition for workspace */
+	Optional<AppDefinitionSpecResource> appDefinition = TheiaCloudHandlerUtil
+		.getAppDefinitionSpecForWorkspace(client, namespace, appDefinitionID);
+	if (appDefinition.isEmpty()) {
+	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;
 	}
 
-	String templateResourceName = template.get().getMetadata().getName();
-	String templateResourceUID = template.get().getMetadata().getUid();
-	int port = template.get().getSpec().getPort();
+	String appDefinitionResourceName = appDefinition.get().getMetadata().getName();
+	String appDefinitionResourceUID = appDefinition.get().getMetadata().getUid();
+	int port = appDefinition.get().getSpec().getPort();
 
 	/* find ingress */
-	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, templateResourceName,
-		templateResourceUID);
+	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, appDefinitionResourceName,
+		appDefinitionResourceUID);
 	if (ingress.isEmpty()) {
-	    LOGGER.error(formatLogMessage(correlationId, "No Ingress for template " + templateID + " found."));
+	    LOGGER.error(
+		    formatLogMessage(correlationId, "No Ingress for app definition " + appDefinitionID + " found."));
 	    return false;
 	}
 
 	/* get a service to use */
-	Entry<Optional<Service>, Boolean> reserveServiceResult = reserveService(client, namespace, templateResourceName,
-		templateResourceUID, templateID, workspaceResourceName, workspaceResourceUID, correlationId);
+	Entry<Optional<Service>, Boolean> reserveServiceResult = reserveService(client, namespace,
+		appDefinitionResourceName, appDefinitionResourceUID, appDefinitionID, workspaceResourceName,
+		workspaceResourceUID, correlationId);
 	if (reserveServiceResult.getValue()) {
 	    LOGGER.info(formatLogMessage(correlationId, "Found an already reserved service"));
 	    return true;
 	}
 	Optional<Service> serviceToUse = reserveServiceResult.getKey();
 	if (serviceToUse.isEmpty()) {
-	    LOGGER.error(formatLogMessage(correlationId, "No Service for template " + templateID + " found."));
+	    LOGGER.error(
+		    formatLogMessage(correlationId, "No Service for app definition " + appDefinitionID + " found."));
 	}
 
 	/* get the deployment for the service and add as owner */
-	Integer instance = TheiaCloudServiceUtil.getId(correlationId, template.get(), serviceToUse.get());
+	Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition.get(), serviceToUse.get());
 	if (instance == null) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while getting instance from Service"));
 	    return false;
@@ -120,12 +123,12 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 
 	try {
 	    client.apps().deployments().inNamespace(namespace)
-		    .withName(TheiaCloudDeploymentUtil.getDeploymentName(template.get(), instance))
+		    .withName(TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance))
 		    .edit(deployment -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId,
 			    workspaceResourceName, workspaceResourceUID, deployment));
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
-		    + (templateID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
+		    + (appDefinitionID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
 	    return false;
 	}
 
@@ -133,15 +136,18 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	    /* add user to allowed emails */
 	    try {
 		client.configMaps().inNamespace(namespace)
-			.withName(TheiaCloudConfigMapUtil.getEmailConfigName(template.get(), instance))
+			.withName(TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition.get(), instance))
 			.edit(configmap -> {
 			    configmap.setData(Collections.singletonMap(AddedHandler.FILENAME_AUTHENTICATED_EMAILS_LIST,
 				    userEmail));
 			    return configmap;
 			});
 	    } catch (KubernetesClientException e) {
-		LOGGER.error(formatLogMessage(correlationId, "Error while editing email configmap "
-			+ (templateID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)), e);
+		LOGGER.error(
+			formatLogMessage(correlationId,
+				"Error while editing email configmap "
+					+ (appDefinitionID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)),
+			e);
 		return false;
 	    }
 	}
@@ -149,7 +155,8 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
 	/* adjust the ingress */
 	String host;
 	try {
-	    host = updateIngress(client, namespace, ingress, serviceToUse, templateID, instance, port, template.get());
+	    host = updateIngress(client, namespace, ingress, serviceToUse, appDefinitionID, instance, port,
+		    appDefinition.get());
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
@@ -169,10 +176,10 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
     }
 
     protected synchronized Entry<Optional<Service>, Boolean> reserveService(DefaultKubernetesClient client,
-	    String namespace, String templateResourceName, String templateResourceUID, String templateID,
+	    String namespace, String appDefinitionResourceName, String appDefinitionResourceUID, String appDefinitionID,
 	    String workspaceResourceName, String workspaceResourceUID, String correlationId) {
-	List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, templateResourceName,
-		templateResourceUID);
+	List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
+		appDefinitionResourceUID);
 
 	Optional<Service> alreadyReservedService = TheiaCloudServiceUtil
 		.getServiceOwnedByWorkspace(workspaceResourceName, workspaceResourceUID, existingServices);
@@ -199,10 +206,10 @@ public class EagerStartWorkspaceAddedHandler implements WorkspaceAddedHandler {
     }
 
     protected synchronized String updateIngress(DefaultKubernetesClient client, String namespace,
-	    Optional<Ingress> ingress, Optional<Service> serviceToUse, String templateID, int instance, int port,
-	    TemplateSpecResource template) {
-	String host = template.getSpec().getHost();
-	String path = ingressPathProvider.getPath(template, instance);
+	    Optional<Ingress> ingress, Optional<Service> serviceToUse, String appDefinitionID, int instance, int port,
+	    AppDefinitionSpecResource appDefinition) {
+	String host = appDefinition.getSpec().getHost();
+	String path = ingressPathProvider.getPath(appDefinition, instance);
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.get().getMetadata().getName())
 		.edit(ingressToUpdate -> {
 		    IngressRule ingressRule = new IngressRule();
