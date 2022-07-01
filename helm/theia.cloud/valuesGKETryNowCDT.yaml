@@ -10,9 +10,9 @@ image:
   name: theiacloud/cdt-blueprint
 
 hosts:
-  workspace: workspace.34.141.62.32.nip.io
-  landing: theia.cloud.34.141.62.32.nip.io
-  instance: ws.34.141.62.32.nip.io
+  workspace: workspace.34.159.89.224.nip.io
+  landing: theia.cloud.34.159.89.224.nip.io
+  instance: ws.34.159.89.224.nip.io
 
 landingPage:
   image: theiacloud/theia-cloud-try-now-page
