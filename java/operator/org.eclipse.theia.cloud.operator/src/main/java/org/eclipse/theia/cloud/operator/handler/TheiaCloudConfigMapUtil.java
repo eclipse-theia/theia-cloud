@@ -25,7 +25,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -44,32 +44,32 @@ public final class TheiaCloudConfigMapUtil {
 	return K8sUtil.validString(getProxyConfigNamePrefix(appDefinition) + instance);
     }
 
-    public static String getProxyConfigName(Workspace workspace) {
-	return K8sUtil.validString(getProxyConfigNamePrefix(workspace) + workspace.getMetadata().getUid());
+    public static String getProxyConfigName(Session session) {
+	return K8sUtil.validString(getProxyConfigNamePrefix(session) + session.getMetadata().getUid());
     }
 
     public static String getEmailConfigName(AppDefinitionSpecResource appDefinition, int instance) {
 	return K8sUtil.validString(getEmailConfigNamePrefix(appDefinition) + instance);
     }
 
-    public static String getEmailConfigName(Workspace workspace) {
-	return K8sUtil.validString(getEmailConfigNamePrefix(workspace) + workspace.getMetadata().getUid());
+    public static String getEmailConfigName(Session session) {
+	return K8sUtil.validString(getEmailConfigNamePrefix(session) + session.getMetadata().getUid());
     }
 
     private static String getProxyConfigNamePrefix(AppDefinitionSpecResource appDefinition) {
 	return appDefinition.getSpec().getName() + CONFIGMAP_PROXY_NAME;
     }
 
-    private static String getProxyConfigNamePrefix(Workspace workspace) {
-	return workspace.getSpec().getName() + CONFIGMAP_PROXY_NAME;
+    private static String getProxyConfigNamePrefix(Session session) {
+	return session.getSpec().getName() + CONFIGMAP_PROXY_NAME;
     }
 
     private static String getEmailConfigNamePrefix(AppDefinitionSpecResource appDefinition) {
 	return appDefinition.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
     }
 
-    public static String getEmailConfigNamePrefix(Workspace workspace) {
-	return workspace.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
+    public static String getEmailConfigNamePrefix(Session session) {
+	return session.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
     }
 
     public static Integer getProxyId(String correlationId, AppDefinitionSpecResource appDefinition, ConfigMap item) {
@@ -116,9 +116,9 @@ public final class TheiaCloudConfigMapUtil {
 	return replacements;
     }
 
-    public static Map<String, String> getProxyConfigMapReplacements(String namespace, Workspace workspace) {
+    public static Map<String, String> getProxyConfigMapReplacements(String namespace, Session session) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(workspace));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }
@@ -131,9 +131,9 @@ public final class TheiaCloudConfigMapUtil {
 	return replacements;
     }
 
-    public static Map<String, String> getEmailConfigMapReplacements(String namespace, Workspace workspace) {
+    public static Map<String, String> getEmailConfigMapReplacements(String namespace, Session session) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(workspace));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }

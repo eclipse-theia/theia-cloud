@@ -41,8 +41,8 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
@@ -120,8 +120,8 @@ public final class AddedHandler {
 	} catch (IOException | URISyntaxException e) {
 	    return;
 	}
-	K8sUtil.loadAndCreateIngressWithOwnerReference(client, namespace, correlationId, ingressYaml, AppDefinitionSpec.API,
-		AppDefinitionSpec.KIND, templateResourceName, templateResourceUID, 0);
+	K8sUtil.loadAndCreateIngressWithOwnerReference(client, namespace, correlationId, ingressYaml,
+		AppDefinitionSpec.API, AppDefinitionSpec.KIND, templateResourceName, templateResourceUID, 0);
     }
 
     public static void updateProxyConfigMap(DefaultKubernetesClient client, String namespace, ConfigMap configMap,
@@ -135,17 +135,17 @@ public final class AddedHandler {
 	configMap.setData(data);
     }
 
-    public static void updateWorkspaceError(DefaultKubernetesClient client, Workspace workspace, String namespace,
+    public static void updateSessionError(DefaultKubernetesClient client, Session session, String namespace,
 	    String error, String correlationId) {
-	client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
-		.withName(workspace.getMetadata().getName())//
+	client.customResources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
+		.withName(session.getMetadata().getName())//
 		.edit(ws -> {
 		    ws.getSpec().setError(error);
 		    return ws;
 		});
     }
 
-    public static void updateWorkspaceURLAsync(DefaultKubernetesClient client, Workspace workspace, String namespace,
+    public static void updateSessionURLAsync(DefaultKubernetesClient client, Session session, String namespace,
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {
 	    for (int i = 1; i <= 60; i++) {
@@ -159,7 +159,7 @@ public final class AddedHandler {
 		try {
 		    connection = (HttpsURLConnection) new URL("https://" + url).openConnection();
 		} catch (IOException e) {
-		    LOGGER.error(formatLogMessage(correlationId, "Error while checking workspace availability."), e);
+		    LOGGER.error(formatLogMessage(correlationId, "Error while checking session availability."), e);
 		    continue;
 		}
 		int code;
@@ -177,7 +177,7 @@ public final class AddedHandler {
 		    continue;
 		} catch (NoSuchAlgorithmException | KeyManagementException e) {
 		    LOGGER.error(formatLogMessage(correlationId,
-			    "Error while checking workspace availability with SSL ignore."), e);
+			    "Error while checking session availability with SSL ignore."), e);
 		    continue;
 		}
 
@@ -185,8 +185,8 @@ public final class AddedHandler {
 
 		if (code == 200) {
 		    LOGGER.info(formatLogMessage(correlationId, url + " is available."));
-		    client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace)
-			    .withName(workspace.getMetadata().getName())//
+		    client.customResources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
+			    .withName(session.getMetadata().getName())//
 			    .edit(ws -> {
 				ws.getSpec().setUrl(url);
 				return ws;

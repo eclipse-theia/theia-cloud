@@ -5,6 +5,6 @@ window.theiaCloudConfig = {
   //   keycloakAuthUrl: "https://keycloak.url/auth/",
   //   keycloakRealm: "TheiaCloud",
   //   keycloakClientId: "theia-cloud",
-  workspaceServiceUrl: "https://workspace.192.168.39.173.nip.io/workspaces",
+  serviceUrl: "https://service.192.168.39.173.nip.io/service",
   appDefinition: "theia-cloud-demo",
 };

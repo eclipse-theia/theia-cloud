@@ -1,6 +1,6 @@
 # Building
 
-Besides the Operator, Workspaces-REST-Service, and the Dashboard, Theia.Cloud also has a simple Theia-based demo application and an init-container running wondershaper which may enable limiting the network bandwidth of a running application.
+Besides the Operator, Theia.cloud-REST-Service, and the Dashboard, Theia.Cloud also has a simple Theia-based demo application and an init-container running wondershaper which may enable limiting the network bandwidth of a running application.
 
 ```bash
 # Build the wondershaper init-container.
@@ -15,8 +15,8 @@ docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile 
 # Build the Try Now page with:
 docker build -t theia-cloud-try-now-page -f dockerfiles/try-now-page/Dockerfile .
 
-# Build the workspace REST service with:
-docker build -t theia-cloud-workspace -f dockerfiles/workspace/Dockerfile .
+# Build the Theia.cloud REST service with:
+docker build -t theia-cloud-service -f dockerfiles/service/Dockerfile .
 
 # Build the operator with:
 docker build -t theia-cloud-operator -f dockerfiles/operator/Dockerfile .

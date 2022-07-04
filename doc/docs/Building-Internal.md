@@ -39,12 +39,12 @@ docker push theiacloud/theia-cloud-try-now-page:latest
 
 ```
 
-Build and push the workspace REST service with:
+Build and push the Theia.cloud REST service with:
 
 ```bash
-docker build -t theia-cloud-workspace:latest -f dockerfiles/workspace/Dockerfile .
-docker tag theia-cloud-workspace:latest theiacloud/theia-cloud-workspace:latest
-docker push theiacloud/theia-cloud-workspace:latest
+docker build -t theia-cloud-service:latest -f dockerfiles/service/Dockerfile .
+docker tag theia-cloud-service:latest theiacloud/theia-cloud-service:latest
+docker push theiacloud/theia-cloud-service:latest
 ```
 
 Build and push the operator with:

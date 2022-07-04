@@ -9,5 +9,5 @@
     <booleanAttribute key="org.eclipse.debug.core.launchGroup.1.adoptIfRunning" value="false"/>
     <booleanAttribute key="org.eclipse.debug.core.launchGroup.1.enabled" value="true"/>
     <stringAttribute key="org.eclipse.debug.core.launchGroup.1.mode" value="inherit"/>
-    <stringAttribute key="org.eclipse.debug.core.launchGroup.1.name" value="Workspace Service"/>
+    <stringAttribute key="org.eclipse.debug.core.launchGroup.1.name" value="Theia.cloud Service"/>
 </launchConfiguration>

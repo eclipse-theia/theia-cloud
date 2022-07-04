@@ -1,4 +1,4 @@
-name: Docker Workspace CI
+name: Docker Theia.cloud Service CI
 
 on:
   push:
@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build -t theia-cloud-workspace:$(date +%s) -f dockerfiles/workspace/Dockerfile .
+      run: docker build -t theia-cloud-service:$(date +%s) -f dockerfiles/service/Dockerfile .

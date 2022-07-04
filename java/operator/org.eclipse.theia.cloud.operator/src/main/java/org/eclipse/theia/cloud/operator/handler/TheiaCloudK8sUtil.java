@@ -20,9 +20,9 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -35,15 +35,15 @@ public final class TheiaCloudK8sUtil {
     }
 
     public static boolean checkIfMaxInstancesReached(DefaultKubernetesClient client, String namespace,
-	    WorkspaceSpec workspaceSpec, AppDefinitionSpec appDefinitionSpec, String correlationId) {
+	    SessionSpec sessionSpec, AppDefinitionSpec appDefinitionSpec, String correlationId) {
 
 	if (appDefinitionSpec.getMaxInstances() < 1) {
 	    LOGGER.info(formatLogMessage(correlationId,
-		    "App Definition " + appDefinitionSpec.getName() + " allows indefinite workspaces."));
+		    "App Definition " + appDefinitionSpec.getName() + " allows indefinite sessions."));
 	    return false;
 	}
 
-	long currentInstances = client.customResources(Workspace.class, WorkspaceSpecResourceList.class)
+	long currentInstances = client.customResources(Session.class, SessionSpecResourceList.class)
 		.inNamespace(namespace).list().getItems().stream()//
 		.filter(w -> {
 		    String appDefinition = w.getSpec().getAppDefinition();

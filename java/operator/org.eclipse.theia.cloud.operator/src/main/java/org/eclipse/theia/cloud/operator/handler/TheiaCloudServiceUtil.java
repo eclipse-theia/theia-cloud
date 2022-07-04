@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -47,16 +47,16 @@ public final class TheiaCloudServiceUtil {
 	return K8sUtil.validString(getServiceNamePrefix(appDefinition) + instance);
     }
 
-    public static String getServiceName(Workspace workspace) {
-	return K8sUtil.validString(getServiceNamePrefix(workspace) + workspace.getMetadata().getUid());
+    public static String getServiceName(Session session) {
+	return K8sUtil.validString(getServiceNamePrefix(session) + session.getMetadata().getUid());
     }
 
     private static String getServiceNamePrefix(AppDefinitionSpecResource appDefinition) {
 	return appDefinition.getSpec().getName() + SERVICE_NAME;
     }
 
-    private static String getServiceNamePrefix(Workspace workspace) {
-	return workspace.getSpec().getName() + SERVICE_NAME;
+    private static String getServiceNamePrefix(Session session) {
+	return session.getSpec().getName() + SERVICE_NAME;
     }
 
     public static Integer getId(String correlationId, AppDefinitionSpecResource appDefinition, Service service) {
@@ -88,25 +88,25 @@ public final class TheiaCloudServiceUtil {
 	return replacements;
     }
 
-    public static Map<String, String> getServiceReplacements(String namespace, Workspace workspace, int port) {
+    public static Map<String, String> getServiceReplacements(String namespace, Session session, int port) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_SERVICENAME, getServiceName(workspace));
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(workspace));
+	replacements.put(PLACEHOLDER_SERVICENAME, getServiceName(session));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(port));
 	return replacements;
     }
 
-    public static Optional<Service> getServiceOwnedByWorkspace(String workspaceResourceName,
-	    String workspaceResourceUID, List<Service> existingServices) {
+    public static Optional<Service> getServiceOwnedBySession(String sessionResourceName,
+	    String sessionResourceUID, List<Service> existingServices) {
 	Optional<Service> alreadyReservedService = existingServices.stream()//
 		.filter(service -> {
 		    if (isUnusedService(service)) {
 			return false;
 		    }
 		    for (OwnerReference ownerReference : service.getMetadata().getOwnerReferences()) {
-			if (workspaceResourceName.equals(ownerReference.getName())
-				&& workspaceResourceUID.equals(ownerReference.getUid())) {
+			if (sessionResourceName.equals(ownerReference.getName())
+				&& sessionResourceUID.equals(ownerReference.getUid())) {
 			    return true;
 			}
 		    }

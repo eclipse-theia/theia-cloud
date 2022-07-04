@@ -27,8 +27,8 @@ import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResourceList;
 
@@ -62,11 +62,11 @@ public final class TheiaCloudHandlerUtil {
 	return K8sUtil.validString(appDefinition.getSpec().getName() + "-" + instance);
     }
 
-    public static String getAppSelector(Workspace workspace) {
-	return K8sUtil.validString(workspace.getSpec().getName() + "-" + workspace.getMetadata().getUid());
+    public static String getAppSelector(Session session) {
+	return K8sUtil.validString(session.getSpec().getName() + "-" + session.getMetadata().getUid());
     }
 
-    public static Optional<AppDefinitionSpecResource> getAppDefinitionSpecForWorkspace(DefaultKubernetesClient client,
+    public static Optional<AppDefinitionSpecResource> getAppDefinitionSpecForSession(DefaultKubernetesClient client,
 	    String namespace, String appDefinitionID) {
 	Optional<AppDefinitionSpecResource> appDefinition = client
 		.customResources(AppDefinitionSpecResource.class, AppDefinitionSpecResourceList.class).inNamespace(namespace)
@@ -76,20 +76,20 @@ public final class TheiaCloudHandlerUtil {
 	return appDefinition;
     }
 
-    public static <T extends HasMetadata> T addOwnerReferenceToItem(String correlationId, String workspaceResourceName,
-	    String workspaceResourceUID, T item) {
-	OwnerReference serviceOwnerReference = createOwnerReference(workspaceResourceName, workspaceResourceUID);
+    public static <T extends HasMetadata> T addOwnerReferenceToItem(String correlationId, String sessionResourceName,
+	    String sessionResourceUID, T item) {
+	OwnerReference serviceOwnerReference = createOwnerReference(sessionResourceName, sessionResourceUID);
 	LOGGER.info(formatLogMessage(correlationId, "Adding a new owner reference to " + item.getMetadata().getName()));
 	item.getMetadata().getOwnerReferences().add(serviceOwnerReference);
 	return item;
     }
 
-    public static OwnerReference createOwnerReference(String workspaceResourceName, String workspaceResourceUID) {
+    public static OwnerReference createOwnerReference(String sessionResourceName, String sessionResourceUID) {
 	OwnerReference ownerReference = new OwnerReference();
-	ownerReference.setApiVersion(HasMetadata.getApiVersion(Workspace.class));
-	ownerReference.setKind(WorkspaceSpec.KIND);
-	ownerReference.setName(workspaceResourceName);
-	ownerReference.setUid(workspaceResourceUID);
+	ownerReference.setApiVersion(HasMetadata.getApiVersion(Session.class));
+	ownerReference.setKind(SessionSpec.KIND);
+	ownerReference.setName(sessionResourceName);
+	ownerReference.setUid(sessionResourceUID);
 	return ownerReference;
     }
 

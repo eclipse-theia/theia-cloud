@@ -37,7 +37,7 @@ Open `./helm/theia.cloud/valuesGKETryNow.yaml` and update the host section to us
 
 ```yaml
 hosts:
-  workspace: workspace.34.141.62.32.nip.io
+  service: service.34.141.62.32.nip.io
   landing: theia.cloud.34.141.62.32.nip.io
   instance: ws.34.141.62.32.nip.io
 ```
@@ -52,7 +52,7 @@ helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-name
 ```
 
 ### Trouble shooting
-Recreate tls secret for workspaces:
+Recreate tls secret for sessions:
 
 `kubectl delete secret ws-cert-secret -n theiacloud`
 

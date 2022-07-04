@@ -31,11 +31,11 @@ public class TheiaCloudArguments {
     @Option(names = { "--keycloak" }, description = "Whether to use keycloak", required = false)
     private boolean useKeycloak;
 
-    @Option(names = { "--eagerStart" }, description = "Whether workspaces shall be started early.", required = false)
+    @Option(names = { "--eagerStart" }, description = "Whether sessions shall be started early.", required = false)
     private boolean eagerStart;
 
     @Option(names = {
-	    "--ephemeralStorage" }, description = "Whether workspaces will get persisted storage assigned.", required = false)
+	    "--ephemeralStorage" }, description = "Whether sessions will get persisted storage assigned.", required = false)
     private boolean ephemeralStorage;
 
     @Option(names = {

@@ -1,6 +1,6 @@
 import './App.css';
 
-import { getTheiaCloudConfig, startWorkspace } from '@theia-cloud/common';
+import { getTheiaCloudConfig, startSession } from '@theia-cloud/common';
 import { useState } from 'react';
 
 import { Spinner } from './components/Spinner';
@@ -21,12 +21,12 @@ function App(): JSX.Element {
 
   document.title = `${config.appName} - Try Now`;
 
-  const handleStartWorkspace = (): void => {
+  const handleStartSession = (): void => {
     setLoading(true);
     setError(undefined);
-    startWorkspace({
+    startSession({
       appId: config.appId,
-      workspaceServiceUrl: config.workspaceServiceUrl,
+      serviceUrl: config.serviceUrl,
       appDefinition: config.appDefinition
     })
       .catch((err: Error) => {
@@ -72,7 +72,7 @@ function App(): JSX.Element {
         </>
       ) : (
         <p>
-          <button disabled={!acceptedTerms} onClick={handleStartWorkspace} className='App__try-now-button'>
+          <button disabled={!acceptedTerms} onClick={handleStartSession} className='App__try-now-button'>
             Launch {config.appName}
           </button>
         </p>

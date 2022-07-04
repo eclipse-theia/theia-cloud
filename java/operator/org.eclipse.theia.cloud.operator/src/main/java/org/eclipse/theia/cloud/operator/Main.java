@@ -20,9 +20,9 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.di.DefaultTheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
@@ -65,10 +65,9 @@ public class Main {
 	KubernetesDeserializer.registerCustomKind(appDefinitionAPIVersion, AppDefinitionSpec.KIND,
 		AppDefinitionSpecResource.class);
 
-	String workspaceAPIVersion = HasMetadata.getApiVersion(Workspace.class);
-	LOGGER.info(
-		formatLogMessage(COR_ID_INIT, "Registering WorkspaceSpecResource in version " + workspaceAPIVersion));
-	KubernetesDeserializer.registerCustomKind(workspaceAPIVersion, WorkspaceSpec.KIND, Workspace.class);
+	String sessionAPIVersion = HasMetadata.getApiVersion(Session.class);
+	LOGGER.info(formatLogMessage(COR_ID_INIT, "Registering Sessions in version " + sessionAPIVersion));
+	KubernetesDeserializer.registerCustomKind(sessionAPIVersion, SessionSpec.KIND, Session.class);
 
 	/* Check if custom resource definition for app definition is registered */
 	client.apiextensions().v1().customResourceDefinitions().list().getItems().stream()//
@@ -77,12 +76,12 @@ public class Main {
 		.orElseThrow(() -> new RuntimeException(
 			"Deployment error: Custom resource definition App Definition for Theia.Cloud not found."));
 
-	/* Check if custom resource definition for workspace is registered */
+	/* Check if custom resource definition for session is registered */
 	client.apiextensions().v1().customResourceDefinitions().list().getItems().stream()//
-		.filter(Main::isWorkspaceCRD)//
+		.filter(Main::isSessionCRD)//
 		.findAny()//
 		.orElseThrow(() -> new RuntimeException(
-			"Deployment error: Custom resource definition Workspace for Theia.Cloud not found."));
+			"Deployment error: Custom resource definition Session for Theia.Cloud not found."));
 
 	AbstractTheiaCloudOperatorModule module = createModule(args);
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
@@ -90,7 +89,7 @@ public class Main {
 	TheiaCloud theiaCloud = new TheiaCloudImpl(namespace, module, client,
 		client.customResources(AppDefinitionSpecResource.class, AppDefinitionSpecResourceList.class)
 			.inNamespace(namespace),
-		client.customResources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace));
+		client.customResources(Session.class, SessionSpecResourceList.class).inNamespace(namespace));
 
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Launching Theia Cloud Now"));
 	theiaCloud.start();
@@ -117,11 +116,10 @@ public class Main {
 	return AppDefinitionSpec.CRD_NAME.equals(metadataName);
     }
 
-    private static boolean isWorkspaceCRD(CustomResourceDefinition crd) {
+    private static boolean isSessionCRD(CustomResourceDefinition crd) {
 	String metadataName = crd.getMetadata().getName();
-	LOGGER.trace(
-		formatLogMessage(COR_ID_INIT, "Checking whether " + metadataName + " is " + WorkspaceSpec.CRD_NAME));
-	return WorkspaceSpec.CRD_NAME.equals(metadataName);
+	LOGGER.trace(formatLogMessage(COR_ID_INIT, "Checking whether " + metadataName + " is " + SessionSpec.CRD_NAME));
+	return SessionSpec.CRD_NAME.equals(metadataName);
     }
 
 }

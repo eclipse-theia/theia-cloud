@@ -1,45 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: workspace-deployment
+  name: service-deployment
   labels:
-    app: workspace
+    app: service
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: workspace
+      app: service
   template:
     metadata:
       labels:
-        app: workspace
+        app: service
     spec:
-      # we need to be able to create and read workspaces
+      # we need to be able to create and read sessions
       automountServiceAccountToken: true
-      serviceAccountName: workspace-api-service-account
+      serviceAccountName: service-api-service-account
       containers:
-      - name: workspace-container
-        image: {{ .Values.workspace.image }}
+      - name: service-container
+        image: {{ .Values.service.image }}
         ports:
         - name: http
           containerPort: 8081
           protocol: TCP
         envFrom:
         - configMapRef:
-            name: workspace-config
+            name: service-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: workspace-service
+  name: service-service
   labels:
-    app: workspace
+    app: service
   namespace: {{ .Release.Namespace }}
 spec:
   type: ClusterIP
   selector:
-    app: workspace
+    app: service
   ports:
     - name: http
       protocol: TCP
