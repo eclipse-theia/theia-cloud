@@ -25,7 +25,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -54,16 +54,16 @@ public final class TheiaCloudDeploymentUtil {
 	return appDefinition.getSpec().getName() + DEPLOYMENT_NAME;
     }
 
-    private static String getDeploymentNamePrefix(Workspace workspace) {
-	return workspace.getSpec().getName() + DEPLOYMENT_NAME;
+    private static String getDeploymentNamePrefix(Session session) {
+	return session.getSpec().getName() + DEPLOYMENT_NAME;
     }
 
     public static String getDeploymentName(AppDefinitionSpecResource appDefinition, int instance) {
 	return K8sUtil.validString(getDeploymentNamePrefix(appDefinition) + instance);
     }
 
-    public static String getDeploymentName(Workspace workspace) {
-	return K8sUtil.validString(getDeploymentNamePrefix(workspace) + workspace.getMetadata().getUid());
+    public static String getDeploymentName(Session session) {
+	return K8sUtil.validString(getDeploymentNamePrefix(session) + session.getMetadata().getUid());
     }
 
     public static Integer getId(String correlationId, AppDefinitionSpecResource appDefinition, Deployment deployment) {
@@ -106,18 +106,18 @@ public final class TheiaCloudDeploymentUtil {
 	return replacements;
     }
 
-    public static Map<String, String> getDeploymentsReplacements(String namespace, Workspace workspace,
+    public static Map<String, String> getDeploymentsReplacements(String namespace, Session session,
 	    AppDefinitionSpecResource appDefinition) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_DEPLOYMENTNAME, getDeploymentName(workspace));
+	replacements.put(PLACEHOLDER_DEPLOYMENTNAME, getDeploymentName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(workspace));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(session));
 	replacements.put(PLACEHOLDER_APPDEFINITIONNAME, appDefinition.getSpec().getName());
 	replacements.put(PLACEHOLDER_IMAGE, appDefinition.getSpec().getImage());
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME,
-		TheiaCloudConfigMapUtil.getProxyConfigName(workspace));
+		TheiaCloudConfigMapUtil.getProxyConfigName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
-		TheiaCloudConfigMapUtil.getEmailConfigName(workspace));
+		TheiaCloudConfigMapUtil.getEmailConfigName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinition.getSpec().getPort()));
 	replacements.put(PLACEHOLDER_CPU_LIMITS, orEmpty(appDefinition.getSpec().getLimitsCpu()));
 	replacements.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(appDefinition.getSpec().getLimitsMemory()));

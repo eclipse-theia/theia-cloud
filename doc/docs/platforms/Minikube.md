@@ -105,7 +105,7 @@ $ minikube ip
 
 # If you don't use Minikube or your shell does not support $(), replace $(minikube ip) with the IP you determined above
 
-helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace --values ./helm/theia.cloud/valuesMinikube.yaml --set hosts.workspace=workspace.$(minikube ip).nip.io --set hosts.landing=theia.cloud.$(minikube ip).nip.io --set hosts.instance=ws.$(minikube ip).nip.io --set keycloak.authUrl=https://keycloak.$(minikube ip).nip.io/auth/
+helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace --values ./helm/theia.cloud/valuesMinikube.yaml --set hosts.service=service.$(minikube ip).nip.io --set hosts.landing=theia.cloud.$(minikube ip).nip.io --set hosts.instance=ws.$(minikube ip).nip.io --set keycloak.authUrl=https://keycloak.$(minikube ip).nip.io/auth/
 
 # Optional: switch to the newly created namespace
 kubectl config set-context --current --namespace=theiacloud
@@ -125,7 +125,7 @@ In Chrome:
 In Firefox:
 `Warning: Potential Security Risk Ahead -> Advanced... -> Accept the Risk and Continue`
 
-https://workspace.192.168.39.81.nip.io \
+https://service.192.168.39.81.nip.io \
 https://ws.192.168.39.81.nip.io  \
 https://keycloak.192.168.39.81.nip.io/
 
@@ -135,8 +135,8 @@ At last, go to
 
 https://theia.cloud.192.168.39.81.nip.io
 
-and accept the certificate. This will bring you to the Keycloak login page and will start up a workspace for your user after login.\
-The very first launch may take a bit longer, since the docker image for the workspace has to be pulled.
+and accept the certificate. This will bring you to the Keycloak login page and will start up a session for your user after login.\
+The very first launch may take a bit longer, since the docker image for the session has to be pulled.
 
 ### Uninstall Theia.Cloud
 

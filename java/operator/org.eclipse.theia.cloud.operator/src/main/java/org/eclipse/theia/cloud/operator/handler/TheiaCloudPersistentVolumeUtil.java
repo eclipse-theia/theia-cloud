@@ -19,7 +19,7 @@ package org.eclipse.theia.cloud.operator.handler;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
 
 public final class TheiaCloudPersistentVolumeUtil {
 
@@ -29,22 +29,22 @@ public final class TheiaCloudPersistentVolumeUtil {
 
     }
 
-    public static String getPersistentVolumeName(Workspace workspace) {
-	String user = workspace.getSpec().getUser();
+    public static String getPersistentVolumeName(Session session) {
+	String user = session.getSpec().getUser();
 	String pvName = user.replace("@", "at").replace(".", "-");
 	return pvName;
     }
 
-    public static Map<String, String> getPersistentVolumeReplacements(String namespace, Workspace workspace) {
+    public static Map<String, String> getPersistentVolumeReplacements(String namespace, Session session) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, getPersistentVolumeName(workspace));
+	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, getPersistentVolumeName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }
 
-    public static Map<String, String> getPersistentVolumeClaimReplacements(String namespace, Workspace workspace) {
+    public static Map<String, String> getPersistentVolumeClaimReplacements(String namespace, Session session) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, getPersistentVolumeName(workspace));
+	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, getPersistentVolumeName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }

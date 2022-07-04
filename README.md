@@ -12,10 +12,10 @@ Theia.cloud brings simple custom resource definitions (CRDs) that allow to speci
 A Java-based operator will listen for the creation, modification, and deletion of custom resources based on those CRDs and will manage the application.\
 See [Architecture.md](doc/docs/Architecture.md) for more information on the architecture.
 
-### Workspace REST Service
+### Theia.cloud REST Service
 
 This REST Service acts as the API for creating and stopping Theia-based products for an authenticated user as well as providing additional information.\
-The workspace service creates, modifies, and deletes the custom resources the operator listens to.
+The Theia.cloud service creates, modifies, and deletes the custom resources the operator listens to.
 
 ### Dashboard and resusable UI components
 

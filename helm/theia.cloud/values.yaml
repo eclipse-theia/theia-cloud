@@ -23,7 +23,7 @@ image:
 # You may adjust the hostname below.
 hosts:
   # hostname of the REST-API
-  workspace: workspace.192.168.39.173.nip.io
+  service: service.192.168.39.173.nip.io
 
   # hostname of the landing page
   landing: theia.cloud.192.168.39.173.nip.io
@@ -93,10 +93,10 @@ operator:
   # - K8SANNOTATIONANDWONDERSHAPER    Set Kubernetes annotations and use wondershaper init container
   bandwidthLimiter: "K8SANNOTATION"
 
-# Values of the workspace REST service
-workspace:
+# Values of the Theia.cloud REST service
+service:
   # The image to use
-  image: theiacloud/theia-cloud-workspace
+  image: theiacloud/theia-cloud-service
 
 # Values to influence the ingresses
 ingress:

@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudPersistentVolumeUtil;
@@ -49,24 +49,23 @@ public class GKEPersistentVolumeHandlerImpl implements PersistentVolumeHandler {
 
     @Override
     public void createAndApplyPersistentVolume(DefaultKubernetesClient client, String namespace, String correlationId,
-	    Workspace workspace) {
+	    Session session) {
 	/* no needed ? */
     }
 
     @Override
     public void createAndApplyPersistentVolumeClaim(DefaultKubernetesClient client, String namespace,
-	    String correlationId, Workspace workspace) {
+	    String correlationId, Session session) {
 
 	Map<String, String> replacements = TheiaCloudPersistentVolumeUtil
-		.getPersistentVolumeClaimReplacements(namespace, workspace);
+		.getPersistentVolumeClaimReplacements(namespace, session);
 	String persistentVolumeClaimYaml;
 	try {
 	    persistentVolumeClaimYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
 		    GKEPersistentVolumeHandlerImpl.class, TEMPLATE_PERSISTENTVOLUMECLAIM_YAML, replacements,
 		    correlationId);
 	} catch (IOException | URISyntaxException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for workspace " + workspace),
-		    e);
+	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for session " + session), e);
 	    return;
 	}
 

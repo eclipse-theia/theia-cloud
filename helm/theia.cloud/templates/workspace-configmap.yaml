@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: workspace-config
+  name: service-config
   namespace: {{ .Release.Namespace }}
 data:
   APPID: {{ .Values.app.id }}

@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: workspace-ingress
+  name: service-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
@@ -10,16 +10,16 @@ metadata:
 spec:
   tls: 
   - hosts:
-    - {{ .Values.hosts.workspace }}
-    secretName: workspace-cert-secret
+    - {{ .Values.hosts.service }}
+    secretName: service-cert-secret
   rules:
-  - host: {{ .Values.hosts.workspace }}
+  - host: {{ .Values.hosts.service }}
     http:
       paths:
       - backend:
           service:
-            name: workspace-service
+            name: service-service
             port:
               number: 8081
-        path: /workspaces
+        path: /service
         pathType: ImplementationSpecific

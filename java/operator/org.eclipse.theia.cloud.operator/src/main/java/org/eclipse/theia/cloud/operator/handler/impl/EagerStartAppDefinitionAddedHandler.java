@@ -49,7 +49,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 
 /**
  * A {@link AppDefinitionAddedHandler} that will eagerly start up deployments
- * ahead of usage time which will later be used as workspaces.
+ * ahead of usage time which will later be used as sessions.
  */
 public class EagerStartAppDefinitionAddedHandler implements AppDefinitionAddedHandler {
 
