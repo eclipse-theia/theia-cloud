@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: workspace-api-access
+  name: service-api-access
   namespace: {{ .Release.Namespace }}
 rules:
   -
@@ -9,19 +9,19 @@ rules:
       - ""
       - theia.cloud
     resources:
-      - workspaces
+      - sessions
     verbs: ["get", "create", "watch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: workspace-api-access
+  name: service-api-access
   namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: workspace-api-access
+  name: service-api-access
 subjects:
 - kind: ServiceAccount
-  name: workspace-api-service-account
+  name: service-api-service-account
   namespace: {{ .Release.Namespace }}
