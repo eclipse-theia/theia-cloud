@@ -55,8 +55,8 @@ public class PersistentVolumeHandlerImpl implements PersistentVolumeHandler {
 		session);
 	String persistentVolumeYaml;
 	try {
-	    persistentVolumeYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
-		    PersistentVolumeHandlerImpl.class, TEMPLATE_PERSISTENTVOLUME_YAML, replacements, correlationId);
+	    persistentVolumeYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(TEMPLATE_PERSISTENTVOLUME_YAML,
+		    replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for session " + session), e);
 	    return;
@@ -73,8 +73,7 @@ public class PersistentVolumeHandlerImpl implements PersistentVolumeHandler {
 	String persistentVolumeClaimYaml;
 	try {
 	    persistentVolumeClaimYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
-		    PersistentVolumeHandlerImpl.class, TEMPLATE_PERSISTENTVOLUMECLAIM_YAML, replacements,
-		    correlationId);
+		    TEMPLATE_PERSISTENTVOLUMECLAIM_YAML, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for session " + session), e);
 	    return;

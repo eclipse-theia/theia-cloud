@@ -157,8 +157,8 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionAddedHa
 		: AddedHandler.TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML;
 	String serviceYaml;
 	try {
-	    serviceYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(EagerStartAppDefinitionAddedHandler.class,
-		    templateYaml, replacements, correlationId);
+	    serviceYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(templateYaml, replacements,
+		    correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
@@ -178,8 +178,8 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionAddedHa
 		: AddedHandler.TEMPLATE_DEPLOYMENT_WITHOUT_AOUTH2_PROXY_YAML;
 	String deploymentYaml;
 	try {
-	    deploymentYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
-		    EagerStartAppDefinitionAddedHandler.class, templateYaml, replacements, correlationId);
+	    deploymentYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(templateYaml, replacements,
+		    correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
@@ -202,9 +202,8 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionAddedHa
 		appDefinition, instance);
 	String configMapYaml;
 	try {
-	    configMapYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
-		    EagerStartAppDefinitionAddedHandler.class, AddedHandler.TEMPLATE_CONFIGMAP_YAML, replacements,
-		    correlationId);
+	    configMapYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(AddedHandler.TEMPLATE_CONFIGMAP_YAML,
+		    replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),
@@ -229,8 +228,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionAddedHa
 	String configMapYaml;
 	try {
 	    configMapYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
-		    EagerStartAppDefinitionAddedHandler.class, AddedHandler.TEMPLATE_CONFIGMAP_EMAILS_YAML,
-		    replacements, correlationId);
+		    AddedHandler.TEMPLATE_CONFIGMAP_EMAILS_YAML, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while adjusting template for instance number " + instance),

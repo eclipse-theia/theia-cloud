@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: placeholder-depname
+  namespace: placeholder-namespace
+  ownerReferences:
+    - apiVersion: theia.cloud/v1beta
+      kind: AppDefinition
+      name: placeholder
+      uid: placeholder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: placeholder-app
+  template:
+    metadata:
+      labels:
+        app: placeholder-app
+    spec:
+      automountServiceAccountToken: false
+      # initContainers:
+      # - name: wondershaper-init
+      #   image: gcr.io/kubernetes-238012/theia-cloud-wondershaper
+      #   securityContext:
+      #     capabilities:
+      #       add:
+      #       - NET_ADMIN
+      containers:
+        - name: placeholder-definitionname
+          image: placeholder-image
+          ports:
+            - containerPort: placeholder-port
+          resources:
+            limits:
+              cpu: placeholder-cpu-limits
+              memory: placeholder-memory-limits
+            requests:
+              cpu: placeholder-cpu-requests
+              memory: placeholder-memory-requests
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+        - name: nginx-hello-world
+          image: nginxdemos/hello
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0

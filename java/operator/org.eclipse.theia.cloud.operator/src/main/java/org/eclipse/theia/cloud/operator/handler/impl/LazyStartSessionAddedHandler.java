@@ -204,8 +204,8 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 		: AddedHandler.TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML;
 	String serviceYaml;
 	try {
-	    serviceYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(LazyStartSessionAddedHandler.class,
-		    templateYaml, replacements, correlationId);
+	    serviceYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(templateYaml, replacements,
+		    correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for session " + session), e);
 	    return Optional.empty();
@@ -219,7 +219,7 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 	Map<String, String> replacements = TheiaCloudConfigMapUtil.getEmailConfigMapReplacements(namespace, session);
 	String configMapYaml;
 	try {
-	    configMapYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(LazyStartSessionAddedHandler.class,
+	    configMapYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
 		    AddedHandler.TEMPLATE_CONFIGMAP_EMAILS_YAML, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for session " + session), e);
@@ -238,8 +238,8 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 	Map<String, String> replacements = TheiaCloudConfigMapUtil.getProxyConfigMapReplacements(namespace, session);
 	String configMapYaml;
 	try {
-	    configMapYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(LazyStartSessionAddedHandler.class,
-		    AddedHandler.TEMPLATE_CONFIGMAP_YAML, replacements, correlationId);
+	    configMapYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(AddedHandler.TEMPLATE_CONFIGMAP_YAML,
+		    replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for session " + session), e);
 	    return;
@@ -262,8 +262,8 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 		: AddedHandler.TEMPLATE_DEPLOYMENT_WITHOUT_AOUTH2_PROXY_YAML;
 	String deploymentYaml;
 	try {
-	    deploymentYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(LazyStartSessionAddedHandler.class,
-		    templateYaml, replacements, correlationId);
+	    deploymentYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(templateYaml, replacements,
+		    correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for session " + session), e);
 	    return;

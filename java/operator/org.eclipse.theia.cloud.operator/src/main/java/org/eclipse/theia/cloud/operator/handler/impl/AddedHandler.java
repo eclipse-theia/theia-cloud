@@ -115,8 +115,8 @@ public final class AddedHandler {
 	Map<String, String> replacements = TheiaCloudIngressUtil.getIngressReplacements(namespace, appDefinition);
 	String ingressYaml;
 	try {
-	    ingressYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(AddedHandler.class, TEMPLATE_INGRESS_YAML,
-		    replacements, correlationId);
+	    ingressYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(TEMPLATE_INGRESS_YAML, replacements,
+		    correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    return;
 	}
