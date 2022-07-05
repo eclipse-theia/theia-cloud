@@ -29,3 +29,7 @@ spec:
           - {{ .Values.operator.cloudProvider }}
           - "--bandwidthLimiter"
           - {{ .Values.operator.bandwidthLimiter }}
+      {{- if .Values.operator.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.operator.imagePullSecret }}
+      {{- end }}

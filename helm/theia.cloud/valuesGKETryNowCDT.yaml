@@ -8,6 +8,7 @@ issuer:
 
 image:
   name: theiacloud/cdt-blueprint
+  pullSecret: ""
 
 hosts:
   service: service.34.159.89.224.nip.io

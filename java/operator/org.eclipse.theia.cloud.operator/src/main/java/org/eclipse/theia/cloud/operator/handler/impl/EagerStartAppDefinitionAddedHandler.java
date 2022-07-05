@@ -192,6 +192,10 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionAddedHa
 		    bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
 			    appDefinition.getSpec().getUplinkLimit(), correlationId);
 		    AddedHandler.removeEmptyResources(deployment);
+		    if (appDefinition.getSpec().getPullSecret() != null
+			    && !appDefinition.getSpec().getPullSecret().isEmpty()) {
+			AddedHandler.addImagePullSecret(deployment, appDefinition.getSpec().getPullSecret());
+		    }
 		});
     }
 

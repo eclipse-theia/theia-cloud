@@ -8,6 +8,7 @@ issuer:
 
 image:
   name: theiacloud/theia-cloud-demo
+  pullSecret: ""
 
 hosts:
   service: service.192.168.39.3.nip.io
@@ -16,6 +17,7 @@ hosts:
 
 landingPage:
   image: theiacloud/theia-cloud-landing-page
+  # imagePullSecret: pullsecret
   appDefinition: "theia-cloud-demo"
 
 keycloak:
@@ -28,6 +30,7 @@ keycloak:
 
 operator:
   image: theiacloud/theia-cloud-operator
+  # imagePullSecret: pullsecret
   eagerStart: false
   ephemeralStorage: false
   cloudProvider: "K8S"
@@ -35,6 +38,7 @@ operator:
 
 service:
   image: theiacloud/theia-cloud-service
+  # imagePullSecret: pullsecret
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
