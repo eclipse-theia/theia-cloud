@@ -62,8 +62,7 @@ public class GKEPersistentVolumeHandlerImpl implements PersistentVolumeHandler {
 	String persistentVolumeClaimYaml;
 	try {
 	    persistentVolumeClaimYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
-		    GKEPersistentVolumeHandlerImpl.class, TEMPLATE_PERSISTENTVOLUMECLAIM_YAML, replacements,
-		    correlationId);
+		    TEMPLATE_PERSISTENTVOLUMECLAIM_YAML, replacements, correlationId);
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for session " + session), e);
 	    return;

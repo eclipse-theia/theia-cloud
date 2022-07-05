@@ -10,6 +10,7 @@ RUN cd /operator/common/maven-conf && \
     mvn clean verify
 
 FROM openjdk:11-jre-slim-buster
+RUN mkdir /templates
 WORKDIR /log-config
 COPY java/operator/org.eclipse.theia.cloud.operator/log4j2.xml .
 WORKDIR /operator
