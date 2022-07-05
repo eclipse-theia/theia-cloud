@@ -20,6 +20,9 @@ image:
   # The name of docker image to be used
   name: theiacloud/theia-cloud-demo
 
+  # the image pull secret. Leave empty if registry is public
+  pullSecret: ""
+
 # You may adjust the hostname below.
 hosts:
   # hostname of the REST-API
@@ -35,6 +38,9 @@ hosts:
 landingPage:
   # the landing page image to use
   image: theiacloud/theia-cloud-landing-page
+
+  # Optional: the image pull secret
+  imagePullSecret: pullsecret
 
   # the app id to launch
   appDefinition: "theia-cloud-demo"
@@ -70,6 +76,9 @@ operator:
   # The operator image
   image: theiacloud/theia-cloud-operator
 
+  # Optional: the image pull secret
+  imagePullSecret: pullsecret
+
   # Whether theia applications shall be started eager. This means that the application is already
   # running without a user. When a user requests a new session, one of the already launched ones
   # is assigned.
@@ -97,6 +106,9 @@ operator:
 service:
   # The image to use
   image: theiacloud/theia-cloud-service
+
+  # Optional: the image pull secret
+  imagePullSecret: pullsecret
 
 # Values to influence the ingresses
 ingress:

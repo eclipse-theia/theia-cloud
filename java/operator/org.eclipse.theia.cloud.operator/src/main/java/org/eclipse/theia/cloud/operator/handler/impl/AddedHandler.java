@@ -25,8 +25,10 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -51,6 +53,7 @@ import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -231,6 +234,16 @@ public final class AddedHandler {
 		toRemove.forEach(requests::remove);
 	    }
 	}
+    }
+
+    public static void addImagePullSecret(Deployment deployment, String secret) {
+	List<LocalObjectReference> imagePullSecrets = deployment.getSpec().getTemplate().getSpec()
+		.getImagePullSecrets();
+	if (imagePullSecrets == null) {
+	    imagePullSecrets = new ArrayList<LocalObjectReference>();
+	    deployment.getSpec().getTemplate().getSpec().setImagePullSecrets(imagePullSecrets);
+	}
+	imagePullSecrets.add(new LocalObjectReference(secret));
     }
 
 }

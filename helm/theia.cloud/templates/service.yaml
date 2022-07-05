@@ -28,6 +28,10 @@ spec:
         envFrom:
         - configMapRef:
             name: service-config
+      {{- if .Values.service.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.service.imagePullSecret }}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service

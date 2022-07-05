@@ -37,6 +37,10 @@ spec:
             - name: landing-page-config
               mountPath: /usr/share/nginx/html/logo.png
               subPath: logo.png
+      {{- if .Values.landingPage.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.landingPage.imagePullSecret }}
+      {{- end }}
       volumes:
         - name: landing-page-config
           configMap:
