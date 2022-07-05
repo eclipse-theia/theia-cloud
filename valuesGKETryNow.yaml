@@ -8,6 +8,7 @@ issuer:
 
 image:
   name: theiacloud/theia-cloud-demo
+  pullSecret: ""
 
 hosts:
   service: service.34.141.62.32.nip.io

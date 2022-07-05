@@ -11,9 +11,51 @@ spec:
     singular: appdefinition
   scope: Namespaced
   versions:
-    - name : v1beta
+    - name : v2beta
       served: true
       storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                pullSecret:
+                  type: string
+                uid:
+                  type: integer
+                port:
+                  type: integer
+                host:
+                  type: string
+                ingressname:
+                  type: string
+                minInstances:
+                  type: integer
+                maxInstances:
+                  type: integer
+                killAfter:
+                  type: integer
+                requestsMemory:
+                  type: string
+                requestsCpu:
+                  type: string
+                limitsMemory:
+                  type: string
+                limitsCpu:
+                  type: string
+                downlinkLimit:
+                  type: integer
+                uplinkLimit:
+                  type: integer
+    - name : v1beta
+      served: true
+      storage: false
       schema:
         openAPIV3Schema:
           type: object
