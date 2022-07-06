@@ -102,6 +102,11 @@ operator:
   # - K8SANNOTATIONANDWONDERSHAPER    Set Kubernetes annotations and use wondershaper init container
   bandwidthLimiter: "K8SANNOTATION"
 
+  # Configures how sessions will be stopped. Possible values:
+  # - FIXEDTIME   Sessions will be stopped after a fixed time (killAfter value set in AppDefinition)
+  # - INACTIVITY  Sessions will be stopped after user inactivity (killAfter value set in AppDefinition)
+  killAfter: "FIXEDTIME"
+
 # Values of the Theia.cloud REST service
 service:
   # The image to use

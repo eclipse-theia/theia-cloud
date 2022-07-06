@@ -41,6 +41,9 @@ public class SessionSpec {
     @JsonProperty("error")
     private String error;
 
+    @JsonProperty("lastActivity")
+    private int lastActivity;
+
     public SessionSpec() {
     }
 
@@ -78,10 +81,18 @@ public class SessionSpec {
 	this.error = error;
     }
 
+    public int getLastActivity() {
+	return lastActivity;
+    }
+
+    public void setLastActivity(int lastActivity) {
+	this.lastActivity = lastActivity;
+    }
+
     @Override
     public String toString() {
 	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
-		+ ", error=" + error + "]";
+		+ ", error=" + error + ", lastActivity=" + lastActivity + "]";
     }
 
 }

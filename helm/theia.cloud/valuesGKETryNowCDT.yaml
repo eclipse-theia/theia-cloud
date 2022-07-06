@@ -33,6 +33,7 @@ operator:
   ephemeralStorage: true
   cloudProvider: "GKE"
   bandwidthLimiter: "WONDERSHAPER"
+  killAfter: "FIXEDTIME"
 
 service:
   image: theiacloud/theia-cloud-service

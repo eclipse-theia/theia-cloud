@@ -155,4 +155,21 @@ public final class K8sUtil {
 
     }
 
+    public static void reportActivity(String correlationId, String name, String appDefinition, String user) {
+	NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessions = CLIENT
+		.customResources(Session.class, SessionSpecResourceList.class).inNamespace(K8sUtil.NAMESPACE);
+	Resource<Session> existingSession = sessions.withName(name);
+	if (existingSession.get() == null) {
+	    LOGGER.info(formatLogMessage(correlationId, "Activity reported for session {" + name + " - " + appDefinition
+		    + " - " + user + "} but session not found"));
+	    return;
+	}
+	existingSession.edit(session -> {
+	    session.getSpec().setLastActivity((int) System.currentTimeMillis());
+	    LOGGER.trace(formatLogMessage(correlationId,
+		    "updating activity for session {" + name + " - " + appDefinition + " - " + user + "}"));
+	    return session;
+	});
+    }
+
 }

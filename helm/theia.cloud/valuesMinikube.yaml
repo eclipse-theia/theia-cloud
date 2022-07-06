@@ -35,6 +35,7 @@ operator:
   ephemeralStorage: false
   cloudProvider: "K8S"
   bandwidthLimiter: "K8SANNOTATION"
+  killAfter: "FIXEDTIME"
 
 service:
   image: theiacloud/theia-cloud-service

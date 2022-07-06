@@ -83,10 +83,11 @@ public class Main {
 		.orElseThrow(() -> new RuntimeException(
 			"Deployment error: Custom resource definition Session for Theia.Cloud not found."));
 
-	AbstractTheiaCloudOperatorModule module = createModule(args);
+	TheiaCloudArguments arguments = createArguments(args);
+	AbstractTheiaCloudOperatorModule module = createModule(arguments);
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
 
-	TheiaCloud theiaCloud = new TheiaCloudImpl(namespace, module, client,
+	TheiaCloud theiaCloud = new TheiaCloudImpl(namespace, module, arguments, client,
 		client.customResources(AppDefinitionSpecResource.class, AppDefinitionSpecResourceList.class)
 			.inNamespace(namespace),
 		client.customResources(Session.class, SessionSpecResourceList.class).inNamespace(namespace));
@@ -95,7 +96,7 @@ public class Main {
 	theiaCloud.start();
     }
 
-    protected AbstractTheiaCloudOperatorModule createModule(String[] args) {
+    protected TheiaCloudArguments createArguments(String[] args) {
 	TheiaCloudArguments arguments = new TheiaCloudArguments();
 	CommandLine commandLine = new CommandLine(arguments).setTrimQuotes(true);
 	commandLine.parseArgs(args);
@@ -105,7 +106,11 @@ public class Main {
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: ephemeralStorage " + arguments.isEphemeralStorage()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: cloudProvider " + arguments.getCloudProvider()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: bandwidthLimiter " + arguments.getBandwidthLimiter()));
+	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: killAfter " + arguments.getKillAfter()));
+	return arguments;
+    }
 
+    protected AbstractTheiaCloudOperatorModule createModule(TheiaCloudArguments arguments) {
 	return new DefaultTheiaCloudOperatorModule(arguments);
     }
 

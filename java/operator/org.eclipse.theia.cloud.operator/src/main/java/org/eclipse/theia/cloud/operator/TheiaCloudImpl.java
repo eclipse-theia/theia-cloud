@@ -57,6 +57,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 
     private final String namespace;
     private final Injector injector;
+    private final TheiaCloudArguments arguments;
     private final DefaultKubernetesClient client;
     private final NonNamespaceOperation<AppDefinitionSpecResource, AppDefinitionSpecResourceList, Resource<AppDefinitionSpecResource>> appDefinitionResourceClient;
     private final NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessionResourceClient;
@@ -65,11 +66,13 @@ public class TheiaCloudImpl implements TheiaCloud {
     private SessionAddedHandler sessionAddedHandler;
     private SessionRemovedHandler sessionRemovedHandler;
 
-    public TheiaCloudImpl(String namespace, AbstractTheiaCloudOperatorModule module, DefaultKubernetesClient client,
+    public TheiaCloudImpl(String namespace, AbstractTheiaCloudOperatorModule module, TheiaCloudArguments arguments,
+	    DefaultKubernetesClient client,
 	    NonNamespaceOperation<AppDefinitionSpecResource, AppDefinitionSpecResourceList, Resource<AppDefinitionSpecResource>> appDefinitionResourceClient,
 	    NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessionResourceClient) {
 	this.namespace = namespace;
 	this.injector = Guice.createInjector(module);
+	this.arguments = arguments;
 	this.client = client;
 	this.appDefinitionResourceClient = appDefinitionResourceClient;
 	this.sessionResourceClient = sessionResourceClient;
@@ -84,8 +87,9 @@ public class TheiaCloudImpl implements TheiaCloud {
 	initAppDefinitionsAndWatchForChanges();
 	initSessionsAndWatchForChanges();
 
-	EXECUTOR.scheduleWithFixedDelay(new KillAfterRunnable(appDefinitionResourceClient, sessionResourceClient), 1, 1,
-		TimeUnit.MINUTES);
+	EXECUTOR.scheduleWithFixedDelay(
+		new KillAfterRunnable(appDefinitionResourceClient, sessionResourceClient, arguments.getKillAfter()), 1,
+		1, TimeUnit.MINUTES);
     }
 
     private void handleAppDefnitionEvent(Watcher.Action action, String uid, String correlationId) {

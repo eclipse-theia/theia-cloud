@@ -20,6 +20,7 @@ The Theia.Cloud Operator listens for changes to custom resources inside the clus
 |--ephemeralStorage|boolean|Whether sessions get persisted storage assigned|
 |--cloudProvider|null, GKE|Cloud Provider specific configs|
 |--bandwidthLimiter|null, K8SANNOTATION, WONDERSHAPER, K8SANNOTATIONANDWONDERSHAPER|How to limit ingress/egress bandwidth|
+|--killAfter|null, FIXEDTIME, INACTIVITY|Whether sessions shall be stopped after a fixed time or after user inactivity|
 
 ## Custom Resources
 

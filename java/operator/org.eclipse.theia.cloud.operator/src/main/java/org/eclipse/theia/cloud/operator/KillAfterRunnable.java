@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.operator.TheiaCloudArguments.KillAfter;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResourceList;
 
@@ -43,12 +44,15 @@ public final class KillAfterRunnable implements Runnable {
 
     private NonNamespaceOperation<AppDefinitionSpecResource, AppDefinitionSpecResourceList, Resource<AppDefinitionSpecResource>> appDefinitionResourceClient;
     private NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessionResourceClient;
+    private KillAfter mode;
 
     public KillAfterRunnable(
 	    NonNamespaceOperation<AppDefinitionSpecResource, AppDefinitionSpecResourceList, Resource<AppDefinitionSpecResource>> appDefinitionResourceClient,
-	    NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessionResourceClient) {
+	    NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessionResourceClient,
+	    KillAfter mode) {
 	this.appDefinitionResourceClient = appDefinitionResourceClient;
 	this.sessionResourceClient = sessionResourceClient;
+	this.mode = mode;
     }
 
     @Override
@@ -77,19 +81,16 @@ public final class KillAfterRunnable implements Runnable {
 		String appDefinitionName = session.getSpec().getAppDefinition();
 		if (killAfterMap.containsKey(appDefinitionName)) {
 		    Integer killAfter = killAfterMap.get(appDefinitionName);
-
-		    String creationTimestamp = session.getMetadata().getCreationTimestamp();
-		    Instant parse = Instant.parse(creationTimestamp);
-		    long minutesSinceCreation = ChronoUnit.MINUTES.between(parse, now);
-		    if (minutesSinceCreation > killAfter) {
-			LOGGER.info(formatLogMessage(COR_ID_KILLPREFIX, correlationId,
-				"Session " + session.getSpec().getName() + " WILL be killed. KilledAfter: " + killAfter
-					+ " ; since creation: " + minutesSinceCreation));
-			sessionsToKill.add(session.getMetadata().getName());
-		    } else {
-			LOGGER.trace(formatLogMessage(COR_ID_KILLPREFIX, correlationId,
-				"Session " + session.getSpec().getName() + " will not be killed. KilledAfter: "
-					+ killAfter + " ; since creation: " + minutesSinceCreation));
+		    switch (mode) {
+		    case INACTIVITY:
+			inactivity(correlationId, sessionsToKill, now, session, killAfter);
+			break;
+		    case FIXEDTIME:
+			fixedTime(correlationId, sessionsToKill, now, session, killAfter);
+			break;
+		    default:
+			fixedTime(correlationId, sessionsToKill, now, session, killAfter);
+			break;
 		    }
 		} else {
 		    LOGGER.trace(formatLogMessage(COR_ID_KILLPREFIX, correlationId,
@@ -102,6 +103,38 @@ public final class KillAfterRunnable implements Runnable {
 	    }
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(COR_ID_KILLPREFIX, correlationId, "Exception in kill after runnable"), e);
+	}
+    }
+
+    protected void inactivity(String correlationId, Set<String> sessionsToKill, Instant now, Session session,
+	    Integer killAfter) {
+	int lastActivity = session.getSpec().getLastActivity();
+	Instant parse = Instant.ofEpochMilli(lastActivity);
+	long minutesSinceLastActivity = ChronoUnit.MINUTES.between(parse, now);
+	if (minutesSinceLastActivity > killAfter) {
+	    LOGGER.info(formatLogMessage(COR_ID_KILLPREFIX, correlationId,
+		    "Session " + session.getSpec().getName() + " WILL be killed. KilledAfter: " + killAfter
+			    + " ; since last activity: " + minutesSinceLastActivity));
+	    sessionsToKill.add(session.getMetadata().getName());
+	} else {
+	    LOGGER.trace(formatLogMessage(COR_ID_KILLPREFIX, correlationId,
+		    "Session " + session.getSpec().getName() + " will not be killed. KilledAfter: " + killAfter
+			    + " ; since last activity: " + minutesSinceLastActivity));
+	}
+    }
+
+    protected void fixedTime(String correlationId, Set<String> sessionsToKill, Instant now, Session session,
+	    Integer killAfter) {
+	String creationTimestamp = session.getMetadata().getCreationTimestamp();
+	Instant parse = Instant.parse(creationTimestamp);
+	long minutesSinceCreation = ChronoUnit.MINUTES.between(parse, now);
+	if (minutesSinceCreation > killAfter) {
+	    LOGGER.info(formatLogMessage(COR_ID_KILLPREFIX, correlationId, "Session " + session.getSpec().getName()
+		    + " WILL be killed. KilledAfter: " + killAfter + " ; since creation: " + minutesSinceCreation));
+	    sessionsToKill.add(session.getMetadata().getName());
+	} else {
+	    LOGGER.trace(formatLogMessage(COR_ID_KILLPREFIX, correlationId, "Session " + session.getSpec().getName()
+		    + " will not be killed. KilledAfter: " + killAfter + " ; since creation: " + minutesSinceCreation));
 	}
     }
 }

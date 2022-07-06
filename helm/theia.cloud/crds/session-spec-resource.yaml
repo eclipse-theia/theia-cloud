@@ -31,3 +31,5 @@ spec:
                   type: string
                 error:
                   type: string
+                lastActivity:
+                  type: integer

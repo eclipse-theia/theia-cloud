@@ -28,6 +28,10 @@ public class TheiaCloudArguments {
 	K8SANNOTATION, WONDERSHAPER, K8SANNOTATIONANDWONDERSHAPER
     }
 
+    public enum KillAfter {
+	FIXEDTIME, INACTIVITY
+    }
+
     @Option(names = { "--keycloak" }, description = "Whether to use keycloak", required = false)
     private boolean useKeycloak;
 
@@ -45,6 +49,9 @@ public class TheiaCloudArguments {
     @Option(names = {
 	    "--bandwidthLimiter" }, description = "The method of limiting network bandwidth", required = false)
     private BandwidthLimiter bandwidthLimiter;
+
+    @Option(names = { "--killAfter" }, description = "How the timeout to stop sessions is computed", required = false)
+    private KillAfter killAfter;
 
     public boolean isUseKeycloak() {
 	return useKeycloak;
@@ -66,6 +73,10 @@ public class TheiaCloudArguments {
 	return bandwidthLimiter;
     }
 
+    public KillAfter getKillAfter() {
+	return killAfter;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -74,6 +85,7 @@ public class TheiaCloudArguments {
 	result = prime * result + ((cloudProvider == null) ? 0 : cloudProvider.hashCode());
 	result = prime * result + (eagerStart ? 1231 : 1237);
 	result = prime * result + (ephemeralStorage ? 1231 : 1237);
+	result = prime * result + ((killAfter == null) ? 0 : killAfter.hashCode());
 	result = prime * result + (useKeycloak ? 1231 : 1237);
 	return result;
     }
@@ -95,6 +107,8 @@ public class TheiaCloudArguments {
 	    return false;
 	if (ephemeralStorage != other.ephemeralStorage)
 	    return false;
+	if (killAfter != other.killAfter)
+	    return false;
 	if (useKeycloak != other.useKeycloak)
 	    return false;
 	return true;
@@ -104,7 +118,7 @@ public class TheiaCloudArguments {
     public String toString() {
 	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", ephemeralStorage="
 		+ ephemeralStorage + ", cloudProvider=" + cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter
-		+ "]";
+		+ ", killAfter=" + killAfter + "]";
     }
 
 }

@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
 
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 
 import org.jboss.logging.Logger;
@@ -49,6 +50,16 @@ public class SessionResource {
 	}
 	LOGGER.info(formatLogMessage(correlationId, "Launching session " + session));
 	return K8sUtil.launchSession(correlationId, generateSessionName(session), session.appDefinition, session.user);
+    }
+
+    @PUT
+    public void reportActivity(Session session) {
+	String correlationId = generateCorrelationId();
+	if (wrongAppId(session)) {
+	    LOGGER.info(
+		    formatLogMessage(correlationId, "Report activity call without matching appId: " + session.appId));
+	}
+	K8sUtil.reportActivity(correlationId, generateSessionName(session), session.appDefinition, session.user);
     }
 
     private boolean wrongAppId(Session session) {
