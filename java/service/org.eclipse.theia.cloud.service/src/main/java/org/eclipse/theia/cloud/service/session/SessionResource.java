@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
@@ -35,8 +36,13 @@ import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
+import io.quarkus.security.identity.SecurityIdentity;
+
 @Path("/service/session")
 public class SessionResource extends BaseResource {
+
+    @Inject
+    protected SecurityIdentity identity;
 
     @Operation(summary = "List sessions", description = "List sessions of a user.")
     @GET
@@ -46,6 +52,9 @@ public class SessionResource extends BaseResource {
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
 	    info(correlationId, "List sessions call without matching appId: " + request.appId);
+	    return Collections.emptyList();
+	}
+	if (!isAuthenticated(correlationId, request, identity)) {
 	    return Collections.emptyList();
 	}
 	info(correlationId, "Listing sessions " + request);
@@ -59,6 +68,9 @@ public class SessionResource extends BaseResource {
 	if (!isValidRequest(request)) {
 	    info(correlationId, "Launching session call without matching appId: " + request.appId);
 	    return SessionLaunchResponse.error("AppId is not matching.");
+	}
+	if (!isAuthenticated(correlationId, request, identity)) {
+	    return SessionLaunchResponse.error("Unauthenticated request");
 	}
 	info(correlationId, "Launching session " + request);
 	if (request.isEphemeral()) {
@@ -89,6 +101,9 @@ public class SessionResource extends BaseResource {
 	    info(correlationId, "Stop session call without matching appId: " + request.appId);
 	    return false;
 	}
+	if (!isAuthenticated(correlationId, request, identity)) {
+	    return false;
+	}
 	if (request.sessionName == null) {
 	    // check if we are allowed to launch another workspace
 	    info(correlationId, "No session name");
@@ -104,6 +119,9 @@ public class SessionResource extends BaseResource {
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
 	    info(correlationId, "Report activity call without matching appId: " + request.appId);
+	    return false;
+	}
+	if (!isAuthenticated(correlationId, request, identity)) {
 	    return false;
 	}
 	if (request.sessionName == null) {

@@ -12,6 +12,17 @@ RUN cd /service/common/maven-conf && \
 FROM openjdk:11-jre-slim-buster
 WORKDIR /service
 COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-0.7.0-SNAPSHOT-runner.jar .
-ENV APPID default-app-id
-ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} -jar ./service-0.7.0-SNAPSHOT-runner.jar
+
+ENV APPID asdfghjkl
+ENV KEYCLOAK_ENABLE false
+ENV KEYCLOAK_SERVERURL https://keycloak.url/auth/realms/TheiaCloud
+ENV KEYCLOAK_CLIENTID theia-cloud
+ENV KEYCLOAK_CLIENTSECRET publicbutoauth2proxywantsasecret
+
+ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} \
+    -Dtheia.cloud.use.keycloak=${KEYCLOAK_ENABLE} \
+    -Dquarkus.oidc.auth-server-url=${KEYCLOAK_SERVERURL} \
+    -Dquarkus.oidc.client-id=${KEYCLOAK_CLIENTID} \
+    -Dquarkus.oidc.credentials.secret=${KEYCLOAK_CLIENTSECRET} \
+    -jar ./service-0.7.0-SNAPSHOT-runner.jar
 CMD [ "" ]

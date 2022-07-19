@@ -18,19 +18,38 @@ package org.eclipse.theia.cloud.service;
 import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 import org.jboss.logging.Logger;
 
+import io.quarkus.security.identity.SecurityIdentity;
+
 public class BaseResource {
     private static final String THEIA_CLOUD_APP_ID = "theia.cloud.app.id";
+    private static final String THEIA_CLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
 
     protected final Logger logger;
     protected final String appId;
+    protected boolean useKeycloak;
 
     public BaseResource() {
 	appId = System.getProperty(THEIA_CLOUD_APP_ID, "asdfghjkl");
+	useKeycloak = Boolean.valueOf(System.getProperty(THEIA_CLOUD_USE_KEYCLOAK, "false"));
 	logger = Logger.getLogger(getClass().getSuperclass());
     }
 
     protected boolean isValidRequest(ServiceRequest request) {
 	return request != null && request.appId != null && request.appId.equals(appId);
+    }
+
+    protected boolean isAuthenticated(String correlationId, ServiceRequest request, SecurityIdentity identity) {
+	if (!useKeycloak) {
+	    trace(correlationId, "Keycloak disabled. All calls are accepted.");
+	    return true;
+	}
+	if (identity == null) {
+	    error(correlationId, "SecurityIdentity is null. Request can't be checked for authentication.");
+	    return false;
+	}
+	boolean isAuthenticatedCall = !identity.isAnonymous();
+	info(correlationId, "Authenticated: " + isAuthenticatedCall + " for request " + request);
+	return isAuthenticatedCall;
     }
 
     public void info(String correlationId, String message) {

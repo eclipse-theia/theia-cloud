@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrela
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -31,8 +32,13 @@ import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
 
+import io.quarkus.security.identity.SecurityIdentity;
+
 @Path("/service/workspace")
 public class WorkspaceResource extends BaseResource {
+
+    @Inject
+    protected SecurityIdentity identity;
 
     @Operation(summary = "List workspaces", description = "Lists the workspaces of a user.")
     @GET
@@ -42,6 +48,9 @@ public class WorkspaceResource extends BaseResource {
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
 	    info(correlationId, "List workspaces call without matching appId: " + request.appId);
+	    return List.of();
+	}
+	if (!isAuthenticated(correlationId, request, identity)) {
 	    return List.of();
 	}
 	info(correlationId, "Listing workspaces " + request);
@@ -55,6 +64,9 @@ public class WorkspaceResource extends BaseResource {
 	if (!isValidRequest(request)) {
 	    info(correlationId, "Create workspace call without matching appId: " + request.appId);
 	    return WorkspaceCreationResponse.error("Create workspace call without matching appId: " + request.appId);
+	}
+	if (!isAuthenticated(correlationId, request, identity)) {
+	    return WorkspaceCreationResponse.error("Unauthenticated request");
 	}
 	info(correlationId, "Creating workspace " + request);
 	Workspace workspace = K8sUtil.createWorkspace(correlationId,
@@ -71,6 +83,9 @@ public class WorkspaceResource extends BaseResource {
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
 	    info(correlationId, "Delete workspace call without matching appId: " + request.appId);
+	    return false;
+	}
+	if (!isAuthenticated(correlationId, request, identity)) {
 	    return false;
 	}
 	if (request.workspaceName == null) {

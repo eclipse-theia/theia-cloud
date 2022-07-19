@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.Optional;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,8 +31,13 @@ import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.service.session.SessionLaunchResponse;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
+import io.quarkus.security.identity.SecurityIdentity;
+
 @Path("/service")
 public class RootResource extends BaseResource {
+
+    @Inject
+    protected SecurityIdentity identity;
 
     @Operation(summary = "Ping", description = "Replies if the service is available.")
     @GET
@@ -46,6 +52,9 @@ public class RootResource extends BaseResource {
 	    info(correlationId, "Ping without matching appId: " + request.appId);
 	    return false;
 	}
+	if (!isAuthenticated(correlationId, request, identity)) {
+	    return false;
+	}
 	return true;
     }
 
@@ -56,6 +65,9 @@ public class RootResource extends BaseResource {
 	if (!isValidRequest(request)) {
 	    info(correlationId, "Launch call without matching appId: " + request.appId);
 	    return SessionLaunchResponse.error("Launch call without matching appId: " + request.appId);
+	}
+	if (!isAuthenticated(correlationId, request, identity)) {
+	    return SessionLaunchResponse.error("Unauthenticated request");
 	}
 
 	if (request.isEphemeral()) {
