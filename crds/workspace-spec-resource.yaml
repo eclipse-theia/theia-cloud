@@ -1,14 +1,14 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: sessions.theia.cloud
+  name: workspaces.theia.cloud
 spec:
   group: theia.cloud
   names:
-    kind: Session
-    listKind: SessionList
-    plural: sessions
-    singular: session
+    kind: Workspace
+    listKind: WorkspaceList
+    plural: workspaces
+    singular: workspace
   scope: Namespaced
   versions:
     - name : v1beta
@@ -23,15 +23,12 @@ spec:
               properties:
                 name:
                   type: string
-                workspace:
+                label:
                   type: string
-                appDefinition: # cached from workspace
+                appDefinition:
                   type: string
-                user:          # cached from workspace
+                user:
                   type: string
-                url:
+                storage:
                   type: string
-                error:
-                  type: string
-                lastActivity:
-                  type: integer
+                  

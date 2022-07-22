@@ -28,6 +28,12 @@ hosts:
   # hostname of the REST-API
   service: service.192.168.39.173.nip.io
 
+  # port of the REST-API
+  servicePort: 8081
+
+  # protocol of the REST-API
+  serviceProtocol: https
+
   # hostname of the landing page
   landing: theia.cloud.192.168.39.173.nip.io
 
@@ -101,6 +107,16 @@ operator:
   # - WONDERSHAPER                    Set via wondershaper init container
   # - K8SANNOTATIONANDWONDERSHAPER    Set Kubernetes annotations and use wondershaper init container
   bandwidthLimiter: "K8SANNOTATION"
+
+  # Configures how sessions will be stopped. This defines the strategy and the limit in minutes and will override any specification from an appDefinition.
+  # Possible values for strategy:
+  # - FIXEDTIME   Sessions will be stopped after a fixed limit
+  # - INACTIVITY  Sessions will be stopped after user inactivity limit
+  timeoutStrategy: "FIXEDTIME"
+  timeoutlimit: "30"
+
+  # Set the number of active sessions a single user can launch
+  sessionsPerUser: "1"
 
 # Values of the Theia.cloud REST service
 service:
