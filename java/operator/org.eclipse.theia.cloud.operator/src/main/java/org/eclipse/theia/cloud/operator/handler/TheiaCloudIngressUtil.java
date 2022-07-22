@@ -26,7 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.operator.handler.impl.AddedHandler;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -34,7 +34,7 @@ import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public final class TheiaCloudIngressUtil {
 
@@ -46,8 +46,8 @@ public final class TheiaCloudIngressUtil {
     private TheiaCloudIngressUtil() {
     }
 
-    public static boolean checkForExistingIngressAndAddOwnerReferencesIfMissing(DefaultKubernetesClient client,
-	    String namespace, AppDefinitionSpecResource appDefinition, String correlationId) {
+    public static boolean checkForExistingIngressAndAddOwnerReferencesIfMissing(NamespacedKubernetesClient client,
+	    String namespace, AppDefinition appDefinition, String correlationId) {
 	Optional<Ingress> existingIngressWithParentAppDefinition = K8sUtil.getExistingIngress(client, namespace,
 		appDefinition.getMetadata().getName(), appDefinition.getMetadata().getUid());
 	if (existingIngressWithParentAppDefinition.isPresent()) {
@@ -56,7 +56,7 @@ public final class TheiaCloudIngressUtil {
 	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace, appDefinition.getSpec().getIngressname());
 	if (ingress.isPresent()) {
 	    OwnerReference ownerReference = new OwnerReference();
-	    ownerReference.setApiVersion(HasMetadata.getApiVersion(AppDefinitionSpecResource.class));
+	    ownerReference.setApiVersion(HasMetadata.getApiVersion(AppDefinition.class));
 	    ownerReference.setKind(AppDefinitionSpec.KIND);
 	    ownerReference.setName(appDefinition.getMetadata().getName());
 	    ownerReference.setUid(appDefinition.getMetadata().getUid());
@@ -65,11 +65,11 @@ public final class TheiaCloudIngressUtil {
 	return ingress.isPresent();
     }
 
-    public static String getIngressName(AppDefinitionSpecResource appDefinition) {
+    public static String getIngressName(AppDefinition appDefinition) {
 	return appDefinition.getSpec().getIngressname();
     }
 
-    public static Map<String, String> getIngressReplacements(String namespace, AppDefinitionSpecResource appDefinition) {
+    public static Map<String, String> getIngressReplacements(String namespace, AppDefinition appDefinition) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_INGRESSNAME, getIngressName(appDefinition));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
@@ -77,7 +77,7 @@ public final class TheiaCloudIngressUtil {
 	return replacements;
     }
 
-    public static void addOwnerReferenceToIngress(DefaultKubernetesClient client, String namespace, Ingress ingress,
+    public static void addOwnerReferenceToIngress(NamespacedKubernetesClient client, String namespace, Ingress ingress,
 	    OwnerReference ownerReference) {
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName())
 		.edit(ingressToEdit -> {
@@ -86,7 +86,7 @@ public final class TheiaCloudIngressUtil {
 		});
     }
 
-    public static void removeIngressRule(DefaultKubernetesClient client, String namespace, Ingress ingress, String path,
+    public static void removeIngressRule(NamespacedKubernetesClient client, String namespace, Ingress ingress, String path,
 	    String correlationId) {
 	String ingressPath = path + AddedHandler.INGRESS_REWRITE_PATH;
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName())

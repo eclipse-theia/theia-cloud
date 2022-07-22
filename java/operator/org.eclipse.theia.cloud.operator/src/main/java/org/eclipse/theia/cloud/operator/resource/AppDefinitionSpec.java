@@ -53,8 +53,8 @@ public class AppDefinitionSpec {
     @JsonProperty("maxInstances")
     private int maxInstances;
 
-    @JsonProperty("killAfter")
-    private int killAfter;
+    @JsonProperty("timeout")
+    private Timeout timeout;
 
     @JsonProperty("requestsMemory")
     private String requestsMemory;
@@ -113,8 +113,8 @@ public class AppDefinitionSpec {
 	return maxInstances;
     }
 
-    public int getKillAfter() {
-	return killAfter;
+    public Timeout getTimeout() {
+	return timeout;
     }
 
     public String getRequestsMemory() {
@@ -149,10 +149,38 @@ public class AppDefinitionSpec {
     public String toString() {
 	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", pullSecret=" + pullSecret + ", uid=" + uid
 		+ ", port=" + port + ", host=" + host + ", ingressname=" + ingressname + ", minInstances="
-		+ minInstances + ", maxInstances=" + maxInstances + ", killAfter=" + killAfter + ", requestsMemory="
+		+ minInstances + ", maxInstances=" + maxInstances + ", timeout=" + timeout + ", requestsMemory="
 		+ requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory=" + limitsMemory + ", limitsCpu="
 		+ limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit=" + uplinkLimit + ", mountPath="
 		+ mountPath + "]";
     }
 
+    public static class Timeout {
+	@JsonProperty("limit")
+	private int limit;
+
+	@JsonProperty("strategy")
+	private String strategy;
+
+	public Timeout() {
+	}
+
+	public Timeout(String strategy, int limit) {
+	    this.strategy = strategy;
+	    this.limit = limit;
+	}
+
+	public int getLimit() {
+	    return limit;
+	}
+
+	public String getStrategy() {
+	    return strategy;
+	}
+
+	@Override
+	public String toString() {
+	    return "Timeout [limit=" + limit + ", strategy=" + strategy + "]";
+	}
+    }
 }

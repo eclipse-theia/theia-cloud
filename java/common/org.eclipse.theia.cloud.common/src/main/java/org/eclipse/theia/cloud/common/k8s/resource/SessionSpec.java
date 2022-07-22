@@ -41,13 +41,20 @@ public class SessionSpec {
     @JsonProperty("error")
     private String error;
 
+    @JsonProperty("workspace")
+    private String workspace;
+
+    @JsonProperty("lastActivity")
+    private long lastActivity;
+
     public SessionSpec() {
     }
 
-    public SessionSpec(String name, String appDefinition, String user) {
+    public SessionSpec(String name, String appDefinition, String user, String workspace) {
 	this.name = name;
 	this.appDefinition = appDefinition;
 	this.user = user;
+	this.workspace = workspace;
     }
 
     public String getName() {
@@ -78,10 +85,26 @@ public class SessionSpec {
 	this.error = error;
     }
 
+    public long getLastActivity() {
+	return lastActivity;
+    }
+
+    public void setLastActivity(long lastActivity) {
+	this.lastActivity = lastActivity;
+    }
+
+    public String getWorkspace() {
+	return workspace;
+    }
+
+    public void setWorkspace(String workspace) {
+	this.workspace = workspace;
+    }
+
     @Override
     public String toString() {
 	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
-		+ ", error=" + error + "]";
+		+ ", error=" + error + ", lastActivity=" + lastActivity + "]";
     }
 
 }

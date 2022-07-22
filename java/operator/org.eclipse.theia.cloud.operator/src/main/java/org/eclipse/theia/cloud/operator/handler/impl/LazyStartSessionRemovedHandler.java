@@ -23,38 +23,41 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.SessionRemovedHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public class LazyStartSessionRemovedHandler implements SessionRemovedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(LazyStartSessionRemovedHandler.class);
 
-    private IngressPathProvider ingressPathProvider;
-
     @Inject
-    public LazyStartSessionRemovedHandler(IngressPathProvider ingressPathProvider) {
-	this.ingressPathProvider = ingressPathProvider;
-    }
+    protected IngressPathProvider ingressPathProvider;
+    @Inject
+    protected NamespacedKubernetesClient client;
+    @Inject
+    @Named(TheiaCloudOperatorModule.NAMESPACE)
+    protected String namespace;
 
     @Override
-    public boolean handle(DefaultKubernetesClient client, Session session, String namespace, String correlationId) {
+    public boolean handle(Session session, String correlationId) {
 	/* session information */
 	SessionSpec sessionSpec = session.getSpec();
 
 	/* find appDefinition for session */
 	String appDefinitionID = sessionSpec.getAppDefinition();
-	Optional<AppDefinitionSpecResource> optionalAppDefinition = TheiaCloudHandlerUtil
-		.getAppDefinitionSpecForSession(client, namespace, appDefinitionID);
+	Optional<AppDefinition> optionalAppDefinition = TheiaCloudHandlerUtil.getAppDefinitionForSession(client,
+		namespace, appDefinitionID);
 	if (optionalAppDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;

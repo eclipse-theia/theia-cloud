@@ -18,10 +18,8 @@ package org.eclipse.theia.cloud.operator.handler;
 
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-
 public interface SessionAddedHandler {
 
-    boolean handle(DefaultKubernetesClient client, Session session, String namespace, String correlationId);
+    boolean handle(Session session, String correlationId);
 
 }

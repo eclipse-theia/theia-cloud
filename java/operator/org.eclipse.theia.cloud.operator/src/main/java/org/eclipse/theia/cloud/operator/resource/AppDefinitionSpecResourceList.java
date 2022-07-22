@@ -18,7 +18,7 @@ package org.eclipse.theia.cloud.operator.resource;
 
 import io.fabric8.kubernetes.client.CustomResourceList;
 
-public class AppDefinitionSpecResourceList extends CustomResourceList<AppDefinitionSpecResource> {
+public class AppDefinitionSpecResourceList extends CustomResourceList<AppDefinition> {
 
     private static final long serialVersionUID = 722136158817065564L;
 

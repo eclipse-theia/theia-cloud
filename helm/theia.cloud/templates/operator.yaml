@@ -29,6 +29,16 @@ spec:
           - {{ .Values.operator.cloudProvider }}
           - "--bandwidthLimiter"
           - {{ .Values.operator.bandwidthLimiter }}
+          - "--serviceUrl"
+          - {{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}:{{ .Values.hosts.servicePort }}/service,
+          - "--timeoutStrategy"
+          - {{ .Values.operator.timeoutStrategy }}
+          - "--timeoutLimit"
+          - "{{ .Values.operator.timeoutLimit }}"
+          - "--sessionsPerUser"
+          - "{{ .Values.operator.sessionsPerUser }}"
+          - "--appId"
+          - {{ .Values.app.id }}
       {{- if .Values.operator.imagePullSecret }}
       imagePullSecrets:
         - name: {{ .Values.operator.imagePullSecret }}

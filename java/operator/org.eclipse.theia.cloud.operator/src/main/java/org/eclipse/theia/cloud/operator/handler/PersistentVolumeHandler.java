@@ -16,19 +16,16 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 
 public interface PersistentVolumeHandler {
 
-    void createAndApplyPersistentVolume(DefaultKubernetesClient client, String namespace, String correlationId,
-	    AppDefinitionSpec appDefinition, Session session);
+    void createAndApplyPersistentVolume(String correlationId, Workspace workspace);
 
-    void createAndApplyPersistentVolumeClaim(DefaultKubernetesClient client, String namespace, String correlationId,
-	    AppDefinitionSpec appDefinition, Session session);
+    void createAndApplyPersistentVolumeClaim(String correlationId, Workspace workspace);
 
     void addVolumeClaim(Deployment deployment, String pvcName, AppDefinitionSpec appDefinition);
 

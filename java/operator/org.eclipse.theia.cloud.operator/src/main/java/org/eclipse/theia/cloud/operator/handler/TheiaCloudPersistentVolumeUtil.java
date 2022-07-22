@@ -20,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -28,6 +30,7 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 public final class TheiaCloudPersistentVolumeUtil {
 
     public static final String PLACEHOLDER_PERSISTENTVOLUMENAME = "placeholder-pv";
+    public static final String PLACEHOLDER_LABEL_WORKSPACE_NAME = "placeholder-label-workspace-name";
 
     private static final String MOUNT_PATH = "/home/project/persisted";
 
@@ -44,22 +47,22 @@ public final class TheiaCloudPersistentVolumeUtil {
     }
 
     public static String getPersistentVolumeName(Session session) {
-	String user = session.getSpec().getUser();
-	String pvName = user.replace("@", "at").replace(".", "-");
-	return pvName;
+	return WorkspaceUtil.getStorageName(session.getSpec().getWorkspace());
     }
 
-    public static Map<String, String> getPersistentVolumeReplacements(String namespace, Session session) {
+    public static Map<String, String> getPersistentVolumeReplacements(String namespace, Workspace workspace) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, getPersistentVolumeName(session));
+	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace.getSpec().getName()));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+	replacements.put(PLACEHOLDER_LABEL_WORKSPACE_NAME, workspace.getSpec().getName());
 	return replacements;
     }
 
-    public static Map<String, String> getPersistentVolumeClaimReplacements(String namespace, Session session) {
+    public static Map<String, String> getPersistentVolumeClaimReplacements(String namespace, Workspace workspace) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, getPersistentVolumeName(session));
+	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace.getSpec().getName()));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+	replacements.put(PLACEHOLDER_LABEL_WORKSPACE_NAME, workspace.getSpec().getName());
 	return replacements;
     }
 

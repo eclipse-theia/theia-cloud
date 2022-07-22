@@ -17,16 +17,18 @@
 package org.eclipse.theia.cloud.operator.di;
 
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
-import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.AppDefinitionAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.SessionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.SessionRemovedHandler;
+import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.EagerStartAppDefinitionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.EagerStartSessionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.GKEPersistentVolumeHandlerImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartAppDefinitionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartSessionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartSessionRemovedHandler;
+import org.eclipse.theia.cloud.operator.handler.impl.LazyWorkspaceHandler;
 
 public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorModule {
 
@@ -57,6 +59,11 @@ public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorM
 	default:
 	    return super.bindPersistentVolumeHandler();
 	}
+    }
+
+    @Override
+    protected Class<? extends WorkspaceHandler> bindWorkspaceHandler() {
+	return LazyWorkspaceHandler.class;
     }
 
     @Override

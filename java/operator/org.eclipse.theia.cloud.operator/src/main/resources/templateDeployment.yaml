@@ -50,6 +50,19 @@ spec:
             requests:
               cpu: placeholder-cpu-requests
               memory: placeholder-memory-requests
+          env:
+          - name: THEIA_CLOUD_APP_ID
+            value: placeholder-env-app-id
+          - name: THEIA_CLOUD_SERVICE_URL
+            value: placeholder-env-service-url
+          - name: THEIA_CLOUD_SESSION_UID
+            value: placeholder-env-session-uid
+          - name: THEIA_CLOUD_SESSION_NAME
+            value: placeholder-env-session-name
+          - name: THEIA_CLOUD_SESSION_USER
+            value: placeholder-env-session-user
+          - name: THEIA_CLOUD_SESSION_URL
+            value: placeholder-env-service-url
       securityContext:
         runAsUser: placeholder-uid
         runAsGroup: placeholder-uid

@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
+import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.SessionAddedHandler;
@@ -35,10 +36,11 @@ import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 import org.eclipse.theia.cloud.operator.util.JavaUtil;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
@@ -48,8 +50,8 @@ import io.fabric8.kubernetes.api.model.networking.v1.IngressBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 /**
  * A {@link SessionAddedHandler} that relies on the fact that the app definition
@@ -59,17 +61,19 @@ public class EagerStartSessionAddedHandler implements SessionAddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(EagerStartSessionAddedHandler.class);
 
-    protected TheiaCloudArguments arguments;
-    protected IngressPathProvider ingressPathProvider;
+    @Inject
+    protected NamespacedKubernetesClient client;
+    @Inject
+    @Named(TheiaCloudOperatorModule.NAMESPACE)
+    protected String namespace;
 
     @Inject
-    public EagerStartSessionAddedHandler(TheiaCloudArguments arguments, IngressPathProvider ingressPathProvider) {
-	this.arguments = arguments;
-	this.ingressPathProvider = ingressPathProvider;
-    }
+    protected IngressPathProvider ingressPathProvider;
+    @Inject
+    protected TheiaCloudArguments arguments;
 
     @Override
-    public boolean handle(DefaultKubernetesClient client, Session session, String namespace, String correlationId) {
+    public boolean handle(Session session, String correlationId) {
 	SessionSpec spec = session.getSpec();
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));
 
@@ -80,8 +84,8 @@ public class EagerStartSessionAddedHandler implements SessionAddedHandler {
 	String userEmail = spec.getUser();
 
 	/* find app definition for session */
-	Optional<AppDefinitionSpecResource> appDefinition = TheiaCloudHandlerUtil.getAppDefinitionSpecForSession(client,
-		namespace, appDefinitionID);
+	Optional<AppDefinition> appDefinition = TheiaCloudHandlerUtil.getAppDefinitionForSession(client, namespace,
+		spec.getName());
 	if (appDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;
@@ -176,7 +180,7 @@ public class EagerStartSessionAddedHandler implements SessionAddedHandler {
 	return true;
     }
 
-    protected synchronized Entry<Optional<Service>, Boolean> reserveService(DefaultKubernetesClient client,
+    protected synchronized Entry<Optional<Service>, Boolean> reserveService(NamespacedKubernetesClient client,
 	    String namespace, String appDefinitionResourceName, String appDefinitionResourceUID, String appDefinitionID,
 	    String sessionResourceName, String sessionResourceUID, String correlationId) {
 	List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
@@ -206,40 +210,42 @@ public class EagerStartSessionAddedHandler implements SessionAddedHandler {
 	return JavaUtil.tuple(serviceToUse, false);
     }
 
-    protected synchronized String updateIngress(DefaultKubernetesClient client, String namespace,
+    protected synchronized String updateIngress(NamespacedKubernetesClient client, String namespace,
 	    Optional<Ingress> ingress, Optional<Service> serviceToUse, String appDefinitionID, int instance, int port,
-	    AppDefinitionSpecResource appDefinition) {
+	    AppDefinition appDefinition) {
 	String host = appDefinition.getSpec().getHost();
 	String path = ingressPathProvider.getPath(appDefinition, instance);
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.get().getMetadata().getName())
-		.edit(ingressToUpdate -> {
-		    IngressRule ingressRule = new IngressRule();
-		    ingressToUpdate.getSpec().getRules().add(ingressRule);
-
-		    ingressRule.setHost(host);
-
-		    HTTPIngressRuleValue http = new HTTPIngressRuleValue();
-		    ingressRule.setHttp(http);
-
-		    HTTPIngressPath httpIngressPath = new HTTPIngressPath();
-		    http.getPaths().add(httpIngressPath);
-		    httpIngressPath.setPath(path + AddedHandler.INGRESS_REWRITE_PATH);
-		    httpIngressPath.setPathType("Prefix");
-
-		    IngressBackend ingressBackend = new IngressBackend();
-		    httpIngressPath.setBackend(ingressBackend);
-
-		    IngressServiceBackend ingressServiceBackend = new IngressServiceBackend();
-		    ingressBackend.setService(ingressServiceBackend);
-		    ingressServiceBackend.setName(serviceToUse.get().getMetadata().getName());
-
-		    ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
-		    ingressServiceBackend.setPort(serviceBackendPort);
-		    serviceBackendPort.setNumber(port);
-
-		    return ingressToUpdate;
-		});
+		.edit(ingressToUpdate -> addIngressRule(ingressToUpdate, serviceToUse.get(), host, port, path));
 	return host + path + "/";
+    }
+
+    protected Ingress addIngressRule(Ingress ingress, Service serviceToUse, String host, int port, String path) {
+	IngressRule ingressRule = new IngressRule();
+	ingress.getSpec().getRules().add(ingressRule);
+
+	ingressRule.setHost(host);
+
+	HTTPIngressRuleValue http = new HTTPIngressRuleValue();
+	ingressRule.setHttp(http);
+
+	HTTPIngressPath httpIngressPath = new HTTPIngressPath();
+	http.getPaths().add(httpIngressPath);
+	httpIngressPath.setPath(path + AddedHandler.INGRESS_REWRITE_PATH);
+	httpIngressPath.setPathType("Prefix");
+
+	IngressBackend ingressBackend = new IngressBackend();
+	httpIngressPath.setBackend(ingressBackend);
+
+	IngressServiceBackend ingressServiceBackend = new IngressServiceBackend();
+	ingressBackend.setService(ingressServiceBackend);
+	ingressServiceBackend.setName(serviceToUse.getMetadata().getName());
+
+	ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
+	ingressServiceBackend.setPort(serviceBackendPort);
+	serviceBackendPort.setNumber(port);
+
+	return ingress;
     }
 
 }

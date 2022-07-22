@@ -20,20 +20,34 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.AppDefinitionAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public class LazyStartAppDefinitionAddedHandler implements AppDefinitionAddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(LazyStartAppDefinitionAddedHandler.class);
 
+    @Inject
+    protected NamespacedKubernetesClient client;
+
+    @Inject
+    protected IngressPathProvider ingressPathProvider;
+
+    @Inject
+    @Named(TheiaCloudOperatorModule.NAMESPACE)
+    String namespace;
+
     @Override
-    public void handle(DefaultKubernetesClient client, AppDefinitionSpecResource appDefinition, String namespace,
-	    String correlationId) {
+    public void handle(AppDefinition appDefinition, String correlationId) {
 	AppDefinitionSpec spec = appDefinition.getSpec();
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));
 
@@ -41,8 +55,8 @@ public class LazyStartAppDefinitionAddedHandler implements AppDefinitionAddedHan
 	String appDefinitionResourceUID = appDefinition.getMetadata().getUid();
 
 	/* Create ingress if not existing */
-	if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client, namespace, appDefinition,
-		correlationId)) {
+	if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client, namespace,
+		appDefinition, correlationId)) {
 	    LOGGER.trace(formatLogMessage(correlationId, "No existing Ingress"));
 	    AddedHandler.createAndApplyIngress(client, namespace, correlationId, appDefinitionResourceName,
 		    appDefinitionResourceUID, appDefinition);
