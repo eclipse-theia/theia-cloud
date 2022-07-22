@@ -29,12 +29,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceUtil;
+import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResourceList;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 
 public final class TheiaCloudHandlerUtil {
 
@@ -58,7 +63,7 @@ public final class TheiaCloudHandlerUtil {
 	return missing;
     }
 
-    public static String getAppSelector(AppDefinitionSpecResource appDefinition, int instance) {
+    public static String getAppSelector(AppDefinition appDefinition, int instance) {
 	return K8sUtil.validString(appDefinition.getSpec().getName() + "-" + instance);
     }
 
@@ -66,14 +71,23 @@ public final class TheiaCloudHandlerUtil {
 	return K8sUtil.validString(session.getSpec().getName() + "-" + session.getMetadata().getUid());
     }
 
-    public static Optional<AppDefinitionSpecResource> getAppDefinitionSpecForSession(DefaultKubernetesClient client,
+    public static Optional<AppDefinition> getAppDefinitionForSession(NamespacedKubernetesClient client,
 	    String namespace, String appDefinitionID) {
-	Optional<AppDefinitionSpecResource> appDefinition = client
-		.customResources(AppDefinitionSpecResource.class, AppDefinitionSpecResourceList.class).inNamespace(namespace)
-		.list().getItems().stream()//
-		.filter(appDefinitionSpecResource -> appDefinitionID.equals(appDefinitionSpecResource.getSpec().getName()))//
+	Optional<AppDefinition> appDefinition = client
+		.resources(AppDefinition.class, AppDefinitionSpecResourceList.class).inNamespace(namespace).list()
+		.getItems().stream()//
+		.filter(appDefinitionSpecResource -> appDefinitionID
+			.equals(appDefinitionSpecResource.getSpec().getName()))//
 		.findAny();
 	return appDefinition;
+    }
+
+    public static Optional<Workspace> getWorkspaceForSession(NamespacedKubernetesClient client, String namespace,
+	    String sessionName) {
+	String workspaceName = WorkspaceUtil.getWorkspaceNameFromSession(sessionName);
+	NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaces = client
+		.resources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace);
+	return Optional.ofNullable(workspaces.withName(workspaceName).get());
     }
 
     public static <T extends HasMetadata> T addOwnerReferenceToItem(String correlationId, String sessionResourceName,

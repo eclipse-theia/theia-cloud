@@ -16,12 +16,10 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
-
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 
 public interface AppDefinitionAddedHandler {
 
-    void handle(DefaultKubernetesClient client, AppDefinitionSpecResource appDefinition, String namespace, String correlationId);
+    void handle(AppDefinition appDefinition, String correlationId);
 
 }

@@ -27,7 +27,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
@@ -43,7 +43,7 @@ public final class TheiaCloudServiceUtil {
     private TheiaCloudServiceUtil() {
     }
 
-    public static String getServiceName(AppDefinitionSpecResource appDefinition, int instance) {
+    public static String getServiceName(AppDefinition appDefinition, int instance) {
 	return K8sUtil.validString(getServiceNamePrefix(appDefinition) + instance);
     }
 
@@ -51,7 +51,7 @@ public final class TheiaCloudServiceUtil {
 	return K8sUtil.validString(getServiceNamePrefix(session) + session.getMetadata().getUid());
     }
 
-    private static String getServiceNamePrefix(AppDefinitionSpecResource appDefinition) {
+    private static String getServiceNamePrefix(AppDefinition appDefinition) {
 	return appDefinition.getSpec().getName() + SERVICE_NAME;
     }
 
@@ -59,7 +59,7 @@ public final class TheiaCloudServiceUtil {
 	return session.getSpec().getName() + SERVICE_NAME;
     }
 
-    public static Integer getId(String correlationId, AppDefinitionSpecResource appDefinition, Service service) {
+    public static Integer getId(String correlationId, AppDefinition appDefinition, Service service) {
 	int namePrefixLength = getServiceNamePrefix(appDefinition).length();
 	String name = service.getMetadata().getName();
 	String instance = name.substring(namePrefixLength);
@@ -71,13 +71,13 @@ public final class TheiaCloudServiceUtil {
 	return null;
     }
 
-    public static Set<Integer> computeIdsOfMissingServices(AppDefinitionSpecResource appDefinition, String correlationId,
+    public static Set<Integer> computeIdsOfMissingServices(AppDefinition appDefinition, String correlationId,
 	    int instances, List<Service> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
 		service -> getId(correlationId, appDefinition, service));
     }
 
-    public static Map<String, String> getServiceReplacements(String namespace, AppDefinitionSpecResource appDefinition,
+    public static Map<String, String> getServiceReplacements(String namespace, AppDefinition appDefinition,
 	    int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_SERVICENAME, getServiceName(appDefinition, instance));

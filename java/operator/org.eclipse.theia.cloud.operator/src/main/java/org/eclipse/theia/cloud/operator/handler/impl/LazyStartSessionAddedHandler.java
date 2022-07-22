@@ -23,28 +23,32 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
+import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
+import org.eclipse.theia.cloud.operator.handler.DeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
 import org.eclipse.theia.cloud.operator.handler.SessionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
-import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudK8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudPersistentVolumeUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudServiceUtil;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -57,29 +61,34 @@ import io.fabric8.kubernetes.api.model.networking.v1.IngressBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(LazyStartSessionAddedHandler.class);
 
-    protected PersistentVolumeHandler persistentVolumeHandler;
-    protected IngressPathProvider ingressPathProvider;
-    protected TheiaCloudArguments arguments;
-    protected BandwidthLimiter bandwidthLimiter;
+    @Inject
+    protected NamespacedKubernetesClient client;
+    @Inject
+    @Named(TheiaCloudOperatorModule.NAMESPACE)
+    protected String namespace;
 
     @Inject
-    public LazyStartSessionAddedHandler(PersistentVolumeHandler persistentVolumeHandler,
-	    IngressPathProvider ingressPathProvider, TheiaCloudArguments arguments, BandwidthLimiter bandwidthLimiter) {
-	this.persistentVolumeHandler = persistentVolumeHandler;
-	this.ingressPathProvider = ingressPathProvider;
-	this.arguments = arguments;
-	this.bandwidthLimiter = bandwidthLimiter;
-    }
+    protected PersistentVolumeHandler persistentVolumeHandler;
+    @Inject
+    protected IngressPathProvider ingressPathProvider;
+    @Inject
+    protected TheiaCloudArguments arguments;
+    @Inject
+    protected BandwidthLimiter bandwidthLimiter;
+    @Inject
+    protected DeploymentTemplateReplacements deploymentReplacements;
 
     @Override
-    public boolean handle(DefaultKubernetesClient client, Session session, String namespace, String correlationId) {
+    public boolean handle(Session session, String correlationId) {
 	/* session information */
 	String sessionResourceName = session.getMetadata().getName();
 	String sessionResourceUID = session.getMetadata().getUid();
@@ -87,8 +96,8 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 
 	/* find app definition for session */
 	String appDefinitionID = sessionSpec.getAppDefinition();
-	Optional<AppDefinitionSpecResource> optionalAppDefinition = TheiaCloudHandlerUtil
-		.getAppDefinitionSpecForSession(client, namespace, appDefinitionID);
+	Optional<AppDefinition> optionalAppDefinition = TheiaCloudHandlerUtil.getAppDefinitionForSession(client,
+		namespace, appDefinitionID);
 	if (optionalAppDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;
@@ -104,21 +113,49 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 	    return false;
 	}
 
-	/* handle storage */
+	/* check if max sessions reached already */
+	if (arguments.getSessionsPerUser() != null && arguments.getSessionsPerUser() >= 0) {
+	    if (arguments.getSessionsPerUser() == 0) {
+		LOGGER.info(formatLogMessage(correlationId,
+			"No sessions allowed for this user. Could not create session " + sessionSpec));
+		AddedHandler.updateSessionError(client, session, namespace,
+			"Max instances reached. Could not create session", correlationId);
+		return false;
+	    }
+	    NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessions = client
+		    .resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace);
+	    long userSessions = sessions.list().getItems().stream().filter(
+		    knownSession -> Objects.equals(session.getSpec().getUser(), knownSession.getSpec().getUser()))
+		    .count();
+	    if (userSessions > arguments.getSessionsPerUser()) {
+		LOGGER.info(formatLogMessage(correlationId,
+			"No more sessions allowed for this user, limit is  " + arguments.getSessionsPerUser()));
+		AddedHandler.updateSessionError(client, session, namespace,
+			"No more sessions allowed for this user, you reached your limit.", correlationId);
+		return false;
+	    }
+	}
+
+	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client, namespace, sessionSpec,
+		optionalAppDefinition.get().getSpec(), correlationId)) {
+	    LOGGER.info(formatLogMessage(correlationId,
+		    "Max instances for " + appDefinitionID + " reached. Cannot create " + sessionSpec));
+	    AddedHandler.updateSessionError(client, session, namespace,
+		    "Max instances reached. Could not create session", correlationId);
+	    return false;
+	}
+
+	/* check storage */
 	Optional<String> pvcName;
 	if (arguments.isEphemeralStorage()) {
 	    pvcName = Optional.empty();
 	} else {
-	    /* create persistent volume if not present already */
 	    pvcName = Optional.of(TheiaCloudPersistentVolumeUtil.getPersistentVolumeName(session));
 	    Optional<PersistentVolumeClaim> volume = K8sUtil.getPersistentVolumeClaim(client, namespace, pvcName.get());
 	    if (volume.isEmpty()) {
-		LOGGER.debug(formatLogMessage(correlationId,
-			"No Volumce Claim with name " + pvcName.get() + " was found. Creating claims."));
-		persistentVolumeHandler.createAndApplyPersistentVolume(client, namespace, correlationId,
-			optionalAppDefinition.get().getSpec(), session);
-		persistentVolumeHandler.createAndApplyPersistentVolumeClaim(client, namespace, correlationId,
-			optionalAppDefinition.get().getSpec(), session);
+		AddedHandler.updateSessionError(client, session, namespace,
+			"No storage found for started session, will use ephemeral storage instead", correlationId);
+		return false;
 	    }
 	}
 
@@ -198,7 +235,7 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 	return true;
     }
 
-    protected Optional<Service> createAndApplyService(DefaultKubernetesClient client, String namespace,
+    protected Optional<Service> createAndApplyService(NamespacedKubernetesClient client, String namespace,
 	    String correlationId, String sessionResourceName, String sessionResourceUID, Session session, int port,
 	    boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(namespace, session, port);
@@ -216,8 +253,8 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 		SessionSpec.API, SessionSpec.KIND, sessionResourceName, sessionResourceUID, 0);
     }
 
-    protected void createAndApplyEmailConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String sessionResourceName, String sessionResourceUID, Session session) {
+    protected void createAndApplyEmailConfigMap(NamespacedKubernetesClient client, String namespace,
+	    String correlationId, String sessionResourceName, String sessionResourceUID, Session session) {
 	Map<String, String> replacements = TheiaCloudConfigMapUtil.getEmailConfigMapReplacements(namespace, session);
 	String configMapYaml;
 	try {
@@ -234,9 +271,9 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 		});
     }
 
-    protected void createAndApplyProxyConfigMap(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String sessionResourceName, String sessionResourceUID, Session session,
-	    AppDefinitionSpecResource appDefinition) {
+    protected void createAndApplyProxyConfigMap(NamespacedKubernetesClient client, String namespace,
+	    String correlationId, String sessionResourceName, String sessionResourceUID, Session session,
+	    AppDefinition appDefinition) {
 	Map<String, String> replacements = TheiaCloudConfigMapUtil.getProxyConfigMapReplacements(namespace, session);
 	String configMapYaml;
 	try {
@@ -255,11 +292,10 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 		});
     }
 
-    protected void createAndApplyDeployment(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String sessionResourceName, String sessionResourceUID, Session session,
-	    AppDefinitionSpecResource appDefinition, Optional<String> pvName, boolean useOAuth2Proxy) {
-	Map<String, String> replacements = TheiaCloudDeploymentUtil.getDeploymentsReplacements(namespace, session,
-		appDefinition);
+    protected void createAndApplyDeployment(NamespacedKubernetesClient client, String namespace, String correlationId,
+	    String sessionResourceName, String sessionResourceUID, Session session, AppDefinition appDefinition,
+	    Optional<String> pvName, boolean useOAuth2Proxy) {
+	Map<String, String> replacements = deploymentReplacements.getReplacements(namespace, appDefinition, session);
 	String templateYaml = useOAuth2Proxy ? AddedHandler.TEMPLATE_DEPLOYMENT_YAML
 		: AddedHandler.TEMPLATE_DEPLOYMENT_WITHOUT_AOUTH2_PROXY_YAML;
 	String deploymentYaml;
@@ -284,9 +320,8 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 		});
     }
 
-    protected synchronized String updateIngress(DefaultKubernetesClient client, String namespace,
-	    Optional<Ingress> ingress, Optional<Service> serviceToUse, Session session,
-	    AppDefinitionSpecResource appDefinition) {
+    protected synchronized String updateIngress(NamespacedKubernetesClient client, String namespace,
+	    Optional<Ingress> ingress, Optional<Service> serviceToUse, Session session, AppDefinition appDefinition) {
 	String host = appDefinition.getSpec().getHost();
 	String path = ingressPathProvider.getPath(appDefinition, session);
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.get().getMetadata().getName())

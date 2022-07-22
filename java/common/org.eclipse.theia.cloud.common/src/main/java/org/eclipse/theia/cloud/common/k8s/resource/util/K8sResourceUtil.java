@@ -16,7 +16,18 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.util;
 
+import java.util.Objects;
+
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesResource;
 import io.fabric8.kubernetes.client.CustomResource;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 
 public final class K8sResourceUtil {
 
@@ -29,4 +40,22 @@ public final class K8sResourceUtil {
 	return "name=" + name + " version=" + version + " value=" + resource.getSpec();
     }
 
+    public static void registerSessionResource(NamespacedKubernetesClient client) {
+	registerCustomResource(client, Session.class, SessionSpec.KIND, SessionSpec.CRD_NAME);
+    }
+
+    public static void registerWorkspaceResource(NamespacedKubernetesClient client) {
+	registerCustomResource(client, Workspace.class, WorkspaceSpec.KIND, WorkspaceSpec.CRD_NAME);
+    }
+
+    public static void registerCustomResource(NamespacedKubernetesClient client,
+	    Class<? extends KubernetesResource> resourceClass, String kind, String crdName) {
+	String apiVersion = HasMetadata.getApiVersion(resourceClass);
+	KubernetesDeserializer.registerCustomKind(apiVersion, kind, resourceClass);
+
+	client.apiextensions().v1().customResourceDefinitions().list().getItems().stream()//
+		.filter(crd -> Objects.equals(crd.getMetadata().getName(), crdName)).findAny() //
+		.orElseThrow(() -> new RuntimeException(
+			"Deployment error: Custom resource definition " + crdName + " not found."));
+    }
 }

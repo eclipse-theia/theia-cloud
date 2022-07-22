@@ -39,8 +39,13 @@ spec:
                   type: integer
                 maxInstances:
                   type: integer
-                killAfter:
-                  type: integer
+                timeout:
+                  type: object
+                  properties:
+                    strategy: 
+                      type: string
+                    limit: 
+                      type: integer
                 requestsMemory:
                   type: string
                 requestsCpu:

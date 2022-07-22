@@ -39,7 +39,7 @@ import io.fabric8.kubernetes.api.model.PersistentVolumeList;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
@@ -69,52 +69,52 @@ public final class K8sUtil {
 	return "t" + string.replace(".", "-") + "c";
     }
 
-    public static Optional<Ingress> getExistingIngress(DefaultKubernetesClient client, String namespace,
+    public static Optional<Ingress> getExistingIngress(NamespacedKubernetesClient client, String namespace,
 	    String ingressName) {
 	return client.network().v1().ingresses().inNamespace(namespace).list().getItems().stream()//
 		.filter(ingress -> ingressName.equals(ingress.getMetadata().getName()))//
 		.findAny();
     }
 
-    public static Optional<Ingress> getExistingIngress(DefaultKubernetesClient client, String namespace,
+    public static Optional<Ingress> getExistingIngress(NamespacedKubernetesClient client, String namespace,
 	    String ownerName, String ownerUid) {
 	return getExistingTypesStream(client, namespace, ownerName, ownerUid,
 		client.network().v1().ingresses().list().getItems())//
 			.findAny();
     }
 
-    public static List<Service> getExistingServices(DefaultKubernetesClient client, String namespace, String ownerName,
+    public static List<Service> getExistingServices(NamespacedKubernetesClient client, String namespace, String ownerName,
 	    String ownerUid) {
 	return getExistingTypes(client, namespace, ownerName, ownerUid,
 		client.services().inNamespace(namespace).list().getItems());
     }
 
-    public static List<Deployment> getExistingDeployments(DefaultKubernetesClient client, String namespace,
+    public static List<Deployment> getExistingDeployments(NamespacedKubernetesClient client, String namespace,
 	    String ownerName, String ownerUid) {
 	return getExistingTypes(client, namespace, ownerName, ownerUid,
 		client.apps().deployments().inNamespace(namespace).list().getItems());
     }
 
-    public static List<ConfigMap> getExistingConfigMaps(DefaultKubernetesClient client, String namespace,
+    public static List<ConfigMap> getExistingConfigMaps(NamespacedKubernetesClient client, String namespace,
 	    String ownerName, String ownerUid) {
 	return getExistingTypes(client, namespace, ownerName, ownerUid,
 		client.configMaps().inNamespace(namespace).list().getItems());
     }
 
-    public static Optional<PersistentVolumeClaim> getPersistentVolumeClaim(DefaultKubernetesClient client,
+    public static Optional<PersistentVolumeClaim> getPersistentVolumeClaim(NamespacedKubernetesClient client,
 	    String namespace, String volumeName) {
 	Resource<PersistentVolumeClaim> pvc = client.persistentVolumeClaims().inNamespace(namespace)
 		.withName(volumeName);
 	return pvc.get() == null ? Optional.empty() : Optional.of(pvc.get());
     }
 
-    private static <T extends HasMetadata> List<T> getExistingTypes(DefaultKubernetesClient client, String namespace,
+    private static <T extends HasMetadata> List<T> getExistingTypes(NamespacedKubernetesClient client, String namespace,
 	    String ownerName, String ownerUid, List<T> items) {
 	return getExistingTypesStream(client, namespace, ownerName, ownerUid, items)//
 		.collect(Collectors.toList());
     }
 
-    private static <T extends HasMetadata> Stream<T> getExistingTypesStream(DefaultKubernetesClient client,
+    private static <T extends HasMetadata> Stream<T> getExistingTypesStream(NamespacedKubernetesClient client,
 	    String namespace, String ownerName, String ownerUid, List<T> items) {
 	return items.stream()//
 		.filter(item -> hasThisTemplateOwnerReference(item.getMetadata().getOwnerReferences(), ownerUid,
@@ -131,7 +131,7 @@ public final class K8sUtil {
 	return false;
     }
 
-    public static Optional<Ingress> loadAndCreateIngressWithOwnerReference(DefaultKubernetesClient client,
+    public static Optional<Ingress> loadAndCreateIngressWithOwnerReference(NamespacedKubernetesClient client,
 	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
 	    String ownerName, String ownerUid, int ownerReferenceIndex) {
 	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
@@ -140,7 +140,7 @@ public final class K8sUtil {
 		});
     }
 
-    public static Optional<Service> loadAndCreateServiceWithOwnerReference(DefaultKubernetesClient client,
+    public static Optional<Service> loadAndCreateServiceWithOwnerReference(NamespacedKubernetesClient client,
 	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
 	    String ownerName, String ownerUid, int ownerReferenceIndex) {
 	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
@@ -148,7 +148,7 @@ public final class K8sUtil {
 		});
     }
 
-    public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(DefaultKubernetesClient client,
+    public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(NamespacedKubernetesClient client,
 	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
 	    String ownerName, String ownerUid, int ownerReferenceIndex) {
 	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
@@ -157,7 +157,7 @@ public final class K8sUtil {
 		});
     }
 
-    public static Optional<Deployment> loadAndCreateDeploymentWithOwnerReference(DefaultKubernetesClient client,
+    public static Optional<Deployment> loadAndCreateDeploymentWithOwnerReference(NamespacedKubernetesClient client,
 	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
 	    String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<Deployment> additionalModification) {
 	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
@@ -165,7 +165,7 @@ public final class K8sUtil {
 		client.apps().deployments().inNamespace(namespace), additionalModification);
     }
 
-    public static Optional<PersistentVolumeClaim> loadAndCreatePersistentVolumeClaim(DefaultKubernetesClient client,
+    public static Optional<PersistentVolumeClaim> loadAndCreatePersistentVolumeClaim(NamespacedKubernetesClient client,
 	    String namespace, String correlationId, String yaml) {
 	NonNamespaceOperation<PersistentVolumeClaim, PersistentVolumeClaimList, Resource<PersistentVolumeClaim>> items = client
 		.persistentVolumeClaims().inNamespace(namespace);
@@ -184,7 +184,7 @@ public final class K8sUtil {
 	return Optional.empty();
     }
 
-    public static Optional<PersistentVolume> loadAndCreatePersistentVolume(DefaultKubernetesClient client,
+    public static Optional<PersistentVolume> loadAndCreatePersistentVolume(NamespacedKubernetesClient client,
 	    String namespace, String correlationId, String yaml) {
 	NonNamespaceOperation<PersistentVolume, PersistentVolumeList, Resource<PersistentVolume>> items = client
 		.persistentVolumes();
@@ -203,7 +203,7 @@ public final class K8sUtil {
 	return Optional.empty();
     }
 
-    public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(DefaultKubernetesClient client,
+    public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(NamespacedKubernetesClient client,
 	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
 	    String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<ConfigMap> additionalModification) {
 	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
@@ -212,7 +212,7 @@ public final class K8sUtil {
     }
 
     private static <T extends HasMetadata, U, V extends Resource<T>> Optional<T> loadAndCreateTypeWithOwnerReference(
-	    DefaultKubernetesClient client, String namespace, String correlationId, String yaml, String ownerAPIVersion,
+	    NamespacedKubernetesClient client, String namespace, String correlationId, String yaml, String ownerAPIVersion,
 	    String ownerKind, String ownerName, String ownerUid, int ownerReferenceIndex, String typeName,
 	    NonNamespaceOperation<T, U, V> items, Consumer<T> additionalModification) {
 

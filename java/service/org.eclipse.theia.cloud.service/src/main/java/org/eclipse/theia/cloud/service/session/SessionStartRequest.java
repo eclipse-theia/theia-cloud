@@ -14,26 +14,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service;
+package org.eclipse.theia.cloud.service.session;
 
-public class Session {
+import org.eclipse.theia.cloud.service.ServiceRequest;
 
-    public String appDefinition;
+public class SessionStartRequest extends ServiceRequest {
+
     public String user;
-    public String appId;
+    public String workspaceName;
 
-    public Session() {
+    public SessionStartRequest() {
     }
 
-    public Session(String appDefinition, String user, String appId) {
-	this.appDefinition = appDefinition;
+    public SessionStartRequest(String appId, String user, String workspaceName) {
+	super(appId);
+	this.workspaceName = workspaceName;
 	this.user = user;
-	this.appId = appId;
-    }
-
-    @Override
-    public String toString() {
-	return "Session [appDefinition=" + appDefinition + ", user=" + user + ", appId=" + appId + "]";
     }
 
 }

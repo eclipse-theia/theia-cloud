@@ -23,11 +23,15 @@ spec:
               properties:
                 name:
                   type: string
-                appDefinition:
+                workspace:
                   type: string
-                user:
+                appDefinition: # cached from workspace
+                  type: string
+                user:          # cached from workspace
                   type: string
                 url:
                   type: string
                 error:
                   type: string
+                lastActivity:
+                  type: integer

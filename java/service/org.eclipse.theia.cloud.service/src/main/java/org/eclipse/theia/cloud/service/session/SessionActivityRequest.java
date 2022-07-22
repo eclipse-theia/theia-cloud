@@ -1,6 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
- * others.
+ * Copyright (C) 2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,21 +13,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service;
+package org.eclipse.theia.cloud.service.session;
 
-public class Reply {
+import org.eclipse.theia.cloud.service.ServiceRequest;
 
-    public boolean success;
-    public String url;
-    public String error;
+public class SessionActivityRequest extends ServiceRequest {
+    public String sessionName;
 
-    public Reply() {
+    public SessionActivityRequest() {
     }
 
-    public Reply(boolean success, String url, String error) {
-	this.success = success;
-	this.url = url;
-	this.error = error;
+    public SessionActivityRequest(String appId, String sessionName) {
+	super(appId);
+	this.sessionName = sessionName;
     }
 
 }

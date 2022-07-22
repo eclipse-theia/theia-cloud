@@ -46,6 +46,23 @@ public class TheiaCloudArguments {
 	    "--bandwidthLimiter" }, description = "The method of limiting network bandwidth", required = false)
     private BandwidthLimiter bandwidthLimiter;
 
+    @Option(names = { "--serviceUrl" }, description = "URL of the Theia Cloud Service", required = false)
+    private String serviceUrl;
+
+    @Option(names = {
+	    "--timeoutStrategy" }, description = "How the timeout to stop sessions is computed", required = false)
+    private String timeoutStrategy;
+
+    @Option(names = { "--timeoutLimit" }, description = "Timeout for a session to be stopped", required = false)
+    private Integer timeoutLimit;
+
+    @Option(names = {
+	    "--sessionsPerUser" }, description = "Number of active sessions a single user is allowed to start.", required = false)
+    private Integer sessionsPerUser;
+
+    @Option(names = { "--appId" }, description = "Application ID necessary for service calls", required = false)
+    private String appId;
+
     public boolean isUseKeycloak() {
 	return useKeycloak;
     }
@@ -66,14 +83,39 @@ public class TheiaCloudArguments {
 	return bandwidthLimiter;
     }
 
+    public String getServiceUrl() {
+	return serviceUrl;
+    }
+
+    public String getTimeoutStrategy() {
+	return timeoutStrategy;
+    }
+
+    public Integer getTimeoutLimit() {
+	return timeoutLimit;
+    }
+
+    public Integer getSessionsPerUser() {
+	return sessionsPerUser;
+    }
+
+    public String getAppId() {
+	return appId;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
 	int result = 1;
+	result = prime * result + ((appId == null) ? 0 : appId.hashCode());
 	result = prime * result + ((bandwidthLimiter == null) ? 0 : bandwidthLimiter.hashCode());
 	result = prime * result + ((cloudProvider == null) ? 0 : cloudProvider.hashCode());
 	result = prime * result + (eagerStart ? 1231 : 1237);
 	result = prime * result + (ephemeralStorage ? 1231 : 1237);
+	result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
+	result = prime * result + ((sessionsPerUser == null) ? 0 : sessionsPerUser.hashCode());
+	result = prime * result + ((timeoutLimit == null) ? 0 : timeoutLimit.hashCode());
+	result = prime * result + ((timeoutStrategy == null) ? 0 : timeoutStrategy.hashCode());
 	result = prime * result + (useKeycloak ? 1231 : 1237);
 	return result;
     }
@@ -87,6 +129,11 @@ public class TheiaCloudArguments {
 	if (getClass() != obj.getClass())
 	    return false;
 	TheiaCloudArguments other = (TheiaCloudArguments) obj;
+	if (appId == null) {
+	    if (other.appId != null)
+		return false;
+	} else if (!appId.equals(other.appId))
+	    return false;
 	if (bandwidthLimiter != other.bandwidthLimiter)
 	    return false;
 	if (cloudProvider != other.cloudProvider)
@@ -94,6 +141,26 @@ public class TheiaCloudArguments {
 	if (eagerStart != other.eagerStart)
 	    return false;
 	if (ephemeralStorage != other.ephemeralStorage)
+	    return false;
+	if (serviceUrl == null) {
+	    if (other.serviceUrl != null)
+		return false;
+	} else if (!serviceUrl.equals(other.serviceUrl))
+	    return false;
+	if (sessionsPerUser == null) {
+	    if (other.sessionsPerUser != null)
+		return false;
+	} else if (!sessionsPerUser.equals(other.sessionsPerUser))
+	    return false;
+	if (timeoutLimit == null) {
+	    if (other.timeoutLimit != null)
+		return false;
+	} else if (!timeoutLimit.equals(other.timeoutLimit))
+	    return false;
+	if (timeoutStrategy == null) {
+	    if (other.timeoutStrategy != null)
+		return false;
+	} else if (!timeoutStrategy.equals(other.timeoutStrategy))
 	    return false;
 	if (useKeycloak != other.useKeycloak)
 	    return false;
@@ -104,7 +171,8 @@ public class TheiaCloudArguments {
     public String toString() {
 	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", ephemeralStorage="
 		+ ephemeralStorage + ", cloudProvider=" + cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter
-		+ "]";
+		+ ", serviceUrl=" + serviceUrl + ", timeoutStrategy=" + timeoutStrategy + ", timeoutLimit="
+		+ timeoutLimit + ", sessionsPerUser=" + sessionsPerUser + ", appId=" + appId + "]";
     }
 
 }

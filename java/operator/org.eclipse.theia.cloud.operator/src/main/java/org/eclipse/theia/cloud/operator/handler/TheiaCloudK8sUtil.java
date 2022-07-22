@@ -25,7 +25,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
 
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public final class TheiaCloudK8sUtil {
 
@@ -34,7 +34,7 @@ public final class TheiaCloudK8sUtil {
     private TheiaCloudK8sUtil() {
     }
 
-    public static boolean checkIfMaxInstancesReached(DefaultKubernetesClient client, String namespace,
+    public static boolean checkIfMaxInstancesReached(NamespacedKubernetesClient client, String namespace,
 	    SessionSpec sessionSpec, AppDefinitionSpec appDefinitionSpec, String correlationId) {
 
 	if (appDefinitionSpec.getMaxInstances() < 1) {
@@ -43,8 +43,8 @@ public final class TheiaCloudK8sUtil {
 	    return false;
 	}
 
-	long currentInstances = client.customResources(Session.class, SessionSpecResourceList.class)
-		.inNamespace(namespace).list().getItems().stream()//
+	long currentInstances = client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
+		.list().getItems().stream()//
 		.filter(w -> {
 		    String appDefinition = w.getSpec().getAppDefinition();
 		    boolean result = appDefinition.equals(appDefinitionSpec.getName());

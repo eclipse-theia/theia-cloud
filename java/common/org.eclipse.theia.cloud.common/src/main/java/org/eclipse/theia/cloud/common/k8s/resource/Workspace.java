@@ -1,6 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
- * others.
+ * Copyright (C) 2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.resource;
+package org.eclipse.theia.cloud.common.k8s.resource;
 
 import org.eclipse.theia.cloud.common.k8s.resource.util.K8sResourceUtil;
 
@@ -25,13 +24,13 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v2beta")
+@Version("v1beta")
 @Group("theia.cloud")
-@Singular("appdefinition")
-@Plural("appdefinitions")
-public class AppDefinitionSpecResource extends CustomResource<AppDefinitionSpec, Void> implements Namespaced {
+@Singular("workspace")
+@Plural("workspaces")
+public class Workspace extends CustomResource<WorkspaceSpec, Void> implements Namespaced {
 
-    private static final long serialVersionUID = 8749670583218521755L;
+    private static final long serialVersionUID = 4518092300237069237L;
 
     @Override
     public String toString() {

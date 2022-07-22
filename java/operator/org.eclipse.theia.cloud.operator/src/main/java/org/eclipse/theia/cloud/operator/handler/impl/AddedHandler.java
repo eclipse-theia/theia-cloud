@@ -48,7 +48,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 import org.eclipse.theia.cloud.operator.handler.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.TheiaCloudIngressUtil;
 import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResource;
+import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -57,7 +57,7 @@ import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public final class AddedHandler {
 
@@ -113,8 +113,8 @@ public final class AddedHandler {
 
     }
 
-    public static void createAndApplyIngress(DefaultKubernetesClient client, String namespace, String correlationId,
-	    String templateResourceName, String templateResourceUID, AppDefinitionSpecResource appDefinition) {
+    public static void createAndApplyIngress(NamespacedKubernetesClient client, String namespace, String correlationId,
+	    String templateResourceName, String templateResourceUID, AppDefinition appDefinition) {
 	Map<String, String> replacements = TheiaCloudIngressUtil.getIngressReplacements(namespace, appDefinition);
 	String ingressYaml;
 	try {
@@ -127,7 +127,7 @@ public final class AddedHandler {
 		AppDefinitionSpec.API, AppDefinitionSpec.KIND, templateResourceName, templateResourceUID, 0);
     }
 
-    public static void updateProxyConfigMap(DefaultKubernetesClient client, String namespace, ConfigMap configMap,
+    public static void updateProxyConfigMap(NamespacedKubernetesClient client, String namespace, ConfigMap configMap,
 	    String host, int port) {
 	ConfigMap templateConfigMap = client.configMaps().inNamespace(namespace).withName(OAUTH2_PROXY_CONFIGMAP_NAME)
 		.get();
@@ -138,9 +138,9 @@ public final class AddedHandler {
 	configMap.setData(data);
     }
 
-    public static void updateSessionError(DefaultKubernetesClient client, Session session, String namespace,
+    public static void updateSessionError(NamespacedKubernetesClient client, Session session, String namespace,
 	    String error, String correlationId) {
-	client.customResources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
+	client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
 		.withName(session.getMetadata().getName())//
 		.edit(ws -> {
 		    ws.getSpec().setError(error);
@@ -148,7 +148,7 @@ public final class AddedHandler {
 		});
     }
 
-    public static void updateSessionURLAsync(DefaultKubernetesClient client, Session session, String namespace,
+    public static void updateSessionURLAsync(NamespacedKubernetesClient client, Session session, String namespace,
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {
 	    for (int i = 1; i <= 60; i++) {
@@ -188,7 +188,7 @@ public final class AddedHandler {
 
 		if (code == 200) {
 		    LOGGER.info(formatLogMessage(correlationId, url + " is available."));
-		    client.customResources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
+		    client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
 			    .withName(session.getMetadata().getName())//
 			    .edit(ws -> {
 				ws.getSpec().setUrl(url);
