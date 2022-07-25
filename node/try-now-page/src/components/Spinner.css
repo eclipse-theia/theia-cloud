@@ -1,19 +1,35 @@
-.Spinner__logo {
-  width: 100px;
-  height: 100px;
+.spinner-container {
+  display: flex;
+  flex-direction: center;
+  align-self: center;
+  justify-content: center;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .Spinner__logo {
-    animation: Spinner__logo--spin infinite 5s linear;
-  }
+.custom-spinner {
+  align-self: center;
 }
 
-@keyframes Spinner__logo--spin {
-  from {
-    transform: rotate(0deg);
+.custom-spinner svg {
+  animation-delay: 0;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-name: blueprint-spinner;
+  animation-timing-function: ease;
+}
+
+@keyframes blueprint-spinner {
+  0% {
+    filter: invert(49%) sepia(71%) saturate(5980%) hue-rotate(199deg) brightness(103%) contrast(101%);
+    transform: scale(1.0);
   }
-  to {
-    transform: rotate(360deg);
+
+  50% {
+    filter: invert(57%) sepia(52%) saturate(1900%) hue-rotate(160deg) brightness(100%) contrast(102%);
+    transform: scale(0.8);
+  }
+
+  100% {
+    filter: invert(49%) sepia(71%) saturate(5980%) hue-rotate(199deg) brightness(103%) contrast(101%);
+    transform: scale(1.0);
   }
 }

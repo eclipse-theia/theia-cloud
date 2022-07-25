@@ -30,7 +30,7 @@ export function startSession(options: SessionOptions, retries = 0): Promise<void
           location.replace(`https://${response.data.url}`);
         } else {
           console.error(response.data.error);
-          throw new Error(`Could not launch session: ${response.data.error}`);
+          throw new Error('Sorry, there are no more available instances in the cluster.\nPlease try again later, instances are shut down after 30 minutes.\n\nNote: this is not a technical limit of Theia.cloud, but was intentionally set by us to keep this free offer within its intended budget.');
         }
       },
       error => {
