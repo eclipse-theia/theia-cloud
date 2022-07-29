@@ -15,26 +15,18 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler.impl;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceUtil;
+import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
-import org.eclipse.theia.cloud.operator.handler.PersistentVolumeHandler;
+import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import io.fabric8.kubernetes.api.model.PersistentVolume;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
-import io.fabric8.kubernetes.api.model.PersistentVolumeList;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class LazyWorkspaceHandler implements WorkspaceHandler {
     @Inject
@@ -45,34 +37,27 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
     protected String namespace;
 
     @Inject
-    protected PersistentVolumeHandler persistentVolumeHandler;
+    protected PersistentVolumeCreator persistentVolumeHandler;
 
     @Inject
     protected TheiaCloudArguments arguments;
 
     @Inject
-    private NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessionResourceClient;
-
-    @Inject
-    private NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaceResourceClient;
+    protected TheiaCloudClient resourceClient;
 
     @Override
     public boolean workspaceAdded(Workspace workspace, String correlationId) {
 	if (arguments.isEphemeralStorage()) {
 	    editWorkspaceStorage(workspace, "ephemeral");
-	    return true; // no problem
+	    return true;
 	}
 
 	String storageName = WorkspaceUtil.getStorageName(workspace.getSpec().getName());
-	NonNamespaceOperation<PersistentVolume, PersistentVolumeList, Resource<PersistentVolume>> volumes = client
-		.persistentVolumes();
-	if (volumes.withName(storageName).get() == null) {
+	if (!resourceClient.persistentVolumes().has(storageName)) {
 	    persistentVolumeHandler.createAndApplyPersistentVolume(correlationId, workspace);
 	}
 
-	NonNamespaceOperation<PersistentVolumeClaim, PersistentVolumeClaimList, Resource<PersistentVolumeClaim>> claims = client
-		.persistentVolumeClaims().inNamespace(namespace);
-	if (claims.withName(storageName).get() == null) {
+	if (!resourceClient.persistentVolumeClaims().has(storageName)) {
 	    persistentVolumeHandler.createAndApplyPersistentVolumeClaim(correlationId, workspace);
 	}
 
@@ -81,26 +66,17 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
     }
 
     private void editWorkspaceStorage(Workspace workspace, String storage) {
-	workspaceResourceClient.withName(workspace.getSpec().getName()).edit(toEdit -> {
-	    toEdit.getSpec().setStorage(storage);
-	    return toEdit;
-	});
+	resourceClient.workspaces().edit(workspace.getSpec().getName(), toEdit -> toEdit.getSpec().setStorage(storage));
     }
 
     @Override
     public boolean workspaceDeleted(Workspace workspace, String correlationId) {
 	String sessionName = WorkspaceUtil.getSessionName(workspace.getSpec().getName());
-	sessionResourceClient.withName(sessionName).delete();
+	resourceClient.sessions().delete(sessionName);
 
 	String storageName = WorkspaceUtil.getStorageName(workspace.getSpec().getName());
-
-	NonNamespaceOperation<PersistentVolumeClaim, PersistentVolumeClaimList, Resource<PersistentVolumeClaim>> claims = client
-		.persistentVolumeClaims().inNamespace(namespace);
-	claims.withName(storageName).delete();
-
-	NonNamespaceOperation<PersistentVolume, PersistentVolumeList, Resource<PersistentVolume>> volumes = client
-		.persistentVolumes();
-	volumes.withName(storageName).delete();
+	resourceClient.persistentVolumeClaims().delete(storageName);
+	resourceClient.persistentVolumes().delete(storageName);
 	return true;
     }
 

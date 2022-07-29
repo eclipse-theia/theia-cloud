@@ -33,7 +33,11 @@ public class RootResource extends BaseResource {
 	if (response.error != null) {
 	    return SessionLaunchResponse.error(response.error);
 	}
-	return new SessionResource()
+	SessionLaunchResponse launchResponse = new SessionResource()
 		.launchSession(new SessionStartRequest(request.appId, request.user, response.workspace.name));
+	if (!launchResponse.success) {
+	    K8sUtil.deleteWorkspace(response.workspace.name);
+	}
+	return launchResponse;
     }
 }

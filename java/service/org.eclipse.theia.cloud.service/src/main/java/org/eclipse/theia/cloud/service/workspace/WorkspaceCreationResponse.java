@@ -17,7 +17,6 @@
 package org.eclipse.theia.cloud.service.workspace;
 
 import org.eclipse.theia.cloud.service.ServiceResponse;
-import org.eclipse.theia.cloud.service.UserWorkspace;
 
 public class WorkspaceCreationResponse extends ServiceResponse {
     public UserWorkspace workspace;

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize()
-public class WorkspaceSpec {
+public class WorkspaceSpec implements UserScopedSpec {
 
     public static final String API = "theia.cloud/v1beta";
     public static final String KIND = "Workspace";
@@ -70,6 +70,7 @@ public class WorkspaceSpec {
 	return appDefinition;
     }
 
+    @Override
     public String getUser() {
 	return user;
     }
@@ -92,6 +93,14 @@ public class WorkspaceSpec {
 
     public void setError(String error) {
 	this.error = error;
+    }
+
+    public boolean hasStorage() {
+	return getStorage() != null && !getStorage().isBlank();
+    }
+
+    public boolean hasError() {
+	return getError() != null && !getError().isBlank();
     }
 
     @Override

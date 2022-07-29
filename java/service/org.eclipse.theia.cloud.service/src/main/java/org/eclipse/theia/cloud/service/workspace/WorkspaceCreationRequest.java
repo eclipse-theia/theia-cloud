@@ -18,9 +18,8 @@ package org.eclipse.theia.cloud.service.workspace;
 
 import java.util.Optional;
 
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceUtil;
+import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.service.ServiceRequest;
-import org.eclipse.theia.cloud.service.UserWorkspace;
 
 public class WorkspaceCreationRequest extends ServiceRequest {
 

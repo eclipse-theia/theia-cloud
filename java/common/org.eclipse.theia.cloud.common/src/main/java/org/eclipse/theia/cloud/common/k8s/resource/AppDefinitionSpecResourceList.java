@@ -16,26 +16,10 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource;
 
-import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
+import io.fabric8.kubernetes.client.CustomResourceList;
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
+public class AppDefinitionSpecResourceList extends CustomResourceList<AppDefinition> {
 
-@Version("v1beta")
-@Group("theia.cloud")
-@Singular("session")
-@Plural("sessions")
-public class Session extends CustomResource<SessionSpec, Void> implements Namespaced {
-
-    private static final long serialVersionUID = 4518092300237069237L;
-
-    @Override
-    public String toString() {
-	return CustomResourceUtil.toString(this);
-    }
+    private static final long serialVersionUID = 722136158817065564L;
 
 }

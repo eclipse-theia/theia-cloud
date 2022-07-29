@@ -13,28 +13,28 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
-
-@Version("v1beta")
-@Group("theia.cloud")
-@Singular("workspace")
-@Plural("workspaces")
-public class Workspace extends CustomResource<WorkspaceSpec, Void> implements Namespaced {
-
-    private static final long serialVersionUID = 4518092300237069237L;
-
-    @Override
-    public String toString() {
-	return CustomResourceUtil.toString(this);
+public interface SessionHandler {
+    default boolean sessionAdded(Session session, String correlationId) {
+	return true;
     }
 
+    default boolean sessionDeleted(Session session, String correlationId) {
+	return true;
+    }
+
+    default boolean sessionModified(Session session, String correlationId) {
+	return true;
+    }
+
+    default boolean sessionErrored(Session session, String correlationId) {
+	return true;
+    }
+
+    default boolean sessionBookmarked(Session session, String correlationId) {
+	return true;
+    }
 }

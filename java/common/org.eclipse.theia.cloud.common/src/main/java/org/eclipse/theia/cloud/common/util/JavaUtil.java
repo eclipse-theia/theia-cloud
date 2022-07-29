@@ -14,28 +14,26 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.util;
 
-import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
+import java.util.AbstractMap;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
+public final class JavaUtil {
 
-@Version("v1beta")
-@Group("theia.cloud")
-@Singular("session")
-@Plural("sessions")
-public class Session extends CustomResource<SessionSpec, Void> implements Namespaced {
-
-    private static final long serialVersionUID = 4518092300237069237L;
-
-    @Override
-    public String toString() {
-	return CustomResourceUtil.toString(this);
+    private JavaUtil() {
     }
 
+    public static <T, V> Entry<T, V> tuple(T a, V b) {
+	return new AbstractMap.SimpleEntry<T, V>(a, b);
+    }
+
+    public static <T> UnaryOperator<T> toUnary(Consumer<T> consumer) {
+	return item -> {
+	    consumer.accept(item);
+	    return item;
+	};
+    }
 }

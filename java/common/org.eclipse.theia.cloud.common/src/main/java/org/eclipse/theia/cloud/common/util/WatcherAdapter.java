@@ -13,28 +13,29 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.util;
 
-import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
+import java.util.function.BiConsumer;
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.Watcher.Action;
+import io.fabric8.kubernetes.client.WatcherException;
 
-@Version("v1beta")
-@Group("theia.cloud")
-@Singular("workspace")
-@Plural("workspaces")
-public class Workspace extends CustomResource<WorkspaceSpec, Void> implements Namespaced {
-
-    private static final long serialVersionUID = 4518092300237069237L;
-
-    @Override
-    public String toString() {
-	return CustomResourceUtil.toString(this);
+public final class WatcherAdapter {
+    private WatcherAdapter() {
     }
 
+    public static <T> Watcher<T> eventReceived(BiConsumer<Action, T> consumer) {
+	return new Watcher<T>() {
+	    @Override
+	    public void eventReceived(Action action, T resource) {
+		consumer.accept(action, resource);
+	    }
+
+	    @Override
+	    public void onClose(WatcherException cause) {
+		// do nothing
+	    }
+	};
+    }
 }

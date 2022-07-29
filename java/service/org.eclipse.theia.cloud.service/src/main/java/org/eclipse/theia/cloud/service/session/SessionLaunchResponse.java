@@ -16,6 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.session;
 
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.service.ServiceResponse;
 
 public class SessionLaunchResponse extends ServiceResponse {
@@ -27,6 +28,10 @@ public class SessionLaunchResponse extends ServiceResponse {
     public SessionLaunchResponse(boolean success, String error, String url) {
 	super(success, error);
 	this.url = url;
+    }
+
+    public static SessionLaunchResponse from(SessionSpec session) {
+	return new SessionLaunchResponse(session.getUrl() != null, session.getError(), session.getUrl());
     }
 
     public static SessionLaunchResponse error(String error) {

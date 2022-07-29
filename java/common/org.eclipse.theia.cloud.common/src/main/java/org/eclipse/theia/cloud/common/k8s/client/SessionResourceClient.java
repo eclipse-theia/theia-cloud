@@ -13,28 +13,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.k8s.client;
 
-import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
+import java.util.concurrent.TimeUnit;
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 
-@Version("v1beta")
-@Group("theia.cloud")
-@Singular("workspace")
-@Plural("workspaces")
-public class Workspace extends CustomResource<WorkspaceSpec, Void> implements Namespaced {
-
-    private static final long serialVersionUID = 4518092300237069237L;
-
+public interface SessionResourceClient extends CustomResourceClient<SessionSpec, Session, SessionSpecResourceList> {
     @Override
-    public String toString() {
-	return CustomResourceUtil.toString(this);
+    SessionResourceClient interaction(String correlationId);
+
+    Session launch(SessionSpec spec, long timeout, TimeUnit unit);
+
+    default Session launch(SessionSpec spec) {
+	return launch(spec, 1, TimeUnit.MINUTES);
     }
 
+    boolean reportActivity(String name);
 }
