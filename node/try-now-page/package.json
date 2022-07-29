@@ -15,7 +15,7 @@
     "react-scripts": "5.0.1",
     "typescript": "^4.6.4",
     "web-vitals": "^2.1.4",
-    "@theia-cloud/common": "^0.1.0"
+    "@eclipse-theiacloud/common": "^0.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
