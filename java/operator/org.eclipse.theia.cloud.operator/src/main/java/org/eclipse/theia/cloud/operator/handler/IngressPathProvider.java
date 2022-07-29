@@ -16,8 +16,8 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.operator.resource.AppDefinition;
 
 public interface IngressPathProvider {
 

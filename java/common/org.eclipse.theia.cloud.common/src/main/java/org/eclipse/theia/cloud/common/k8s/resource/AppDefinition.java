@@ -25,13 +25,13 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v1beta")
+@Version("v2beta")
 @Group("theia.cloud")
-@Singular("session")
-@Plural("sessions")
-public class Session extends CustomResource<SessionSpec, Void> implements Namespaced {
+@Singular("appdefinition")
+@Plural("appdefinitions")
+public class AppDefinition extends CustomResource<AppDefinitionSpec, Void> implements Namespaced {
 
-    private static final long serialVersionUID = 4518092300237069237L;
+    private static final long serialVersionUID = 8749670583218521755L;
 
     @Override
     public String toString() {

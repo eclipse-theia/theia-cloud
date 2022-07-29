@@ -32,7 +32,7 @@ import javax.ws.rs.Path;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
-import org.eclipse.theia.cloud.service.UserWorkspace;
+import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 import org.jboss.logging.Logger;
 
 @Path("/service/session")

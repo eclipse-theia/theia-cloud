@@ -15,24 +15,24 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler.impl;
 
-import static org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil.PLACEHOLDER_APP;
-import static org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME;
-import static org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME;
-import static org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE;
-import static org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil.PLACEHOLDER_PORT;
+import static org.eclipse.theia.cloud.operator.handler.util.TheiaCloudHandlerUtil.PLACEHOLDER_APP;
+import static org.eclipse.theia.cloud.operator.handler.util.TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME;
+import static org.eclipse.theia.cloud.operator.handler.util.TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME;
+import static org.eclipse.theia.cloud.operator.handler.util.TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE;
+import static org.eclipse.theia.cloud.operator.handler.util.TheiaCloudHandlerUtil.PLACEHOLDER_PORT;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.DeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
-import org.eclipse.theia.cloud.operator.handler.TheiaCloudConfigMapUtil;
-import org.eclipse.theia.cloud.operator.handler.TheiaCloudDeploymentUtil;
-import org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil;
-import org.eclipse.theia.cloud.operator.resource.AppDefinition;
+import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudConfigMapUtil;
+import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudDeploymentUtil;
+import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudHandlerUtil;
 
 import com.google.inject.Inject;
 
@@ -61,8 +61,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     protected IngressPathProvider ingressPathProvider;
 
     @Override
-    public Map<String, String> getReplacements(String namespace, AppDefinition appDefinition,
-	    int instance) {
+    public Map<String, String> getReplacements(String namespace, AppDefinition appDefinition, int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
 	replacements.putAll(getAppDefinitionData(appDefinition));
@@ -72,8 +71,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     }
 
     @Override
-    public Map<String, String> getReplacements(String namespace, AppDefinition appDefinition,
-	    Session session) {
+    public Map<String, String> getReplacements(String namespace, AppDefinition appDefinition, Session session) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
 	replacements.putAll(getAppDefinitionData(appDefinition));

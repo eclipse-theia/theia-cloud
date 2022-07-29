@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022 EclipseSource, logi.cals and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,28 +13,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.handler;
+package org.eclipse.theia.cloud.common.util;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+public final class SessionUtil {
 
-public interface WorkspaceHandler {
-    default boolean workspaceAdded(Workspace workspace, String correlationId) {
-	return true;
+    private SessionUtil() {
+	// util
     }
 
-    default boolean workspaceDeleted(Workspace workspace, String correlationId) {
-	return true;
+    public static String validUserName(String user) {
+	return user.replace("@", "at").replace(".", "-");
     }
 
-    default boolean workspaceModified(Workspace workspace, String correlationId) {
-	return true;
-    }
-
-    default boolean workspaceErrored(Workspace workspace, String correlationId) {
-	return true;
-    }
-
-    default boolean workspaceBookmarked(Workspace workspace, String correlationId) {
-	return true;
-    }
 }

@@ -1,6 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
- * others.
+ * Copyright (C) 2022 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,26 +15,10 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource;
 
-import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
+public interface UserScopedSpec {
+    String getUser();
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
-
-@Version("v1beta")
-@Group("theia.cloud")
-@Singular("session")
-@Plural("sessions")
-public class Session extends CustomResource<SessionSpec, Void> implements Namespaced {
-
-    private static final long serialVersionUID = 4518092300237069237L;
-
-    @Override
-    public String toString() {
-	return CustomResourceUtil.toString(this);
+    static String getUser(Object object) {
+	return object instanceof UserScopedSpec ? ((UserScopedSpec) object).getUser() : null;
     }
-
 }

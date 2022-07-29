@@ -28,10 +28,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceUtil;
+import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
-import org.eclipse.theia.cloud.service.UserWorkspace;
 import org.jboss.logging.Logger;
 
 @Path("/service/workspace")
@@ -83,6 +82,6 @@ public class WorkspaceResource extends BaseResource {
 	    LOGGER.info(formatLogMessage(correlationId, "No workspace name given"));
 	    return false;
 	}
-	return K8sUtil.deleteWorkspace(request.workspaceName, request.user);
+	return K8sUtil.deleteWorkspace(request.workspaceName);
     }
 }

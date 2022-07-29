@@ -18,7 +18,6 @@ package org.eclipse.theia.cloud.operator;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
-import static org.eclipse.theia.cloud.operator.handler.TheiaCloudHandlerUtil.getAppDefinitionForSession;
 
 import java.time.Instant;
 import java.util.LinkedHashSet;
@@ -32,27 +31,19 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec.Timeout;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
-import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
-import org.eclipse.theia.cloud.operator.handler.AppDefinitionAddedHandler;
-import org.eclipse.theia.cloud.operator.handler.SessionAddedHandler;
-import org.eclipse.theia.cloud.operator.handler.SessionRemovedHandler;
+import org.eclipse.theia.cloud.operator.handler.AppDefinitionHandler;
+import org.eclipse.theia.cloud.operator.handler.SessionHandler;
+import org.eclipse.theia.cloud.operator.handler.TimeoutStrategy;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
-import org.eclipse.theia.cloud.operator.resource.AppDefinition;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpec.Timeout;
-import org.eclipse.theia.cloud.operator.resource.AppDefinitionSpecResourceList;
-import org.eclipse.theia.cloud.operator.timeout.TimeoutStrategy;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
-import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class TheiaCloudImpl implements TheiaCloud {
 
@@ -66,32 +57,16 @@ public class TheiaCloudImpl implements TheiaCloud {
     private static final String COR_ID_TIMEOUTPREFIX = "timeout-";
 
     @Inject
-    private NamespacedKubernetesClient client;
+    private TheiaCloudClient resourceClient;
 
     @Inject
-    @Named(TheiaCloudOperatorModule.NAMESPACE)
-    private String namespace;
-
-    @Inject
-    private NonNamespaceOperation<AppDefinition, AppDefinitionSpecResourceList, Resource<AppDefinition>> appDefinitionResourceClient;
-
-    @Inject
-    private NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessionResourceClient;
-
-    @Inject
-    private NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaceResourceClient;
-
-    @Inject
-    private AppDefinitionAddedHandler appDefinitionAddedHandler;
+    private AppDefinitionHandler appDefinitionAddedHandler;
 
     @Inject
     private WorkspaceHandler workspaceHandler;
 
     @Inject
-    private SessionAddedHandler sessionAddedHandler;
-
-    @Inject
-    private SessionRemovedHandler sessionRemovedHandler;
+    private SessionHandler sessionHandler;
 
     @Inject
     private Set<TimeoutStrategy> timeoutStrategies;
@@ -112,112 +87,10 @@ public class TheiaCloudImpl implements TheiaCloud {
 	EXECUTOR.scheduleWithFixedDelay(this::stopTimedOutSessions, 1, 1, TimeUnit.MINUTES);
     }
 
-    private void handleAppDefnitionEvent(Watcher.Action action, String uid, String correlationId) {
-	AppDefinition appDefinition = appDefinitionCache.get(uid);
-	switch (action) {
-	case ADDED:
-	    appDefinitionAdded(appDefinition, correlationId);
-	    break;
-	case DELETED:
-	    appDefinitionDeleted(appDefinition, correlationId);
-	    break;
-	case MODIFIED:
-	    appDefinitionModified(appDefinition, correlationId);
-	    break;
-	case ERROR:
-	    appDefinitionErrored(appDefinition, correlationId);
-	    break;
-	case BOOKMARK:
-	    appDefinitionBookmarked(appDefinition, correlationId);
-	    break;
-	}
-    }
-
-    private void appDefinitionAdded(AppDefinition appDefinition, String correlationId) {
-	LOGGER.trace(formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId,
-		"Delegating appDefinitionAdded to " + appDefinitionAddedHandler.getClass().getName()));
-	appDefinitionAddedHandler.handle(appDefinition, correlationId);
-    }
-
-    private void appDefinitionDeleted(AppDefinition appDefinition, String correlationId) {
-	// TODO
-	LOGGER.warn(
-		formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId, "appDefinitionDeleted not implemented"));
-    }
-
-    private void appDefinitionModified(AppDefinition appDefinition, String correlationId) {
-	// TODO
-	LOGGER.warn(
-		formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId, "appDefinitionModified not implemented"));
-    }
-
-    private void appDefinitionErrored(AppDefinition appDefinition, String correlationId) {
-	// TODO
-	LOGGER.warn(
-		formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId, "appDefinitionErrored not implemented"));
-    }
-
-    private void appDefinitionBookmarked(AppDefinition appDefinition, String correlationId) {
-	// TODO
-	LOGGER.warn(
-		formatLogMessage(COR_ID_APPDEFINITIONPREFIX, correlationId, "appDefinitionBookmarked not implemented"));
-    }
-
-    private void handleSessionEvent(Watcher.Action action, String uid, String correlationId) {
-	Session session = sessionCache.get(uid);
-	switch (action) {
-	case ADDED:
-	    sessionAdded(session, correlationId);
-	    break;
-	case DELETED:
-	    sessionDeleted(session, correlationId);
-	    break;
-	case MODIFIED:
-	    sessionModified(session, correlationId);
-	    break;
-	case ERROR:
-	    sessionErrored(session, correlationId);
-	    break;
-	case BOOKMARK:
-	    sessionBookmarked(session, correlationId);
-	    break;
-	}
-    }
-
-    private void sessionAdded(Session session, String correlationId) {
-	LOGGER.trace(formatLogMessage(COR_ID_SESSIONPREFIX, correlationId,
-		"Delegating sessionAdded to " + sessionAddedHandler.getClass().getName()));
-	sessionAddedHandler.handle(session, correlationId);
-    }
-
-    private void sessionDeleted(Session session, String correlationId) {
-	LOGGER.trace(formatLogMessage(COR_ID_SESSIONPREFIX, correlationId,
-		"Delegating sessionDeleted to " + sessionRemovedHandler.getClass().getName()));
-	sessionRemovedHandler.handle(session, correlationId);
-    }
-
-    private void sessionModified(Session session, String correlationId) {
-	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_SESSIONPREFIX, correlationId, "sessionModified not implemented"));
-    }
-
-    private void sessionErrored(Session session, String correlationId) {
-	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_SESSIONPREFIX, correlationId, "sessionErrored not implemented"));
-    }
-
-    private void sessionBookmarked(Session session, String correlationId) {
-	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_SESSIONPREFIX, correlationId, "sessionBookmarked not implemented"));
-    }
-
     protected void initAppDefinitionsAndWatchForChanges() {
 	try {
-	    /* init existing app definitions */
-	    appDefinitionResourceClient.list().getItems().forEach(this::initAppDefinition);
-
-	    /* watch for changes */
-	    appDefinitionResourceClient.watch(new SpecWatch<AppDefinition>(appDefinitionCache,
+	    resourceClient.appDefinitions().list().forEach(this::initAppDefinition);
+	    resourceClient.appDefinitions().operation().watch(new SpecWatch<>(appDefinitionCache,
 		    this::handleAppDefnitionEvent, "App Definition", COR_ID_APPDEFINITIONPREFIX));
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing app definitions watch"), e);
@@ -227,12 +100,9 @@ public class TheiaCloudImpl implements TheiaCloud {
 
     protected void initWorkspacesAndWatchForChanges() {
 	try {
-	    /* init existing sessions */
-	    workspaceResourceClient.list().getItems().forEach(this::initWorkspace);
-
-	    /* watch for changes */
-	    workspaceResourceClient.watch(new SpecWatch<Workspace>(workspaceCache, this::handleWorkspaceEvent,
-		    "Workspace", COR_ID_SESSIONPREFIX));
+	    resourceClient.workspaces().list().forEach(this::initWorkspace);
+	    resourceClient.workspaces().operation().watch(
+		    new SpecWatch<>(workspaceCache, this::handleWorkspaceEvent, "Workspace", COR_ID_WORKSPACEPREFIX));
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing workspace watch"), e);
 	    System.exit(-1);
@@ -241,12 +111,10 @@ public class TheiaCloudImpl implements TheiaCloud {
 
     protected void initSessionsAndWatchForChanges() {
 	try {
-	    /* init existing sessions */
-	    sessionResourceClient.list().getItems().forEach(this::initSession);
+	    resourceClient.sessions().list().forEach(this::initSession);
 
-	    /* watch for changes */
-	    sessionResourceClient.watch(
-		    new SpecWatch<Session>(sessionCache, this::handleSessionEvent, "Session", COR_ID_SESSIONPREFIX));
+	    resourceClient.sessions().operation()
+		    .watch(new SpecWatch<>(sessionCache, this::handleSessionEvent, "Session", COR_ID_SESSIONPREFIX));
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing session watch"), e);
 	    System.exit(-1);
@@ -271,20 +139,83 @@ public class TheiaCloudImpl implements TheiaCloud {
 	handleSessionEvent(Watcher.Action.ADDED, uid, Main.COR_ID_INIT);
     }
 
+    protected void handleAppDefnitionEvent(Watcher.Action action, String uid, String correlationId) {
+	AppDefinition appDefinition = appDefinitionCache.get(uid);
+	switch (action) {
+	case ADDED:
+	    appDefinitionAddedHandler.appDefinitionAdded(appDefinition, correlationId);
+	    break;
+	case DELETED:
+	    appDefinitionAddedHandler.appDefinitionDeleted(appDefinition, correlationId);
+	    break;
+	case MODIFIED:
+	    appDefinitionAddedHandler.appDefinitionModified(appDefinition, correlationId);
+	    break;
+	case ERROR:
+	    appDefinitionAddedHandler.appDefinitionErrored(appDefinition, correlationId);
+	    break;
+	case BOOKMARK:
+	    appDefinitionAddedHandler.appDefinitionBookmarked(appDefinition, correlationId);
+	    break;
+	}
+    }
+
+    protected void handleSessionEvent(Watcher.Action action, String uid, String correlationId) {
+	Session session = sessionCache.get(uid);
+	switch (action) {
+	case ADDED:
+	    sessionHandler.sessionAdded(session, correlationId);
+	    break;
+	case DELETED:
+	    sessionHandler.sessionDeleted(session, correlationId);
+	    break;
+	case MODIFIED:
+	    sessionHandler.sessionModified(session, correlationId);
+	    break;
+	case ERROR:
+	    sessionHandler.sessionErrored(session, correlationId);
+	    break;
+	case BOOKMARK:
+	    sessionHandler.sessionBookmarked(session, correlationId);
+	    break;
+	}
+    }
+
+    protected void handleWorkspaceEvent(Watcher.Action action, String uid, String correlationId) {
+	Workspace workspace = workspaceCache.get(uid);
+	switch (action) {
+	case ADDED:
+	    workspaceHandler.workspaceAdded(workspace, correlationId);
+	    break;
+	case DELETED:
+	    workspaceHandler.workspaceDeleted(workspace, correlationId);
+	    break;
+	case MODIFIED:
+	    workspaceHandler.workspaceModified(workspace, correlationId);
+	    break;
+	case ERROR:
+	    workspaceHandler.workspaceErrored(workspace, correlationId);
+	    break;
+	case BOOKMARK:
+	    workspaceHandler.workspaceBookmarked(workspace, correlationId);
+	    break;
+	}
+    }
+
     protected void stopTimedOutSessions() {
 	String correlationId = generateCorrelationId();
 
 	try {
 	    Set<String> timedOutSessions = new LinkedHashSet<>();
 	    Instant now = Instant.now();
-	    for (Session session : sessionResourceClient.list().getItems()) {
+	    for (Session session : resourceClient.sessions().list()) {
 		if (isSessionTimedOut(correlationId, now, session)) {
 		    timedOutSessions.add(session.getSpec().getName());
 		}
 	    }
 
 	    for (String sessionName : timedOutSessions) {
-		sessionResourceClient.withName(sessionName).delete();
+		resourceClient.sessions().delete(sessionName);
 	    }
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Exception in kill after runnable"), e);
@@ -314,8 +245,8 @@ public class TheiaCloudImpl implements TheiaCloud {
     }
 
     protected Optional<Timeout> getTimeoutForAppDefinition(String appDefinition) {
-	// given arguments will override app definition
-	Optional<Timeout> appDefTimeout = getAppDefinitionForSession(client, namespace, appDefinition)
+	// given arguments will override app definition setting
+	Optional<Timeout> appDefTimeout = resourceClient.appDefinitions().item(appDefinition)
 		.map(appDef -> appDef.getSpec().getTimeout());
 	Optional<String> strategyName = Optional.ofNullable(arguments.getTimeoutStrategy())
 		.or(() -> appDefTimeout.map(Timeout::getStrategy));
@@ -324,49 +255,4 @@ public class TheiaCloudImpl implements TheiaCloud {
 	return strategyName.isPresent() && limit.isPresent() ? Optional.of(new Timeout(strategyName.get(), limit.get()))
 		: Optional.empty();
     }
-
-    protected void handleWorkspaceEvent(Watcher.Action action, String uid, String correlationId) {
-	Workspace workspace = workspaceCache.get(uid);
-	switch (action) {
-	case ADDED:
-	    workspaceAdded(workspace, correlationId);
-	    break;
-	case DELETED:
-	    workspaceDeleted(workspace, correlationId);
-	    break;
-	case MODIFIED:
-	    workspaceModified(workspace, correlationId);
-	    break;
-	case ERROR:
-	    workspaceErrored(workspace, correlationId);
-	    break;
-	case BOOKMARK:
-	    workspaceBookmarked(workspace, correlationId);
-	    break;
-	}
-    }
-
-    private void workspaceAdded(Workspace workspace, String correlationId) {
-	workspaceHandler.workspaceAdded(workspace, correlationId);
-    }
-
-    private void workspaceDeleted(Workspace workspace, String correlationId) {
-	workspaceHandler.workspaceDeleted(workspace, correlationId);
-    }
-
-    private void workspaceModified(Workspace workspace, String correlationId) {
-	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceModified not implemented"));
-    }
-
-    private void workspaceErrored(Workspace workspace, String correlationId) {
-	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceErrored not implemented"));
-    }
-
-    private void workspaceBookmarked(Workspace workspace, String correlationId) {
-	// TODO
-	LOGGER.warn(formatLogMessage(COR_ID_WORKSPACEPREFIX, correlationId, "workspaceBookmarked not implemented"));
-    }
-
 }

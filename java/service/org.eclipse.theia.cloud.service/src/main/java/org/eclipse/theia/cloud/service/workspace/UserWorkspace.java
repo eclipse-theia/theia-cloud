@@ -13,28 +13,41 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.service.workspace;
 
-import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
+public class UserWorkspace {
+    public String name;
 
-@Version("v1beta")
-@Group("theia.cloud")
-@Singular("workspace")
-@Plural("workspaces")
-public class Workspace extends CustomResource<WorkspaceSpec, Void> implements Namespaced {
+    public String label;
 
-    private static final long serialVersionUID = 4518092300237069237L;
+    public String appDefinition;
 
-    @Override
-    public String toString() {
-	return CustomResourceUtil.toString(this);
+    public String user;
+
+    public boolean active;
+
+    public UserWorkspace() {
+    }
+
+    public UserWorkspace(WorkspaceSpec data) {
+	this(data.getName(), data.getLabel(), data.getAppDefinition(), data.getUser());
+    }
+
+    public UserWorkspace(String name, String label, String appDefinition, String user) {
+	this.name = name;
+	this.label = label;
+	this.appDefinition = appDefinition;
+	this.user = user;
+    }
+
+    public void setActive(boolean active) {
+	this.active = active;
+    }
+
+    public boolean isActive() {
+	return active;
     }
 
 }
