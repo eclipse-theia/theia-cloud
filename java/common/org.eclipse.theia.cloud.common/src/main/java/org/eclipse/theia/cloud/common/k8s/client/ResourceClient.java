@@ -23,7 +23,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import org.eclipse.theia.cloud.common.util.JavaUtil;
-import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 import org.eclipse.theia.cloud.common.util.WatcherAdapter;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -41,21 +40,21 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
 	return operation().withName(name);
     }
 
-    default Optional<T> item(String name) {
+    default Optional<T> get(String name) {
 	return Optional.ofNullable(resource(name).get());
     }
 
     default boolean has(String name) {
-	return item(name).isPresent();
+	return get(name).isPresent();
     }
 
-    default boolean delete(String name) {
-	info("Delete " + name);
+    default boolean delete(String correlationId, String name) {
+	info(correlationId, "Delete " + name);
 	return resource(name).delete();
     }
 
-    default T edit(String name, Consumer<T> consumer) {
-	info("Edit " + name);
+    default T edit(String correlationId, String name, Consumer<T> consumer) {
+	info(correlationId, "Edit " + name);
 	Resource<T> resource = resource(name);
 	if (resource.get() == null) {
 	    return null;
@@ -63,10 +62,10 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
 	return resource.edit(JavaUtil.toUnary(consumer));
     }
 
-    Optional<T> loadAndCreate(String yaml, Consumer<T> customization);
+    Optional<T> loadAndCreate(String correlationId, String yaml, Consumer<T> customization);
 
-    default Optional<T> loadAndCreate(String yaml) {
-	return loadAndCreate(yaml, item -> {
+    default Optional<T> loadAndCreate(String correlationId, String yaml) {
+	return loadAndCreate(correlationId, yaml, item -> {
 	});
     }
 
@@ -95,19 +94,13 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
 
     String getTypeName();
 
-    ResourceClient<T, L> interaction(String correlationId);
+    void info(String correlationId, String message);
 
-    default ResourceClient<T, L> interaction() {
-	return interaction(LogMessageUtil.generateCorrelationId());
-    }
+    void warn(String correlationId, String message);
 
-    void info(String message);
+    void error(String correlationId, String message);
 
-    void warn(String message);
+    void error(String correlationId, String message, Throwable throwable);
 
-    void error(String message);
-
-    void error(String message, Throwable throwable);
-
-    void trace(String message);
+    void trace(String correlationId, String message);
 }

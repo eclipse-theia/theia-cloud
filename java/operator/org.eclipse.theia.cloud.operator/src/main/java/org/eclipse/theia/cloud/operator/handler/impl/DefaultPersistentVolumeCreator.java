@@ -54,12 +54,11 @@ public class DefaultPersistentVolumeCreator implements PersistentVolumeCreator {
 		    e);
 	    return;
 	}
-	client.persistentVolumes().interaction(correlationId).loadAndCreate(persistentVolumeYaml);
+	client.persistentVolumes().loadAndCreate(correlationId, persistentVolumeYaml);
     }
 
     @Override
     public void createAndApplyPersistentVolumeClaim(String correlationId, Workspace workspace) {
-
 	Map<String, String> replacements = TheiaCloudPersistentVolumeUtil
 		.getPersistentVolumeClaimReplacements(client.namespace(), workspace);
 	String persistentVolumeClaimYaml;
@@ -71,7 +70,7 @@ public class DefaultPersistentVolumeCreator implements PersistentVolumeCreator {
 		    e);
 	    return;
 	}
-	client.persistentVolumeClaims().interaction(correlationId).loadAndCreate(persistentVolumeClaimYaml);
+	client.persistentVolumeClaims().loadAndCreate(correlationId, persistentVolumeClaimYaml);
     }
 
 }

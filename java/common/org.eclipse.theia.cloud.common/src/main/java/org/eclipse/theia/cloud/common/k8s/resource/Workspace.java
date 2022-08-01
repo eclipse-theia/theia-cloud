@@ -30,7 +30,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Plural("workspaces")
 public class Workspace extends CustomResource<WorkspaceSpec, Void> implements Namespaced {
 
-    private static final long serialVersionUID = 4518092300237069237L;
+    private static final long serialVersionUID = 6437279756051357397L;
 
     @Override
     public String toString() {

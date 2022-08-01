@@ -1,5 +1,6 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,13 +14,27 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service.workspace;
+package org.eclipse.theia.cloud.service.session;
 
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
-public class WorkspacesListRequest extends ServiceRequest {
+public class SessionListRequest extends ServiceRequest {
+    public static final String KIND = "sessionListRequest";
+
     public String user;
 
-    public WorkspacesListRequest() {
+    public SessionListRequest() {
+	super(KIND);
     }
+
+    public SessionListRequest(String appId, String user) {
+	super(KIND, appId);
+	this.user = user;
+    }
+
+    @Override
+    public String toString() {
+	return "SessionListRequest [user=" + user + ", appId=" + appId + ", kind=" + kind + "]";
+    }
+
 }

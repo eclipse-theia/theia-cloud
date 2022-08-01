@@ -20,13 +20,16 @@ import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.service.ServiceResponse;
 
 public class SessionLaunchResponse extends ServiceResponse {
+    public static final String KIND = "sessionLaunchResponse";
+
     public String url;
 
     public SessionLaunchResponse() {
+	super(KIND);
     }
 
     public SessionLaunchResponse(boolean success, String error, String url) {
-	super(success, error);
+	super(KIND, success, error);
 	this.url = url;
     }
 
@@ -41,4 +44,11 @@ public class SessionLaunchResponse extends ServiceResponse {
     public static SessionLaunchResponse ok(String url) {
 	return new SessionLaunchResponse(true, "", "");
     }
+
+    @Override
+    public String toString() {
+	return "SessionLaunchResponse [url=" + url + ", kind=" + kind + ", success=" + success + ", error=" + error
+		+ "]";
+    }
+
 }

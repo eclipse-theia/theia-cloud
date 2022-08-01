@@ -16,7 +16,11 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import static org.eclipse.theia.cloud.common.util.WorkspaceUtil.getSessionName;
+
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
@@ -26,57 +30,72 @@ import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
-import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.service.session.SessionLaunchResponse;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public final class K8sUtil {
-    private static NamespacedKubernetesClient CLIENT = CustomResourceUtil.createClient();
-    private static TheiaCloudClient CUSTOM_CLIENT = new DefaultTheiaCloudClient(CLIENT).inNamespace("theiacloud");
+    private static NamespacedKubernetesClient KUBERNETES = CustomResourceUtil.createClient();
+    private static TheiaCloudClient CLIENT = new DefaultTheiaCloudClient(KUBERNETES);
 
     private K8sUtil() {
     }
 
     public static Workspace createWorkspace(String correlationId, UserWorkspace data) {
 	WorkspaceSpec spec = new WorkspaceSpec(data.name, data.label, data.appDefinition, data.user);
-	return CUSTOM_CLIENT.workspaces().interaction(correlationId).launch(spec);
+	return CLIENT.workspaces().launch(correlationId, spec);
     }
 
-    public static boolean deleteWorkspace(String workspaceName) {
-	return CUSTOM_CLIENT.workspaces().delete(workspaceName);
+    public static boolean deleteWorkspace(String correlationId, String workspaceName) {
+	return CLIENT.workspaces().delete(correlationId, workspaceName);
     }
 
     public static List<SessionSpec> listSessions(String user) {
-	return CUSTOM_CLIENT.sessions().specs();
+	return CLIENT.sessions().specs();
     }
 
-    public static SessionLaunchResponse launchSession(String correlationId, UserWorkspace workspace) {
-	String sessionName = WorkspaceUtil.getSessionName(workspace.name);
-	SessionSpec sessionSpec = new SessionSpec(sessionName, workspace.appDefinition, workspace.user, workspace.name);
-	Session session = CUSTOM_CLIENT.sessions().interaction(correlationId).launch(sessionSpec);
+    public static SessionLaunchResponse launchEphemeralSession(String correlationId, String appDefinition,
+	    String user) {
+	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition), appDefinition, user);
+	return launchSession(correlationId, sessionSpec);
+    }
+
+    public static SessionLaunchResponse launchWorkspaceSession(String correlationId, UserWorkspace workspace) {
+	SessionSpec sessionSpec = new SessionSpec(getSessionName(workspace.name), workspace.appDefinition,
+		workspace.user, workspace.name);
+	return launchSession(correlationId, sessionSpec);
+    }
+
+    private static SessionLaunchResponse launchSession(String correlationId, SessionSpec sessionSpec) {
+	Session session = CLIENT.sessions().launch(correlationId, sessionSpec);
 	return SessionLaunchResponse.from(session.getSpec());
     }
 
     public static boolean reportSessionActivity(String correlationId, String sessionName) {
-	return CUSTOM_CLIENT.sessions().interaction(correlationId).reportActivity(sessionName);
+	return CLIENT.sessions().reportActivity(correlationId, sessionName);
     }
 
-    public static boolean stopSession(String sessionName, String user) {
-	return CUSTOM_CLIENT.sessions().delete(sessionName);
+    public static boolean stopSession(String correlationId, String sessionName, String user) {
+	return CLIENT.sessions().delete(correlationId, sessionName);
+    }
+
+    public static Optional<Workspace> getWorkspace(String user, String workspaceName) {
+	return CLIENT.workspaces().get(workspaceName)
+		.filter(workspace -> Objects.equals(workspace.getSpec().getUser(), user));
     }
 
     public static List<UserWorkspace> listWorkspaces(String user) {
-	List<Workspace> workspaces = CUSTOM_CLIENT.workspaces().list(user);
+	List<Workspace> workspaces = CLIENT.workspaces().list(user);
 
 	List<UserWorkspace> userWorkspaces = workspaces.stream()
 		.map(workspace -> new UserWorkspace(workspace.getSpec())).collect(Collectors.toList());
 
 	for (UserWorkspace userWorkspace : userWorkspaces) {
-	    String sessionName = WorkspaceUtil.getSessionName(userWorkspace.name);
-	    userWorkspace.active = CUSTOM_CLIENT.sessions().has(sessionName);
+	    String sessionName = getSessionName(userWorkspace.name);
+	    userWorkspace.active = CLIENT.sessions().has(sessionName);
 	}
 	return userWorkspaces;
     }
+
 }

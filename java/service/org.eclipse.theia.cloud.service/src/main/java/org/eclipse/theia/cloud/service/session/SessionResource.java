@@ -15,12 +15,10 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.session;
 
-import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.ws.rs.DELETE;
@@ -30,75 +28,78 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
-import org.jboss.logging.Logger;
 
 @Path("/service/session")
 public class SessionResource extends BaseResource {
-    private static final Logger LOGGER = Logger.getLogger(SessionResource.class);
-
     @GET
-    public List<SessionSpec> listSessions(SessionsListRequest request) {
+    public List<SessionSpec> list(SessionListRequest request) {
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
-	    LOGGER.info(formatLogMessage(correlationId, "List sessions call without matching appId: " + request.appId));
+	    info(correlationId, "List sessions call without matching appId: " + request.appId);
 	    return Collections.emptyList();
 	}
+	info(correlationId, "Listing sessions " + request);
 	return K8sUtil.listSessions(request.user);
     }
 
     @POST
-    public SessionLaunchResponse launchSession(SessionStartRequest request) {
+    public SessionLaunchResponse start(SessionStartRequest request) {
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
-	    LOGGER.info(
-		    formatLogMessage(correlationId, "Launching session call without matching appId: " + request.appId));
+	    info(correlationId, "Launching session call without matching appId: " + request.appId);
 	    return SessionLaunchResponse.error("AppId is not matching.");
 	}
-	if (request.workspaceName == null) {
-	    LOGGER.info(formatLogMessage(correlationId, "No workspace name given"));
-	    return SessionLaunchResponse.error("No workspace name given.");
+	info(correlationId, "Launching session " + request);
+	if (request.isEphemeral()) {
+	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user);
 	}
-	Optional<UserWorkspace> existingWorkspace = K8sUtil.listWorkspaces(request.user).stream()
-		.filter(workspace -> Objects.equals(workspace.name, request.workspaceName)).findAny();
-	if (existingWorkspace.isEmpty()) {
-	    LOGGER.info(formatLogMessage(correlationId, "No workspace for given name: " + request.workspaceName));
+
+	Optional<Workspace> workspace = K8sUtil.getWorkspace(request.user, request.workspaceName);
+	if (workspace.isEmpty()) {
+	    info(correlationId, "No workspace for given workspace name: " + request);
 	    return SessionLaunchResponse.error("No workspace for given name: " + request.workspaceName);
 	}
 
-	LOGGER.info(formatLogMessage(correlationId, "Launching session " + request));
-	return K8sUtil.launchSession(correlationId, existingWorkspace.get());
+	if (request.appDefinition != null) {
+	    // request can override default application definition stored in workspace
+	    workspace.get().getSpec().setAppDefinition(request.appDefinition);
+	}
+	info(correlationId, "Launch workspace session: " + request);
+	return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()));
     }
 
     @DELETE
-    public boolean stopSession(SessionStopRequest request) {
+    public boolean stop(SessionStopRequest request) {
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
-	    LOGGER.info(formatLogMessage(correlationId, "Stop session call without matching appId: " + request.appId));
+	    info(correlationId, "Stop session call without matching appId: " + request.appId);
 	    return false;
 	}
 	if (request.sessionName == null) {
 	    // check if we are allowed to launch another workspace
-	    LOGGER.info(formatLogMessage(correlationId, "No session name"));
+	    info(correlationId, "No session name");
 	    return false;
 	}
-	return K8sUtil.stopSession(request.sessionName, request.user);
+	info(correlationId, "Stop session: " + request);
+	return K8sUtil.stopSession(correlationId, request.sessionName, request.user);
     }
 
     @PATCH
-    public boolean reportActivity(SessionActivityRequest request) {
+    public boolean activity(SessionActivityRequest request) {
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
-	    LOGGER.info(
-		    formatLogMessage(correlationId, "Report activity call without matching appId: " + request.appId));
+	    info(correlationId, "Report activity call without matching appId: " + request.appId);
 	    return false;
 	}
 	if (request.sessionName == null) {
-	    LOGGER.info(formatLogMessage(correlationId, "No session name given"));
+	    info(correlationId, "No session name given");
 	    return false;
 	}
+	info(correlationId, "Report session activity: " + request);
 	return K8sUtil.reportSessionActivity(correlationId, request.sessionName);
     }
 }

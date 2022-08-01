@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ServiceRequest } from './service';
+import { ServiceRequest, ServiceResponse } from './service';
 
 export interface UserSession {
   name: string;
@@ -12,77 +12,54 @@ export interface UserSession {
   lastActivity: number;
 }
 
-export interface SessionLaunchRequest extends ServiceRequest {
+export interface SessionStartRequest extends ServiceRequest {
   appDefinition: string;
-  user?: string;
-  label?: string;
+  user: string;
+  workspaceName?: string; /* no existing workspace means ephemeral storage */
+}
+export namespace SessionStartRequest {
+  export const KIND = 'sessionStartRequest';
 }
 
-export interface SessionLaunchResponse {
-  success: boolean;
-  error: string;
+export interface SessionLaunchResponse extends ServiceResponse {
   url: string;
 }
 
-export interface SessionsListRequest extends ServiceRequest {
+export interface SessionListRequest extends ServiceRequest {
   user?: string;
+}
+export namespace SessionListRequest {
+  export const KIND = 'sessionListRequest';
 }
 
 export interface SessionStopRequest extends ServiceRequest {
   user?: string;
   sessionName: string;
 }
-
-export interface SessionStartRequest extends ServiceRequest {
-  user?: string;
-  workspaceName: string;
+export namespace SessionStopRequest {
+  export const KIND = 'sessionStopRequest';
 }
 
 export interface SessionActivityRequest extends ServiceRequest {
   sessionName: string;
+}
+export namespace SessionActivityRequest {
+  export const KIND = 'sessionActivityRequest';
 }
 
 function toSessionServiceUrl(serviceUrl: string): string {
   return serviceUrl + '/session';
 }
 
-export async function createAndLaunchSession(options: SessionLaunchRequest, retries = 0): Promise<void> {
-  const { appId, serviceUrl, appDefinition, user = uuidv4() + '@theia.cloud' } = options;
-  console.log('Calling to ' + serviceUrl);
-  try {
-    const response = await axios.post(
-      serviceUrl,
-      { appDefinition, user, appId },
-      { timeout: 300000 }
-    );
-    const sessionLaunch = response.data as SessionLaunchResponse;
-    if (sessionLaunch.success) {
-      console.log(`Redirect to: https://${sessionLaunch.url}`);
-      location.replace(`https://${sessionLaunch.url}`);
-    } else {
-      console.error(sessionLaunch.error);
-      throw new Error(`Could not launch session: ${sessionLaunch.error}`);
-    }
-  } catch (error) {
-    // Request timed out or returned an error with an error HTTP code.
-    console.error((error as any).message);
-    if (retries > 0) {
-      createAndLaunchSession(options, retries - 1);
-    } else {
-      throw error;
-    }
-  }
-}
-
-export async function listSessions(options: SessionsListRequest): Promise<UserSession[]> {
-  const { appId, serviceUrl, user = uuidv4() + '@theia.cloud' } = options;
+export async function listSessions(options: SessionListRequest): Promise<UserSession[]> {
+  const { appId, serviceUrl, user = uuidv4() + '@theia.cloud', kind = SessionListRequest.KIND } = options;
   const sessionServiceUrl = toSessionServiceUrl(serviceUrl);
   console.log('Calling to ' + sessionServiceUrl);
   try {
     const response = await axios.get(
       sessionServiceUrl,
       {
-        data: { user, appId },
+        data: { user, appId, kind },
         timeout: 300000
       }
     );
@@ -93,19 +70,19 @@ export async function listSessions(options: SessionsListRequest): Promise<UserSe
   }
 }
 
-export async function startSession(options: SessionStartRequest): Promise<boolean> {
-  const { appId, serviceUrl, workspaceName, user = uuidv4() + '@theia.cloud' } = options;
+export async function startSession(options: SessionStartRequest): Promise<SessionLaunchResponse> {
+  const { appId, serviceUrl, workspaceName, user = uuidv4() + '@theia.cloud', kind = SessionStartRequest.KIND } = options;
   const sessionServiceUrl = toSessionServiceUrl(serviceUrl);
   console.log('Calling to ' + sessionServiceUrl);
   try {
     const response = await axios.post(
       sessionServiceUrl,
       {
-        data: { workspaceName, user, appId },
+        data: { workspaceName, user, appId, kind },
         timeout: 300000
       }
     );
-    return !!response.data;
+    return response.data;
   } catch (error) {
     console.error((error as any).message);
     throw error;
@@ -113,14 +90,14 @@ export async function startSession(options: SessionStartRequest): Promise<boolea
 }
 
 export async function stopSession(options: SessionStopRequest): Promise<boolean> {
-  const { appId, serviceUrl, sessionName, user = uuidv4() + '@theia.cloud' } = options;
+  const { appId, serviceUrl, sessionName, user = uuidv4() + '@theia.cloud', kind = SessionStopRequest.KIND } = options;
   const sessionServiceUrl = toSessionServiceUrl(serviceUrl);
   console.log('Calling to ' + sessionServiceUrl);
   try {
     const response = await axios.delete(
       sessionServiceUrl,
       {
-        data: { sessionName, user, appId },
+        data: { sessionName, user, appId, kind },
         timeout: 300000
       }
     );
@@ -132,14 +109,14 @@ export async function stopSession(options: SessionStopRequest): Promise<boolean>
 }
 
 export async function reportSessionActivity(options: SessionActivityRequest): Promise<boolean> {
-  const { appId, serviceUrl, sessionName } = options;
+  const { appId, serviceUrl, sessionName, kind = SessionActivityRequest.KIND } = options;
   const sessionServiceUrl = toSessionServiceUrl(serviceUrl);
   console.log('Calling to ' + sessionServiceUrl);
   try {
     const response = await axios.patch(
       sessionServiceUrl,
       {
-        data: { sessionName, appId },
+        data: { sessionName, appId, kind },
         timeout: 300000
       }
     );

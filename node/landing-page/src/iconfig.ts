@@ -7,4 +7,5 @@ export interface TheiaCloudConfig {
   keycloakClientId?: string;
   serviceUrl: string;
   appDefinition: string;
+  useEphemeralStorage: boolean;
 }

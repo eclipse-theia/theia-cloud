@@ -13,8 +13,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.di;
+package org.eclipse.theia.cloud.service.workspace;
 
-public interface TheiaCloudOperatorModule {
-    String NAMESPACE = "Namespace";
+import org.eclipse.theia.cloud.service.ServiceRequest;
+
+public class WorkspaceListRequest extends ServiceRequest {
+    public static final String KIND = "workspaceListRequest";
+
+    public String user;
+
+    public WorkspaceListRequest() {
+	super(KIND);
+    }
+
+    @Override
+    public String toString() {
+	return "WorkspaceListRequest [user=" + user + ", appId=" + appId + ", kind=" + kind + "]";
+    }
+
 }

@@ -15,29 +15,54 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
+
+import java.util.Optional;
+
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.service.session.SessionLaunchResponse;
-import org.eclipse.theia.cloud.service.session.SessionResource;
-import org.eclipse.theia.cloud.service.session.SessionStartRequest;
-import org.eclipse.theia.cloud.service.workspace.WorkspaceCreationRequest;
-import org.eclipse.theia.cloud.service.workspace.WorkspaceCreationResponse;
-import org.eclipse.theia.cloud.service.workspace.WorkspaceResource;
+import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 @Path("/service")
 public class RootResource extends BaseResource {
     @POST
-    public SessionLaunchResponse createAndLaunchSession(WorkspaceCreationRequest request) {
-	WorkspaceCreationResponse response = new WorkspaceResource().createWorkspace(request);
+    public SessionLaunchResponse launch(LaunchRequest request) {
+	String correlationId = generateCorrelationId();
+	if (!isValidRequest(request)) {
+	    info(correlationId, "Launch call without matching appId: " + request.appId);
+	    return SessionLaunchResponse.error("Launch call without matching appId: " + request.appId);
+	}
+
+	if (request.isEphemeral()) {
+	    info(correlationId, "Launching ephemeral session " + request);
+	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user);
+	}
+
+	if (request.isExistingWorkspace()) {
+	    Optional<Workspace> workspace = K8sUtil.getWorkspace(request.user, request.workspaceName);
+	    if (workspace.isEmpty()) {
+		return SessionLaunchResponse.error("No workspace for given name: " + request.workspaceName);
+	    }
+	    info(correlationId, "Launching existing workspace session " + request);
+	    return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()));
+	}
+
+	info(correlationId, "Create workspace" + request);
+	Workspace workspace = K8sUtil.createWorkspace(correlationId,
+		new UserWorkspace(request.appDefinition, request.user, request.label));
+	if (workspace.getSpec().getError() != null) {
+	    K8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());
+	    return SessionLaunchResponse.error(workspace.getSpec().getError());
+	}
+	info(correlationId, "Launch workspace session " + request);
+	SessionLaunchResponse response = K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.getSpec()));
 	if (response.error != null) {
-	    return SessionLaunchResponse.error(response.error);
+	    info(correlationId, "Delete workspace due to launch error " + request);
+	    K8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());
 	}
-	SessionLaunchResponse launchResponse = new SessionResource()
-		.launchSession(new SessionStartRequest(request.appId, request.user, response.workspace.name));
-	if (!launchResponse.success) {
-	    K8sUtil.deleteWorkspace(response.workspace.name);
-	}
-	return launchResponse;
+	return response;
     }
 }

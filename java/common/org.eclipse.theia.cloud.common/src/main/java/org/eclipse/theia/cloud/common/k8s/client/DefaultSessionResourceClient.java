@@ -35,12 +35,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
     }
 
     @Override
-    public DefaultSessionResourceClient interaction(String correlationId) {
-	return (DefaultSessionResourceClient) super.interaction(correlationId);
-    }
-
-    @Override
-    public Session create(SessionSpec spec) {
+    public Session create(String correlationId, SessionSpec spec) {
 	Session session = new Session();
 	session.setSpec(spec);
 	spec.setLastActivity(Instant.now().toEpochMilli());
@@ -49,13 +44,14 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	metadata.setName(spec.getName());
 	session.setMetadata(metadata);
 
+	info(correlationId, "Create Session " + session.getSpec());
 	return operation().create(session);
     }
 
     @Override
-    public Session launch(SessionSpec spec, long timeout, TimeUnit unit) {
+    public Session launch(String correlationId, SessionSpec spec, long timeout, TimeUnit unit) {
 	// get or create session
-	Session session = item(spec.getName()).orElseGet(() -> create(spec));
+	Session session = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
 	SessionSpec sessionSpec = session.getSpec();
 
 	// if session is available and has already an url or error, return that session
@@ -63,30 +59,31 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	    return session;
 	}
 	if (sessionSpec.hasError()) {
-	    delete(spec.getName());
+	    delete(correlationId, spec.getName());
 	    return session;
 	}
 
 	// wait for session url or error to be available
 	try {
-	    watchUntil((action, changedSession) -> isSessionComplete(sessionSpec, changedSession), timeout, unit);
+	    watchUntil((action, changedSession) -> isSessionComplete(correlationId, sessionSpec, changedSession),
+		    timeout, unit);
 	} catch (InterruptedException exception) {
-	    error("Timeout while waiting for URL for " + spec.getName(), exception);
+	    error(correlationId, "Timeout while waiting for URL for " + spec.getName(), exception);
 	    sessionSpec.setError("Unable to start session.");
 	}
 	return session;
     }
 
-    protected boolean isSessionComplete(SessionSpec sessionSpec, Session changedSession) {
+    protected boolean isSessionComplete(String correlationId, SessionSpec sessionSpec, Session changedSession) {
 	if (sessionSpec.getName().equals(changedSession.getSpec().getName())) {
 	    if (changedSession.getSpec().hasUrl()) {
-		info("Received URL for " + changedSession);
+		info(correlationId, "Received URL for " + changedSession);
 		sessionSpec.setUrl(changedSession.getSpec().getUrl());
 		return true;
 	    }
 	    if (changedSession.getSpec().hasError()) {
-		info("Received Error for " + changedSession + ". Deleting session again.");
-		delete(sessionSpec.getName());
+		info(correlationId, "Received Error for " + changedSession + ". Deleting session again.");
+		delete(correlationId, sessionSpec.getName());
 		sessionSpec.setError(changedSession.getSpec().getError());
 		return true;
 	    }
@@ -95,9 +92,9 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
     }
 
     @Override
-    public boolean reportActivity(String name) {
-	return edit(name, session -> {
-	    trace("Updating activity for session {" + name + "}");
+    public boolean reportActivity(String correlationId, String name) {
+	return edit(correlationId, name, session -> {
+	    trace(correlationId, "Updating activity for session {" + name + "}");
 	    session.getSpec().setLastActivity(Instant.now().toEpochMilli());
 	}) != null;
     }

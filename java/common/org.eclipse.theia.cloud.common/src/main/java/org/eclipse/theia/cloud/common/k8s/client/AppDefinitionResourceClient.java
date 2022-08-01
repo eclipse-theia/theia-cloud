@@ -21,6 +21,4 @@ import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpecResourceList
 
 public interface AppDefinitionResourceClient
 	extends CustomResourceClient<AppDefinitionSpec, AppDefinition, AppDefinitionSpecResourceList> {
-    @Override
-    AppDefinitionResourceClient interaction(String correlationId);
 }

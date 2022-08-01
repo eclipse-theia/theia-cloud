@@ -139,16 +139,6 @@ public final class AddedHandlerUtil {
 	configMap.setData(data);
     }
 
-    public static void updateSessionError(NamespacedKubernetesClient client, Session session, String namespace,
-	    String error, String correlationId) {
-	client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
-		.withName(session.getMetadata().getName())//
-		.edit(ws -> {
-		    ws.getSpec().setError(error);
-		    return ws;
-		});
-    }
-
     public static void updateSessionURLAsync(NamespacedKubernetesClient client, Session session, String namespace,
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {

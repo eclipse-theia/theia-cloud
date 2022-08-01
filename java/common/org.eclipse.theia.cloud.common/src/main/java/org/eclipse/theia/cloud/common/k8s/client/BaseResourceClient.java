@@ -38,7 +38,6 @@ public class BaseResourceClient<T extends HasMetadata, L extends KubernetesResou
     protected NamespacedKubernetesClient client;
     protected NonNamespaceOperation<T, L, Resource<T>> operation;
     private Class<T> typeClass;
-    protected String correlationId;
 
     public BaseResourceClient(NamespacedKubernetesClient client, Class<T> typeClass, Class<L> listClass) {
 	this(client, client.resources(typeClass, listClass), typeClass);
@@ -57,61 +56,51 @@ public class BaseResourceClient<T extends HasMetadata, L extends KubernetesResou
     }
 
     @Override
-    public BaseResourceClient<T, L> interaction(String correlationId) {
-	this.correlationId = correlationId;
-	return this;
-    }
-
-    @Override
     public NonNamespaceOperation<T, L, Resource<T>> operation() {
 	return this.operation;
     }
 
     @Override
-    public void info(String message) {
-	LOGGER.info(LogMessageUtil.formatLogMessage(getCorrelationId(), message));
+    public void info(String correlationId, String message) {
+	LOGGER.info(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     @Override
-    public void warn(String message) {
-	LOGGER.warn(LogMessageUtil.formatLogMessage(getCorrelationId(), message));
+    public void warn(String correlationId, String message) {
+	LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     @Override
-    public void error(String message) {
-	LOGGER.error(LogMessageUtil.formatLogMessage(getCorrelationId(), message));
+    public void error(String correlationId, String message) {
+	LOGGER.error(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     @Override
-    public void error(String message, Throwable throwable) {
-	LOGGER.error(LogMessageUtil.formatLogMessage(getCorrelationId(), message), throwable);
+    public void error(String correlationId, String message, Throwable throwable) {
+	LOGGER.error(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
     }
 
     @Override
-    public void trace(String message) {
-	LOGGER.trace(LogMessageUtil.formatLogMessage(getCorrelationId(), message));
-    }
-
-    protected String getCorrelationId() {
-	return this.correlationId != null ? this.correlationId : getClass().getSimpleName();
+    public void trace(String correlationId, String message) {
+	LOGGER.trace(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     @Override
-    public Optional<T> loadAndCreate(String yaml, Consumer<T> customization) {
+    public Optional<T> loadAndCreate(String correlationId, String yaml, Consumer<T> customization) {
 	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
-	    trace("Loading new " + getTypeName() + ":\n" + yaml);
+	    trace(correlationId, "Loading new " + getTypeName() + ":\n" + yaml);
 	    T newItem = operation().load(inputStream).get();
 
-	    trace("Customizing new " + getTypeName());
+	    trace(correlationId, "Customizing new " + getTypeName());
 	    customization.accept(newItem);
 
-	    trace("Creating new " + getTypeName());
+	    trace(correlationId, "Creating new " + getTypeName());
 	    operation().create(newItem);
-	    info("Created a new " + getTypeName());
+	    info(correlationId, "Created a new " + getTypeName());
 
 	    return Optional.of(newItem);
 	} catch (IOException exception) {
-	    error("Error while reading yaml byte stream", exception);
+	    error(correlationId, "Error while reading yaml byte stream", exception);
 	}
 	return Optional.empty();
     }

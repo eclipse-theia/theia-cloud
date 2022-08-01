@@ -47,7 +47,7 @@ public final class TheiaCloudPersistentVolumeUtil {
     }
 
     public static String getPersistentVolumeName(Session session) {
-	return WorkspaceUtil.getStorageName(session.getSpec().getWorkspace());
+	return WorkspaceUtil.getStorageName(WorkspaceUtil.getWorkspaceNameFromSession(session.getSpec().getName()));
     }
 
     public static Map<String, String> getPersistentVolumeReplacements(String namespace, Workspace workspace) {

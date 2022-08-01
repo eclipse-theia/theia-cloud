@@ -30,20 +30,16 @@ public class DefaultAppDefinitionResourceClient extends BaseResourceClient<AppDe
     }
 
     @Override
-    public DefaultAppDefinitionResourceClient interaction(String correlationId) {
-	return (DefaultAppDefinitionResourceClient) super.interaction(correlationId);
-    }
-
-    @Override
-    public AppDefinition create(AppDefinitionSpec spec) {
-	AppDefinition session = new AppDefinition();
-	session.setSpec(spec);
+    public AppDefinition create(String correlationId, AppDefinitionSpec spec) {
+	AppDefinition appDefinition = new AppDefinition();
+	appDefinition.setSpec(spec);
 
 	ObjectMeta metadata = new ObjectMeta();
 	metadata.setName(spec.getName());
-	session.setMetadata(metadata);
+	appDefinition.setMetadata(metadata);
 
-	return operation().create(session);
+	info(correlationId, "Create AppDefinition " + appDefinition.getSpec());
+	return operation().create(appDefinition);
     }
 
 }

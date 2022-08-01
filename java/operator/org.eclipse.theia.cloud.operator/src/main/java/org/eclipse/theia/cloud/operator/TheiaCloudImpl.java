@@ -71,9 +71,6 @@ public class TheiaCloudImpl implements TheiaCloud {
     @Inject
     private Set<TimeoutStrategy> timeoutStrategies;
 
-    @Inject
-    private TheiaCloudArguments arguments;
-
     private final Map<String, AppDefinition> appDefinitionCache = new ConcurrentHashMap<>();
     private final Map<String, Workspace> workspaceCache = new ConcurrentHashMap<>();
     private final Map<String, Session> sessionCache = new ConcurrentHashMap<>();
@@ -215,7 +212,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 	    }
 
 	    for (String sessionName : timedOutSessions) {
-		resourceClient.sessions().delete(sessionName);
+		resourceClient.sessions().delete(COR_ID_TIMEOUTPREFIX + correlationId, sessionName);
 	    }
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Exception in kill after runnable"), e);
@@ -223,8 +220,9 @@ public class TheiaCloudImpl implements TheiaCloud {
     }
 
     protected boolean isSessionTimedOut(String correlationId, Instant now, Session session) {
-	Optional<Timeout> timeout = getTimeoutForAppDefinition(session.getSpec().getAppDefinition());
-	if (timeout.isEmpty() && timeout.get().getLimit() <= 0) {
+	Optional<Timeout> timeout = resourceClient.appDefinitions().get(session.getSpec().getAppDefinition())
+		.map(appDef -> appDef.getSpec().getTimeout());
+	if (timeout.isEmpty() || timeout.get().getLimit() <= 0) {
 	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId,
 		    "Session " + session.getSpec().getName() + " will not be stopped automatically [NoTimout]."));
 	    return false;
@@ -242,17 +240,5 @@ public class TheiaCloudImpl implements TheiaCloud {
 		    + " will keep running until the limit of " + limit + " is hit [" + strategyName + "]."));
 	}
 	return false;
-    }
-
-    protected Optional<Timeout> getTimeoutForAppDefinition(String appDefinition) {
-	// given arguments will override app definition setting
-	Optional<Timeout> appDefTimeout = resourceClient.appDefinitions().item(appDefinition)
-		.map(appDef -> appDef.getSpec().getTimeout());
-	Optional<String> strategyName = Optional.ofNullable(arguments.getTimeoutStrategy())
-		.or(() -> appDefTimeout.map(Timeout::getStrategy));
-	Optional<Integer> limit = Optional.ofNullable(arguments.getTimeoutLimit())
-		.or(() -> appDefTimeout.map(Timeout::getLimit));
-	return strategyName.isPresent() && limit.isPresent() ? Optional.of(new Timeout(strategyName.get(), limit.get()))
-		: Optional.empty();
     }
 }

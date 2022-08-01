@@ -17,11 +17,14 @@ package org.eclipse.theia.cloud.service;
 
 public class ServiceRequest {
     public String appId;
+    public String kind;
 
-    public ServiceRequest() {
+    public ServiceRequest(String kind) {
+	this.kind = kind;
     }
 
-    public ServiceRequest(String appId) {
+    public ServiceRequest(String kind, String appId) {
 	this.appId = appId;
+	this.kind = kind;
     }
 }

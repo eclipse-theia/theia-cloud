@@ -16,36 +16,30 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.workspace;
 
-import java.util.Optional;
-
-import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
 public class WorkspaceCreationRequest extends ServiceRequest {
+    public static final String KIND = "workspaceCreationRequest";
 
     public String user;
     public String appDefinition;
     public String label;
 
     public WorkspaceCreationRequest() {
+	super(KIND);
     }
 
     public WorkspaceCreationRequest(String appId, String appDefinition, String user, String label) {
-	super(appId);
+	super(KIND, appId);
 	this.appDefinition = appDefinition;
 	this.user = user;
 	this.label = label;
     }
 
-    public UserWorkspace toUserWorkspace() {
-	return new UserWorkspace(WorkspaceUtil.generateWorkspaceName(user, appDefinition),
-		Optional.ofNullable(label).orElseGet(() -> WorkspaceUtil.generateWorkspaceLabel(user, appDefinition)),
-		appDefinition, user);
-    }
-
     @Override
     public String toString() {
-	return "WorkspaceCreationRequest [user=" + user + ", appDefinition=" + appDefinition + ", label=" + label + "]";
+	return "WorkspaceCreationRequest [user=" + user + ", appDefinition=" + appDefinition + ", label=" + label
+		+ ", appId=" + appId + ", kind=" + kind + "]";
     }
 
 }
