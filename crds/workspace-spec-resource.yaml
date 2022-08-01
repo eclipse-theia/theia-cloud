@@ -25,9 +25,9 @@ spec:
                   type: string
                 label:
                   type: string
-                appDefinition:
+                appDefinition: # last app definition that ran on this workspace
                   type: string
-                user:
+                user:          # user who created the workspace
                   type: string
                 storage:
                   type: string

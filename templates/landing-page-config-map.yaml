@@ -8,15 +8,15 @@ data:
     window.theiaCloudConfig = {
       appId: "{{ .Values.app.id }}",
       appName: "{{ .Values.app.name }}",
+      useEphemeralStorage: {{ .Values.landingPage.ephemeralStorage }},
       useKeycloak: {{ .Values.keycloak.enable }},
       keycloakAuthUrl: "{{ .Values.keycloak.authUrl }}",
       keycloakRealm: "{{ .Values.keycloak.realm }}",
       keycloakClientId: "{{ .Values.keycloak.clientId }}",
-      serviceUrl: "{{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}:{{ .Values.hosts.servicePort }}/service",
+      serviceUrl: "{{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}{{ if .Values.operator.servicePort }}:{{ .Values.hosts.servicePort }}{{ end }}/service",
       appDefinition: "{{ .Values.landingPage.appDefinition }}",
     };
 binaryData:
   {{ range $path, $bytes := .Files.Glob (printf "logos/%s" .Values.app.logo)}}
   {{ print "logo.png: "}}{{ $.Files.Get $path | b64enc }}
   {{ end }}
-
