@@ -62,7 +62,7 @@ public class GKEPersistentVolumeCreator implements PersistentVolumeCreator {
 	    return;
 	}
 
-	client.persistentVolumeClaims().interaction(correlationId).loadAndCreate(persistentVolumeClaimYaml);
+	client.persistentVolumeClaims().loadAndCreate(correlationId, persistentVolumeClaimYaml);
     }
 
 }

@@ -18,14 +18,22 @@ package org.eclipse.theia.cloud.service.session;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
 public class SessionActivityRequest extends ServiceRequest {
+    public static final String KIND = "sessionActivityRequest";
+
     public String sessionName;
 
     public SessionActivityRequest() {
+	super(KIND);
     }
 
     public SessionActivityRequest(String appId, String sessionName) {
-	super(appId);
+	super(KIND, appId);
 	this.sessionName = sessionName;
+    }
+
+    @Override
+    public String toString() {
+	return "SessionActivityRequest [sessionName=" + sessionName + ", appId=" + appId + ", kind=" + kind + "]";
     }
 
 }

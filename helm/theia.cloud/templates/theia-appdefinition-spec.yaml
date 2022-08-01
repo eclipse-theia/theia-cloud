@@ -13,8 +13,8 @@ spec:
   minInstances: 0
   maxInstances: 10
   timeout:
-    limit: 30
-    strategy: "FIXEDTIME"
+    limit: {{ .Values.image.timeoutLimit }}
+    strategy: {{ .Values.image.timeoutStrategy }}
   requestsMemory: 1000M
   limitsMemory: 1200M
   requestsCpu: "100m"

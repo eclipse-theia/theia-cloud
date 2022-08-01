@@ -16,22 +16,26 @@
 package org.eclipse.theia.cloud.service;
 
 public class ServiceResponse {
+    public String kind;
+
     public boolean success;
     public String error;
 
-    public ServiceResponse() {
+    public ServiceResponse(String kind) {
+	this.kind = kind;
     }
 
-    public ServiceResponse(boolean success, String error) {
+    public ServiceResponse(String kind, boolean success, String error) {
+	this.kind = kind;
 	this.success = success;
 	this.error = error;
     }
 
-    public static ServiceResponse error(String error) {
-	return new ServiceResponse(false, error);
+    public static ServiceResponse error(String kind, String error) {
+	return new ServiceResponse(kind, false, error);
     }
 
-    public static ServiceResponse ok() {
-	return new ServiceResponse(true, "");
+    public static ServiceResponse ok(String kind) {
+	return new ServiceResponse(kind, true, "");
     }
 }

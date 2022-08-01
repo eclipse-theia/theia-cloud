@@ -16,6 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -50,6 +51,10 @@ public class SessionSpec implements UserScopedSpec {
     public SessionSpec() {
     }
 
+    public SessionSpec(String name, String appDefinition, String user) {
+	this(name, appDefinition, user, null);
+    }
+
     public SessionSpec(String name, String appDefinition, String user, String workspace) {
 	this.name = name;
 	this.appDefinition = appDefinition;
@@ -65,6 +70,10 @@ public class SessionSpec implements UserScopedSpec {
 	return appDefinition;
     }
 
+    public boolean hasAppDefinition() {
+	return getAppDefinition() != null && !getAppDefinition().isBlank();
+    }
+
     @Override
     public String getUser() {
 	return user;
@@ -78,12 +87,20 @@ public class SessionSpec implements UserScopedSpec {
 	this.url = url;
     }
 
+    public boolean hasUrl() {
+	return getUrl() != null && !getUrl().isBlank();
+    }
+
     public String getError() {
 	return error;
     }
 
     public void setError(String error) {
 	this.error = error;
+    }
+
+    public boolean hasError() {
+	return getError() != null && !getError().isBlank();
     }
 
     public long getLastActivity() {
@@ -98,22 +115,15 @@ public class SessionSpec implements UserScopedSpec {
 	return workspace;
     }
 
-    public void setWorkspace(String workspace) {
-	this.workspace = workspace;
-    }
-
-    public boolean hasUrl() {
-	return getUrl() != null && !getUrl().isBlank();
-    }
-
-    public boolean hasError() {
-	return getError() != null && !getError().isBlank();
+    @JsonIgnore
+    public boolean isEphemeral() {
+	return getWorkspace() == null || getWorkspace().isBlank();
     }
 
     @Override
     public String toString() {
 	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
-		+ ", error=" + error + ", lastActivity=" + lastActivity + "]";
+		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity + "]";
     }
 
 }

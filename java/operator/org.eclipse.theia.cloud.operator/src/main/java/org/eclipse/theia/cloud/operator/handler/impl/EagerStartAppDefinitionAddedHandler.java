@@ -27,10 +27,10 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
-import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.DeploymentTemplateReplacements;
@@ -43,7 +43,6 @@ import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Service;
@@ -63,16 +62,17 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
     public static final String LABEL_VALUE_EMAILS = "emails";
 
     @Inject
-    protected NamespacedKubernetesClient client;
-    @Inject
-    @Named(TheiaCloudOperatorModule.NAMESPACE)
-    protected String namespace;
+    protected TheiaCloudClient client;
+
     @Inject
     protected TheiaCloudArguments arguments;
+
     @Inject
     protected IngressPathProvider ingressPathProvider;
+
     @Inject
     protected BandwidthLimiter bandwidthLimiter;
+
     @Inject
     protected DeploymentTemplateReplacements deploymentReplacements;
 
@@ -86,18 +86,18 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 	int instances = spec.getMinInstances();
 
 	/* Create ingress if not existing */
-	if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client, namespace,
-		appDefinition, correlationId)) {
+	if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client.kubernetes(),
+		client.namespace(), appDefinition, correlationId)) {
 	    LOGGER.trace(formatLogMessage(correlationId, "No existing Ingress"));
-	    AddedHandlerUtil.createAndApplyIngress(client, namespace, correlationId, appDefinitionResourceName,
-		    appDefinitionResourceUID, appDefinition);
+	    AddedHandlerUtil.createAndApplyIngress(client.kubernetes(), client.namespace(), correlationId,
+		    appDefinitionResourceName, appDefinitionResourceUID, appDefinition);
 	} else {
 	    LOGGER.trace(formatLogMessage(correlationId, "Ingress available already"));
 	}
 
 	/* Get existing services for this app definition */
-	List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
-		appDefinitionResourceUID);
+	List<Service> existingServices = K8sUtil.getExistingServices(client.kubernetes(), client.namespace(),
+		appDefinitionResourceName, appDefinitionResourceUID);
 
 	/* Compute missing services */
 	Set<Integer> missingServiceIds = TheiaCloudServiceUtil.computeIdsOfMissingServices(appDefinition, correlationId,
@@ -105,13 +105,13 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 
 	/* Create missing services for this app definition */
 	for (int instance : missingServiceIds) {
-	    createAndApplyService(client, namespace, correlationId, appDefinitionResourceName, appDefinitionResourceUID,
-		    instance, appDefinition, arguments.isUseKeycloak());
+	    createAndApplyService(client.kubernetes(), client.namespace(), correlationId, appDefinitionResourceName,
+		    appDefinitionResourceUID, instance, appDefinition, arguments.isUseKeycloak());
 	}
 
 	if (arguments.isUseKeycloak()) {
 	    /* Get existing configmaps for this app definition */
-	    List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client, namespace,
+	    List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client.kubernetes(), client.namespace(),
 		    appDefinitionResourceName, appDefinitionResourceUID);
 	    List<ConfigMap> existingProxyConfigMaps = existingConfigMaps.stream()//
 		    .filter(configmap -> LABEL_VALUE_PROXY.equals(configmap.getMetadata().getLabels().get(LABEL_KEY)))//
@@ -128,17 +128,17 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 
 	    /* Create missing configmaps for this app definition */
 	    for (int instance : missingProxyIds) {
-		createAndApplyProxyConfigMap(client, namespace, correlationId, appDefinitionResourceName,
-			appDefinitionResourceUID, instance, appDefinition);
+		createAndApplyProxyConfigMap(client.kubernetes(), client.namespace(), correlationId,
+			appDefinitionResourceName, appDefinitionResourceUID, instance, appDefinition);
 	    }
 	    for (int instance : missingEmailIds) {
-		createAndApplyEmailConfigMap(client, namespace, correlationId, appDefinitionResourceName,
-			appDefinitionResourceUID, instance, appDefinition);
+		createAndApplyEmailConfigMap(client.kubernetes(), client.namespace(), correlationId,
+			appDefinitionResourceName, appDefinitionResourceUID, instance, appDefinition);
 	    }
 	}
 
 	/* Get existing deployments for this app definition */
-	List<Deployment> existingDeployments = K8sUtil.getExistingDeployments(client, namespace,
+	List<Deployment> existingDeployments = K8sUtil.getExistingDeployments(client.kubernetes(), client.namespace(),
 		appDefinitionResourceName, appDefinitionResourceUID);
 
 	/* Compute missing deployments */
@@ -147,7 +147,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 
 	/* Create missing deployments for this app definition */
 	for (int instance : missingDeploymentIds) {
-	    createAndApplyDeployment(client, namespace, correlationId, appDefinitionResourceName,
+	    createAndApplyDeployment(client.kubernetes(), client.namespace(), correlationId, appDefinitionResourceName,
 		    appDefinitionResourceUID, instance, appDefinition, arguments.isUseKeycloak());
 	}
 	return true;

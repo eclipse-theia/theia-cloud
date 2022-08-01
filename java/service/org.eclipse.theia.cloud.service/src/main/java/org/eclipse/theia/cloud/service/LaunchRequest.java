@@ -13,21 +13,30 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service.workspace;
+package org.eclipse.theia.cloud.service;
 
-import org.eclipse.theia.cloud.service.ServiceRequest;
+public class LaunchRequest extends ServiceRequest {
+    public static final String KIND = "launchRequest";
 
-public class WorkspaceDeleteRequest extends ServiceRequest {
     public String user;
+    public String appDefinition;
     public String workspaceName;
+    public String label;
+    public boolean ephemeral;
 
-    public WorkspaceDeleteRequest() {
+    public LaunchRequest() {
+	super(KIND);
     }
 
-    public WorkspaceDeleteRequest(String appId, String user, String workspaceName) {
-	super(appId);
-	this.workspaceName = workspaceName;
-	this.user = user;
+    public boolean isEphemeral() {
+	return ephemeral;
     }
 
+    public boolean isExistingWorkspace() {
+	return workspaceName != null && !workspaceName.isBlank();
+    }
+
+    public boolean isCreateWorkspace() {
+	return !isExistingWorkspace() && !isEphemeral();
+    }
 }

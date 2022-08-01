@@ -34,6 +34,7 @@ function theiaCloudConfig(): TheiaCloudConfig {
     useKeycloak: false,
     serviceUrl: "",
     appDefinition: "",
+    useEphemeralStorage: true
   };
 }
 
@@ -50,4 +51,5 @@ createApp(App, {
   keycloakClientId: config.keycloakClientId,
   serviceUrl: config.serviceUrl,
   appDefinition: config.appDefinition,
+  useEphemeralStorage: config.useEphemeralStorage
 }).mount("#app");

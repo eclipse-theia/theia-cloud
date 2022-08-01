@@ -9,9 +9,13 @@ issuer:
 image:
   name: theiacloud/theia-cloud-demo:0.8.0.MS2
   pullSecret: ""
+  timeoutStrategy: "FIXEDTIME"
+  timeoutLimit: "30"
 
 hosts:
   service: service.34.141.62.32.nip.io
+  servicePort: 8081
+  serviceProtocol: https
   landing: theia.cloud.34.141.62.32.nip.io
   instance: ws.34.141.62.32.nip.io
 

@@ -93,74 +93,27 @@ public class LazySessionHandler implements SessionHandler {
 
 	/* find app definition for session */
 	String appDefinitionID = sessionSpec.getAppDefinition();
-	Optional<AppDefinition> optionalAppDefinition = client.appDefinitions().item(appDefinitionID);
+	Optional<AppDefinition> optionalAppDefinition = client.appDefinitions().get(appDefinitionID);
 	if (optionalAppDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;
 	}
+	AppDefinition appDefinition = optionalAppDefinition.get();
 
-	/* check if max instances reached already */
-	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), sessionSpec,
-		optionalAppDefinition.get().getSpec(), correlationId)) {
-	    LOGGER.info(formatLogMessage(correlationId,
-		    "Max instances for " + appDefinitionID + " reached. Cannot create " + sessionSpec));
-	    AddedHandlerUtil.updateSessionError(client.kubernetes(), session, client.namespace(),
-		    "Max instances reached. Could not create session", correlationId);
+	if (hasMaxInstancesReachted(appDefinition, session, correlationId)) {
 	    return false;
 	}
 
-	/* check if max sessions reached already */
-	if (arguments.getSessionsPerUser() != null && arguments.getSessionsPerUser() >= 0) {
-	    if (arguments.getSessionsPerUser() == 0) {
-		LOGGER.info(formatLogMessage(correlationId,
-			"No sessions allowed for this user. Could not create session " + sessionSpec));
-		AddedHandlerUtil.updateSessionError(client.kubernetes(), session, client.namespace(),
-			"Max instances reached. Could not create session", correlationId);
-		return false;
-	    }
-
-	    long userSessions = client.sessions().list(session.getSpec().getUser()).size();
-	    if (userSessions > arguments.getSessionsPerUser()) {
-		LOGGER.info(formatLogMessage(correlationId,
-			"No more sessions allowed for this user, limit is  " + arguments.getSessionsPerUser()));
-		AddedHandlerUtil.updateSessionError(client.kubernetes(), session, client.namespace(),
-			"No more sessions allowed for this user, you reached your limit.", correlationId);
-		return false;
-	    }
-	}
-
-	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), sessionSpec,
-		optionalAppDefinition.get().getSpec(), correlationId)) {
-	    LOGGER.info(formatLogMessage(correlationId,
-		    "Max instances for " + appDefinitionID + " reached. Cannot create " + sessionSpec));
-	    AddedHandlerUtil.updateSessionError(client.kubernetes(), session, client.namespace(),
-		    "Max instances reached. Could not create session", correlationId);
+	if (hasMaxSessionsReached(session, correlationId)) {
 	    return false;
 	}
 
-	/* check storage */
-	Optional<String> pvcName;
-	if (arguments.isEphemeralStorage()) {
-	    pvcName = Optional.empty();
-	} else {
-	    pvcName = Optional.of(TheiaCloudPersistentVolumeUtil.getPersistentVolumeName(session));
-	    if (!client.persistentVolumeClaims().has(pvcName.get())) {
-		AddedHandlerUtil.updateSessionError(client.kubernetes(), session, client.namespace(),
-			"No storage found for started session, will use ephemeral storage instead", correlationId);
-		return false;
-	    }
-	}
-
-	/* find ingress */
-	String appDefinitionResourceName = optionalAppDefinition.get().getMetadata().getName();
-	String appDefinitionResourceUID = optionalAppDefinition.get().getMetadata().getUid();
-	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client.kubernetes(), client.namespace(),
-		appDefinitionResourceName, appDefinitionResourceUID);
+	Optional<Ingress> ingress = getIngress(appDefinition, correlationId);
 	if (ingress.isEmpty()) {
-	    LOGGER.error(
-		    formatLogMessage(correlationId, "No Ingress for app definition " + appDefinitionID + " found."));
 	    return false;
 	}
+
+	syncSessionDataToWorkspace(session, correlationId);
 
 	/* Create service for this session */
 	List<Service> existingServices = K8sUtil.getExistingServices(client.kubernetes(), client.namespace(),
@@ -170,8 +123,9 @@ public class LazySessionHandler implements SessionHandler {
 		    "Existing service for " + sessionSpec + ". Session already running?"));
 	    return true;
 	}
+
 	Optional<Service> serviceToUse = createAndApplyService(correlationId, sessionResourceName, sessionResourceUID,
-		session, optionalAppDefinition.get().getSpec().getPort(), arguments.isUseKeycloak());
+		session, appDefinition.getSpec().getPort(), arguments.isUseKeycloak());
 	if (serviceToUse.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "Unable to create service for session " + sessionSpec));
 	    return false;
@@ -188,7 +142,7 @@ public class LazySessionHandler implements SessionHandler {
 	    }
 	    createAndApplyEmailConfigMap(correlationId, sessionResourceName, sessionResourceUID, session);
 	    createAndApplyProxyConfigMap(correlationId, sessionResourceName, sessionResourceUID, session,
-		    optionalAppDefinition.get());
+		    appDefinition);
 	}
 
 	/* Create deployment for this session */
@@ -199,13 +153,15 @@ public class LazySessionHandler implements SessionHandler {
 		    "Existing deployments for " + sessionSpec + ". Session already running?"));
 	    return true;
 	}
-	createAndApplyDeployment(correlationId, sessionResourceName, sessionResourceUID, session,
-		optionalAppDefinition.get(), pvcName, arguments.isUseKeycloak());
+
+	Optional<String> storageName = getStorageName(session, correlationId);
+	createAndApplyDeployment(correlationId, sessionResourceName, sessionResourceUID, session, appDefinition,
+		storageName, arguments.isUseKeycloak());
 
 	/* adjust the ingress */
 	String host;
 	try {
-	    host = updateIngress(ingress, serviceToUse, session, optionalAppDefinition.get());
+	    host = updateIngress(ingress, serviceToUse, session, appDefinition, correlationId);
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
@@ -224,6 +180,75 @@ public class LazySessionHandler implements SessionHandler {
 	}
 
 	return true;
+    }
+
+    protected void syncSessionDataToWorkspace(Session session, String correlationId) {
+	if (!session.getSpec().isEphemeral() && session.getSpec().hasAppDefinition()) {
+	    // update last used workspace
+	    client.workspaces().edit(correlationId, session.getSpec().getWorkspace(), workspace -> {
+		workspace.getSpec().setAppDefinition(session.getSpec().getAppDefinition());
+	    });
+	}
+    }
+
+    protected boolean hasMaxInstancesReachted(AppDefinition appDefinition, Session session, String correlationId) {
+	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), session.getSpec(),
+		appDefinition.getSpec(), correlationId)) {
+	    LOGGER.info(formatLogMessage(correlationId, "Max instances for " + appDefinition.getSpec().getName()
+		    + " reached. Cannot create " + session.getSpec()));
+	    client.sessions().edit(correlationId, session.getMetadata().getName(),
+		    toEdit -> toEdit.getSpec().setError("Max instances reached. Could not create session"));
+	    return true;
+	}
+	return false;
+    }
+
+    protected boolean hasMaxSessionsReached(Session session, String correlationId) {
+	/* check if max sessions reached already */
+	if (arguments.getSessionsPerUser() != null && arguments.getSessionsPerUser() >= 0) {
+	    if (arguments.getSessionsPerUser() == 0) {
+		LOGGER.info(formatLogMessage(correlationId,
+			"No sessions allowed for this user. Could not create session " + session.getSpec()));
+		client.sessions().edit(correlationId, session.getMetadata().getName(),
+			ws -> ws.getSpec().setError("Max sessions reached. Could not create session"));
+		return true;
+	    }
+
+	    long userSessions = client.sessions().list(session.getSpec().getUser()).size();
+	    if (userSessions > arguments.getSessionsPerUser()) {
+		LOGGER.info(formatLogMessage(correlationId,
+			"No more sessions allowed for this user, limit is  " + arguments.getSessionsPerUser()));
+		client.sessions().edit(correlationId, session.getMetadata().getName(), toEdit -> toEdit.getSpec()
+			.setError("No more sessions allowed for this user, you reached your limit."));
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    protected Optional<Ingress> getIngress(AppDefinition appDefinition, String correlationId) {
+	String appDefinitionResourceName = appDefinition.getMetadata().getName();
+	String appDefinitionResourceUID = appDefinition.getMetadata().getUid();
+	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client.kubernetes(), client.namespace(),
+		appDefinitionResourceName, appDefinitionResourceUID);
+	if (ingress.isEmpty()) {
+	    LOGGER.error(formatLogMessage(correlationId,
+		    "No Ingress for app definition " + appDefinition.getSpec().getName() + " found."));
+	}
+	return ingress;
+    }
+
+    protected Optional<String> getStorageName(Session session, String correlationId) {
+	if (session.getSpec().isEphemeral()) {
+	    return Optional.empty();
+	}
+	String storageName = TheiaCloudPersistentVolumeUtil.getPersistentVolumeName(session);
+	if (!client.persistentVolumeClaims().has(storageName)) {
+	    LOGGER.info(formatLogMessage(correlationId,
+		    "No storage found for started session, will use ephemeral storage instead", correlationId));
+	    return Optional.empty();
+	}
+	return Optional.of(storageName);
     }
 
     protected Optional<Service> createAndApplyService(String correlationId, String sessionResourceName,
@@ -334,10 +359,10 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
-	    Session session, AppDefinition appDefinition) {
+	    Session session, AppDefinition appDefinition, String correlationId) {
 	String host = appDefinition.getSpec().getHost();
 	String path = ingressPathProvider.getPath(appDefinition, session);
-	client.ingresses().edit(ingress.get().getMetadata().getName(), ingressToUpdate -> {
+	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(), ingressToUpdate -> {
 	    IngressRule ingressRule = new IngressRule();
 	    ingressToUpdate.getSpec().getRules().add(ingressRule);
 
@@ -373,7 +398,7 @@ public class LazySessionHandler implements SessionHandler {
 	/* find appDefinition for session */
 	String appDefinitionID = sessionSpec.getAppDefinition();
 
-	Optional<AppDefinition> optionalAppDefinition = client.appDefinitions().item(appDefinitionID);
+	Optional<AppDefinition> optionalAppDefinition = client.appDefinitions().get(appDefinitionID);
 	if (optionalAppDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;

@@ -19,13 +19,16 @@ package org.eclipse.theia.cloud.service.workspace;
 import org.eclipse.theia.cloud.service.ServiceResponse;
 
 public class WorkspaceCreationResponse extends ServiceResponse {
+    public static final String KIND = "workspaceCreationResponse";
+
     public UserWorkspace workspace;
 
     public WorkspaceCreationResponse() {
+	super(KIND);
     }
 
     public WorkspaceCreationResponse(boolean success, String error, UserWorkspace workspace) {
-	super(success, error);
+	super(KIND, success, error);
 	this.workspace = workspace;
     }
 
@@ -36,4 +39,11 @@ public class WorkspaceCreationResponse extends ServiceResponse {
     public static WorkspaceCreationResponse ok(UserWorkspace workspace) {
 	return new WorkspaceCreationResponse(true, null, workspace);
     }
+
+    @Override
+    public String toString() {
+	return "WorkspaceCreationResponse [workspace=" + workspace + ", kind=" + kind + ", success=" + success
+		+ ", error=" + error + "]";
+    }
+
 }

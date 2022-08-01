@@ -15,6 +15,11 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.workspace;
 
+import static org.eclipse.theia.cloud.common.util.WorkspaceUtil.generateWorkspaceLabel;
+import static org.eclipse.theia.cloud.common.util.WorkspaceUtil.generateWorkspaceName;
+
+import java.util.Optional;
+
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 
 public class UserWorkspace {
@@ -31,15 +36,23 @@ public class UserWorkspace {
     public UserWorkspace() {
     }
 
-    public UserWorkspace(WorkspaceSpec data) {
-	this(data.getName(), data.getLabel(), data.getAppDefinition(), data.getUser());
+    public UserWorkspace(String appDefinition, String user) {
+	this(appDefinition, user, null);
     }
 
-    public UserWorkspace(String name, String label, String appDefinition, String user) {
-	this.name = name;
-	this.label = label;
+    public UserWorkspace(String appDefinition, String user, String label) {
+	this(appDefinition, user, null, label);
+    }
+
+    public UserWorkspace(String appDefinition, String user, String name, String label) {
+	this.name = Optional.ofNullable(name).orElseGet(() -> generateWorkspaceName(user, appDefinition));
+	this.label = Optional.ofNullable(label).orElseGet(() -> generateWorkspaceLabel(user, appDefinition));
 	this.appDefinition = appDefinition;
 	this.user = user;
+    }
+
+    public UserWorkspace(WorkspaceSpec data) {
+	this(data.getAppDefinition(), data.getUser(), data.getName(), data.getLabel());
     }
 
     public void setActive(boolean active) {
@@ -48,6 +61,12 @@ public class UserWorkspace {
 
     public boolean isActive() {
 	return active;
+    }
+
+    @Override
+    public String toString() {
+	return "UserWorkspace [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
+		+ user + ", active=" + active + "]";
     }
 
 }

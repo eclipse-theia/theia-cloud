@@ -18,17 +18,25 @@ package org.eclipse.theia.cloud.service.session;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
 public class SessionStopRequest extends ServiceRequest {
+    public static final String KIND = "sessionStopRequest";
 
     public String user;
     public String sessionName;
 
     public SessionStopRequest() {
+	super(KIND);
     }
 
     public SessionStopRequest(String appId, String user, String sessionName) {
-	super(appId);
+	super(KIND, appId);
 	this.sessionName = sessionName;
 	this.user = user;
+    }
+
+    @Override
+    public String toString() {
+	return "SessionStopRequest [user=" + user + ", sessionName=" + sessionName + ", appId=" + appId + ", kind="
+		+ kind + "]";
     }
 
 }

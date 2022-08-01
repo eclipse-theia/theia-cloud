@@ -81,7 +81,7 @@ public class EagerStartSessionHandler implements SessionHandler {
 	String userEmail = spec.getUser();
 
 	/* find app definition for session */
-	Optional<AppDefinition> appDefinition = client.appDefinitions().item(appDefinitionID);
+	Optional<AppDefinition> appDefinition = client.appDefinitions().get(appDefinitionID);
 	if (appDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;
@@ -155,7 +155,8 @@ public class EagerStartSessionHandler implements SessionHandler {
 	/* adjust the ingress */
 	String host;
 	try {
-	    host = updateIngress(ingress, serviceToUse, appDefinitionID, instance, port, appDefinition.get());
+	    host = updateIngress(ingress, serviceToUse, appDefinitionID, instance, port, appDefinition.get(),
+		    correlationId);
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
@@ -207,10 +208,10 @@ public class EagerStartSessionHandler implements SessionHandler {
     }
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
-	    String appDefinitionID, int instance, int port, AppDefinition appDefinition) {
+	    String appDefinitionID, int instance, int port, AppDefinition appDefinition, String correlationId) {
 	String host = appDefinition.getSpec().getHost();
 	String path = ingressPathProvider.getPath(appDefinition, instance);
-	client.ingresses().edit(ingress.get().getMetadata().getName(),
+	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(),
 		ingressToUpdate -> addIngressRule(ingressToUpdate, serviceToUse.get(), host, port, path));
 	return host + path + "/";
     }

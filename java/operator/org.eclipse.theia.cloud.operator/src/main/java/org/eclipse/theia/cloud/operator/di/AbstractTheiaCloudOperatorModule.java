@@ -18,14 +18,8 @@ package org.eclipse.theia.cloud.operator.di;
 
 import java.util.function.Consumer;
 
-import org.eclipse.theia.cloud.common.k8s.client.AppDefinitionResourceClient;
-import org.eclipse.theia.cloud.common.k8s.client.DefaultAppDefinitionResourceClient;
-import org.eclipse.theia.cloud.common.k8s.client.DefaultSessionResourceClient;
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.client.DefaultWorkspaceResourceClient;
-import org.eclipse.theia.cloud.common.k8s.client.SessionResourceClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.client.WorkspaceResourceClient;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloud;
 import org.eclipse.theia.cloud.operator.TheiaCloudImpl;
@@ -45,11 +39,10 @@ import org.eclipse.theia.cloud.operator.handler.impl.IngressPathProviderImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
-public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule implements TheiaCloudOperatorModule {
+public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
     @Override
     protected void configure() {
 	bind(TheiaCloud.class).to(bindTheiaCloud()).in(Singleton.class);
@@ -110,33 +103,7 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule im
 
     @Provides
     @Singleton
-    @Named(NAMESPACE)
-    protected String getNamespace(final NamespacedKubernetesClient client) {
-	return client.getNamespace();
-    }
-
-    @Provides
-    @Singleton
     protected TheiaCloudClient provideTheiaCloudClient(final NamespacedKubernetesClient client) {
 	return new DefaultTheiaCloudClient(client);
     }
-
-    @Provides
-    @Singleton
-    protected AppDefinitionResourceClient provideAppDefinitionResourceClient(final NamespacedKubernetesClient client) {
-	return new DefaultAppDefinitionResourceClient(client);
-    }
-
-    @Provides
-    @Singleton
-    protected WorkspaceResourceClient provideWorkspaceResourceClient(final NamespacedKubernetesClient client) {
-	return new DefaultWorkspaceResourceClient(client);
-    }
-
-    @Provides
-    @Singleton
-    protected SessionResourceClient provideSessionResourceClient(final NamespacedKubernetesClient client) {
-	return new DefaultSessionResourceClient(client);
-    }
-
 }

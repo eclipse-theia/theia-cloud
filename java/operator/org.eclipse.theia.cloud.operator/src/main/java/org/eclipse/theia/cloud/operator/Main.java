@@ -57,13 +57,10 @@ public class Main {
 
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: keycloak " + arguments.isUseKeycloak()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: eagerStart " + arguments.isEagerStart()));
-	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: ephemeralStorage " + arguments.isEphemeralStorage()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: cloudProvider " + arguments.getCloudProvider()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: bandwidthLimiter " + arguments.getBandwidthLimiter()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: appId " + arguments.getAppId()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: serviceUrl " + arguments.getServiceUrl()));
-	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: timeoutStrategy " + arguments.getTimeoutStrategy()));
-	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: timeoutLimit " + arguments.getTimeoutLimit()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: sessionsPerUser " + arguments.getSessionsPerUser()));
 	return arguments;
     }

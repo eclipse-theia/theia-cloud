@@ -28,10 +28,10 @@ import io.fabric8.kubernetes.client.CustomResource;
 public interface CustomResourceClient<S, T extends CustomResource<S, Void>, L extends KubernetesResourceList<T>>
 	extends ResourceClient<T, L> {
 
-    T create(S spec);
+    T create(String correlationId, S spec);
 
     default Optional<S> spec(String name) {
-	return item(name).map(T::getSpec);
+	return get(name).map(T::getSpec);
     }
 
     default List<T> list(String user) {

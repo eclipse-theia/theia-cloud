@@ -32,12 +32,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
     }
 
     @Override
-    public DefaultWorkspaceResourceClient interaction(String correlationId) {
-	return (DefaultWorkspaceResourceClient) super.interaction(correlationId);
-    }
-
-    @Override
-    public Workspace create(WorkspaceSpec spec) {
+    public Workspace create(String correlationId, WorkspaceSpec spec) {
 	Workspace workspace = new Workspace();
 	workspace.setSpec(spec);
 
@@ -45,12 +40,13 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	metadata.setName(spec.getName());
 	workspace.setMetadata(metadata);
 
+	info(correlationId, "Create Workspace " + workspace.getSpec());
 	return operation().create(workspace);
     }
 
     @Override
-    public Workspace launch(WorkspaceSpec spec, long timeout, TimeUnit unit) {
-	Workspace workspace = item(spec.getName()).orElseGet(() -> create(spec));
+    public Workspace launch(String correlationId, WorkspaceSpec spec, long timeout, TimeUnit unit) {
+	Workspace workspace = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
 	WorkspaceSpec workspaceSpec = workspace.getSpec();
 
 	if (workspaceSpec.hasStorage()) {
@@ -58,31 +54,33 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	}
 
 	if (workspaceSpec.hasError()) {
-	    delete(spec.getName());
+	    delete(correlationId, spec.getName());
 	    return workspace;
 	}
 
 	try {
-	    watchUntil((action, changedWorkspace) -> isWorkspaceComplete(workspaceSpec, changedWorkspace), //
+	    watchUntil(
+		    (action, changedWorkspace) -> isWorkspaceComplete(correlationId, workspaceSpec, changedWorkspace),
 		    timeout, unit);
 	} catch (InterruptedException exception) {
-	    error("Timeout while waiting for workspace storage " + workspaceSpec.getName()
+	    error(correlationId, "Timeout while waiting for workspace storage " + workspaceSpec.getName()
 		    + ". Deleting workspace again.", exception);
 	    workspaceSpec.setError("Unable to launch workspace.");
 	}
 	return workspace;
     }
 
-    protected boolean isWorkspaceComplete(WorkspaceSpec createdWorkspace, Workspace changedWorkspace) {
+    protected boolean isWorkspaceComplete(String correlationId, WorkspaceSpec createdWorkspace,
+	    Workspace changedWorkspace) {
 	if (createdWorkspace.getName().equals(changedWorkspace.getSpec().getName())) {
 	    if (changedWorkspace.getSpec().hasStorage()) {
-		info("Received URL for " + createdWorkspace);
+		info(correlationId, "Received URL for " + createdWorkspace);
 		createdWorkspace.setStorage(changedWorkspace.getSpec().getStorage());
 		return true;
 	    }
 	    if (changedWorkspace.getSpec().hasError()) {
-		info("Received Error for " + changedWorkspace + ". Deleting workspace again.");
-		delete(createdWorkspace.getName());
+		info(correlationId, "Received Error for " + changedWorkspace + ". Deleting workspace again.");
+		delete(correlationId, createdWorkspace.getName());
 		createdWorkspace.setError(changedWorkspace.getSpec().getError());
 		return true;
 	    }

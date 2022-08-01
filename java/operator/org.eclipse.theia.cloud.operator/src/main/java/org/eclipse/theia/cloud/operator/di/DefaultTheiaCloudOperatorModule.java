@@ -44,12 +44,6 @@ public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorM
 
     @Override
     protected Class<? extends PersistentVolumeCreator> bindPersistentVolumeHandler() {
-	if (arguments.isEphemeralStorage()) {
-	    return super.bindPersistentVolumeHandler();
-	}
-	if (arguments.getCloudProvider() == null) {
-	    return super.bindPersistentVolumeHandler();
-	}
 	switch (arguments.getCloudProvider()) {
 	case GKE:
 	    return GKEPersistentVolumeCreator.class;

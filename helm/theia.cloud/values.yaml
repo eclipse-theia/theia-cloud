@@ -23,6 +23,15 @@ image:
   # the image pull secret. Leave empty if registry is public
   pullSecret: ""
 
+  # Configures how sessions will be stopped. This defines the strategy and the limit in minutes and will override any specification from an appDefinition.
+  # Possible values for strategy:
+  # - FIXEDTIME   Sessions will be stopped after a fixed limit
+  # - INACTIVITY  Sessions will be stopped after user inactivity limit
+  timeoutStrategy: "FIXEDTIME"
+
+  # Limit in minutes
+  timeoutLimit: "30"
+
 # You may adjust the hostname below.
 hosts:
   # hostname of the REST-API
@@ -50,6 +59,10 @@ landingPage:
 
   # the app id to launch
   appDefinition: "theia-cloud-demo"
+
+  # If set to true no persisted storage is used when creating sessions on the landing page.
+  # Set to false if you want to use persisted storage.
+  ephemeralStorage: true
 
 # Values related to Keycloak
 keycloak:
@@ -92,10 +105,6 @@ operator:
   # Currently only false is fully supported.
   eagerStart: false
 
-  # If set to true no persisted storage is attached to the theia application.
-  # Set to false if you want to use persisted storage.
-  ephemeralStorage: true
-
   # Select your cloude provider. Possible values:
   # - K8S   Plain Kubernetes
   # - GKE   Google Kubernetes Engine
@@ -107,13 +116,6 @@ operator:
   # - WONDERSHAPER                    Set via wondershaper init container
   # - K8SANNOTATIONANDWONDERSHAPER    Set Kubernetes annotations and use wondershaper init container
   bandwidthLimiter: "K8SANNOTATION"
-
-  # Configures how sessions will be stopped. This defines the strategy and the limit in minutes and will override any specification from an appDefinition.
-  # Possible values for strategy:
-  # - FIXEDTIME   Sessions will be stopped after a fixed limit
-  # - INACTIVITY  Sessions will be stopped after user inactivity limit
-  timeoutStrategy: "FIXEDTIME"
-  timeoutlimit: "30"
 
   # Set the number of active sessions a single user can launch
   sessionsPerUser: "1"

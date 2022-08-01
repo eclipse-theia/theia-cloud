@@ -35,10 +35,6 @@ public class TheiaCloudArguments {
     private boolean eagerStart;
 
     @Option(names = {
-	    "--ephemeralStorage" }, description = "Whether sessions will get persisted storage assigned.", required = false)
-    private boolean ephemeralStorage;
-
-    @Option(names = {
 	    "--cloudProvider" }, description = "The cloud provider where Theia.Cloud is deployed", required = false)
     private CloudProvider cloudProvider;
 
@@ -48,13 +44,6 @@ public class TheiaCloudArguments {
 
     @Option(names = { "--serviceUrl" }, description = "URL of the Theia Cloud Service", required = false)
     private String serviceUrl;
-
-    @Option(names = {
-	    "--timeoutStrategy" }, description = "How the timeout to stop sessions is computed", required = false)
-    private String timeoutStrategy;
-
-    @Option(names = { "--timeoutLimit" }, description = "Timeout for a session to be stopped", required = false)
-    private Integer timeoutLimit;
 
     @Option(names = {
 	    "--sessionsPerUser" }, description = "Number of active sessions a single user is allowed to start.", required = false)
@@ -71,10 +60,6 @@ public class TheiaCloudArguments {
 	return eagerStart;
     }
 
-    public boolean isEphemeralStorage() {
-	return ephemeralStorage;
-    }
-
     public CloudProvider getCloudProvider() {
 	return cloudProvider;
     }
@@ -85,14 +70,6 @@ public class TheiaCloudArguments {
 
     public String getServiceUrl() {
 	return serviceUrl;
-    }
-
-    public String getTimeoutStrategy() {
-	return timeoutStrategy;
-    }
-
-    public Integer getTimeoutLimit() {
-	return timeoutLimit;
     }
 
     public Integer getSessionsPerUser() {
@@ -111,11 +88,8 @@ public class TheiaCloudArguments {
 	result = prime * result + ((bandwidthLimiter == null) ? 0 : bandwidthLimiter.hashCode());
 	result = prime * result + ((cloudProvider == null) ? 0 : cloudProvider.hashCode());
 	result = prime * result + (eagerStart ? 1231 : 1237);
-	result = prime * result + (ephemeralStorage ? 1231 : 1237);
 	result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
 	result = prime * result + ((sessionsPerUser == null) ? 0 : sessionsPerUser.hashCode());
-	result = prime * result + ((timeoutLimit == null) ? 0 : timeoutLimit.hashCode());
-	result = prime * result + ((timeoutStrategy == null) ? 0 : timeoutStrategy.hashCode());
 	result = prime * result + (useKeycloak ? 1231 : 1237);
 	return result;
     }
@@ -140,8 +114,6 @@ public class TheiaCloudArguments {
 	    return false;
 	if (eagerStart != other.eagerStart)
 	    return false;
-	if (ephemeralStorage != other.ephemeralStorage)
-	    return false;
 	if (serviceUrl == null) {
 	    if (other.serviceUrl != null)
 		return false;
@@ -152,16 +124,6 @@ public class TheiaCloudArguments {
 		return false;
 	} else if (!sessionsPerUser.equals(other.sessionsPerUser))
 	    return false;
-	if (timeoutLimit == null) {
-	    if (other.timeoutLimit != null)
-		return false;
-	} else if (!timeoutLimit.equals(other.timeoutLimit))
-	    return false;
-	if (timeoutStrategy == null) {
-	    if (other.timeoutStrategy != null)
-		return false;
-	} else if (!timeoutStrategy.equals(other.timeoutStrategy))
-	    return false;
 	if (useKeycloak != other.useKeycloak)
 	    return false;
 	return true;
@@ -169,10 +131,9 @@ public class TheiaCloudArguments {
 
     @Override
     public String toString() {
-	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", ephemeralStorage="
-		+ ephemeralStorage + ", cloudProvider=" + cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter
-		+ ", serviceUrl=" + serviceUrl + ", timeoutStrategy=" + timeoutStrategy + ", timeoutLimit="
-		+ timeoutLimit + ", sessionsPerUser=" + sessionsPerUser + ", appId=" + appId + "]";
+	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", cloudProvider="
+		+ cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter + ", serviceUrl=" + serviceUrl
+		+ ", sessionsPerUser=" + sessionsPerUser + ", appId=" + appId + "]";
     }
 
 }

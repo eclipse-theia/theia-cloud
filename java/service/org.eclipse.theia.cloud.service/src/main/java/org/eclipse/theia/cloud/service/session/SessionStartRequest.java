@@ -19,17 +19,37 @@ package org.eclipse.theia.cloud.service.session;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
 public class SessionStartRequest extends ServiceRequest {
+    public static final String KIND = "sessionStartRequest";
 
     public String user;
+    public String appDefinition;
     public String workspaceName;
 
     public SessionStartRequest() {
+	super(KIND);
     }
 
-    public SessionStartRequest(String appId, String user, String workspaceName) {
-	super(appId);
-	this.workspaceName = workspaceName;
+    public SessionStartRequest(String appId, String user, String appDefinition, String workspaceName) {
+	super(KIND, appId);
 	this.user = user;
+	this.appDefinition = appDefinition;
+	this.workspaceName = workspaceName;
+    }
+
+    public SessionStartRequest(String appId, String user, String appDefinition) {
+	super(KIND, appId);
+	this.user = user;
+	this.appDefinition = appDefinition;
+    }
+
+    public boolean isEphemeral() {
+	return this.workspaceName == null || this.workspaceName.isBlank();
+    }
+
+    @Override
+    public String toString() {
+	return "SessionStartRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName="
+		+ workspaceName + ", appId=" + appId + ", kind=" + kind + "]";
     }
 
 }

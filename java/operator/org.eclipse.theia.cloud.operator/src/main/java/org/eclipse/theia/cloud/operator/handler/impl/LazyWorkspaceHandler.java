@@ -18,40 +18,20 @@ package org.eclipse.theia.cloud.operator.handler.impl;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
-import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
-import org.eclipse.theia.cloud.operator.di.TheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
-
-import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public class LazyWorkspaceHandler implements WorkspaceHandler {
     @Inject
-    protected NamespacedKubernetesClient client;
-
-    @Inject
-    @Named(TheiaCloudOperatorModule.NAMESPACE)
-    protected String namespace;
+    protected TheiaCloudClient resourceClient;
 
     @Inject
     protected PersistentVolumeCreator persistentVolumeHandler;
 
-    @Inject
-    protected TheiaCloudArguments arguments;
-
-    @Inject
-    protected TheiaCloudClient resourceClient;
-
     @Override
     public boolean workspaceAdded(Workspace workspace, String correlationId) {
-	if (arguments.isEphemeralStorage()) {
-	    editWorkspaceStorage(workspace, "ephemeral");
-	    return true;
-	}
-
 	String storageName = WorkspaceUtil.getStorageName(workspace.getSpec().getName());
 	if (!resourceClient.persistentVolumes().has(storageName)) {
 	    persistentVolumeHandler.createAndApplyPersistentVolume(correlationId, workspace);
@@ -61,22 +41,23 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	    persistentVolumeHandler.createAndApplyPersistentVolumeClaim(correlationId, workspace);
 	}
 
-	editWorkspaceStorage(workspace, storageName);
+	editWorkspaceStorage(workspace, storageName, correlationId);
 	return true;
     }
 
-    private void editWorkspaceStorage(Workspace workspace, String storage) {
-	resourceClient.workspaces().edit(workspace.getSpec().getName(), toEdit -> toEdit.getSpec().setStorage(storage));
+    private void editWorkspaceStorage(Workspace workspace, String storage, String correlationId) {
+	resourceClient.workspaces().edit(correlationId, workspace.getSpec().getName(),
+		toEdit -> toEdit.getSpec().setStorage(storage));
     }
 
     @Override
     public boolean workspaceDeleted(Workspace workspace, String correlationId) {
 	String sessionName = WorkspaceUtil.getSessionName(workspace.getSpec().getName());
-	resourceClient.sessions().delete(sessionName);
+	resourceClient.sessions().delete(correlationId, sessionName);
 
 	String storageName = WorkspaceUtil.getStorageName(workspace.getSpec().getName());
-	resourceClient.persistentVolumeClaims().delete(storageName);
-	resourceClient.persistentVolumes().delete(storageName);
+	resourceClient.persistentVolumeClaims().delete(correlationId, storageName);
+	resourceClient.persistentVolumes().delete(correlationId, storageName);
 	return true;
     }
 

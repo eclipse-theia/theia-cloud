@@ -54,10 +54,6 @@ public class WorkspaceSpec implements UserScopedSpec {
 	this.label = label;
     }
 
-    public WorkspaceSpec(String error) {
-	this.error = error;
-    }
-
     public String getName() {
 	return name;
     }
@@ -66,17 +62,25 @@ public class WorkspaceSpec implements UserScopedSpec {
 	return label;
     }
 
+    public void setAppDefinition(String appDefinition) {
+	this.appDefinition = appDefinition;
+    }
+
+    /**
+     * Returns the last app definition with which this workspace was started.
+     * 
+     * @return last app definition
+     */
     public String getAppDefinition() {
 	return appDefinition;
     }
 
+    /**
+     * Returns the user that created this workspace.
+     */
     @Override
     public String getUser() {
 	return user;
-    }
-
-    public void setLabel(String label) {
-	this.label = label;
     }
 
     public String getStorage() {
@@ -106,7 +110,7 @@ public class WorkspaceSpec implements UserScopedSpec {
     @Override
     public String toString() {
 	return "WorkspaceSpec [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
-		+ user + ", error=" + error + "]";
+		+ user + ", storage=" + storage + ", error=" + error + "]";
     }
 
 }

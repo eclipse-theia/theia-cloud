@@ -15,16 +15,41 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import org.eclipse.theia.cloud.common.util.LogMessageUtil;
+import org.jboss.logging.Logger;
+
 public class BaseResource {
     private static final String THEIA_CLOUD_APP_ID = "theia.cloud.app.id";
 
-    private String appId;
+    protected final Logger logger;
+    protected final String appId;
 
     public BaseResource() {
 	appId = System.getProperty(THEIA_CLOUD_APP_ID, "asdfghjkl");
+	logger = Logger.getLogger(getClass().getSuperclass());
     }
 
     protected boolean isValidRequest(ServiceRequest request) {
 	return appId.equals(request.appId);
+    }
+
+    public void info(String correlationId, String message) {
+	logger.info(LogMessageUtil.formatLogMessage(correlationId, message));
+    }
+
+    public void warn(String correlationId, String message) {
+	logger.warn(LogMessageUtil.formatLogMessage(correlationId, message));
+    }
+
+    public void error(String correlationId, String message) {
+	logger.error(LogMessageUtil.formatLogMessage(correlationId, message));
+    }
+
+    public void error(String correlationId, String message, Throwable throwable) {
+	logger.error(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
+    }
+
+    public void trace(String correlationId, String message) {
+	logger.trace(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 }

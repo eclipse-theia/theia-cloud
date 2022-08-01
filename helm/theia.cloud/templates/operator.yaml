@@ -24,17 +24,12 @@ spec:
         args:
           {{ if .Values.keycloak.enable }}- "--keycloak"{{ end }}
           {{ if .Values.operator.eagerStart }}- "--eagerStart"{{ end }}
-          {{ if .Values.operator.ephemeralStorage }}- "--ephemeralStorage"{{ end }}
           - "--cloudProvider"
           - {{ .Values.operator.cloudProvider }}
           - "--bandwidthLimiter"
           - {{ .Values.operator.bandwidthLimiter }}
           - "--serviceUrl"
-          - {{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}:{{ .Values.hosts.servicePort }}/service,
-          - "--timeoutStrategy"
-          - {{ .Values.operator.timeoutStrategy }}
-          - "--timeoutLimit"
-          - "{{ .Values.operator.timeoutLimit }}"
+          - {{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}{{ if .Values.operator.servicePort }}:{{ .Values.hosts.servicePort }}{{ end }}/service,
           - "--sessionsPerUser"
           - "{{ .Values.operator.sessionsPerUser }}"
           - "--appId"

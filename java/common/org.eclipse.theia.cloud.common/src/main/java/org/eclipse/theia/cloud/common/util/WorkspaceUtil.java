@@ -34,6 +34,10 @@ public final class WorkspaceUtil {
 	return workspaceName + SESSION_SUFFIX;
     }
 
+    public static String getSessionName(String user, String appDefinitionName) {
+	return getSessionName(generateWorkspaceName(user, appDefinitionName));
+    }
+
     public static String getStorageName(String workspaceName) {
 	return workspaceName + STORAGE_SUFFIX;
     }

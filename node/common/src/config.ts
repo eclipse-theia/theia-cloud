@@ -7,7 +7,8 @@ export namespace TheiaCloudConfig {
       typeof thing.appName === 'string' &&
       typeof thing.serviceUrl === 'string' &&
       typeof thing.appDefinition === 'string' &&
-      typeof thing.useKeycloak === 'boolean'
+      typeof thing.useKeycloak === 'boolean' &&
+      typeof thing.useEphemeralStorage === 'boolean'
     );
   }
 }
@@ -30,6 +31,7 @@ interface BaseTheiaCloudConfig {
   useKeycloak: boolean;
   serviceUrl: string;
   appDefinition: string;
+  useEphemeralStorage: boolean;
 }
 
 export interface KeycloakConfig {
