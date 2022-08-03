@@ -10,7 +10,9 @@ RUN npm ci
 COPY node/configs/ ./configs/
 COPY node/common/ ./common/
 COPY node/try-now-page/ ./try-now-page/
-RUN npm run build
+RUN npm run build && \
+    chmod 644 /app/try-now-page/build/terms.html && \
+    chmod 644 /app/try-now-page/build/favicon.ico
 
 # production stage
 FROM nginx:stable-alpine as production-stage
