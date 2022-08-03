@@ -7,7 +7,7 @@ issuer:
   email: jfaltermeier@eclipsesource.com
 
 image:
-  name: theiacloud/theia-cloud-demo
+  name: theiacloud/theia-cloud-demo:0.8.0.MS2
   pullSecret: ""
 
 hosts:
@@ -16,7 +16,7 @@ hosts:
   instance: ws.34.141.62.32.nip.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS2
   appDefinition: "theia-cloud-demo"
 
 keycloak:
@@ -28,14 +28,14 @@ keycloak:
   cookieSecret: ""
 
 operator:
-  image: theiacloud/theia-cloud-operator
+  image: theiacloud/theia-cloud-operator:0.8.0.MS2
   eagerStart: false
   ephemeralStorage: true
   cloudProvider: "GKE"
   bandwidthLimiter: "WONDERSHAPER"
 
 service:
-  image: theiacloud/theia-cloud-service
+  image: theiacloud/theia-cloud-service:0.8.0.MS2
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
