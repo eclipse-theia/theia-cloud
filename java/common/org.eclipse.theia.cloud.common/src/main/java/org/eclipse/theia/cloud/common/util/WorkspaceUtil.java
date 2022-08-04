@@ -15,19 +15,24 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.util;
 
+import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
+
 import java.time.Instant;
 
 public final class WorkspaceUtil {
     private static final String SESSION_SUFFIX = "-session";
     private static final String STORAGE_SUFFIX = "-pvc";
+    private static final String WORKSPACE_PREFIX = "ws-";
+    private static final int WORKSPACE_NAME_LIMIT = NamingUtil.VALID_NAME_LIMIT - SESSION_SUFFIX.length();
 
     private WorkspaceUtil() {
 	// util
     }
 
     public static String generateWorkspaceName(String user, String appDefinitionName) {
-	return ("ws-" + appDefinitionName + "-" + SessionUtil.validUserName(user) + "-" + Instant.now().toEpochMilli())
-		.toLowerCase();
+	return asValidName(
+		(WORKSPACE_PREFIX + Instant.now().toEpochMilli() + appDefinitionName + "-" + user).toLowerCase(),
+		WORKSPACE_NAME_LIMIT);
     }
 
     public static String getSessionName(String workspaceName) {

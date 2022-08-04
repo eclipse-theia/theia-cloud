@@ -38,4 +38,10 @@ public class ServiceResponse {
     public static ServiceResponse ok(String kind) {
 	return new ServiceResponse(kind, true, "");
     }
+
+    @Override
+    public String toString() {
+	return "ServiceResponse [kind=" + kind + ", success=" + success + ", error=" + error + "]";
+    }
+
 }

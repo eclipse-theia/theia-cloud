@@ -21,8 +21,4 @@ public final class SessionUtil {
 	// util
     }
 
-    public static String validUserName(String user) {
-	return user.replace("@", "at").replace(".", "-");
-    }
-
 }

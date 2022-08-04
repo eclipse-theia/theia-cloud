@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.operator.handler.util;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.List;
 import java.util.Optional;
@@ -63,11 +64,11 @@ public final class TheiaCloudHandlerUtil {
     }
 
     public static String getAppSelector(AppDefinition appDefinition, int instance) {
-	return K8sUtil.validString(appDefinition.getSpec().getName() + "-" + instance);
+	return asValidName(appDefinition.getSpec().getName() + "-" + instance);
     }
 
     public static String getAppSelector(Session session) {
-	return K8sUtil.validString(session.getSpec().getName() + "-" + session.getMetadata().getUid());
+	return asValidName(session.getSpec().getName() + "-" + session.getMetadata().getUid());
     }
 
     public static Optional<Workspace> getWorkspaceForSession(NamespacedKubernetesClient client, String namespace,

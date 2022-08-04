@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.operator.handler.util;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.List;
 import java.util.Set;
@@ -38,8 +39,7 @@ public final class TheiaCloudDeploymentUtil {
     private TheiaCloudDeploymentUtil() {
     }
 
-    public static String getURL(IngressPathProvider ingressPathProvider, AppDefinition appDefinition,
-	    Session session) {
+    public static String getURL(IngressPathProvider ingressPathProvider, AppDefinition appDefinition, Session session) {
 	return "https://" + appDefinition.getSpec().getHost() + ingressPathProvider.getPath(appDefinition, session)
 		+ "/";
     }
@@ -53,11 +53,11 @@ public final class TheiaCloudDeploymentUtil {
     }
 
     public static String getDeploymentName(AppDefinition appDefinition, int instance) {
-	return K8sUtil.validString(getDeploymentNamePrefix(appDefinition) + instance);
+	return asValidName(getDeploymentNamePrefix(appDefinition) + instance);
     }
 
     public static String getDeploymentName(Session session) {
-	return K8sUtil.validString(getDeploymentNamePrefix(session) + session.getMetadata().getUid());
+	return asValidName(getDeploymentNamePrefix(session) + session.getMetadata().getUid());
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Deployment deployment) {
@@ -72,8 +72,8 @@ public final class TheiaCloudDeploymentUtil {
 	return null;
     }
 
-    public static Set<Integer> computeIdsOfMissingDeployments(AppDefinition appDefinition,
-	    String correlationId, int instances, List<Deployment> existingItems) {
+    public static Set<Integer> computeIdsOfMissingDeployments(AppDefinition appDefinition, String correlationId,
+	    int instances, List<Deployment> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
 		service -> getId(correlationId, appDefinition, service));
     }

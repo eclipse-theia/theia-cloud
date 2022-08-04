@@ -5,6 +5,8 @@
     :appDefinition="appDefinition"
     :email="email"
     :appId="appId"
+    :useEphemeralStorage="useEphemeralStorage"
+    :workspaceName="workspaceName"
   />
 </template>
 
@@ -16,6 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 
 interface AppData {
   email: string | undefined;
+  workspaceName?: string;
 }
 
 export default defineComponent({
@@ -29,6 +32,7 @@ export default defineComponent({
     keycloakClientId: String,
     serviceUrl: String,
     appDefinition: String,
+    useEphemeralStorage: Boolean,
   },
   components: {
     SessionLauncher,
@@ -36,6 +40,7 @@ export default defineComponent({
   data() {
     return {
       email: undefined,
+      workspaceName: undefined
     } as AppData;
   },
   created() {
@@ -63,7 +68,9 @@ export default defineComponent({
           } else {
             const parsedToken = keycloak.idTokenParsed;
             if (parsedToken) {
-              this.email = parsedToken.email;
+              const userMail = parsedToken.email;
+              this.workspaceName = this.useEphemeralStorage ? undefined : 'ws-' + this.appId + '-' + this.appDefinition + '-' + userMail;
+              this.email = userMail;
             }
           }
         })
@@ -71,7 +78,10 @@ export default defineComponent({
           console.error("Authentication Failed");
         });
     } else {
-      this.email = uuidv4() + "@theia.cloud";
+      // for ephemeral storage we generate new addresses every time, for fixed storages we simulate a stable user with a fixed address
+      const userMail = (this.useEphemeralStorage ? uuidv4() : (this.appId + '-' + this.appDefinition)) + "@theia.cloud";
+      this.workspaceName = this.useEphemeralStorage ? undefined : 'ws-' + this.appId + '-' + this.appDefinition + '-' +  userMail;
+      this.email = userMail
     }
   },
 });

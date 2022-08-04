@@ -55,6 +55,10 @@ public final class K8sUtil {
 	return CLIENT.sessions().specs();
     }
 
+    public static Optional<SessionSpec> findExistingSession(SessionSpec spec) {
+	return CLIENT.sessions().specs().stream().filter(sessionSpec -> sessionSpec.equals(spec)).findAny();
+    }
+
     public static SessionLaunchResponse launchEphemeralSession(String correlationId, String appDefinition,
 	    String user) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition), appDefinition, user);
@@ -68,8 +72,10 @@ public final class K8sUtil {
     }
 
     private static SessionLaunchResponse launchSession(String correlationId, SessionSpec sessionSpec) {
-	Session session = CLIENT.sessions().launch(correlationId, sessionSpec);
-	return SessionLaunchResponse.from(session.getSpec());
+	return findExistingSession(sessionSpec).map(SessionLaunchResponse::from).orElseGet(() -> {
+	    Session session = CLIENT.sessions().launch(correlationId, sessionSpec);
+	    return SessionLaunchResponse.from(session.getSpec());
+	});
     }
 
     public static boolean reportSessionActivity(String correlationId, String sessionName) {

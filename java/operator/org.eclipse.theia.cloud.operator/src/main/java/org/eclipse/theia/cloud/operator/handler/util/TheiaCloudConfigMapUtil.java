@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.operator.handler.util;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,19 +42,19 @@ public final class TheiaCloudConfigMapUtil {
     }
 
     public static String getProxyConfigName(AppDefinition appDefinition, int instance) {
-	return K8sUtil.validString(getProxyConfigNamePrefix(appDefinition) + instance);
+	return asValidName(getProxyConfigNamePrefix(appDefinition) + instance);
     }
 
     public static String getProxyConfigName(Session session) {
-	return K8sUtil.validString(getProxyConfigNamePrefix(session) + session.getMetadata().getUid());
+	return asValidName(getProxyConfigNamePrefix(session) + session.getMetadata().getUid());
     }
 
     public static String getEmailConfigName(AppDefinition appDefinition, int instance) {
-	return K8sUtil.validString(getEmailConfigNamePrefix(appDefinition) + instance);
+	return asValidName(getEmailConfigNamePrefix(appDefinition) + instance);
     }
 
     public static String getEmailConfigName(Session session) {
-	return K8sUtil.validString(getEmailConfigNamePrefix(session) + session.getMetadata().getUid());
+	return asValidName(getEmailConfigNamePrefix(session) + session.getMetadata().getUid());
     }
 
     private static String getProxyConfigNamePrefix(AppDefinition appDefinition) {
@@ -126,7 +127,8 @@ public final class TheiaCloudConfigMapUtil {
     public static Map<String, String> getEmailConfigMapReplacements(String namespace, AppDefinition appDefinition,
 	    int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(appDefinition, instance));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
+		getEmailConfigName(appDefinition, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }

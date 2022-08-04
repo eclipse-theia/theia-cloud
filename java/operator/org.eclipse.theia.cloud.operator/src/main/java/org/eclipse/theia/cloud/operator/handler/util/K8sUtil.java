@@ -52,20 +52,6 @@ public final class K8sUtil {
     private K8sUtil() {
     }
 
-    /**
-     * make sure string has max length of 62 and starts and ends with an
-     * alphanumeric character
-     */
-    public static String validString(String originalString) {
-	String string;
-	if (originalString.length() <= 60) {
-	    string = originalString;
-	} else {
-	    string = originalString.substring(originalString.length() - 60, originalString.length());
-	}
-	return "t" + string.replace(".", "-") + "c";
-    }
-
     public static Optional<Ingress> getExistingIngress(NamespacedKubernetesClient client, String namespace,
 	    String ingressName) {
 	return client.network().v1().ingresses().inNamespace(namespace).list().getItems().stream()//

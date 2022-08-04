@@ -11,7 +11,7 @@ rules:
     resources:
       - sessions
       - workspaces
-    verbs: ["get", "create", "watch", "delete"]
+    verbs: ["get", "create", "watch", "delete", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
