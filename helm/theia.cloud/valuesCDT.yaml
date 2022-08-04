@@ -22,6 +22,7 @@ hosts:
 landingPage:
   image: theiacloud/theia-cloud-landing-page:0.8.0.MS2
   appDefinition: "theia-cloud-demo"
+  ephemeralStorage: true
 
 keycloak:
   enable: false
@@ -34,7 +35,6 @@ keycloak:
 operator:
   image: theiacloud/theia-cloud-operator:0.8.0.MS2
   eagerStart: false
-  ephemeralStorage: true
   cloudProvider: "K8S"
   bandwidthLimiter: "K8SANNOTATION"
 

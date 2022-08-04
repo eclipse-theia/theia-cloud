@@ -27,4 +27,10 @@ public class ServiceRequest {
 	this.appId = appId;
 	this.kind = kind;
     }
+
+    @Override
+    public String toString() {
+	return "ServiceRequest [appId=" + appId + ", kind=" + kind + "]";
+    }
+
 }

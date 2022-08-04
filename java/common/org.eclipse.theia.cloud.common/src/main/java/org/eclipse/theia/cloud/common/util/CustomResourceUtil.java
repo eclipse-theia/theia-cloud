@@ -18,8 +18,8 @@ package org.eclipse.theia.cloud.common.util;
 
 import java.util.Objects;
 
-import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
@@ -76,7 +76,9 @@ public final class CustomResourceUtil {
 	    Class<? extends KubernetesResource> resourceClass, String kind, String crdName) {
 	String apiVersion = HasMetadata.getApiVersion(resourceClass);
 	KubernetesDeserializer.registerCustomKind(apiVersion, kind, resourceClass);
+    }
 
+    public static void validateCustomResource(NamespacedKubernetesClient client, String crdName) {
 	client.apiextensions().v1().customResourceDefinitions().list().getItems().stream()
 		.filter(crd -> Objects.equals(crd.getMetadata().getName(), crdName)).findAny()
 		.orElseThrow(() -> new RuntimeException(

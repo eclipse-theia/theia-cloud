@@ -117,13 +117,54 @@ public class SessionSpec implements UserScopedSpec {
 
     @JsonIgnore
     public boolean isEphemeral() {
-	return getWorkspace() == null || getWorkspace().isBlank();
+	return isEphemeral(workspace);
+    }
+
+    @Override
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((appDefinition == null) ? 0 : appDefinition.hashCode());
+	result = prime * result + ((user == null) ? 0 : user.hashCode());
+	result = prime * result + ((workspace == null) ? 0 : workspace.hashCode());
+	return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	SessionSpec other = (SessionSpec) obj;
+	if (appDefinition == null) {
+	    if (other.appDefinition != null)
+		return false;
+	} else if (!appDefinition.equals(other.appDefinition))
+	    return false;
+	if (user == null) {
+	    if (other.user != null)
+		return false;
+	} else if (!user.equals(other.user))
+	    return false;
+	if (workspace == null) {
+	    if (other.workspace != null)
+		return false;
+	} else if (!workspace.equals(other.workspace))
+	    return false;
+	return true;
     }
 
     @Override
     public String toString() {
 	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
 		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity + "]";
+    }
+
+    public static boolean isEphemeral(String workspace) {
+	return workspace == null || workspace.isBlank();
     }
 
 }

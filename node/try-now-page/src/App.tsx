@@ -1,6 +1,6 @@
 import './App.css';
 
-import { getTheiaCloudConfig, startSession } from '@theia-cloud/common';
+import { getTheiaCloudConfig, launch, LaunchRequest } from '@eclipse-theiacloud/common';
 import React, { useState } from 'react';
 
 import { Spinner } from './components/Spinner';
@@ -24,13 +24,15 @@ function App(): JSX.Element {
   const handleStartSession = (): void => {
     setLoading(true);
     setError(undefined);
-    startSession({
-      appId: config.appId,
-      serviceUrl: config.serviceUrl,
-      appDefinition: config.appDefinition
-    })
-      .catch((err: Error) => {
-        setError(err.message);
+
+    launch(config.useEphemeralStorage
+      ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, config.appDefinition)
+      : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, config.appDefinition)
+    )
+      .catch((_err: Error) => {
+        setError('Sorry, there are no more available instances in the cluster.\n'
+        + 'Please try again later, instances are shut down after 30 minutes.\n\n'
+        + 'Note: this is not a technical limit of Theia.cloud, but was intentionally set by us to keep this free offer within its intended budget.');
       })
       .finally(() => {
         setLoading(false);
@@ -60,14 +62,12 @@ function App(): JSX.Element {
   );
 }
 
-const Loading = () => {
-  return <div>
+const Loading = () => <div>
     <Spinner />
     <p className='Loading__description'>
       We will now spawn a dedicated Blueprint for you, hang in tight, this might take up to 3 minutes.
     </p>
-  </div>
-}
+  </div>;
 
 interface LaunchAppProps {
   appName: string;
@@ -89,7 +89,7 @@ const LaunchApp: React.FC<LaunchAppProps> = ({ appName, onStartSession }) => {
       <TermsAndConditions accepted={acceptedTerms} onTermsAccepted={setAcceptedTerms} />
     </div>
   );
-}
+};
 
 interface ErrorComponentProps {
   message?: string;
@@ -105,8 +105,8 @@ const ErrorComponent: React.FC<ErrorComponentProps> = ({ message }) => {
       </h2>
       <pre>ERROR: {message}</pre>
     </div>
-  ) : null
-}
+  ) : null;
+};
 interface TermsAndConditionsProps {
   accepted: boolean;
   onTermsAccepted: (accepted: boolean) => void;
@@ -132,6 +132,6 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ accepted, onTer
       </label>
     </div>
   );
-}
+};
 
 export default App;

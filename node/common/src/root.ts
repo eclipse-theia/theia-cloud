@@ -18,6 +18,7 @@ export interface LaunchEphemeralSessionRequest extends ServiceRequest {
 export interface LaunchSessionWithNewWorkspaceRequest extends ServiceRequest {
   appDefinition: string;
   user?: string;
+  workspaceName?: string;
   label?: string;
   ephemeral: boolean;
 }
@@ -30,8 +31,9 @@ export namespace LaunchRequest {
       return { serviceUrl, appId, appDefinition, user, ephemeral: true };
     }
 
-    export function createWorkspace(serviceUrl: string, appId: string, appDefinition: string, user?: string, label?: string): LaunchSessionWithNewWorkspaceRequest {
-      return { serviceUrl, appId, appDefinition, user, label, ephemeral: false };
+    export function createWorkspace(serviceUrl: string, appId: string, appDefinition: string, user?: string,
+      workspaceName?: string, label?: string): LaunchSessionWithNewWorkspaceRequest {
+      return { serviceUrl, appId, appDefinition, user, label, workspaceName, ephemeral: false };
     }
 
     export function existingWorkspace(serviceUrl: string, appId: string, workspaceName: string, appDefinition?: string, user?: string): LaunchExistingWorkspaceSessionRequest {

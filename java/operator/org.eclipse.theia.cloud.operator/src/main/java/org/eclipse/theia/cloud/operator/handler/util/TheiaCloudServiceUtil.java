@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.operator.handler.util;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,11 +45,11 @@ public final class TheiaCloudServiceUtil {
     }
 
     public static String getServiceName(AppDefinition appDefinition, int instance) {
-	return K8sUtil.validString(getServiceNamePrefix(appDefinition) + instance);
+	return asValidName(getServiceNamePrefix(appDefinition) + instance);
     }
 
     public static String getServiceName(Session session) {
-	return K8sUtil.validString(getServiceNamePrefix(session) + session.getMetadata().getUid());
+	return asValidName(getServiceNamePrefix(session) + session.getMetadata().getUid());
     }
 
     private static String getServiceNamePrefix(AppDefinition appDefinition) {
@@ -97,8 +98,8 @@ public final class TheiaCloudServiceUtil {
 	return replacements;
     }
 
-    public static Optional<Service> getServiceOwnedBySession(String sessionResourceName,
-	    String sessionResourceUID, List<Service> existingServices) {
+    public static Optional<Service> getServiceOwnedBySession(String sessionResourceName, String sessionResourceUID,
+	    List<Service> existingServices) {
 	Optional<Service> alreadyReservedService = existingServices.stream()//
 		.filter(service -> {
 		    if (isUnusedService(service)) {

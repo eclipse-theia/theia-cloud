@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.workspace;
 
+import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 import static org.eclipse.theia.cloud.common.util.WorkspaceUtil.generateWorkspaceLabel;
 import static org.eclipse.theia.cloud.common.util.WorkspaceUtil.generateWorkspaceName;
 
@@ -45,7 +46,7 @@ public class UserWorkspace {
     }
 
     public UserWorkspace(String appDefinition, String user, String name, String label) {
-	this.name = Optional.ofNullable(name).orElseGet(() -> generateWorkspaceName(user, appDefinition));
+	this.name = Optional.ofNullable(asValidName(name)).orElseGet(() -> generateWorkspaceName(user, appDefinition));
 	this.label = Optional.ofNullable(label).orElseGet(() -> generateWorkspaceLabel(user, appDefinition));
 	this.appDefinition = appDefinition;
 	this.user = user;

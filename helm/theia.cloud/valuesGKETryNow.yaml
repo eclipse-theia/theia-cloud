@@ -14,7 +14,6 @@ image:
 
 hosts:
   service: service.34.141.62.32.nip.io
-  servicePort: 8081
   serviceProtocol: https
   landing: theia.cloud.34.141.62.32.nip.io
   instance: ws.34.141.62.32.nip.io
@@ -22,6 +21,7 @@ hosts:
 landingPage:
   image: theiacloud/theia-cloud-try-now-page:0.8.0.MS2
   appDefinition: "theia-cloud-demo"
+  ephemeralStorage: true
 
 keycloak:
   enable: false
@@ -34,7 +34,6 @@ keycloak:
 operator:
   image: theiacloud/theia-cloud-operator:0.8.0.MS2
   eagerStart: false
-  ephemeralStorage: true
   cloudProvider: "GKE"
   bandwidthLimiter: "WONDERSHAPER"
 

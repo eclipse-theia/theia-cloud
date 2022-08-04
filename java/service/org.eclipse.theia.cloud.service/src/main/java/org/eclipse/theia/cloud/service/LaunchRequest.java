@@ -39,4 +39,11 @@ public class LaunchRequest extends ServiceRequest {
     public boolean isCreateWorkspace() {
 	return !isExistingWorkspace() && !isEphemeral();
     }
+
+    @Override
+    public String toString() {
+	return "LaunchRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName=" + workspaceName
+		+ ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + "]";
+    }
+
 }

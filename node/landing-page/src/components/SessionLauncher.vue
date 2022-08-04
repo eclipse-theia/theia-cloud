@@ -15,7 +15,9 @@ export default defineComponent({
     serviceUrl: String,
     appDefinition: String,
     email: String,
-    appId: String
+    appId: String,
+    useEphemeralStorage: Boolean,
+    workspaceName: String
   },
   created() {
     if (this.email) {
@@ -44,7 +46,9 @@ export default defineComponent({
           {
             appDefinition: this.appDefinition,
             user: this.email,
-            appId: this.appId
+            appId: this.appId,
+            ephemeral: this.useEphemeralStorage,
+            workspaceName: this.workspaceName
           },
           {
             timeout: 300000

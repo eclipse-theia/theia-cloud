@@ -23,7 +23,7 @@ spec:
         image: {{ .Values.service.image }}
         ports:
         - name: http
-          containerPort: {{ .Values.hosts.servicePort }}
+          containerPort: 8081
           protocol: TCP
         envFrom:
         - configMapRef:
@@ -47,5 +47,5 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: {{ .Values.hosts.servicePort }}
-      targetPort: {{ .Values.hosts.servicePort }}
+      port: 8081
+      targetPort: 8081

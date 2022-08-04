@@ -58,7 +58,8 @@ public class SessionResource extends BaseResource {
 	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user);
 	}
 
-	Optional<Workspace> workspace = K8sUtil.getWorkspace(request.user, request.workspaceName);
+	Optional<Workspace> workspace = K8sUtil.getWorkspace(request.user,
+		org.eclipse.theia.cloud.common.util.NamingUtil.asValidName(request.workspaceName));
 	if (workspace.isEmpty()) {
 	    info(correlationId, "No workspace for given workspace name: " + request);
 	    return SessionLaunchResponse.error("No workspace for given name: " + request.workspaceName);

@@ -16,7 +16,6 @@ The Theia.Cloud Operator listens for changes to custom resources inside the clus
 |---|---|---|
 |--keycloak|boolean|Whether sessions will be created with a reverse proxy authing against keycloak|
 |--eagerStart|boolean|Whether sessions will be created before there is a user to speed up starts (not (fully) supported yet)|
-|--ephemeralStorage|boolean|Whether sessions get persisted storage assigned|
 |--cloudProvider|null, GKE|Cloud Provider specific configs|
 |--bandwidthLimiter|null, K8SANNOTATION, WONDERSHAPER, K8SANNOTATIONANDWONDERSHAPER|How to limit ingress/egress bandwidth|
 |--sessionsPerUser|number|The number of active sessions a user is allowed to have|
