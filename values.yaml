@@ -37,11 +37,11 @@ hosts:
   # hostname of the REST-API
   service: service.192.168.39.173.nip.io
 
-  # port of the REST-API
-  servicePort: 8081
-
   # protocol of the REST-API
   serviceProtocol: https
+
+  # whether the service port needs to be part of the service URL (default: false)
+  useServicePortInHostname: false
 
   # hostname of the landing page
   landing: theia.cloud.192.168.39.173.nip.io

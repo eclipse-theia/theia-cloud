@@ -13,7 +13,7 @@ data:
       keycloakAuthUrl: "{{ .Values.keycloak.authUrl }}",
       keycloakRealm: "{{ .Values.keycloak.realm }}",
       keycloakClientId: "{{ .Values.keycloak.clientId }}",
-      serviceUrl: "{{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}{{ if .Values.operator.servicePort }}:{{ .Values.hosts.servicePort }}{{ end }}/service",
+      serviceUrl: "{{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}{{ if .Values.hosts.useServicePortInHostname }}:8081{{ end }}/service",
       appDefinition: "{{ .Values.landingPage.appDefinition }}",
     };
 binaryData:

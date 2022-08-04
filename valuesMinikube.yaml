@@ -14,7 +14,6 @@ image:
 
 hosts:
   service: service.192.168.39.3.nip.io
-  servicePort: 8081
   serviceProtocol: https
   landing: theia.cloud.192.168.39.3.nip.io
   instance: ws.192.168.39.3.nip.io
@@ -23,6 +22,7 @@ landingPage:
   image: theiacloud/theia-cloud-landing-page:0.8.0.MS2
   # imagePullSecret: pullsecret
   appDefinition: "theia-cloud-demo"
+  ephemeralStorage: false
 
 keycloak:
   enable: true
@@ -36,7 +36,6 @@ operator:
   image: theiacloud/theia-cloud-operator:0.8.0.MS2
   # imagePullSecret: pullsecret
   eagerStart: false
-  ephemeralStorage: false
   cloudProvider: "K8S"
   bandwidthLimiter: "K8SANNOTATION"
 
