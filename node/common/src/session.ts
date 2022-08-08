@@ -17,7 +17,8 @@ export function startSession(options: SessionOptions, retries = 0): Promise<void
       {
         appDefinition: appDefinition,
         user: user,
-        appId: appId
+        appId: appId,
+        startupTimeout: 3
       },
       {
         timeout: 300000

@@ -68,7 +68,8 @@ public final class K8sUtil {
 	return client;
     }
 
-    public static Reply launchSession(String correlationId, String name, String appDefinition, String user) {
+    public static Reply launchSession(String correlationId, String name, String appDefinition, String user,
+	    int startupTimeout) {
 
 	NonNamespaceOperation<Session, SessionSpecResourceList, Resource<Session>> sessions = CLIENT
 		.customResources(Session.class, SessionSpecResourceList.class).inNamespace(K8sUtil.NAMESPACE);
@@ -141,7 +142,11 @@ public final class K8sUtil {
 	}
 
 	try {
-	    latch.await(1, TimeUnit.MINUTES);
+	    LOGGER.info(formatLogMessage(correlationId, "Startup timeout set to " + startupTimeout + " minutes"));
+	    boolean succededWithinTimeout = latch.await(startupTimeout, TimeUnit.MINUTES);
+	    if (!succededWithinTimeout) {
+		throw new Error("Timeout reached");
+	    }
 	} catch (InterruptedException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Timeout while waiting for URL for " + name), e);
 	    return new Reply(false, "", "Unable to start session");

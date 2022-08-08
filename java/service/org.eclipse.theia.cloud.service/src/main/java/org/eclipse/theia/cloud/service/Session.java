@@ -21,6 +21,7 @@ public class Session {
     public String appDefinition;
     public String user;
     public String appId;
+    public int startupTimeout = 3;
 
     public Session() {
     }
@@ -31,9 +32,17 @@ public class Session {
 	this.appId = appId;
     }
 
+    public Session(String appDefinition, String user, String appId, int startupTimeout) {
+	this.appDefinition = appDefinition;
+	this.user = user;
+	this.appId = appId;
+	this.startupTimeout = startupTimeout;
+    }
+
     @Override
     public String toString() {
-	return "Session [appDefinition=" + appDefinition + ", user=" + user + ", appId=" + appId + "]";
+	return "Session [appDefinition=" + appDefinition + ", user=" + user + ", appId=" + appId
+		+ ", startupTimeoutInMinutes=" + startupTimeout + "]";
     }
 
 }

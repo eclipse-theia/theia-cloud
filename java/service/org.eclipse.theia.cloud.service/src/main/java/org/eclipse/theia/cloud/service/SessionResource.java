@@ -48,7 +48,8 @@ public class SessionResource {
 	    return new Reply(false, "", "AppId is not matching.");
 	}
 	LOGGER.info(formatLogMessage(correlationId, "Launching session " + session));
-	return K8sUtil.launchSession(correlationId, generateSessionName(session), session.appDefinition, session.user);
+	return K8sUtil.launchSession(correlationId, generateSessionName(session), session.appDefinition, session.user,
+		session.startupTimeout);
     }
 
     private boolean wrongAppId(Session session) {
