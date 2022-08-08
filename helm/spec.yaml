@@ -1,0 +1,8 @@
+apiVersion: theia.cloud/v1beta
+metadata:
+  name: theia-cloud-demo
+kind: Session
+spec:
+  name: test-sessions
+  appDefinition: theia-cloud-demo
+  user: test-user@theia.cloud

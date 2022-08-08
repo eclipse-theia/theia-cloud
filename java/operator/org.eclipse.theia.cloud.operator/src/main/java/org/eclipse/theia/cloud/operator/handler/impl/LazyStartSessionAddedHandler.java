@@ -248,7 +248,7 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
 		SessionSpec.API, SessionSpec.KIND, sessionResourceName, sessionResourceUID, 0, configMap -> {
-		    String host = appDefinition.getSpec().getHost()
+		    String host = session.getMetadata().getUid() + "." + appDefinition.getSpec().getHost()
 			    + ingressPathProvider.getPath(appDefinition, session);
 		    int port = appDefinition.getSpec().getPort();
 		    AddedHandler.updateProxyConfigMap(client, namespace, configMap, host, port);
@@ -287,7 +287,7 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
     protected synchronized String updateIngress(DefaultKubernetesClient client, String namespace,
 	    Optional<Ingress> ingress, Optional<Service> serviceToUse, Session session,
 	    AppDefinitionSpecResource appDefinition) {
-	String host = appDefinition.getSpec().getHost();
+	String host = session.getMetadata().getUid() + "." + appDefinition.getSpec().getHost();
 	String path = ingressPathProvider.getPath(appDefinition, session);
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.get().getMetadata().getName())
 		.edit(ingressToUpdate -> {
@@ -301,7 +301,7 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 
 		    HTTPIngressPath httpIngressPath = new HTTPIngressPath();
 		    http.getPaths().add(httpIngressPath);
-		    httpIngressPath.setPath(path + AddedHandler.INGRESS_REWRITE_PATH);
+		    httpIngressPath.setPath(path);
 		    httpIngressPath.setPathType("Prefix");
 
 		    IngressBackend ingressBackend = new IngressBackend();
@@ -317,7 +317,7 @@ public class LazyStartSessionAddedHandler implements SessionAddedHandler {
 
 		    return ingressToUpdate;
 		});
-	return host + path + "/";
+	return host + path;
     }
 
 }

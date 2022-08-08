@@ -1,0 +1,46 @@
+app:
+  id: asdfghjkl
+  name: Custom IDE
+  logo: theiablueprint.png
+
+issuer:
+  email: mmorlock@example.com
+
+image:
+  name: <put your application image here>
+  pullSecret: ""
+
+hosts:
+  service: <!TODO serviceURL>
+  landing: <!TODO landingURL>
+  instance: <!TODO service>
+
+landingPage:
+  image: <replace with your try-now-image>
+  imagePullSecret: ""
+  appDefinition: "theia-cloud-demo"
+
+keycloak:
+  enable: false
+  authUrl: ""
+  realm: ""
+  clientId: ""
+  clientSecret: ""
+  cookieSecret: ""
+
+operator:
+  image: <replace with your operator-image>
+  imagePullSecret: ""
+  eagerStart: false
+  ephemeralStorage: true
+  cloudProvider: "K8S"
+  bandwidthLimiter: "K8SANNOTATION"
+
+service:
+  image: <replace with your service-image>
+  imagePullSecret: ""
+
+ingress:
+  instanceName: "theia-cloud-demo-ws-ingress"
+  clusterIssuer: letsencrypt-prod
+  theiaCloudCommonName: false

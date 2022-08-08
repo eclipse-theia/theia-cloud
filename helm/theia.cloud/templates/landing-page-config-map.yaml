@@ -12,7 +12,7 @@ data:
       keycloakAuthUrl: "{{ .Values.keycloak.authUrl }}",
       keycloakRealm: "{{ .Values.keycloak.realm }}",
       keycloakClientId: "{{ .Values.keycloak.clientId }}",
-      serviceUrl: "https://{{ .Values.hosts.service }}/service",
+      serviceUrl: "https://<!TODO serviceURL>/service",
       appDefinition: "{{ .Values.landingPage.appDefinition }}",
     };
 binaryData:

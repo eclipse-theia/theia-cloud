@@ -217,7 +217,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionAddedHa
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
 		AppDefinitionSpec.API, AppDefinitionSpec.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
 		configMap -> {
-		    String host = appDefinition.getSpec().getHost()
+		    String host = appDefinition.getSpec() + "-" + instance + appDefinition.getSpec().getHost()
 			    + ingressPathProvider.getPath(appDefinition, instance);
 		    int port = appDefinition.getSpec().getPort();
 		    AddedHandler.updateProxyConfigMap(client, namespace, configMap, host, port);

@@ -71,8 +71,8 @@ public class LazyStartSessionRemovedHandler implements SessionRemovedHandler {
 	    return false;
 	}
 
-	String path = ingressPathProvider.getPath(optionalAppDefinition.get(), session);
-	TheiaCloudIngressUtil.removeIngressRule(client, namespace, ingress.get(), path, correlationId);
+	String searchedHost = optionalAppDefinition.get().getSpec().getHost();
+	TheiaCloudIngressUtil.removeIngressRule(client, namespace, ingress.get(), searchedHost, correlationId);
 
 	return true;
     }

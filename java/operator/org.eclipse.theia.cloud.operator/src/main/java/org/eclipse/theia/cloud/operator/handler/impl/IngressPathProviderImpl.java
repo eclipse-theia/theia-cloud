@@ -24,12 +24,22 @@ public class IngressPathProviderImpl implements IngressPathProvider {
 
     @Override
     public String getPath(AppDefinitionSpecResource appDefinition, int instance) {
-	return "/" + appDefinition.getSpec() + "-" + instance;
+	return "/";
     }
 
     @Override
     public String getPath(AppDefinitionSpecResource appDefinition, Session session) {
-	return "/" + session.getMetadata().getUid();
+	return "/";
     }
 
 }
+
+//@Override
+//public String getPath(AppDefinitionSpecResource appDefinition, int instance) {
+//	return "/" + appDefinition.getSpec() + "-" + instance;
+//}
+//
+//@Override
+//public String getPath(AppDefinitionSpecResource appDefinition, Session session) {
+//	return "/" + session.getMetadata().getUid();
+//}

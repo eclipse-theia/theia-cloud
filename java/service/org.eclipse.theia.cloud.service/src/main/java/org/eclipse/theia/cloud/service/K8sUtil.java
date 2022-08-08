@@ -141,7 +141,10 @@ public final class K8sUtil {
 	}
 
 	try {
-	    latch.await(1, TimeUnit.MINUTES);
+	    boolean succededWithinTimeout = latch.await(3, TimeUnit.MINUTES);
+	    if (!succededWithinTimeout) {
+		throw new Error("Timeout reached");
+	    }
 	} catch (InterruptedException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Timeout while waiting for URL for " + name), e);
 	    return new Reply(false, "", "Unable to start session");

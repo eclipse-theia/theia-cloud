@@ -2,6 +2,7 @@ import './App.css';
 
 import { getTheiaCloudConfig, startSession } from '@theia-cloud/common';
 import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Spinner } from './components/Spinner';
 
@@ -24,11 +25,15 @@ function App(): JSX.Element {
   const handleStartSession = (): void => {
     setLoading(true);
     setError(undefined);
-    startSession({
-      appId: config.appId,
-      serviceUrl: config.serviceUrl,
-      appDefinition: config.appDefinition
-    })
+    startSession(
+      {
+        appId: config.appId,
+        serviceUrl: config.serviceUrl,
+        appDefinition: config.appDefinition,
+        user: uuidv4() + '@theia.cloud'
+      },
+      30
+    )
       .catch((err: Error) => {
         setError(err.message);
       })
@@ -68,7 +73,7 @@ function App(): JSX.Element {
       {loading ? (
         <>
           <Spinner />
-          <p>We will now spawn a dedicated Blueprint for you, hang in tight, this might take up to 3 minutes.</p>
+          <p>We will now spawn a dedicated Custom IDE for you, hang in tight, this might take a while.</p>
         </>
       ) : (
         <p>

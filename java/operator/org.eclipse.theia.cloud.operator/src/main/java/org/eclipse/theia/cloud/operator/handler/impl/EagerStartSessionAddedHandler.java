@@ -209,7 +209,7 @@ public class EagerStartSessionAddedHandler implements SessionAddedHandler {
     protected synchronized String updateIngress(DefaultKubernetesClient client, String namespace,
 	    Optional<Ingress> ingress, Optional<Service> serviceToUse, String appDefinitionID, int instance, int port,
 	    AppDefinitionSpecResource appDefinition) {
-	String host = appDefinition.getSpec().getHost();
+	String host = appDefinition.getSpec() + "-" + instance + "." + appDefinition.getSpec().getHost();
 	String path = ingressPathProvider.getPath(appDefinition, instance);
 	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.get().getMetadata().getName())
 		.edit(ingressToUpdate -> {
@@ -223,7 +223,7 @@ public class EagerStartSessionAddedHandler implements SessionAddedHandler {
 
 		    HTTPIngressPath httpIngressPath = new HTTPIngressPath();
 		    http.getPaths().add(httpIngressPath);
-		    httpIngressPath.setPath(path + AddedHandler.INGRESS_REWRITE_PATH);
+		    httpIngressPath.setPath(path);
 		    httpIngressPath.setPathType("Prefix");
 
 		    IngressBackend ingressBackend = new IngressBackend();
@@ -239,7 +239,7 @@ public class EagerStartSessionAddedHandler implements SessionAddedHandler {
 
 		    return ingressToUpdate;
 		});
-	return host + path + "/";
+	return host + path;
     }
 
 }

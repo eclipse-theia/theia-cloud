@@ -4,20 +4,10 @@ metadata:
   name: {{ .Values.ingress.instanceName }}
   namespace: {{ .Release.Namespace }}
   annotations:
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
-    {{ if .Values.ingress.theiaCloudCommonName }}cert-manager.io/common-name: "Theia.Cloud" {{ end }}
-    acme.cert-manager.io/http01-ingress-class: nginx
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      proxy_set_header 'X-Forwarded-Uri' $request_uri;
+    kubernetes.io/ingress.class: kom-operator
+    traefik.ingress.kubernetes.io/router.entrypoints: secondary
 spec:
-  tls: 
-  - hosts:
-    - {{ .Values.hosts.instance }}
-    secretName: ws-cert-secret
   rules:
-    - host: {{ .Values.hosts.instance }}
+    - host: placeholder.{{ .Values.hosts.instance }}
       http:
       
