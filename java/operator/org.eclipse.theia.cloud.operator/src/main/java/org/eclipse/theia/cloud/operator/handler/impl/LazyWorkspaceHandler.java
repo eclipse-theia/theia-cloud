@@ -57,4 +57,15 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 
 	return true;
     }
+
+    @Override
+    public boolean workspaceDeleted(Workspace workspace, String correlationId) {
+	String sessionName = WorkspaceUtil.getSessionName(workspace.getSpec().getName());
+	client.sessions().delete(correlationId, sessionName);
+
+	String storageName = WorkspaceUtil.getStorageName(workspace.getSpec().getName());
+	client.persistentVolumeClaims().delete(correlationId, storageName);
+	client.persistentVolumes().delete(correlationId, storageName);
+	return true;
+    }
 }
