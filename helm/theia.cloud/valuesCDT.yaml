@@ -14,7 +14,6 @@ image:
 
 hosts:
   service: service.192.168.39.173.nip.io
-  servicePort: 8081
   serviceProtocol: https
   landing: theia.cloud.192.168.39.173.nip.io
   instance: ws.192.168.39.173.nip.io

@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +31,9 @@ import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudPersistentVolumeU
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import com.google.inject.Inject;
+
+import io.fabric8.kubernetes.api.model.PersistentVolume;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 
 public class GKEPersistentVolumeCreator implements PersistentVolumeCreator {
 
@@ -43,12 +47,13 @@ public class GKEPersistentVolumeCreator implements PersistentVolumeCreator {
     protected TheiaCloudClient client;
 
     @Override
-    public void createAndApplyPersistentVolume(String correlationId, Workspace workspace) {
-	/* no needed ? */
+    public Optional<PersistentVolume> createAndApplyPersistentVolume(String correlationId, Workspace workspace) {
+	return Optional.empty();
     }
 
     @Override
-    public void createAndApplyPersistentVolumeClaim(String correlationId, Workspace workspace) {
+    public Optional<PersistentVolumeClaim> createAndApplyPersistentVolumeClaim(String correlationId,
+	    Workspace workspace) {
 
 	Map<String, String> replacements = TheiaCloudPersistentVolumeUtil
 		.getPersistentVolumeClaimReplacements(client.namespace(), workspace);
@@ -59,10 +64,10 @@ public class GKEPersistentVolumeCreator implements PersistentVolumeCreator {
 	} catch (IOException | URISyntaxException e) {
 	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for workspace " + workspace),
 		    e);
-	    return;
+	    return Optional.empty();
 	}
-
-	client.persistentVolumeClaims().loadAndCreate(correlationId, persistentVolumeClaimYaml);
+	return client.persistentVolumeClaims().loadAndCreate(correlationId, persistentVolumeClaimYaml,
+		claim -> claim.addOwnerReference(workspace));
     }
 
 }

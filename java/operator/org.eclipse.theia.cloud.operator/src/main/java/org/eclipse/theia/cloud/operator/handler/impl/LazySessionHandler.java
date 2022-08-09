@@ -36,7 +36,6 @@ import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.DeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
-import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.SessionHandler;
 import org.eclipse.theia.cloud.operator.handler.util.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudConfigMapUtil;
@@ -70,8 +69,6 @@ public class LazySessionHandler implements SessionHandler {
     private static final Logger LOGGER = LogManager.getLogger(LazySessionHandler.class);
     protected static final String USER_DATA = "user-data";
 
-    @Inject
-    protected PersistentVolumeCreator persistentVolumeCreator;
     @Inject
     protected IngressPathProvider ingressPathProvider;
     @Inject
