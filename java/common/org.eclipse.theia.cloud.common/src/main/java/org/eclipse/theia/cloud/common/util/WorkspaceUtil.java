@@ -49,13 +49,21 @@ public final class WorkspaceUtil {
 
     public static String getWorkspaceNameFromSession(String sessionName) {
 	return sessionName.endsWith(SESSION_SUFFIX)
-		? sessionName.substring(sessionName.length() - SESSION_SUFFIX.length())
+		? sessionName.substring(0, sessionName.length() - SESSION_SUFFIX.length())
 		: sessionName;
     }
 
     public static String getWorkspaceNameFromStorage(String pvcName) {
-	return pvcName.endsWith(STORAGE_SUFFIX) ? pvcName.substring(pvcName.length() - STORAGE_SUFFIX.length())
+	return pvcName.endsWith(STORAGE_SUFFIX) ? pvcName.substring(0, pvcName.length() - STORAGE_SUFFIX.length())
 		: pvcName;
+    }
+
+    public static String getStorageNameFromSession(String sessionName) {
+	return getStorageName(getWorkspaceNameFromSession(sessionName));
+    }
+
+    public static String getSessionNameFromStorage(String sessionName) {
+	return getSessionName(getWorkspaceNameFromSession(sessionName));
     }
 
     public static String generateWorkspaceLabel(String user, String appDefinitionName) {
