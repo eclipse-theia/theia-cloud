@@ -19,7 +19,7 @@ hosts:
   instance: ws.34.159.89.224.nip.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS2
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS3
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
 
@@ -32,13 +32,13 @@ keycloak:
   cookieSecret: ""
 
 operator:
-  image: theiacloud/theia-cloud-operator:0.8.0.MS2
+  image: theiacloud/theia-cloud-operator:0.8.0.MS3
   eagerStart: false
   cloudProvider: "GKE"
   bandwidthLimiter: "WONDERSHAPER"
 
 service:
-  image: theiacloud/theia-cloud-service:0.8.0.MS2
+  image: theiacloud/theia-cloud-service:0.8.0.MS3
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
