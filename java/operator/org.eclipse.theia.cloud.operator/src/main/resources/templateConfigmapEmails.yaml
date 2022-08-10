@@ -6,7 +6,7 @@ metadata:
     theiacloud: emails
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v2beta
+    - apiVersion: theia.cloud/v3beta
       kind: AppDefinition
       name: placeholder
       uid: placeholder

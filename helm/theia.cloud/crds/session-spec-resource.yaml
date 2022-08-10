@@ -11,7 +11,7 @@ spec:
     singular: session
   scope: Namespaced
   versions:
-    - name : v1beta
+    - name : v2beta
       served: true
       storage: true
       schema:
@@ -35,3 +35,24 @@ spec:
                   type: string
                 lastActivity:
                   type: integer
+    - name : v1beta
+      served: true
+      storage: false
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                appDefinition:
+                  type: string
+                user:
+                  type: string
+                url:
+                  type: string
+                error:
+                  type: string
+                  
