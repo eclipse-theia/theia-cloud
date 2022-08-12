@@ -35,6 +35,7 @@ public class LaunchRequest extends ServiceRequest {
 
     @Schema(title = "If true no workspace will be created. ", required = true)
     public boolean ephemeral;
+    public int timeout = 3;
 
     public LaunchRequest() {
 	super(KIND);
@@ -58,7 +59,8 @@ public class LaunchRequest extends ServiceRequest {
     @Override
     public String toString() {
 	return "LaunchRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName=" + workspaceName
-		+ ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + "]";
+		+ ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + ", timeout="
+		+ timeout + "]";
     }
 
 }

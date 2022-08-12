@@ -24,8 +24,8 @@ import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 public interface SessionResourceClient extends CustomResourceClient<SessionSpec, Session, SessionSpecResourceList> {
     Session launch(String correlationId, SessionSpec spec, long timeout, TimeUnit unit);
 
-    default Session launch(String correlationId, SessionSpec spec) {
-	return launch(correlationId, spec, 1, TimeUnit.MINUTES);
+    default Session launch(String correlationId, SessionSpec spec, int timeout) {
+	return launch(correlationId, spec, timeout, TimeUnit.MINUTES);
     }
 
     boolean reportActivity(String correlationId, String name);

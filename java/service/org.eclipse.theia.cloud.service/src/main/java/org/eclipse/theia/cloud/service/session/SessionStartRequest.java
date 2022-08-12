@@ -31,16 +31,25 @@ public class SessionStartRequest extends ServiceRequest {
 
     @Schema(title = "The name of the workspace to mount/create.", required = false)
     public String workspaceName;
+    public int timeout = 3;
 
     public SessionStartRequest() {
 	super(KIND);
     }
 
-    public SessionStartRequest(String appId, String user, String appDefinition, String workspaceName) {
+    public SessionStartRequest(String appId, String user, String appDefinition, String workspaceName, int timeout) {
 	super(KIND, appId);
 	this.user = user;
 	this.appDefinition = appDefinition;
 	this.workspaceName = workspaceName;
+	this.timeout = timeout;
+    }
+
+    public SessionStartRequest(String appId, String user, String appDefinition, int timeout) {
+	super(KIND, appId);
+	this.user = user;
+	this.appDefinition = appDefinition;
+	this.timeout = timeout;
     }
 
     public SessionStartRequest(String appId, String user, String appDefinition) {

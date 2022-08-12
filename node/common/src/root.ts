@@ -7,12 +7,14 @@ export interface LaunchExistingWorkspaceSessionRequest extends ServiceRequest {
     appDefinition?: string;
     user?: string;
     workspaceName: string;
+    timeout?: number;
 }
 
 export interface LaunchEphemeralSessionRequest extends ServiceRequest {
     appDefinition: string;
     user?: string;
     ephemeral: boolean;
+    timeout?: number;
 }
 
 export interface LaunchSessionWithNewWorkspaceRequest extends ServiceRequest {
@@ -21,23 +23,24 @@ export interface LaunchSessionWithNewWorkspaceRequest extends ServiceRequest {
   workspaceName?: string;
   label?: string;
   ephemeral: boolean;
+  timeout?: number;
 }
 
 export type LaunchRequest = LaunchExistingWorkspaceSessionRequest | LaunchEphemeralSessionRequest | LaunchSessionWithNewWorkspaceRequest;
 export namespace LaunchRequest {
     export const KIND = 'launchRequest';
 
-    export function ephemeral(serviceUrl: string, appId: string, appDefinition: string, user?: string): LaunchEphemeralSessionRequest {
-      return { serviceUrl, appId, appDefinition, user, ephemeral: true };
+    export function ephemeral(serviceUrl: string, appId: string, appDefinition: string, timeout?: number, user?: string): LaunchEphemeralSessionRequest {
+      return { serviceUrl, appId, appDefinition, user, ephemeral: true, timeout };
     }
 
-    export function createWorkspace(serviceUrl: string, appId: string, appDefinition: string, user?: string,
+    export function createWorkspace(serviceUrl: string, appId: string, appDefinition: string, timeout?: number, user?: string,
       workspaceName?: string, label?: string): LaunchSessionWithNewWorkspaceRequest {
-      return { serviceUrl, appId, appDefinition, user, label, workspaceName, ephemeral: false };
+      return { serviceUrl, appId, appDefinition, user, label, workspaceName, ephemeral: false, timeout };
     }
 
-    export function existingWorkspace(serviceUrl: string, appId: string, workspaceName: string, appDefinition?: string, user?: string): LaunchExistingWorkspaceSessionRequest {
-      return { serviceUrl, appId, workspaceName, appDefinition, user };
+    export function existingWorkspace(serviceUrl: string, appId: string, workspaceName: string, timeout?: number, appDefinition?: string, user?: string): LaunchExistingWorkspaceSessionRequest {
+      return { serviceUrl, appId, workspaceName, appDefinition, user, timeout };
     }
 }
 
