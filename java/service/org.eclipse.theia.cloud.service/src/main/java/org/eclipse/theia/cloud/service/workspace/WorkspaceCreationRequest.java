@@ -16,13 +16,20 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.workspace;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
+@Schema(name = "Workspace Creation Request", description = "Request to create a new workspace.")
 public class WorkspaceCreationRequest extends ServiceRequest {
     public static final String KIND = "workspaceCreationRequest";
 
+    @Schema(title = "The user identification, usually the email address.", required = true)
     public String user;
+
+    @Schema(title = "The app this workspace will be used with.", required = false)
     public String appDefinition;
+
+    @Schema(title = "The label of the workspace", required = true)
     public String label;
 
     public WorkspaceCreationRequest() {

@@ -13,25 +13,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service.workspace;
+package org.eclipse.theia.cloud.service;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.service.ServiceRequest;
+import javax.ws.rs.core.Application;
 
-@Schema(name = "Workspace List Request", description = "Request to list workspaces of a user.")
-public class WorkspaceListRequest extends ServiceRequest {
-    public static final String KIND = "workspaceListRequest";
+import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
+import org.eclipse.microprofile.openapi.annotations.info.Info;
 
-    @Schema(title = "The user identification, usually the email address.", required = true)
-    public String user;
-
-    public WorkspaceListRequest() {
-	super(KIND);
-    }
-
-    @Override
-    public String toString() {
-	return "WorkspaceListRequest [user=" + user + ", appId=" + appId + ", kind=" + kind + "]";
-    }
-
+@OpenAPIDefinition(info = @Info(title = "Theia.cloud API", version = "0.8.0"))
+public class TheiaCloudApiApplication extends Application {
 }

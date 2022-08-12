@@ -15,12 +15,17 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.workspace;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
+@Schema(name = "Workspace Deletion Request", description = "Request to delete a workspace")
 public class WorkspaceDeletionRequest extends ServiceRequest {
     public static final String KIND = "workspaceDeletionRequest";
 
+    @Schema(title = "The user identification, usually the email address.", required = true)
     public String user;
+
+    @Schema(title = "The name of the workspace to delete.", required = true)
     public String workspaceName;
 
     public WorkspaceDeletionRequest() {

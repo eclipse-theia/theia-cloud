@@ -15,12 +15,17 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.session;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
+@Schema(name = "Session Stop Request", description = "A request to stop a session")
 public class SessionStopRequest extends ServiceRequest {
     public static final String KIND = "sessionStopRequest";
 
+    @Schema(title = "The user identification, usually the email address.", required = true)
     public String user;
+
+    @Schema(title = "The name of the session to stop.", required = true)
     public String sessionName;
 
     public SessionStopRequest() {

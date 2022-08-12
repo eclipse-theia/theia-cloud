@@ -23,12 +23,15 @@ import java.util.Optional;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.service.session.SessionLaunchResponse;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 @Path("/service")
 public class RootResource extends BaseResource {
+
+    @Operation(summary = "Launch Session", description = "Launches a session and creates a workspace if required.")
     @POST
     public SessionLaunchResponse launch(LaunchRequest request) {
 	String correlationId = generateCorrelationId();

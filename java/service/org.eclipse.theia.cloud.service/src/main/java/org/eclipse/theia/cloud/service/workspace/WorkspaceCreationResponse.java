@@ -16,11 +16,14 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.workspace;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceResponse;
 
+@Schema(name = "Workspace Creation Response", description = "Response of a workspace creation. Allows to retrieve whether the creation was successfull or to get the error that occurred.")
 public class WorkspaceCreationResponse extends ServiceResponse {
     public static final String KIND = "workspaceCreationResponse";
 
+    @Schema(title = "The workspace.", required = true)
     public UserWorkspace workspace;
 
     public WorkspaceCreationResponse() {

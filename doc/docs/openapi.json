@@ -1,0 +1,496 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "Theia.cloud API",
+    "version" : "0.8.0"
+  },
+  "paths" : {
+    "/service" : {
+      "post" : {
+        "tags" : [ "Root Resource" ],
+        "summary" : "Launch Session",
+        "description" : "Launches a session and creates a workspace if required.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Launch Request"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Session Launch Response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/service/session" : {
+      "get" : {
+        "tags" : [ "Session Resource" ],
+        "summary" : "List sessions",
+        "description" : "List sessions of a user.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Session List Request"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SessionSpec"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Session Resource" ],
+        "summary" : "Start a new session",
+        "description" : "Starts a new session for an existing workspace.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Session Start Request"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Session Launch Response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Session Resource" ],
+        "summary" : "Stop session",
+        "description" : "Stops a session.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Session Stop Request"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Session Resource" ],
+        "summary" : "Report session activity",
+        "description" : "Updates the last activity timestamp for a session to monitor activity.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Session Activity Request"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/service/workspace" : {
+      "get" : {
+        "tags" : [ "Workspace Resource" ],
+        "summary" : "List workspaces",
+        "description" : "Lists the workspaces of a user.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Workspace List Request"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/User Workspace"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Workspace Resource" ],
+        "summary" : "Create workspace",
+        "description" : "Creates a new workspace for a user.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Workspace Creation Request"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Workspace Creation Response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Workspace Resource" ],
+        "summary" : "Delete workspace",
+        "description" : "Deletes a workspace.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Workspace Deletion Request"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Launch Request" : {
+        "description" : "A request to launch a new session.",
+        "required" : [ "appId", "user", "appDefinition", "ephemeral" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "user" : {
+            "title" : "The user identification, usually the email address.",
+            "type" : "string"
+          },
+          "appDefinition" : {
+            "title" : "The app to launch.",
+            "type" : "string"
+          },
+          "workspaceName" : {
+            "title" : "The name of the workspace to mount/create.",
+            "type" : "string"
+          },
+          "label" : {
+            "title" : "The label of the workspace to mount/create.",
+            "type" : "string"
+          },
+          "ephemeral" : {
+            "title" : "If true no workspace will be created. ",
+            "type" : "boolean"
+          }
+        }
+      },
+      "Session Activity Request" : {
+        "description" : "A request to report activity for a running session.",
+        "required" : [ "appId", "sessionName" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "sessionName" : {
+            "title" : "The name of the session for which activity is reported.",
+            "type" : "string"
+          }
+        }
+      },
+      "Session Launch Response" : {
+        "description" : "Response for a session launch. Allows to access the URL of the session or the error that occured during launch.",
+        "required" : [ "success" ],
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "title" : "Specifies which kind of response this is. This is optional.",
+            "type" : "string"
+          },
+          "success" : {
+            "title" : "Whether the request was successful",
+            "type" : "boolean"
+          },
+          "error" : {
+            "title" : "The error message. Empty if request was successful.",
+            "type" : "string"
+          },
+          "url" : {
+            "title" : "The URL of the running workspace or empty if there was an error.",
+            "type" : "string"
+          }
+        }
+      },
+      "Session List Request" : {
+        "description" : "A request to list the sessions of a user.",
+        "required" : [ "appId", "user" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "user" : {
+            "title" : "The user identification, usually the email address.",
+            "type" : "string"
+          }
+        }
+      },
+      "Session Start Request" : {
+        "description" : "A request to start a session",
+        "required" : [ "appId", "user", "appDefinition" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "user" : {
+            "title" : "The user identification, usually the email address.",
+            "type" : "string"
+          },
+          "appDefinition" : {
+            "title" : "The app to launch.",
+            "type" : "string"
+          },
+          "workspaceName" : {
+            "title" : "The name of the workspace to mount/create.",
+            "type" : "string"
+          }
+        }
+      },
+      "Session Stop Request" : {
+        "description" : "A request to stop a session",
+        "required" : [ "appId", "user", "sessionName" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "user" : {
+            "title" : "The user identification, usually the email address.",
+            "type" : "string"
+          },
+          "sessionName" : {
+            "title" : "The name of the session to stop.",
+            "type" : "string"
+          }
+        }
+      },
+      "SessionSpec" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "appDefinition" : {
+            "type" : "string"
+          },
+          "user" : {
+            "type" : "string"
+          },
+          "url" : {
+            "type" : "string"
+          },
+          "error" : {
+            "type" : "string"
+          },
+          "workspace" : {
+            "type" : "string"
+          },
+          "lastActivity" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        }
+      },
+      "User Workspace" : {
+        "description" : "Description of a user workspace",
+        "required" : [ "name", "label", "user", "active" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "title" : "The name of the workspace",
+            "type" : "string"
+          },
+          "label" : {
+            "title" : "The label of the workspace",
+            "type" : "string"
+          },
+          "appDefinition" : {
+            "title" : "The app this workspace was used with.",
+            "type" : "string"
+          },
+          "user" : {
+            "title" : "The user identification, usually the email address.",
+            "type" : "string"
+          },
+          "active" : {
+            "title" : "Whether the workspace is in use at the moment.",
+            "type" : "boolean"
+          }
+        }
+      },
+      "Workspace Creation Request" : {
+        "description" : "Request to create a new workspace.",
+        "required" : [ "appId", "user", "label" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "user" : {
+            "title" : "The user identification, usually the email address.",
+            "type" : "string"
+          },
+          "appDefinition" : {
+            "title" : "The app this workspace will be used with.",
+            "type" : "string"
+          },
+          "label" : {
+            "title" : "The label of the workspace",
+            "type" : "string"
+          }
+        }
+      },
+      "Workspace Creation Response" : {
+        "description" : "Response of a workspace creation. Allows to retrieve whether the creation was successfull or to get the error that occurred.",
+        "required" : [ "success", "workspace" ],
+        "type" : "object",
+        "properties" : {
+          "kind" : {
+            "title" : "Specifies which kind of response this is. This is optional.",
+            "type" : "string"
+          },
+          "success" : {
+            "title" : "Whether the request was successful",
+            "type" : "boolean"
+          },
+          "error" : {
+            "title" : "The error message. Empty if request was successful.",
+            "type" : "string"
+          },
+          "workspace" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/User Workspace"
+            }, {
+              "title" : "The workspace."
+            } ]
+          }
+        }
+      },
+      "Workspace Deletion Request" : {
+        "description" : "Request to delete a workspace",
+        "required" : [ "appId", "user", "workspaceName" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "user" : {
+            "title" : "The user identification, usually the email address.",
+            "type" : "string"
+          },
+          "workspaceName" : {
+            "title" : "The name of the workspace to delete.",
+            "type" : "string"
+          }
+        }
+      },
+      "Workspace List Request" : {
+        "description" : "Request to list workspaces of a user.",
+        "required" : [ "appId", "user" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "user" : {
+            "title" : "The user identification, usually the email address.",
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}
