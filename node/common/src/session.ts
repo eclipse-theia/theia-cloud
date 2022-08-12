@@ -16,6 +16,7 @@ export interface SessionStartRequest extends ServiceRequest {
   appDefinition: string;
   user: string;
   workspaceName?: string; /* no existing workspace means ephemeral storage */
+  timeout?: number;
 }
 export namespace SessionStartRequest {
   export const KIND = 'sessionStartRequest';
@@ -71,14 +72,14 @@ export async function listSessions(options: SessionListRequest): Promise<UserSes
 }
 
 export async function startSession(options: SessionStartRequest): Promise<SessionLaunchResponse> {
-  const { appId, serviceUrl, workspaceName, user = uuidv4() + '@theia.cloud', kind = SessionStartRequest.KIND } = options;
+  const { appId, serviceUrl, workspaceName, user = uuidv4() + '@theia.cloud', kind = SessionStartRequest.KIND, timeout } = options;
   const sessionServiceUrl = toSessionServiceUrl(serviceUrl);
   console.log('Calling to ' + sessionServiceUrl);
   try {
     const response = await axios.post(
       sessionServiceUrl,
       {
-        data: { workspaceName, user, appId, kind },
+        data: { workspaceName, user, appId, kind, timeout },
         timeout: 300000
       }
     );

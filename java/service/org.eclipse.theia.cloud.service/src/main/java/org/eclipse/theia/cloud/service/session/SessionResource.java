@@ -59,7 +59,7 @@ public class SessionResource extends BaseResource {
 	}
 	info(correlationId, "Launching session " + request);
 	if (request.isEphemeral()) {
-	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user);
+	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout);
 	}
 
 	Optional<Workspace> workspace = K8sUtil.getWorkspace(request.user,
@@ -74,7 +74,8 @@ public class SessionResource extends BaseResource {
 	    workspace.get().getSpec().setAppDefinition(request.appDefinition);
 	}
 	info(correlationId, "Launch workspace session: " + request);
-	return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()));
+	return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
+		request.timeout);
     }
 
     @Operation(summary = "Stop session", description = "Stops a session.")

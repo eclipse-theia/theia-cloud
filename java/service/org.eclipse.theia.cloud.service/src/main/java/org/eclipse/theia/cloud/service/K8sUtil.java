@@ -59,21 +59,22 @@ public final class K8sUtil {
 	return CLIENT.sessions().specs().stream().filter(sessionSpec -> sessionSpec.equals(spec)).findAny();
     }
 
-    public static SessionLaunchResponse launchEphemeralSession(String correlationId, String appDefinition,
-	    String user) {
+    public static SessionLaunchResponse launchEphemeralSession(String correlationId, String appDefinition, String user,
+	    int timeout) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition), appDefinition, user);
-	return launchSession(correlationId, sessionSpec);
+	return launchSession(correlationId, sessionSpec, timeout);
     }
 
-    public static SessionLaunchResponse launchWorkspaceSession(String correlationId, UserWorkspace workspace) {
+    public static SessionLaunchResponse launchWorkspaceSession(String correlationId, UserWorkspace workspace,
+	    int timeout) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(workspace.name), workspace.appDefinition,
 		workspace.user, workspace.name);
-	return launchSession(correlationId, sessionSpec);
+	return launchSession(correlationId, sessionSpec, timeout);
     }
 
-    private static SessionLaunchResponse launchSession(String correlationId, SessionSpec sessionSpec) {
+    private static SessionLaunchResponse launchSession(String correlationId, SessionSpec sessionSpec, int timeout) {
 	return findExistingSession(sessionSpec).map(SessionLaunchResponse::from).orElseGet(() -> {
-	    Session session = CLIENT.sessions().launch(correlationId, sessionSpec);
+	    Session session = CLIENT.sessions().launch(correlationId, sessionSpec, timeout);
 	    return SessionLaunchResponse.from(session.getSpec());
 	});
     }

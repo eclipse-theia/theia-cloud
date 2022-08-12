@@ -42,14 +42,15 @@ public class RootResource extends BaseResource {
 
 	if (request.isEphemeral()) {
 	    info(correlationId, "Launching ephemeral session " + request);
-	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user);
+	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout);
 	}
 
 	if (request.isExistingWorkspace()) {
 	    Optional<Workspace> workspace = K8sUtil.getWorkspace(request.user, asValidName(request.workspaceName));
 	    if (workspace.isPresent()) {
 		info(correlationId, "Launching existing workspace session " + request);
-		return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()));
+		return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
+			request.timeout);
 	    }
 	}
 
@@ -62,7 +63,7 @@ public class RootResource extends BaseResource {
 	}
 	info(correlationId, "Launch workspace session " + request);
 	SessionLaunchResponse response = K8sUtil.launchWorkspaceSession(correlationId,
-		new UserWorkspace(workspace.getSpec()));
+		new UserWorkspace(workspace.getSpec()), request.timeout);
 	if (response.error != null) {
 	    info(correlationId, "Delete workspace due to launch error " + request);
 	    K8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());
