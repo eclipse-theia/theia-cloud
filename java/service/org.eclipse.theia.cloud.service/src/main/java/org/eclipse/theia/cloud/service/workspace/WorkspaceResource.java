@@ -25,12 +25,15 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
 
 @Path("/service/workspace")
 public class WorkspaceResource extends BaseResource {
+
+    @Operation(summary = "List workspaces", description = "Lists the workspaces of a user.")
     @GET
     public List<UserWorkspace> list(WorkspaceListRequest request) {
 	String correlationId = generateCorrelationId();
@@ -42,6 +45,7 @@ public class WorkspaceResource extends BaseResource {
 	return K8sUtil.listWorkspaces(request.user);
     }
 
+    @Operation(summary = "Create workspace", description = "Creates a new workspace for a user.")
     @POST
     public WorkspaceCreationResponse create(WorkspaceCreationRequest request) {
 	String correlationId = generateCorrelationId();
@@ -58,6 +62,7 @@ public class WorkspaceResource extends BaseResource {
 	return WorkspaceCreationResponse.ok(new UserWorkspace(workspace.getSpec()));
     }
 
+    @Operation(summary = "Delete workspace", description = "Deletes a workspace.")
     @DELETE
     public boolean delete(WorkspaceDeletionRequest request) {
 	String correlationId = generateCorrelationId();

@@ -16,11 +16,14 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.session;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
+@Schema(name = "Session List Request", description = "A request to list the sessions of a user.")
 public class SessionListRequest extends ServiceRequest {
     public static final String KIND = "sessionListRequest";
 
+    @Schema(title = "The user identification, usually the email address.", required = true)
     public String user;
 
     public SessionListRequest() {

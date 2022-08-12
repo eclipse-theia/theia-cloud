@@ -27,6 +27,7 @@ import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.service.BaseResource;
@@ -35,6 +36,8 @@ import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 @Path("/service/session")
 public class SessionResource extends BaseResource {
+
+    @Operation(summary = "List sessions", description = "List sessions of a user.")
     @GET
     public List<SessionSpec> list(SessionListRequest request) {
 	String correlationId = generateCorrelationId();
@@ -46,6 +49,7 @@ public class SessionResource extends BaseResource {
 	return K8sUtil.listSessions(request.user);
     }
 
+    @Operation(summary = "Start a new session", description = "Starts a new session for an existing workspace.")
     @POST
     public SessionLaunchResponse start(SessionStartRequest request) {
 	String correlationId = generateCorrelationId();
@@ -73,6 +77,7 @@ public class SessionResource extends BaseResource {
 	return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()));
     }
 
+    @Operation(summary = "Stop session", description = "Stops a session.")
     @DELETE
     public boolean stop(SessionStopRequest request) {
 	String correlationId = generateCorrelationId();
@@ -89,6 +94,7 @@ public class SessionResource extends BaseResource {
 	return K8sUtil.stopSession(correlationId, request.sessionName, request.user);
     }
 
+    @Operation(summary = "Report session activity", description = "Updates the last activity timestamp for a session to monitor activity.")
     @PATCH
     public boolean activity(SessionActivityRequest request) {
 	String correlationId = generateCorrelationId();

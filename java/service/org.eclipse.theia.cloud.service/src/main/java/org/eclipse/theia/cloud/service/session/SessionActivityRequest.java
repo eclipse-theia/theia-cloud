@@ -15,11 +15,14 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.session;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
+@Schema(name = "Session Activity Request", description = "A request to report activity for a running session.")
 public class SessionActivityRequest extends ServiceRequest {
     public static final String KIND = "sessionActivityRequest";
 
+    @Schema(title = "The name of the session for which activity is reported.", required = true)
     public String sessionName;
 
     public SessionActivityRequest() {
