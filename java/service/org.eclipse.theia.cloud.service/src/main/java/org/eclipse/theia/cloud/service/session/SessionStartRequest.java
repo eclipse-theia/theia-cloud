@@ -31,6 +31,8 @@ public class SessionStartRequest extends ServiceRequest {
 
     @Schema(title = "The name of the workspace to mount/create.", required = false)
     public String workspaceName;
+
+    @Schema(title = "Number of minutes to wait for session launch. Default is 3 Minutes.", required = false)
     public int timeout = 3;
 
     public SessionStartRequest() {

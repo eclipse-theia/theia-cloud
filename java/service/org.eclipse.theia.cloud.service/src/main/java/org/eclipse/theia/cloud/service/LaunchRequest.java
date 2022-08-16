@@ -35,6 +35,8 @@ public class LaunchRequest extends ServiceRequest {
 
     @Schema(title = "If true no workspace will be created. ", required = true)
     public boolean ephemeral;
+
+    @Schema(title = "Number of minutes to wait for session launch. Default is 3 Minutes.", required = false)
     public int timeout = 3;
 
     public LaunchRequest() {
