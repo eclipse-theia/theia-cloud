@@ -29,7 +29,7 @@ public class WorkspaceCreationRequest extends ServiceRequest {
     @Schema(title = "The app this workspace will be used with.", required = false)
     public String appDefinition;
 
-    @Schema(title = "The label of the workspace", required = true)
+    @Schema(title = "The label of the workspace", required = false)
     public String label;
 
     public WorkspaceCreationRequest() {
