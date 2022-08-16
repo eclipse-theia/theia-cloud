@@ -7,7 +7,7 @@ issuer:
   email: jfaltermeier@eclipsesource.com
 
 image:
-  name: theiacloud/theia-cloud-demo:0.8.0.MS3
+  name: theiacloud/theia-cloud-demo:0.8.0.MS4
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
@@ -19,7 +19,7 @@ hosts:
   instance: ws.34.141.62.32.nip.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS3
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS4
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
 
@@ -32,13 +32,14 @@ keycloak:
   cookieSecret: ""
 
 operator:
-  image: theiacloud/theia-cloud-operator:0.8.0.MS3
+  image: theiacloud/theia-cloud-operator:0.8.0.MS4
   eagerStart: false
   cloudProvider: "GKE"
   bandwidthLimiter: "WONDERSHAPER"
+  sessionsPerUser: "1"
 
 service:
-  image: theiacloud/theia-cloud-service:0.8.0.MS3
+  image: theiacloud/theia-cloud-service:0.8.0.MS4
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"

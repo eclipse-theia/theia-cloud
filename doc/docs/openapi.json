@@ -256,6 +256,11 @@
           "ephemeral" : {
             "title" : "If true no workspace will be created. ",
             "type" : "boolean"
+          },
+          "timeout" : {
+            "format" : "int32",
+            "title" : "Number of minutes to wait for session launch. Default is 3 Minutes.",
+            "type" : "integer"
           }
         }
       },
@@ -332,6 +337,11 @@
           "workspaceName" : {
             "title" : "The name of the workspace to mount/create.",
             "type" : "string"
+          },
+          "timeout" : {
+            "format" : "int32",
+            "title" : "Number of minutes to wait for session launch. Default is 3 Minutes.",
+            "type" : "integer"
           }
         }
       },
