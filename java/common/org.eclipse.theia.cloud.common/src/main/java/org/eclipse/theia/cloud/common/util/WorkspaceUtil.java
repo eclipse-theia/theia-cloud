@@ -30,9 +30,8 @@ public final class WorkspaceUtil {
     }
 
     public static String generateWorkspaceName(String user, String appDefinitionName) {
-	return asValidName(
-		(WORKSPACE_PREFIX + Instant.now().toEpochMilli() + appDefinitionName + "-" + user).toLowerCase(),
-		WORKSPACE_NAME_LIMIT);
+	return asValidName((WORKSPACE_PREFIX + Instant.now().toEpochMilli() + getWorkspaceDescription(appDefinitionName)
+		+ "-" + user).toLowerCase(), WORKSPACE_NAME_LIMIT);
     }
 
     public static String getSessionName(String workspaceName) {
@@ -40,7 +39,7 @@ public final class WorkspaceUtil {
     }
 
     public static String getSessionName(String user, String appDefinitionName) {
-	return getSessionName(generateWorkspaceName(user, appDefinitionName));
+	return getSessionName(generateWorkspaceName(user, getWorkspaceDescription(appDefinitionName)));
     }
 
     public static String getStorageName(String workspaceName) {
@@ -67,7 +66,11 @@ public final class WorkspaceUtil {
     }
 
     public static String generateWorkspaceLabel(String user, String appDefinitionName) {
-	return appDefinitionName + " of " + user;
+	return getWorkspaceDescription(appDefinitionName) + " of " + user;
+    }
+
+    protected static String getWorkspaceDescription(String appDefinitionName) {
+	return (appDefinitionName == null || appDefinitionName.isBlank()) ? "Workspace" : appDefinitionName;
     }
 
 }

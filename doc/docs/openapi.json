@@ -410,7 +410,7 @@
       },
       "Workspace Creation Request" : {
         "description" : "Request to create a new workspace.",
-        "required" : [ "appId", "user", "label" ],
+        "required" : [ "appId", "user" ],
         "type" : "object",
         "properties" : {
           "appId" : {
