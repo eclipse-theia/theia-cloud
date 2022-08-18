@@ -4,6 +4,8 @@ metadata:
   name: landing-page-deployment
   labels:
     app: landing-page
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/landing-page-config-map.yaml") . | sha256sum }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1

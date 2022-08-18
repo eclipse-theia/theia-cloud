@@ -15,9 +15,9 @@ metadata:
 spec:
   tls: 
   - hosts:
-    - {{ .Values.hosts.instance }}
+    - {{ tpl .Values.hosts.instance . }}
     secretName: ws-cert-secret
   rules:
-    - host: {{ .Values.hosts.instance }}
+    - host: {{ tpl .Values.hosts.instance . }}
       http:
       

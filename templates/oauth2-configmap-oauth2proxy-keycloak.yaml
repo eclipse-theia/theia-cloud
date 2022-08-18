@@ -2,13 +2,13 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: oauth2-proxy-config
-  namespace: {{ .Release.Namespace }}
+  namespace: { { .Release.Namespace } }
 data:
   oauth2-proxy.cfg: |+
     # Provider config
     provider="keycloak-oidc"
     redirect_url="https://placeholder/oauth2/callback"
-    oidc_issuer_url="{{ .Values.keycloak.authUrl }}realms/{{ .Values.keycloak.realm }}"
+    oidc_issuer_url="{{ tpl .Values.keycloak.authUrl . }}realms/{{ .Values.keycloak.realm }}"
     ssl_insecure_skip_verify=true
     # Client config
     client_id="{{ .Values.keycloak.clientId }}"
@@ -25,6 +25,6 @@ data:
     skip_provider_button="true"
     reverse_proxy="true"
     # email_domains=["*"]
-    cookie_domains=["{{ .Values.hosts.instance }}"]
-    whitelist_domains=["{{ .Values.hosts.instance }}:*",".google.com:*"]
+    cookie_domains=["{{ tpl .Values.hosts.instance . }}"]
+    whitelist_domains=["{{ tpl .Values.hosts.instance . }}:*", ".google.com:*"]
     custom_templates_dir="/templates"

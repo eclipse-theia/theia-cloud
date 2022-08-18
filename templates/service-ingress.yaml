@@ -10,10 +10,10 @@ metadata:
 spec:
   tls: 
   - hosts:
-    - {{ .Values.hosts.service }}
+    - {{ tpl .Values.hosts.service . }}
     secretName: service-cert-secret
   rules:
-  - host: {{ .Values.hosts.service }}
+  - host: {{ tpl .Values.hosts.service . }}
     http:
       paths:
       - backend:

@@ -10,13 +10,14 @@ data:
       appName: "{{ .Values.app.name }}",
       useEphemeralStorage: {{ .Values.landingPage.ephemeralStorage }},
       useKeycloak: {{ .Values.keycloak.enable }},
-      keycloakAuthUrl: "{{ .Values.keycloak.authUrl }}",
+      keycloakAuthUrl: "{{ tpl .Values.keycloak.authUrl . }}",
       keycloakRealm: "{{ .Values.keycloak.realm }}",
       keycloakClientId: "{{ .Values.keycloak.clientId }}",
-      serviceUrl: "{{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}{{ if .Values.hosts.useServicePortInHostname }}:8081{{ end }}/service",
+      serviceUrl: "{{ .Values.hosts.serviceProtocol }}://{{ tpl .Values.hosts.service . }}{{ if .Values.hosts.useServicePortInHostname }}:8081{{ end }}/service",
       appDefinition: "{{ .Values.landingPage.appDefinition }}",
     };
 binaryData:
   {{ range $path, $bytes := .Files.Glob (printf "logos/%s" .Values.app.logo)}}
   {{ print "logo.png: "}}{{ $.Files.Get $path | b64enc }}
   {{ end }}
+

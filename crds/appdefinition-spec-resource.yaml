@@ -42,9 +42,9 @@ spec:
                 timeout:
                   type: object
                   properties:
-                    strategy: 
+                    strategy:
                       type: string
-                    limit: 
+                    limit:
                       type: integer
                 requestsMemory:
                   type: string
@@ -62,7 +62,7 @@ spec:
                   type: string
     - name : v2beta
       served: true
-      storage: false
+      storage: true
       schema:
         openAPIV3Schema:
           type: object
@@ -144,4 +144,3 @@ spec:
                   type: integer
                 uplinkLimit:
                   type: integer
-                  

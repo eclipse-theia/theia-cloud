@@ -4,6 +4,8 @@ metadata:
   name: service-deployment
   labels:
     app: service
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/service-configmap.yaml") . | sha256sum }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1

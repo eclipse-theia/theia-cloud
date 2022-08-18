@@ -10,10 +10,10 @@ metadata:
 spec:
   tls: 
   - hosts:
-    - {{ .Values.hosts.landing }}
+    - {{ tpl .Values.hosts.landing . }}
     secretName: landing-page-cert-secret
   rules:
-  - host: {{ .Values.hosts.landing }}
+  - host: {{ tpl .Values.hosts.landing . }}
     http:
       paths:
       - backend:
