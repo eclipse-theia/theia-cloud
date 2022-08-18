@@ -29,7 +29,7 @@ spec:
           - "--bandwidthLimiter"
           - {{ .Values.operator.bandwidthLimiter }}
           - "--serviceUrl"
-          - {{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}{{ if .Values.hosts.useServicePortInHostname }}:8081{{ end }}/service,
+          - {{ .Values.hosts.serviceProtocol }}://{{ tpl .Values.hosts.service . }}{{ if .Values.hosts.useServicePortInHostname }}:8081{{ end }}/service,
           - "--sessionsPerUser"
           - "{{ .Values.operator.sessionsPerUser }}"
           - "--appId"
