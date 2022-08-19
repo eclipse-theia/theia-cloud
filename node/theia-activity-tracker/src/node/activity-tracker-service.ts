@@ -7,8 +7,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  ***********************************************************************/
+import { SessionActivityRequest, TheiaCloud } from '@eclipse-theiacloud/common/lib';
 import { injectable } from '@theia/core/shared/inversify';
-import { reportSessionActivity, SessionActivityRequest } from '@eclipse-theiacloud/common/build';
 
 import { TheiaCloudActivityTrackerService } from '../common/activity-tracker-protocol';
 
@@ -92,7 +92,7 @@ export class DefaultTheiaCloudActivityTrackerService implements TheiaCloudActivi
   protected async updateSessionActivity(): Promise<void> {
     const data = this.getRequestData();
     if(data) {
-      reportSessionActivity(data);
+      TheiaCloud.Session.reportSessionActivity(data);
     }
   }
 }

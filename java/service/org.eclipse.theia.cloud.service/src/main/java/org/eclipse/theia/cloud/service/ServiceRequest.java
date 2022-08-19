@@ -19,7 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 public class ServiceRequest {
 
-    @Schema(title = "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.", required = true)
+    @Schema(description = "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.", required = true)
     public String appId;
 
     @Schema(hidden = true)

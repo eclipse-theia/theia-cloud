@@ -17,26 +17,26 @@ package org.eclipse.theia.cloud.service;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-@Schema(name = "Launch Request", description = "A request to launch a new session.")
+@Schema(name = "LaunchRequest", description = "A request to launch a new session.")
 public class LaunchRequest extends ServiceRequest {
     public static final String KIND = "launchRequest";
 
-    @Schema(title = "The user identification, usually the email address.", required = true)
+    @Schema(description = "The user identification, usually the email address.", required = true)
     public String user;
 
-    @Schema(title = "The app to launch.", required = true)
+    @Schema(description = "The app to launch. Needs to be set if a new or ephemeral session should be launched. For an existing workspace the last app definition will be used if none is given.", required = false)
     public String appDefinition;
 
-    @Schema(title = "The name of the workspace to mount/create.", required = false)
+    @Schema(description = "The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched.", required = false)
     public String workspaceName;
 
-    @Schema(title = "The label of the workspace to mount/create.", required = false)
+    @Schema(description = "The label of the workspace to mount/create. If no label is given, a default label will be generated.", required = false)
     public String label;
 
-    @Schema(title = "If true no workspace will be created. ", required = true)
+    @Schema(description = "If true no workspace will be created for the session.", required = false)
     public boolean ephemeral;
 
-    @Schema(title = "Number of minutes to wait for session launch. Default is 3 Minutes.", required = false)
+    @Schema(description = "Number of minutes to wait for session launch. Default is 3 Minutes.", required = false)
     public int timeout = 3;
 
     public LaunchRequest() {

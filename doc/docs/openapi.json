@@ -14,7 +14,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Launch Request"
+                "$ref" : "#/components/schemas/LaunchRequest"
               }
             }
           }
@@ -25,7 +25,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Session Launch Response"
+                  "$ref" : "#/components/schemas/SessionLaunchResponse"
                 }
               }
             }
@@ -42,7 +42,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Session List Request"
+                "$ref" : "#/components/schemas/SessionListRequest"
               }
             }
           }
@@ -71,7 +71,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Session Start Request"
+                "$ref" : "#/components/schemas/SessionStartRequest"
               }
             }
           }
@@ -82,7 +82,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Session Launch Response"
+                  "$ref" : "#/components/schemas/SessionLaunchResponse"
                 }
               }
             }
@@ -97,7 +97,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Session Stop Request"
+                "$ref" : "#/components/schemas/SessionStopRequest"
               }
             }
           }
@@ -123,7 +123,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Session Activity Request"
+                "$ref" : "#/components/schemas/SessionActivityRequest"
               }
             }
           }
@@ -151,7 +151,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Workspace List Request"
+                "$ref" : "#/components/schemas/WorkspaceListRequest"
               }
             }
           }
@@ -164,7 +164,7 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/User Workspace"
+                    "$ref" : "#/components/schemas/UserWorkspace"
                   }
                 }
               }
@@ -180,7 +180,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Workspace Creation Request"
+                "$ref" : "#/components/schemas/WorkspaceCreationRequest"
               }
             }
           }
@@ -191,7 +191,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Workspace Creation Response"
+                  "$ref" : "#/components/schemas/WorkspaceCreationResponse"
                 }
               }
             }
@@ -206,7 +206,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/Workspace Deletion Request"
+                "$ref" : "#/components/schemas/WorkspaceDeletionRequest"
               }
             }
           }
@@ -228,138 +228,91 @@
   },
   "components" : {
     "schemas" : {
-      "Launch Request" : {
+      "LaunchRequest" : {
         "description" : "A request to launch a new session.",
-        "required" : [ "appId", "user", "appDefinition", "ephemeral" ],
+        "required" : [ "appId", "user" ],
         "type" : "object",
         "properties" : {
           "appId" : {
-            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
-            "title" : "The user identification, usually the email address.",
+            "description" : "The user identification, usually the email address.",
             "type" : "string"
           },
           "appDefinition" : {
-            "title" : "The app to launch.",
+            "description" : "The app to launch. Needs to be set if a new or ephemeral session should be launched. For an existing workspace the last app definition will be used if none is given.",
             "type" : "string"
           },
           "workspaceName" : {
-            "title" : "The name of the workspace to mount/create.",
+            "description" : "The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched.",
             "type" : "string"
           },
           "label" : {
-            "title" : "The label of the workspace to mount/create.",
+            "description" : "The label of the workspace to mount/create. If no label is given, a default label will be generated.",
             "type" : "string"
           },
           "ephemeral" : {
-            "title" : "If true no workspace will be created. ",
+            "description" : "If true no workspace will be created for the session.",
             "type" : "boolean"
           },
           "timeout" : {
             "format" : "int32",
-            "title" : "Number of minutes to wait for session launch. Default is 3 Minutes.",
+            "description" : "Number of minutes to wait for session launch. Default is 3 Minutes.",
             "type" : "integer"
           }
         }
       },
-      "Session Activity Request" : {
+      "SessionActivityRequest" : {
         "description" : "A request to report activity for a running session.",
         "required" : [ "appId", "sessionName" ],
         "type" : "object",
         "properties" : {
           "appId" : {
-            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "sessionName" : {
-            "title" : "The name of the session for which activity is reported.",
+            "description" : "The name of the session for which activity is reported.",
             "type" : "string"
           }
         }
       },
-      "Session Launch Response" : {
+      "SessionLaunchResponse" : {
         "description" : "Response for a session launch. Allows to access the URL of the session or the error that occured during launch.",
         "required" : [ "success" ],
         "type" : "object",
         "properties" : {
           "kind" : {
-            "title" : "Specifies which kind of response this is. This is optional.",
+            "description" : "Specifies which kind of response this is. This is optional.",
             "type" : "string"
           },
           "success" : {
-            "title" : "Whether the request was successful",
+            "description" : "Whether the request was successful",
             "type" : "boolean"
           },
           "error" : {
-            "title" : "The error message. Empty if request was successful.",
+            "description" : "The error message. Empty if request was successful.",
             "type" : "string"
           },
           "url" : {
-            "title" : "The URL of the running workspace or empty if there was an error.",
+            "description" : "The URL of the running workspace or empty if there was an error.",
             "type" : "string"
           }
         }
       },
-      "Session List Request" : {
+      "SessionListRequest" : {
         "description" : "A request to list the sessions of a user.",
         "required" : [ "appId", "user" ],
         "type" : "object",
         "properties" : {
           "appId" : {
-            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
-            "title" : "The user identification, usually the email address.",
-            "type" : "string"
-          }
-        }
-      },
-      "Session Start Request" : {
-        "description" : "A request to start a session",
-        "required" : [ "appId", "user", "appDefinition" ],
-        "type" : "object",
-        "properties" : {
-          "appId" : {
-            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
-            "type" : "string"
-          },
-          "user" : {
-            "title" : "The user identification, usually the email address.",
-            "type" : "string"
-          },
-          "appDefinition" : {
-            "title" : "The app to launch.",
-            "type" : "string"
-          },
-          "workspaceName" : {
-            "title" : "The name of the workspace to mount/create.",
-            "type" : "string"
-          },
-          "timeout" : {
-            "format" : "int32",
-            "title" : "Number of minutes to wait for session launch. Default is 3 Minutes.",
-            "type" : "integer"
-          }
-        }
-      },
-      "Session Stop Request" : {
-        "description" : "A request to stop a session",
-        "required" : [ "appId", "user", "sessionName" ],
-        "type" : "object",
-        "properties" : {
-          "appId" : {
-            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
-            "type" : "string"
-          },
-          "user" : {
-            "title" : "The user identification, usually the email address.",
-            "type" : "string"
-          },
-          "sessionName" : {
-            "title" : "The name of the session to stop.",
+            "description" : "The user identification, usually the email address.",
             "type" : "string"
           }
         }
@@ -391,112 +344,159 @@
           }
         }
       },
-      "User Workspace" : {
+      "SessionStartRequest" : {
+        "description" : "A request to start a session",
+        "required" : [ "appId", "user", "appDefinition" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "user" : {
+            "description" : "The user identification, usually the email address.",
+            "type" : "string"
+          },
+          "appDefinition" : {
+            "description" : "The app to launch.",
+            "type" : "string"
+          },
+          "workspaceName" : {
+            "description" : "The name of the workspace to mount/create.",
+            "type" : "string"
+          },
+          "timeout" : {
+            "format" : "int32",
+            "description" : "Number of minutes to wait for session launch. Default is 3 Minutes.",
+            "type" : "integer"
+          }
+        }
+      },
+      "SessionStopRequest" : {
+        "description" : "A request to stop a session",
+        "required" : [ "appId", "user", "sessionName" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "user" : {
+            "description" : "The user identification, usually the email address.",
+            "type" : "string"
+          },
+          "sessionName" : {
+            "description" : "The name of the session to stop.",
+            "type" : "string"
+          }
+        }
+      },
+      "UserWorkspace" : {
         "description" : "Description of a user workspace",
         "required" : [ "name", "label", "user", "active" ],
         "type" : "object",
         "properties" : {
           "name" : {
-            "title" : "The name of the workspace",
+            "description" : "The name of the workspace",
             "type" : "string"
           },
           "label" : {
-            "title" : "The label of the workspace",
+            "description" : "The label of the workspace",
             "type" : "string"
           },
           "appDefinition" : {
-            "title" : "The app this workspace was used with.",
+            "description" : "The app this workspace was used with.",
             "type" : "string"
           },
           "user" : {
-            "title" : "The user identification, usually the email address.",
+            "description" : "The user identification, usually the email address.",
             "type" : "string"
           },
           "active" : {
-            "title" : "Whether the workspace is in use at the moment.",
+            "description" : "Whether the workspace is in use at the moment.",
             "type" : "boolean"
           }
         }
       },
-      "Workspace Creation Request" : {
+      "WorkspaceCreationRequest" : {
         "description" : "Request to create a new workspace.",
         "required" : [ "appId", "user" ],
         "type" : "object",
         "properties" : {
           "appId" : {
-            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
-            "title" : "The user identification, usually the email address.",
+            "description" : "The user identification, usually the email address.",
             "type" : "string"
           },
           "appDefinition" : {
-            "title" : "The app this workspace will be used with.",
+            "description" : "The app this workspace will be used with.",
             "type" : "string"
           },
           "label" : {
-            "title" : "The label of the workspace",
+            "description" : "The label of the workspace",
             "type" : "string"
           }
         }
       },
-      "Workspace Creation Response" : {
+      "WorkspaceCreationResponse" : {
         "description" : "Response of a workspace creation. Allows to retrieve whether the creation was successfull or to get the error that occurred.",
         "required" : [ "success", "workspace" ],
         "type" : "object",
         "properties" : {
           "kind" : {
-            "title" : "Specifies which kind of response this is. This is optional.",
+            "description" : "Specifies which kind of response this is. This is optional.",
             "type" : "string"
           },
           "success" : {
-            "title" : "Whether the request was successful",
+            "description" : "Whether the request was successful",
             "type" : "boolean"
           },
           "error" : {
-            "title" : "The error message. Empty if request was successful.",
+            "description" : "The error message. Empty if request was successful.",
             "type" : "string"
           },
           "workspace" : {
             "allOf" : [ {
-              "$ref" : "#/components/schemas/User Workspace"
+              "$ref" : "#/components/schemas/UserWorkspace"
             }, {
-              "title" : "The workspace."
+              "description" : "The workspace."
             } ]
           }
         }
       },
-      "Workspace Deletion Request" : {
+      "WorkspaceDeletionRequest" : {
         "description" : "Request to delete a workspace",
         "required" : [ "appId", "user", "workspaceName" ],
         "type" : "object",
         "properties" : {
           "appId" : {
-            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
-            "title" : "The user identification, usually the email address.",
+            "description" : "The user identification, usually the email address.",
             "type" : "string"
           },
           "workspaceName" : {
-            "title" : "The name of the workspace to delete.",
+            "description" : "The name of the workspace to delete.",
             "type" : "string"
           }
         }
       },
-      "Workspace List Request" : {
+      "WorkspaceListRequest" : {
         "description" : "Request to list workspaces of a user.",
         "required" : [ "appId", "user" ],
         "type" : "object",
         "properties" : {
           "appId" : {
-            "title" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
-            "title" : "The user identification, usually the email address.",
+            "description" : "The user identification, usually the email address.",
             "type" : "string"
           }
         }

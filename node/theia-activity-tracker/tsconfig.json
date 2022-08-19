@@ -4,6 +4,6 @@
     "src"
   ],
   "compilerOptions": {
-    "outDir": "build",
+    "outDir": "lib",
   }
 }
