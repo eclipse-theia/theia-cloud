@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 
@@ -46,13 +45,9 @@ public final class TheiaCloudPersistentVolumeUtil {
 	return mountPath;
     }
 
-    public static String getPersistentVolumeName(Session session) {
-	return WorkspaceUtil.getStorageNameFromSession(session.getSpec().getName());
-    }
-
     public static Map<String, String> getPersistentVolumeReplacements(String namespace, Workspace workspace) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace.getSpec().getName()));
+	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(PLACEHOLDER_LABEL_WORKSPACE_NAME, workspace.getSpec().getName());
 	return replacements;
@@ -60,7 +55,7 @@ public final class TheiaCloudPersistentVolumeUtil {
 
     public static Map<String, String> getPersistentVolumeClaimReplacements(String namespace, Workspace workspace) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace.getSpec().getName()));
+	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(PLACEHOLDER_LABEL_WORKSPACE_NAME, workspace.getSpec().getName());
 	return replacements;

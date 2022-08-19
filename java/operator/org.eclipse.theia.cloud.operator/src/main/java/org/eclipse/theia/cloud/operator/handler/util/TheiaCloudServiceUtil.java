@@ -17,7 +17,6 @@
 package org.eclipse.theia.cloud.operator.handler.util;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
-import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.util.NamingUtil;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
@@ -37,7 +37,7 @@ public final class TheiaCloudServiceUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudServiceUtil.class);
 
-    public static final String SERVICE_NAME = "-service-";
+    public static final String SERVICE_NAME = "service";
 
     public static final String PLACEHOLDER_SERVICENAME = "placeholder-servicename";
 
@@ -45,25 +45,15 @@ public final class TheiaCloudServiceUtil {
     }
 
     public static String getServiceName(AppDefinition appDefinition, int instance) {
-	return asValidName(getServiceNamePrefix(appDefinition) + instance);
+	return NamingUtil.createName(appDefinition, instance, SERVICE_NAME);
     }
 
     public static String getServiceName(Session session) {
-	return asValidName(getServiceNamePrefix(session) + session.getMetadata().getUid());
-    }
-
-    private static String getServiceNamePrefix(AppDefinition appDefinition) {
-	return appDefinition.getSpec().getName() + SERVICE_NAME;
-    }
-
-    private static String getServiceNamePrefix(Session session) {
-	return session.getSpec().getName() + SERVICE_NAME;
+	return NamingUtil.createName(session, SERVICE_NAME);
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Service service) {
-	int namePrefixLength = getServiceNamePrefix(appDefinition).length();
-	String name = service.getMetadata().getName();
-	String instance = name.substring(namePrefixLength);
+	String instance = TheiaCloudK8sUtil.extractIdFromName(service.getMetadata());
 	try {
 	    return Integer.valueOf(instance);
 	} catch (NumberFormatException e) {
