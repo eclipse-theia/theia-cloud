@@ -15,9 +15,9 @@ spec:
   timeout:
     limit: {{ .Values.image.timeoutLimit }}
     strategy: {{ .Values.image.timeoutStrategy }}
-  requestsMemory: {{ .Values.image.requestsMemory | default 1000M | quote }}
-  limitsMemory: {{ .Values.image.limitsMemory | default 1000M | quote }}
-  requestsCpu: {{ .Values.image.requestsCpu | default 100m | quote }}
+  requestsMemory: {{ .Values.image.requestsMemory | default "1000M" | quote }}
+  limitsMemory: {{ .Values.image.limitsMemory | default "1000M" | quote }}
+  requestsCpu: {{ .Values.image.requestsCpu | default "100m" | quote }}
   limitsCpu: {{ .Values.image.limitsCpu | default 2 | quote }}
   downlinkLimit: 30000
   uplinkLimit: 30000
