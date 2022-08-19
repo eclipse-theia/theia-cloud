@@ -43,6 +43,11 @@ hosts:
   # whether the service port needs to be part of the service URL (default: false)
   useServicePortInHostname: false
 
+  # used by oauth2 proxy
+  csrfAllowedDomains:
+    - domain.one.tld
+    - domain.two.tld
+
   # hostname of the landing page
   landing: theia.cloud.192.168.39.173.nip.io
 

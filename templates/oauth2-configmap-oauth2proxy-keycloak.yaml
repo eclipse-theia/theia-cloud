@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: oauth2-proxy-config
-  namespace: { { .Release.Namespace } }
+  namespace: {{ .Release.Namespace }}
 data:
   oauth2-proxy.cfg: |+
     # Provider config
@@ -25,6 +25,6 @@ data:
     skip_provider_button="true"
     reverse_proxy="true"
     # email_domains=["*"]
-    cookie_domains=["{{ tpl .Values.hosts.instance . }}"]
+    cookie_domains={{- toJson .Values.hosts.csrfAllowedDomains }}
     whitelist_domains=["{{ tpl .Values.hosts.instance . }}:*", ".google.com:*"]
     custom_templates_dir="/templates"
