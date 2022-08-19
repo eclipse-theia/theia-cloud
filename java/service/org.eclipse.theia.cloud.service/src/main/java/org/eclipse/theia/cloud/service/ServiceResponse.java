@@ -19,13 +19,13 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 public class ServiceResponse {
 
-    @Schema(title = "Specifies which kind of response this is. This is optional.", required = false)
+    @Schema(description = "Specifies which kind of response this is. This is optional.", required = false)
     public String kind;
 
-    @Schema(title = "Whether the request was successful", required = true)
+    @Schema(description = "Whether the request was successful", required = true)
     public boolean success;
 
-    @Schema(title = "The error message. Empty if request was successful.", required = false)
+    @Schema(description = "The error message. Empty if request was successful.", required = false)
     public String error;
 
     public ServiceResponse(String kind) {

@@ -18,11 +18,11 @@ package org.eclipse.theia.cloud.service.workspace;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
-@Schema(name = "Workspace List Request", description = "Request to list workspaces of a user.")
+@Schema(name = "WorkspaceListRequest", description = "Request to list workspaces of a user.")
 public class WorkspaceListRequest extends ServiceRequest {
     public static final String KIND = "workspaceListRequest";
 
-    @Schema(title = "The user identification, usually the email address.", required = true)
+    @Schema(description = "The user identification, usually the email address.", required = true)
     public String user;
 
     public WorkspaceListRequest() {

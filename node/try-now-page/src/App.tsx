@@ -1,10 +1,10 @@
 import './App.css';
 
-import { getTheiaCloudConfig, launch, LaunchRequest } from '@eclipse-theiacloud/common';
+import { getTheiaCloudConfig, LaunchRequest, TheiaCloud } from '@eclipse-theiacloud/common';
 import React, { useState } from 'react';
 
-import { Spinner } from './components/Spinner';
 import { AppLogo } from './components/AppLogo';
+import { Spinner } from './components/Spinner';
 
 function App(): JSX.Element {
   const [config] = useState(() => getTheiaCloudConfig());
@@ -25,7 +25,7 @@ function App(): JSX.Element {
     setLoading(true);
     setError(undefined);
 
-    launch(config.useEphemeralStorage
+    TheiaCloud.launch(config.useEphemeralStorage
       ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, config.appDefinition)
       : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, config.appDefinition)
     )
@@ -62,12 +62,12 @@ function App(): JSX.Element {
   );
 }
 
-const Loading = () => <div>
-    <Spinner />
-    <p className='Loading__description'>
+const Loading = (): JSX.Element => <div>
+  <Spinner />
+  <p className='Loading__description'>
       We will now spawn a dedicated Blueprint for you, hang in tight, this might take up to 3 minutes.
-    </p>
-  </div>;
+  </p>
+</div>;
 
 interface LaunchAppProps {
   appName: string;
@@ -95,18 +95,17 @@ interface ErrorComponentProps {
   message?: string;
 }
 
-const ErrorComponent: React.FC<ErrorComponentProps> = ({ message }) => {
-  return message !== undefined ? (
-    <div className='App__error-message'>
-      <h2 >
-        <strong>
+const ErrorComponent: React.FC<ErrorComponentProps> = ({ message }) => message !== undefined ? (
+  <div className='App__error-message'>
+    <h2>
+      <strong>
           Oh no, something went wrong! &#9785;
-        </strong>
-      </h2>
-      <pre>ERROR: {message}</pre>
-    </div>
-  ) : null;
-};
+      </strong>
+    </h2>
+    <pre>ERROR: {message}</pre>
+  </div>
+// eslint-disable-next-line no-null/no-null
+) : null;
 interface TermsAndConditionsProps {
   accepted: boolean;
   onTermsAccepted: (accepted: boolean) => void;
@@ -115,23 +114,21 @@ const openTerms = (): boolean => {
   window.open('/terms.html', 'popup', 'width=600,height=600');
   return false;
 };
-const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ accepted, onTermsAccepted }) => {
-  return (
-    <div className='terms-and-conditions'>
-      <input
-        id='accept-terms'
-        type='checkbox'
-        checked={accepted}
-        onChange={ev => onTermsAccepted(ev.target.checked)}
-      />
-      <label htmlFor='accept-terms'>
+const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ accepted, onTermsAccepted }) => (
+  <div className='terms-and-conditions'>
+    <input
+      id='accept-terms'
+      type='checkbox'
+      checked={accepted}
+      onChange={ev => onTermsAccepted(ev.target.checked)}
+    />
+    <label htmlFor='accept-terms'>
         I accept the{' '}
-        <a target='popup' href='/terms.html' onClick={openTerms}>
+      <a target='popup' href='/terms.html' onClick={openTerms}>
           terms and conditions.
-        </a>
-      </label>
-    </div>
-  );
-};
+      </a>
+    </label>
+  </div>
+);
 
 export default App;

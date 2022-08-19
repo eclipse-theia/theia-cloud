@@ -20,11 +20,11 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.service.ServiceResponse;
 
-@Schema(name = "Session Launch Response", description = "Response for a session launch. Allows to access the URL of the session or the error that occured during launch.")
+@Schema(name = "SessionLaunchResponse", description = "Response for a session launch. Allows to access the URL of the session or the error that occured during launch.")
 public class SessionLaunchResponse extends ServiceResponse {
     public static final String KIND = "sessionLaunchResponse";
 
-    @Schema(title = "The URL of the running workspace or empty if there was an error.", required = false)
+    @Schema(description = "The URL of the running workspace or empty if there was an error.", required = false)
     public String url;
 
     public SessionLaunchResponse() {

@@ -24,22 +24,22 @@ import java.util.Optional;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 
-@Schema(name = "User Workspace", description = "Description of a user workspace")
+@Schema(name = "UserWorkspace", description = "Description of a user workspace")
 public class UserWorkspace {
 
-    @Schema(title = "The name of the workspace", required = true)
+    @Schema(description = "The name of the workspace", required = true)
     public String name;
 
-    @Schema(title = "The label of the workspace", required = true)
+    @Schema(description = "The label of the workspace", required = true)
     public String label;
 
-    @Schema(title = "The app this workspace was used with.", required = false)
+    @Schema(description = "The app this workspace was used with.", required = false)
     public String appDefinition;
 
-    @Schema(title = "The user identification, usually the email address.", required = true)
+    @Schema(description = "The user identification, usually the email address.", required = true)
     public String user;
 
-    @Schema(title = "Whether the workspace is in use at the moment.", required = true)
+    @Schema(description = "Whether the workspace is in use at the moment.", required = true)
     public boolean active;
 
     public UserWorkspace() {

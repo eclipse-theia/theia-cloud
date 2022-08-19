@@ -42,7 +42,7 @@ export default defineComponent({
       console.log('Calling to ' + this.serviceUrl);
       axios
         .post(
-          this.serviceUrl + '',
+          this.serviceUrl + '/service',
           {
             appDefinition: this.appDefinition,
             user: this.email,

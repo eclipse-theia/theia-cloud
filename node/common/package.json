@@ -1,16 +1,38 @@
 {
   "name": "@eclipse-theiacloud/common",
-  "version": "0.1.0",
-  "private": true,
-  "description": "",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "version": "0.8.0-alpha.6",
+  "description": "Common functionality for Theia.cloud",
+  "license": "EPL-2.0",
+  "keywords": [
+    "theia",
+    "cloud",
+    "kubernetes",
+    "k8s"
+  ],
+  "author": {
+    "name": "Theia.cloud"
+  },
+  "homepage": "http://theia-cloud.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipsesource/theia-cloud.git"
+  },
+  "bugs": "https://github.com/eclipsesource/theia-cloud/issues",
+  "contributors": [
+    {
+      "name": "Theia.cloud Project",
+      "url": "http://theia-cloud.io"
+    }
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "src",
-    "build"
+    "lib"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "publish:next": "SHA=$(git rev-parse --short HEAD) && npm version prepatch --preid next.${SHA}"
   },
   "dependencies": {
     "@types/uuid": "^8.3.4",
