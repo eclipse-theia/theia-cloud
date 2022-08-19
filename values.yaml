@@ -45,8 +45,7 @@ hosts:
 
   # used by oauth2 proxy
   csrfAllowedDomains:
-    - domain.one.tld
-    - domain.two.tld
+    - "{{ .Values.hosts.instance }}"
 
   # hostname of the landing page
   landing: theia.cloud.192.168.39.173.nip.io
