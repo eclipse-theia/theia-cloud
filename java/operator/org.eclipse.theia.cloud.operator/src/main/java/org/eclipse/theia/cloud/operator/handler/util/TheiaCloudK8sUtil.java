@@ -25,6 +25,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public final class TheiaCloudK8sUtil {
@@ -54,6 +55,13 @@ public final class TheiaCloudK8sUtil {
 		})//
 		.count();
 	return currentInstances > appDefinitionSpec.getMaxInstances();
+    }
+
+    public static String extractIdFromName(ObjectMeta metadata) {
+	String name = metadata.getName();
+	String[] split = name.split("-");
+	String instance = split.length == 0 ? "" : split[0];
+	return instance;
     }
 
 }

@@ -40,7 +40,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
     public boolean workspaceAdded(Workspace workspace, String correlationId) {
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + workspace.getSpec()));
 
-	String storageName = WorkspaceUtil.getStorageName(workspace.getSpec().getName());
+	String storageName = WorkspaceUtil.getStorageName(workspace);
 	if (!client.persistentVolumes().has(storageName)) {
 	    LOGGER.trace(formatLogMessage(correlationId, "Creating new persistent volume named " + storageName));
 	    persistentVolumeHandler.createAndApplyPersistentVolume(correlationId, workspace);
@@ -63,7 +63,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	String sessionName = WorkspaceUtil.getSessionName(workspace.getSpec().getName());
 	client.sessions().delete(correlationId, sessionName);
 
-	String storageName = WorkspaceUtil.getStorageName(workspace.getSpec().getName());
+	String storageName = WorkspaceUtil.getStorageName(workspace);
 	client.persistentVolumeClaims().delete(correlationId, storageName);
 	client.persistentVolumes().delete(correlationId, storageName);
 	return true;

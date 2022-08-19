@@ -17,7 +17,6 @@
 package org.eclipse.theia.cloud.operator.handler.util;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
-import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,6 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.util.NamingUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 
@@ -35,48 +35,30 @@ public final class TheiaCloudConfigMapUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudConfigMapUtil.class);
 
-    public static final String CONFIGMAP_PROXY_NAME = "-config-";
-    public static final String CONFIGMAP_EMAIL_NAME = "-emailconfig-";
+    public static final String CONFIGMAP_PROXY_NAME = "config";
+    public static final String CONFIGMAP_EMAIL_NAME = "emailconfig";
 
     private TheiaCloudConfigMapUtil() {
     }
 
     public static String getProxyConfigName(AppDefinition appDefinition, int instance) {
-	return asValidName(getProxyConfigNamePrefix(appDefinition) + instance);
+	return NamingUtil.createName(appDefinition, instance, CONFIGMAP_PROXY_NAME);
     }
 
     public static String getProxyConfigName(Session session) {
-	return asValidName(getProxyConfigNamePrefix(session) + session.getMetadata().getUid());
+	return NamingUtil.createName(session, CONFIGMAP_PROXY_NAME);
     }
 
     public static String getEmailConfigName(AppDefinition appDefinition, int instance) {
-	return asValidName(getEmailConfigNamePrefix(appDefinition) + instance);
+	return NamingUtil.createName(appDefinition, instance, CONFIGMAP_EMAIL_NAME);
     }
 
     public static String getEmailConfigName(Session session) {
-	return asValidName(getEmailConfigNamePrefix(session) + session.getMetadata().getUid());
-    }
-
-    private static String getProxyConfigNamePrefix(AppDefinition appDefinition) {
-	return appDefinition.getSpec().getName() + CONFIGMAP_PROXY_NAME;
-    }
-
-    private static String getProxyConfigNamePrefix(Session session) {
-	return session.getSpec().getName() + CONFIGMAP_PROXY_NAME;
-    }
-
-    private static String getEmailConfigNamePrefix(AppDefinition appDefinition) {
-	return appDefinition.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
-    }
-
-    public static String getEmailConfigNamePrefix(Session session) {
-	return session.getSpec().getName() + CONFIGMAP_EMAIL_NAME;
+	return NamingUtil.createName(session, CONFIGMAP_EMAIL_NAME);
     }
 
     public static Integer getProxyId(String correlationId, AppDefinition appDefinition, ConfigMap item) {
-	int namePrefixLength = getProxyConfigNamePrefix(appDefinition).length();
-	String name = item.getMetadata().getName();
-	String instance = name.substring(namePrefixLength);
+	String instance = TheiaCloudK8sUtil.extractIdFromName(item.getMetadata());
 	try {
 	    return Integer.valueOf(instance);
 	} catch (NumberFormatException e) {
@@ -86,9 +68,7 @@ public final class TheiaCloudConfigMapUtil {
     }
 
     public static Integer getEmailId(String correlationId, AppDefinition appDefinition, ConfigMap item) {
-	int namePrefixLength = getEmailConfigNamePrefix(appDefinition).length();
-	String name = item.getMetadata().getName();
-	String instance = name.substring(namePrefixLength);
+	String instance = TheiaCloudK8sUtil.extractIdFromName(item.getMetadata());
 	try {
 	    return Integer.valueOf(instance);
 	} catch (NumberFormatException e) {

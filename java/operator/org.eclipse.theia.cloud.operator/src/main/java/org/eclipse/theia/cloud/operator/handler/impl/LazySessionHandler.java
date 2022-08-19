@@ -32,6 +32,8 @@ import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.DeploymentTemplateReplacements;
@@ -239,7 +241,14 @@ public class LazySessionHandler implements SessionHandler {
 	if (session.getSpec().isEphemeral()) {
 	    return Optional.empty();
 	}
-	String storageName = TheiaCloudPersistentVolumeUtil.getPersistentVolumeName(session);
+	Optional<Workspace> workspace = client.workspaces().get(session.getSpec().getWorkspace());
+	if (!workspace.isPresent()) {
+	    LOGGER.info(formatLogMessage(correlationId, "No workspace with name " + session.getSpec().getWorkspace()
+		    + " found for session " + session.getSpec().getName(), correlationId));
+	    return Optional.empty();
+
+	}
+	String storageName = WorkspaceUtil.getStorageName(workspace.get());
 	if (!client.persistentVolumeClaims().has(storageName)) {
 	    LOGGER.info(formatLogMessage(correlationId,
 		    "No storage found for started session, will use ephemeral storage instead", correlationId));

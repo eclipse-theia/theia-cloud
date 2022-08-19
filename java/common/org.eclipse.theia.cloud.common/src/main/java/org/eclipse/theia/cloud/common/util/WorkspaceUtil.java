@@ -19,9 +19,11 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.time.Instant;
 
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+
 public final class WorkspaceUtil {
     private static final String SESSION_SUFFIX = "-session";
-    private static final String STORAGE_SUFFIX = "-pvc";
+    private static final String STORAGE_SUFFIX = "pvc";
     private static final String WORKSPACE_PREFIX = "ws-";
     private static final int WORKSPACE_NAME_LIMIT = NamingUtil.VALID_NAME_LIMIT - SESSION_SUFFIX.length();
 
@@ -42,27 +44,8 @@ public final class WorkspaceUtil {
 	return getSessionName(generateWorkspaceName(user, getWorkspaceDescription(appDefinitionName)));
     }
 
-    public static String getStorageName(String workspaceName) {
-	return workspaceName + STORAGE_SUFFIX;
-    }
-
-    public static String getWorkspaceNameFromSession(String sessionName) {
-	return sessionName.endsWith(SESSION_SUFFIX)
-		? sessionName.substring(0, sessionName.length() - SESSION_SUFFIX.length())
-		: sessionName;
-    }
-
-    public static String getWorkspaceNameFromStorage(String pvcName) {
-	return pvcName.endsWith(STORAGE_SUFFIX) ? pvcName.substring(0, pvcName.length() - STORAGE_SUFFIX.length())
-		: pvcName;
-    }
-
-    public static String getStorageNameFromSession(String sessionName) {
-	return getStorageName(getWorkspaceNameFromSession(sessionName));
-    }
-
-    public static String getSessionNameFromStorage(String sessionName) {
-	return getSessionName(getWorkspaceNameFromSession(sessionName));
+    public static String getStorageName(Workspace workspace) {
+	return NamingUtil.createName(workspace, STORAGE_SUFFIX);
     }
 
     public static String generateWorkspaceLabel(String user, String appDefinitionName) {

@@ -20,7 +20,6 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,15 +30,9 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
-import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
-import io.fabric8.kubernetes.client.dsl.Resource;
 
 public final class TheiaCloudHandlerUtil {
 
@@ -69,14 +62,6 @@ public final class TheiaCloudHandlerUtil {
 
     public static String getAppSelector(Session session) {
 	return asValidName(session.getSpec().getName() + "-" + session.getMetadata().getUid());
-    }
-
-    public static Optional<Workspace> getWorkspaceForSession(NamespacedKubernetesClient client, String namespace,
-	    String sessionName) {
-	String workspaceName = WorkspaceUtil.getWorkspaceNameFromSession(sessionName);
-	NonNamespaceOperation<Workspace, WorkspaceSpecResourceList, Resource<Workspace>> workspaces = client
-		.resources(Workspace.class, WorkspaceSpecResourceList.class).inNamespace(namespace);
-	return Optional.ofNullable(workspaces.withName(workspaceName).get());
     }
 
     public static <T extends HasMetadata> T addOwnerReferenceToItem(String correlationId, String sessionResourceName,

@@ -17,7 +17,6 @@
 package org.eclipse.theia.cloud.operator.handler.util;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
-import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.List;
 import java.util.Set;
@@ -26,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.util.NamingUtil;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -34,7 +34,7 @@ public final class TheiaCloudDeploymentUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudDeploymentUtil.class);
 
-    public static final String DEPLOYMENT_NAME = "-deployment-";
+    public static final String DEPLOYMENT_NAME = "deployment";
 
     private TheiaCloudDeploymentUtil() {
     }
@@ -44,26 +44,16 @@ public final class TheiaCloudDeploymentUtil {
 		+ "/";
     }
 
-    private static String getDeploymentNamePrefix(AppDefinition appDefinition) {
-	return appDefinition.getSpec().getName() + DEPLOYMENT_NAME;
-    }
-
-    private static String getDeploymentNamePrefix(Session session) {
-	return session.getSpec().getName() + DEPLOYMENT_NAME;
-    }
-
     public static String getDeploymentName(AppDefinition appDefinition, int instance) {
-	return asValidName(getDeploymentNamePrefix(appDefinition) + instance);
+	return NamingUtil.createName(appDefinition, instance, DEPLOYMENT_NAME);
     }
 
     public static String getDeploymentName(Session session) {
-	return asValidName(getDeploymentNamePrefix(session) + session.getMetadata().getUid());
+	return NamingUtil.createName(session, DEPLOYMENT_NAME);
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Deployment deployment) {
-	int namePrefixLength = getDeploymentNamePrefix(appDefinition).length();
-	String name = deployment.getMetadata().getName();
-	String instance = name.substring(namePrefixLength);
+	String instance = TheiaCloudK8sUtil.extractIdFromName(deployment.getMetadata());
 	try {
 	    return Integer.valueOf(instance);
 	} catch (NumberFormatException e) {

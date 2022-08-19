@@ -15,11 +15,47 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.util;
 
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+
 public final class NamingUtil {
     public static final int VALID_NAME_LIMIT = 62;
 
     private NamingUtil() {
 	// utility
+    }
+
+    public static String createName(AppDefinition appDefinition, int instance, String suffix) {
+	return createName(instance + "-" + appDefinition.getMetadata().getUid(), suffix,
+		getAdditionalInformation(appDefinition));
+    }
+
+    public static String createName(Session session, String suffix) {
+	return createName(session.getMetadata().getUid(), suffix, getAdditionalInformation(session));
+    }
+
+    public static String createName(Workspace workspace, String suffix) {
+	return createName(workspace.getMetadata().getUid(), suffix, getAdditionalInformation(workspace));
+    }
+
+    private static String createName(String prefix, String suffix, String additionalInformation) {
+	return asValidName(prefix + "-" + suffix + "-" + additionalInformation);
+    }
+
+    private static String getAdditionalInformation(AppDefinition appDefinition) {
+	return appDefinition.getSpec().getName();
+    }
+
+    private static String getAdditionalInformation(Session session) {
+	String workspace = (session.getSpec().getWorkspace() == null || session.getSpec().getWorkspace().isBlank())
+		? "none"
+		: session.getSpec().getWorkspace();
+	return session.getSpec().getUser() + "-" + workspace + "-" + session.getSpec().getAppDefinition();
+    }
+
+    private static String getAdditionalInformation(Workspace workspace) {
+	return workspace.getSpec().getName();
     }
 
     /**
