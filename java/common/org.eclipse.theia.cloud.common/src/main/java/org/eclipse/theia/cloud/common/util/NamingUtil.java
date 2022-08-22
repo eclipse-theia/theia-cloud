@@ -15,6 +15,8 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.util;
 
+import java.util.Locale;
+
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
@@ -24,6 +26,8 @@ public final class NamingUtil {
     public static final int VALID_NAME_LIMIT = 62;
 
     private static final int MAX_IDENTIFIER_LENGTH = 24;
+
+    private static final Locale US_LOCALE = new Locale("en", "US");
 
     private NamingUtil() {
 	// utility
@@ -199,7 +203,7 @@ public final class NamingUtil {
 	if (!Character.isLetterOrDigit(valid.charAt(valid.length() - 1))) {
 	    valid = valid.substring(0, valid.length() - 1) + "z";
 	}
-	return valid;
+	return valid.toLowerCase(US_LOCALE);
     }
 
 }
