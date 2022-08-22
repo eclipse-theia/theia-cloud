@@ -20,27 +20,131 @@ import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 
 public final class NamingUtil {
+
     public static final int VALID_NAME_LIMIT = 62;
+
+    private static final int MAX_IDENTIFIER_LENGTH = 24;
 
     private NamingUtil() {
 	// utility
     }
 
-    public static String createName(AppDefinition appDefinition, int instance, String suffix) {
-	return createName(instance + "-" + appDefinition.getMetadata().getUid(), suffix,
-		getAdditionalInformation(appDefinition));
+    /**
+     * Creates a string that can be used as a name for a kubernetes object.
+     * 
+     * When the same arguments are passed to this method again, the resulting name
+     * will be the same.
+     * 
+     * For different arguments the resulting name will be unique in the cluster.
+     * 
+     * @param appDefinition the {@link AppDefinition}
+     * @param instance      instance id
+     * @param identifier    a short description/name of the kubernetes object for
+     *                      which this name will be used. This will be part of the
+     *                      unique sections of the generated name. <b>The combined
+     *                      length of the instance and the identifier must be at
+     *                      most 23 characters long!</b>
+     * @return the name
+     */
+    public static String createName(AppDefinition appDefinition, int instance, String identifier) {
+	/*
+	 * Kubenertes UIDs are standardized UUIDs/GUIDs. This means the uid string will
+	 * have a length of 36.
+	 * 
+	 * Unique part of the name will consist of the instance followed by the app
+	 * definition's uuid followed by the identifier. Parts will be separated with
+	 * "-". This must be shorter than {@link NamingUtil.VALID_NAME_LIMIT}
+	 * 
+	 * We fill remaining space with additional information about the app definition.
+	 * This may be trimmed away however.
+	 */
+	String prefix = instance + "-";
+	return createName(prefix + appDefinition.getMetadata().getUid(), identifier,
+		getAdditionalInformation(appDefinition), MAX_IDENTIFIER_LENGTH - prefix.length());
     }
 
-    public static String createName(Session session, String suffix) {
-	return createName(session.getMetadata().getUid(), suffix, getAdditionalInformation(session));
+    /**
+     * Creates a string that can be used as a name for a kubernetes object.
+     * 
+     * When the same arguments are passed to this method again, the resulting name
+     * will be the same.
+     * 
+     * For different arguments the resulting name will be unique in the cluster.
+     * 
+     * @param session    the {@link Session}
+     * @param identifier a short description/name of the kubernetes object for which
+     *                   this name will be used. This will be part of the unique
+     *                   sections of the generated name. <b>Must be at most 24
+     *                   characters long!</b>
+     * @return the name
+     */
+    public static String createName(Session session, String identifier) {
+	/*
+	 * Kubenertes UIDs are standardized UUIDs/GUIDs. This means the uid string will
+	 * have a length of 36.
+	 * 
+	 * Unique part of the name will consist of the sessions's uuid followed by the
+	 * identifier. Parts will be separated with "-". This must be shorter than
+	 * {@link NamingUtil.VALID_NAME_LIMIT}
+	 * 
+	 * We fill remaining space with additional information about the session. This
+	 * may be trimmed away however.
+	 */
+	return createName(session.getMetadata().getUid(), identifier, getAdditionalInformation(session),
+		MAX_IDENTIFIER_LENGTH);
     }
 
-    public static String createName(Workspace workspace, String suffix) {
-	return createName(workspace.getMetadata().getUid(), suffix, getAdditionalInformation(workspace));
+    /**
+     * Creates a string that can be used as a name for a kubernetes object.
+     * 
+     * When the same arguments are passed to this method again, the resulting name
+     * will be the same.
+     * 
+     * For different arguments the resulting name will be unique in the cluster.
+     * 
+     * @param workspace  the {@link Workspace}
+     * @param identifier a short description/name of the kubernetes object for which
+     *                   this name will be used. This will be part of the unique
+     *                   sections of the generated name. <b>Must be at most 24
+     *                   characters long!</b>
+     * @return the name
+     */
+    public static String createName(Workspace workspace, String identifier) {
+	/*
+	 * Kubenertes UIDs are standardized UUIDs/GUIDs. This means the uid string will
+	 * have a length of 36.
+	 * 
+	 * Unique part of the name will consist of the workspace uuid followed by the
+	 * identifier. Parts will be separated with "-". This must be shorter than
+	 * {@link NamingUtil.VALID_NAME_LIMIT}
+	 * 
+	 * We fill remaining space with additional information about the workspace. This
+	 * may be trimmed away however.
+	 */
+	return createName(workspace.getMetadata().getUid(), identifier, getAdditionalInformation(workspace),
+		MAX_IDENTIFIER_LENGTH);
     }
 
-    private static String createName(String prefix, String suffix, String additionalInformation) {
-	return asValidName(prefix + "-" + suffix + "-" + additionalInformation);
+    /**
+     * Joins prefix, identifier, and additionalInformation with "-" and enforces
+     * conventions to get a valid kubernetes name.
+     * 
+     * @param prefix
+     * @param identifier
+     * @param additionalInformation
+     * @param maxIdentifierLength   max length of the identifier
+     * @return the name
+     * 
+     * @throw {@link IllegalArgumentException} in case the passed identifier is too
+     *        long
+     */
+    private static String createName(String prefix, String identifier, String additionalInformation,
+	    int maxIdentifierLength) {
+	if (identifier.length() > maxIdentifierLength) {
+	    throw new IllegalArgumentException(
+		    "Identifier " + identifier + " is too long. Max length is " + maxIdentifierLength);
+	}
+	return asValidName(String.join("-", prefix, identifier, additionalInformation));
     }
 
     private static String getAdditionalInformation(AppDefinition appDefinition) {
