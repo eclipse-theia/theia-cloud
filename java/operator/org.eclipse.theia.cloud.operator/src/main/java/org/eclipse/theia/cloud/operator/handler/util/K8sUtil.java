@@ -30,6 +30,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceEdit;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -39,6 +41,7 @@ import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.client.internal.SerializationUtils;
 
 public final class K8sUtil {
 
@@ -162,7 +165,13 @@ public final class K8sUtil {
 	    ResourceEdit.<T>updateOwnerReference(ownerReferenceIndex, ownerAPIVersion, ownerKind, ownerName, ownerUid,
 		    correlationId).andThen(additionalModification).accept(newItem);
 
-	    LOGGER.trace(formatLogMessage(correlationId, "Creating new " + typeName));
+	    String resultingYaml;
+	    try {
+		resultingYaml = SerializationUtils.dumpAsYaml(newItem);
+	    } catch (JsonProcessingException e) {
+		resultingYaml = "Serializing " + typeName + " to Yaml failed.";
+	    }
+	    LOGGER.trace(formatLogMessage(correlationId, "Creating new " + typeName + ":\n" + resultingYaml));
 	    items.create(newItem);
 	    LOGGER.info(formatLogMessage(correlationId, "Created a new " + typeName));
 
