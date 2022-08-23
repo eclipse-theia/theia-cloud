@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.operator.handler.impl;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.operator.handler.util.TheiaCloudDeploymentUtil.HOST_PROTOCOL;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -134,7 +135,7 @@ public final class AddedHandlerUtil {
 		.get();
 	Map<String, String> data = new LinkedHashMap<>(templateConfigMap.getData());
 	data.put(OAUTH2_PROXY_CFG, data.get(OAUTH2_PROXY_CFG)//
-		.replace(CONFIGMAP_DATA_PLACEHOLDER_HOST, "https://" + host)//
+		.replace(CONFIGMAP_DATA_PLACEHOLDER_HOST, HOST_PROTOCOL + host)//
 		.replace(CONFIGMAP_DATA_PLACEHOLDER_PORT, String.valueOf(port)));
 	configMap.setData(data);
     }
@@ -151,7 +152,7 @@ public final class AddedHandlerUtil {
 
 		HttpsURLConnection connection;
 		try {
-		    connection = (HttpsURLConnection) new URL("https://" + url).openConnection();
+		    connection = (HttpsURLConnection) new URL(HOST_PROTOCOL + url).openConnection();
 		} catch (IOException e) {
 		    LOGGER.error(formatLogMessage(correlationId, "Error while checking session availability."), e);
 		    continue;
