@@ -50,4 +50,4 @@ spec:
           - name: THEIA_CLOUD_SESSION_USER
             value: placeholder-env-session-user
           - name: THEIA_CLOUD_SESSION_URL
-            value: placeholder-env-service-url
+            value: placeholder-env-session-url

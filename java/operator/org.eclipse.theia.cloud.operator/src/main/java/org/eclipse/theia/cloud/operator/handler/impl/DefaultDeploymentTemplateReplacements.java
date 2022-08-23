@@ -51,6 +51,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     public static final String PLACEHOLDER_ENV_SESSION_UID = "placeholder-env-session-uid";
     public static final String PLACEHOLDER_ENV_SESSION_NAME = "placeholder-env-session-name";
     public static final String PLACEHOLDER_ENV_SESSION_USER = "placeholder-env-session-user";
+    public static final String PLACEHOLDER_ENV_SESSION_URL = "placeholder-env-session-url";
 
     protected static final String DEFAULT_UID = "1000";
 
@@ -65,7 +66,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
 	replacements.putAll(getAppDefinitionData(appDefinition));
-	replacements.putAll(getEnvironmentVariables(Optional.empty()));
+	replacements.putAll(getEnvironmentVariables(appDefinition, instance));
 	replacements.putAll(getInstanceData(appDefinition, instance));
 	return replacements;
     }
@@ -75,7 +76,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
 	replacements.putAll(getAppDefinitionData(appDefinition));
-	replacements.putAll(getEnvironmentVariables(Optional.of(session)));
+	replacements.putAll(getEnvironmentVariables(appDefinition, session));
 	replacements.putAll(getSessionData(session));
 	return replacements;
     }
@@ -91,6 +92,20 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	appDefinitionData.put(PLACEHOLDER_MEMORY_REQUESTS, orEmpty(appDefinition.getSpec().getRequestsMemory()));
 	appDefinitionData.put(PLACEHOLDER_UID, getUID(appDefinition.getSpec().getUid()));
 	return appDefinitionData;
+    }
+
+    protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, Session session) {
+	Map<String, String> environmentVariables = getEnvironmentVariables(Optional.of(session));
+	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL,
+		TheiaCloudDeploymentUtil.getSessionURL(ingressPathProvider, appDefinition, session));
+	return environmentVariables;
+    }
+
+    protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, int instance) {
+	Map<String, String> environmentVariables = getEnvironmentVariables(Optional.empty());
+	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL,
+		TheiaCloudDeploymentUtil.getSessionURL(ingressPathProvider, appDefinition, instance));
+	return environmentVariables;
     }
 
     protected Map<String, String> getEnvironmentVariables(Optional<Session> session) {

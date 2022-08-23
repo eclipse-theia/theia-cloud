@@ -34,14 +34,24 @@ public final class TheiaCloudDeploymentUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudDeploymentUtil.class);
 
+    public static final String HOST_PROTOCOL = "https://";
     public static final String DEPLOYMENT_NAME = "deployment";
 
     private TheiaCloudDeploymentUtil() {
     }
 
-    public static String getURL(IngressPathProvider ingressPathProvider, AppDefinition appDefinition, Session session) {
-	return "https://" + appDefinition.getSpec().getHost() + ingressPathProvider.getPath(appDefinition, session)
-		+ "/";
+    public static String getSessionURL(IngressPathProvider ingressPathProvider, AppDefinition appDefinition,
+	    Session session) {
+	return getSessionURL(appDefinition.getSpec().getHost(), ingressPathProvider.getPath(appDefinition, session));
+    }
+
+    public static String getSessionURL(IngressPathProvider ingressPathProvider, AppDefinition appDefinition,
+	    int instance) {
+	return getSessionURL(appDefinition.getSpec().getHost(), ingressPathProvider.getPath(appDefinition, instance));
+    }
+
+    private static String getSessionURL(String host, String path) {
+	return HOST_PROTOCOL + host + path + "/";
     }
 
     public static String getDeploymentName(AppDefinition appDefinition, int instance) {

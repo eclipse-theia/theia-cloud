@@ -112,6 +112,7 @@ public class EagerStartSessionHandler implements SessionHandler {
 	if (serviceToUse.isEmpty()) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "No Service for app definition " + appDefinitionID + " found."));
+	    return false;
 	}
 
 	/* get the deployment for the service and add as owner */
