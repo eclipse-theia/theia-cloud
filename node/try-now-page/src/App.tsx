@@ -1,6 +1,6 @@
 import './App.css';
 
-import { getTheiaCloudConfig, LaunchRequest, TheiaCloud } from '@eclipse-theiacloud/common';
+import { getTheiaCloudConfig, LaunchRequest, PingRequest, TheiaCloud } from '@eclipse-theiacloud/common';
 import React, { useState } from 'react';
 
 import { AppLogo } from './components/AppLogo';
@@ -25,16 +25,26 @@ function App(): JSX.Element {
     setLoading(true);
     setError(undefined);
 
-    TheiaCloud.launch(config.useEphemeralStorage
-      ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, config.appDefinition)
-      : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, config.appDefinition)
-    )
-      .catch((_err: Error) => {
-        setError('Sorry, there are no more available instances in the cluster.\n'
-        + 'Please try again later, instances are shut down after 30 minutes.\n\n'
-        + 'Note: this is not a technical limit of Theia.cloud, but was intentionally set by us to keep this free offer within its intended budget.');
+    // first check if the service is available. if not we are doing maintenance and should adapt the error message accordingly
+    TheiaCloud.ping(PingRequest.create(config.serviceUrl, config.appId))
+      .then(() => {
+        // ping successfull continue with launch
+        TheiaCloud.launch(config.useEphemeralStorage
+          ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, config.appDefinition)
+          : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, config.appDefinition)
+        )
+          .catch((_err: Error) => {
+            setError('Sorry, there are no more available instances in the cluster.\n'
+          + 'Please try again later, instances are shut down after 30 minutes.\n\n'
+          + 'Note: this is not a technical limit of Theia.cloud, but was intentionally set by us to keep this free offer within its intended budget.');
+          })
+          .finally(() => {
+            setLoading(false);
+          });
       })
-      .finally(() => {
+      .catch((_err: Error) => {
+        setError('Sorry, we are performing some maintenance at the moment.\n'
+        + 'Please try again later. Usually maintenance won\'t last longer than 60 minutes.\n\n');
         setLoading(false);
       });
   };

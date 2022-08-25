@@ -2,7 +2,7 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  LaunchRequest as ClientLaunchRequest, RootResourceApi,
+  LaunchRequest as ClientLaunchRequest, PingRequest as ClientPingRequest, RootResourceApi,
   SessionActivityRequest as ClientSessionActivityRequest, SessionLaunchResponse, SessionListRequest as ClientSessionListRequest,
   SessionResourceApi, SessionSpec, SessionStartRequest as ClientSessionStartRequest, SessionStopRequest as ClientSessionStopRequest,
   UserWorkspace, WorkspaceCreationRequest as ClientWorkspaceCreationRequest, WorkspaceCreationResponse,
@@ -13,6 +13,16 @@ import { Configuration } from './client/configuration';
 export interface ServiceRequest {
   serviceUrl: string;
   kind?: string;
+}
+
+export type PingRequest = ClientPingRequest & ServiceRequest;
+
+export namespace PingRequest {
+  export const KIND = 'pingRequest';
+
+  export function create(serviceUrl: string, appId: string): PingRequest {
+    return { serviceUrl, appId };
+  }
 }
 
 export type LaunchRequest = ClientLaunchRequest & ServiceRequest;
@@ -36,7 +46,7 @@ export namespace LaunchRequest {
 
 export type SessionListRequest = ClientSessionListRequest & ServiceRequest;
 export namespace SessionListRequest {
-  export const KIND = 'launchRequest';
+  export const KIND = 'sessionListRequest';
 }
 
 export type SessionStartRequest = ClientSessionStartRequest & ServiceRequest;
@@ -86,6 +96,16 @@ export namespace TheiaCloud {
 
   function workspaceApi(url: string): WorkspaceResourceApi {
     return new WorkspaceResourceApi(new Configuration({ basePath: basePath(url) }));
+  }
+
+  export async function ping(request: PingRequest): Promise<void> {
+    const fullRequest = { kind: PingRequest.KIND, ...request };
+    try {
+      await rootApi(request.serviceUrl).serviceGet(fullRequest, createConfig());
+    } catch (error) {
+      console.error((error as any).message);
+      throw error;
+    }
   }
 
   export async function launch(request: LaunchRequest, retries = 0): Promise<void> {

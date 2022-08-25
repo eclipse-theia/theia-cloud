@@ -20,8 +20,11 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.Optional;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
@@ -30,6 +33,21 @@ import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 @Path("/service")
 public class RootResource extends BaseResource {
+
+    @Operation(summary = "Ping", description = "Replies if the service is available.")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @GET
+    public boolean ping(PingRequest request) {
+	if (request == null) {
+	    return false;
+	}
+	String correlationId = generateCorrelationId();
+	if (!isValidRequest(request)) {
+	    info(correlationId, "Ping without matching appId: " + request.appId);
+	    return false;
+	}
+	return true;
+    }
 
     @Operation(summary = "Launch Session", description = "Launches a session and creates a workspace if required.")
     @POST
