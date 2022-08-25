@@ -24,3 +24,9 @@ You can generate the typescript client used in the common package by using the f
 ```bash
 openapi-generator-cli generate -g typescript-axios -i ./doc/docs/openapi.json -o node/common/src/client/ --additional-properties=supportsES6=true,typescriptThreePlus=true
 ```
+
+If the command is not found, you may install the generator with:
+
+```bash
+npm install @openapitools/openapi-generator-cli -g
+```

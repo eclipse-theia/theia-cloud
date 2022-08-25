@@ -71,6 +71,19 @@ export interface LaunchRequest {
     'timeout'?: number;
 }
 /**
+ * 
+ * @export
+ * @interface PingRequest
+ */
+export interface PingRequest {
+    /**
+     * The App Id of this Theia.cloud instance. Request without a matching Id will be denied.
+     * @type {string}
+     * @memberof PingRequest
+     */
+    'appId': string;
+}
+/**
  * A request to report activity for a running session.
  * @export
  * @interface SessionActivityRequest
@@ -438,6 +451,40 @@ export interface WorkspaceListRequest {
 export const RootResourceApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
+         * Replies if the service is available.
+         * @summary Ping
+         * @param {PingRequest} [pingRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceGet: async (pingRequest?: PingRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/service`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(pingRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Launches a session and creates a workspace if required.
          * @summary Launch Session
          * @param {LaunchRequest} [launchRequest] 
@@ -482,6 +529,17 @@ export const RootResourceApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = RootResourceApiAxiosParamCreator(configuration)
     return {
         /**
+         * Replies if the service is available.
+         * @summary Ping
+         * @param {PingRequest} [pingRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async serviceGet(pingRequest?: PingRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.serviceGet(pingRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Launches a session and creates a workspace if required.
          * @summary Launch Session
          * @param {LaunchRequest} [launchRequest] 
@@ -503,6 +561,16 @@ export const RootResourceApiFactory = function (configuration?: Configuration, b
     const localVarFp = RootResourceApiFp(configuration)
     return {
         /**
+         * Replies if the service is available.
+         * @summary Ping
+         * @param {PingRequest} [pingRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceGet(pingRequest?: PingRequest, options?: any): AxiosPromise<boolean> {
+            return localVarFp.serviceGet(pingRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Launches a session and creates a workspace if required.
          * @summary Launch Session
          * @param {LaunchRequest} [launchRequest] 
@@ -522,6 +590,18 @@ export const RootResourceApiFactory = function (configuration?: Configuration, b
  * @extends {BaseAPI}
  */
 export class RootResourceApi extends BaseAPI {
+    /**
+     * Replies if the service is available.
+     * @summary Ping
+     * @param {PingRequest} [pingRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RootResourceApi
+     */
+    public serviceGet(pingRequest?: PingRequest, options?: AxiosRequestConfig) {
+        return RootResourceApiFp(this.configuration).serviceGet(pingRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Launches a session and creates a workspace if required.
      * @summary Launch Session

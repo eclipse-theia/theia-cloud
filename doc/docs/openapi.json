@@ -6,6 +6,32 @@
   },
   "paths" : {
     "/service" : {
+      "get" : {
+        "tags" : [ "Root Resource" ],
+        "summary" : "Ping",
+        "description" : "Replies if the service is available.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PingRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
       "post" : {
         "tags" : [ "Root Resource" ],
         "summary" : "Launch Session",
@@ -261,6 +287,16 @@
             "format" : "int32",
             "description" : "Number of minutes to wait for session launch. Default is 3 Minutes.",
             "type" : "integer"
+          }
+        }
+      },
+      "PingRequest" : {
+        "required" : [ "appId" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
           }
         }
       },
