@@ -22,7 +22,7 @@ Then browse to http://localhost/ and explore the spec from here: https://raw.git
 You can generate the typescript client used in the common package by using the following command from the root of this repository:
 
 ```bash
-openapi-generator-cli generate -g typescript-axios -i ./doc/docs/openapi.json -o node/common/src/client/ --additional-properties=supportsES6=true,typescriptThreePlus=true
+openapi-generator-cli generate -g typescript-fetch -i ./doc/docs/openapi.json -o node/common/src/client/ --additional-properties=supportsES6=true,typescriptThreePlus=true
 ```
 
 If the command is not found, you may install the generator with:

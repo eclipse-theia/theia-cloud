@@ -15,12 +15,19 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+@Schema(name = "PingRequest", description = "Request to ping the availability of the service.")
 public class PingRequest extends ServiceRequest {
 
     public static final String KIND = "pingRequest";
 
     public PingRequest() {
 	super(KIND);
+    }
+
+    public PingRequest(String appId) {
+	super(KIND, appId);
     }
 
     @Override

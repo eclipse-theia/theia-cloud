@@ -6,32 +6,6 @@
   },
   "paths" : {
     "/service" : {
-      "get" : {
-        "tags" : [ "Root Resource" ],
-        "summary" : "Ping",
-        "description" : "Replies if the service is available.",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/PingRequest"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "boolean"
-                }
-              }
-            }
-          }
-        }
-      },
       "post" : {
         "tags" : [ "Root Resource" ],
         "summary" : "Launch Session",
@@ -60,35 +34,6 @@
       }
     },
     "/service/session" : {
-      "get" : {
-        "tags" : [ "Session Resource" ],
-        "summary" : "List sessions",
-        "description" : "List sessions of a user.",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/SessionListRequest"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/SessionSpec"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
       "post" : {
         "tags" : [ "Session Resource" ],
         "summary" : "Start a new session",
@@ -168,20 +113,26 @@
         }
       }
     },
-    "/service/workspace" : {
+    "/service/session/{appId}/{user}" : {
       "get" : {
-        "tags" : [ "Workspace Resource" ],
-        "summary" : "List workspaces",
-        "description" : "Lists the workspaces of a user.",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/WorkspaceListRequest"
-              }
-            }
+        "tags" : [ "Session Resource" ],
+        "summary" : "List sessions",
+        "description" : "List sessions of a user.",
+        "parameters" : [ {
+          "name" : "appId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
           }
-        },
+        }, {
+          "name" : "user",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -190,14 +141,16 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/UserWorkspace"
+                    "$ref" : "#/components/schemas/SessionSpec"
                   }
                 }
               }
             }
           }
         }
-      },
+      }
+    },
+    "/service/workspace" : {
       "post" : {
         "tags" : [ "Workspace Resource" ],
         "summary" : "Create workspace",
@@ -237,6 +190,70 @@
             }
           }
         },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/service/workspace/{appId}/{user}" : {
+      "get" : {
+        "tags" : [ "Workspace Resource" ],
+        "summary" : "List workspaces",
+        "description" : "Lists the workspaces of a user.",
+        "parameters" : [ {
+          "name" : "appId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "user",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserWorkspace"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/service/{appId}" : {
+      "get" : {
+        "tags" : [ "Root Resource" ],
+        "summary" : "Ping",
+        "description" : "Replies if the service is available.",
+        "parameters" : [ {
+          "name" : "appId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -291,6 +308,7 @@
         }
       },
       "PingRequest" : {
+        "description" : "Request to ping the availability of the service.",
         "required" : [ "appId" ],
         "type" : "object",
         "properties" : {

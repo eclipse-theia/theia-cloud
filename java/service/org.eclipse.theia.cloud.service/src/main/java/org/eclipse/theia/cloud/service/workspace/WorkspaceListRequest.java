@@ -29,6 +29,11 @@ public class WorkspaceListRequest extends ServiceRequest {
 	super(KIND);
     }
 
+    public WorkspaceListRequest(String appId, String user) {
+	super(KIND, appId);
+	this.user = user;
+    }
+
     @Override
     public String toString() {
 	return "WorkspaceListRequest [user=" + user + ", appId=" + appId + ", kind=" + kind + "]";

@@ -1,14 +1,14 @@
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
+import { RootResourceApi, SessionResourceApi, WorkspaceResourceApi } from './client/apis';
 import {
-  LaunchRequest as ClientLaunchRequest, PingRequest as ClientPingRequest, RootResourceApi,
-  SessionActivityRequest as ClientSessionActivityRequest, SessionLaunchResponse, SessionListRequest as ClientSessionListRequest,
-  SessionResourceApi, SessionSpec, SessionStartRequest as ClientSessionStartRequest, SessionStopRequest as ClientSessionStopRequest,
+  LaunchRequest as ClientLaunchRequest,
+  PingRequest as ClientPingRequest, SessionActivityRequest as ClientSessionActivityRequest, SessionLaunchResponse, SessionListRequest as ClientSessionListRequest,
+  SessionSpec, SessionStartRequest as ClientSessionStartRequest, SessionStopRequest as ClientSessionStopRequest,
   UserWorkspace, WorkspaceCreationRequest as ClientWorkspaceCreationRequest, WorkspaceCreationResponse,
-  WorkspaceDeletionRequest as ClientWorkspaceDeletionRequest, WorkspaceListRequest as ClientWorkspaceListRequest, WorkspaceResourceApi
-} from './client/api';
-import { Configuration } from './client/configuration';
+  WorkspaceDeletionRequest as ClientWorkspaceDeletionRequest, WorkspaceListRequest as ClientWorkspaceListRequest
+} from './client/models';
+import { Configuration } from './client/runtime';
 
 export interface ServiceRequest {
   serviceUrl: string;
@@ -16,7 +16,6 @@ export interface ServiceRequest {
 }
 
 export type PingRequest = ClientPingRequest & ServiceRequest;
-
 export namespace PingRequest {
   export const KIND = 'pingRequest';
 
@@ -101,7 +100,7 @@ export namespace TheiaCloud {
   export async function ping(request: PingRequest): Promise<void> {
     const fullRequest = { kind: PingRequest.KIND, ...request };
     try {
-      await rootApi(request.serviceUrl).serviceGet(fullRequest, createConfig());
+      await rootApi(request.serviceUrl).serviceAppIdGet(fullRequest, createConfig());
     } catch (error) {
       console.error((error as any).message);
       throw error;
@@ -109,11 +108,10 @@ export namespace TheiaCloud {
   }
 
   export async function launch(request: LaunchRequest, retries = 0): Promise<void> {
-    const fullRequest = { kind: LaunchRequest.KIND, ...request };
-    console.log('Calling to ' + fullRequest.serviceUrl);
+    const launchRequest = { kind: LaunchRequest.KIND, ...request };
     try {
-      const response = await rootApi(request.serviceUrl).servicePost(fullRequest, createConfig());
-      const sessionLaunch = response.data;
+      const response = await rootApi(request.serviceUrl).servicePost({ launchRequest }, createConfig());
+      const sessionLaunch = response;
       if (sessionLaunch.success) {
         console.log(`Redirect to: https://${sessionLaunch.url}`);
         location.replace(`https://${sessionLaunch.url}`);
@@ -134,40 +132,40 @@ export namespace TheiaCloud {
 
   export namespace Session {
     export async function listSessions(request: SessionListRequest): Promise<SessionSpec[]> {
-      const fullRequest = { kind: SessionListRequest.KIND, ...request };
-      return getData(request.serviceUrl, () => sessionApi(request.serviceUrl).serviceSessionGet(fullRequest, createConfig()));
+      const sessionListRequest = { kind: SessionListRequest.KIND, ...request };
+      return sessionApi(request.serviceUrl).serviceSessionAppIdUserGet(sessionListRequest, createConfig());
     }
 
     export async function startSession(request: SessionStartRequest): Promise<SessionLaunchResponse> {
-      const fullRequest = { kind: SessionStartRequest.KIND, ...request };
-      return getData(request.serviceUrl, () => sessionApi(request.serviceUrl).serviceSessionPost(fullRequest, createConfig()));
+      const sessionStartRequest = { kind: SessionStartRequest.KIND, ...request };
+      return sessionApi(request.serviceUrl).serviceSessionPost({ sessionStartRequest }, createConfig());
     }
 
     export async function stopSession(request: SessionStopRequest): Promise<boolean> {
-      const fullRequest = { kind: SessionStopRequest.KIND, ...request };
-      return getData(request.serviceUrl, () => sessionApi(request.serviceUrl).serviceSessionDelete(fullRequest, createConfig()));
+      const sessionStopRequest = { kind: SessionStopRequest.KIND, ...request };
+      return sessionApi(request.serviceUrl).serviceSessionDelete({ sessionStopRequest }, createConfig());
     }
 
     export async function reportSessionActivity(request: SessionActivityRequest): Promise<boolean> {
-      const fullRequest = { kind: SessionActivityRequest.KIND, ...request };
-      return getData(request.serviceUrl, () => sessionApi(request.serviceUrl).serviceSessionPatch(fullRequest, createConfig()));
+      const sessionActivityRequest = { kind: SessionActivityRequest.KIND, ...request };
+      return sessionApi(request.serviceUrl).serviceSessionPatch({ sessionActivityRequest }, createConfig());
     }
   }
 
   export namespace Workspace {
     export async function listWorkspaces(request: WorkspaceListRequest): Promise<UserWorkspace[]> {
-      const fullRequest = { kind: WorkspaceListRequest.KIND, ...request };
-      return getData(request.serviceUrl, () => workspaceApi(request.serviceUrl).serviceWorkspaceGet(fullRequest, createConfig()));
+      const workspaceListRequest = { kind: WorkspaceListRequest.KIND, ...request };
+      return workspaceApi(request.serviceUrl).serviceWorkspaceAppIdUserGet(workspaceListRequest, createConfig());
     }
 
     export async function createWorkspace(request: WorkspaceCreationRequest): Promise<WorkspaceCreationResponse> {
-      const fullRequest = { kind: WorkspaceCreationRequest.KIND, ...request };
-      return getData(request.serviceUrl, () => workspaceApi(request.serviceUrl).serviceWorkspacePost(fullRequest, createConfig()));
+      const workspaceCreationRequest = { kind: WorkspaceCreationRequest.KIND, ...request };
+      return workspaceApi(request.serviceUrl).serviceWorkspacePost({ workspaceCreationRequest }, createConfig());
     }
 
     export async function deleteWorkspace(request: WorkspaceDeletionRequest): Promise<boolean> {
-      const fullRequest = { kind: WorkspaceDeletionRequest.KIND, ...request };
-      return getData(request.serviceUrl, () => workspaceApi(request.serviceUrl).serviceWorkspaceDelete(fullRequest, createConfig()));
+      const workspaceDeletionRequest = { kind: WorkspaceDeletionRequest.KIND, ...request };
+      return workspaceApi(request.serviceUrl).serviceWorkspaceDelete({ workspaceDeletionRequest }, createConfig());
     }
   }
 }
@@ -176,17 +174,8 @@ function createUser(): string {
   return uuidv4() + '@theia.cloud';
 }
 
-function createConfig(): AxiosRequestConfig {
-  return { timeout: 30000 };
-}
-
-async function getData<T = any>(url: string, call: () => Promise<AxiosResponse<T>>): Promise<T> {
-  console.log('Calling to ' + url);
-  try {
-    const response = await call();
-    return response.data;
-  } catch (error) {
-    console.error((error as any).message);
-    throw error;
-  }
+function createConfig(): RequestInit {
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), 30000);
+  return { signal: controller.signal };
 }

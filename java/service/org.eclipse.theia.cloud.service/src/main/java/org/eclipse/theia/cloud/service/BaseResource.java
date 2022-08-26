@@ -30,7 +30,7 @@ public class BaseResource {
     }
 
     protected boolean isValidRequest(ServiceRequest request) {
-	return appId.equals(request.appId);
+	return request != null && request.appId != null && request.appId.equals(appId);
     }
 
     public void info(String correlationId, String message) {
