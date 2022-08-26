@@ -26,6 +26,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
@@ -39,7 +40,9 @@ public class SessionResource extends BaseResource {
 
     @Operation(summary = "List sessions", description = "List sessions of a user.")
     @GET
-    public List<SessionSpec> list(SessionListRequest request) {
+    @Path("/{appId}/{user}")
+    public List<SessionSpec> list(@PathParam("appId") String appId, @PathParam("user") String user) {
+	SessionListRequest request = new SessionListRequest(appId, user);
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
 	    info(correlationId, "List sessions call without matching appId: " + request.appId);

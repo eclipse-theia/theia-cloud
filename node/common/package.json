@@ -1,6 +1,6 @@
 {
   "name": "@eclipse-theiacloud/common",
-  "version": "0.8.0-alpha.6",
+  "version": "0.8.0-alpha.8",
   "description": "Common functionality for Theia.cloud",
   "license": "EPL-2.0",
   "keywords": [
@@ -36,7 +36,6 @@
   },
   "dependencies": {
     "@types/uuid": "^8.3.4",
-    "axios": "^0.27.2",
     "uuid": "^8.3.2"
   }
 }

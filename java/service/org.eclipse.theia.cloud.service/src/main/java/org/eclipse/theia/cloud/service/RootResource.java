@@ -20,11 +20,10 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.Optional;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.PathParam;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
@@ -35,12 +34,13 @@ import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 public class RootResource extends BaseResource {
 
     @Operation(summary = "Ping", description = "Replies if the service is available.")
-    @Consumes(MediaType.APPLICATION_JSON)
     @GET
-    public boolean ping(PingRequest request) {
-	if (request == null) {
+    @Path("/{appId}")
+    public boolean ping(@PathParam("appId") String appId) {
+	if (appId == null) {
 	    return false;
 	}
+	PingRequest request = new PingRequest(appId);
 	String correlationId = generateCorrelationId();
 	if (!isValidRequest(request)) {
 	    info(correlationId, "Ping without matching appId: " + request.appId);
