@@ -10,6 +10,8 @@ import {
 } from './client/models';
 import { Configuration } from './client/runtime';
 
+const DEFAULT_TIMEOUT = 30000;
+
 export interface ServiceRequest {
   serviceUrl: string;
   kind?: string;
@@ -107,10 +109,10 @@ export namespace TheiaCloud {
     }
   }
 
-  export async function launch(request: LaunchRequest, retries = 0): Promise<void> {
+  export async function launch(request: LaunchRequest, retries = 0, timeout?: number): Promise<void> {
     const launchRequest = { kind: LaunchRequest.KIND, ...request };
     try {
-      const response = await rootApi(request.serviceUrl).servicePost({ launchRequest }, createConfig());
+      const response = await rootApi(request.serviceUrl).servicePost({ launchRequest }, createConfig(timeout || request.timeout));
       const sessionLaunch = response;
       if (sessionLaunch.success) {
         console.log(`Redirect to: https://${sessionLaunch.url}`);
@@ -123,7 +125,7 @@ export namespace TheiaCloud {
       // Request timed out or returned an error with an error HTTP code.
       console.error((error as any).message);
       if (retries > 0) {
-        launch(request, retries - 1);
+        launch(request, retries - 1, timeout);
       } else {
         throw error;
       }
@@ -131,41 +133,41 @@ export namespace TheiaCloud {
   }
 
   export namespace Session {
-    export async function listSessions(request: SessionListRequest): Promise<SessionSpec[]> {
+    export async function listSessions(request: SessionListRequest, timeout?: number): Promise<SessionSpec[]> {
       const sessionListRequest = { kind: SessionListRequest.KIND, ...request };
-      return sessionApi(request.serviceUrl).serviceSessionAppIdUserGet(sessionListRequest, createConfig());
+      return sessionApi(request.serviceUrl).serviceSessionAppIdUserGet(sessionListRequest, createConfig(timeout));
     }
 
-    export async function startSession(request: SessionStartRequest): Promise<SessionLaunchResponse> {
+    export async function startSession(request: SessionStartRequest, timeout?: number): Promise<SessionLaunchResponse> {
       const sessionStartRequest = { kind: SessionStartRequest.KIND, ...request };
-      return sessionApi(request.serviceUrl).serviceSessionPost({ sessionStartRequest }, createConfig());
+      return sessionApi(request.serviceUrl).serviceSessionPost({ sessionStartRequest }, createConfig(timeout));
     }
 
-    export async function stopSession(request: SessionStopRequest): Promise<boolean> {
+    export async function stopSession(request: SessionStopRequest, timeout?: number): Promise<boolean> {
       const sessionStopRequest = { kind: SessionStopRequest.KIND, ...request };
-      return sessionApi(request.serviceUrl).serviceSessionDelete({ sessionStopRequest }, createConfig());
+      return sessionApi(request.serviceUrl).serviceSessionDelete({ sessionStopRequest }, createConfig(timeout));
     }
 
-    export async function reportSessionActivity(request: SessionActivityRequest): Promise<boolean> {
+    export async function reportSessionActivity(request: SessionActivityRequest, timeout?: number): Promise<boolean> {
       const sessionActivityRequest = { kind: SessionActivityRequest.KIND, ...request };
-      return sessionApi(request.serviceUrl).serviceSessionPatch({ sessionActivityRequest }, createConfig());
+      return sessionApi(request.serviceUrl).serviceSessionPatch({ sessionActivityRequest }, createConfig(timeout));
     }
   }
 
   export namespace Workspace {
-    export async function listWorkspaces(request: WorkspaceListRequest): Promise<UserWorkspace[]> {
+    export async function listWorkspaces(request: WorkspaceListRequest, timeout?: number): Promise<UserWorkspace[]> {
       const workspaceListRequest = { kind: WorkspaceListRequest.KIND, ...request };
-      return workspaceApi(request.serviceUrl).serviceWorkspaceAppIdUserGet(workspaceListRequest, createConfig());
+      return workspaceApi(request.serviceUrl).serviceWorkspaceAppIdUserGet(workspaceListRequest, createConfig(timeout));
     }
 
-    export async function createWorkspace(request: WorkspaceCreationRequest): Promise<WorkspaceCreationResponse> {
+    export async function createWorkspace(request: WorkspaceCreationRequest, timeout?: number): Promise<WorkspaceCreationResponse> {
       const workspaceCreationRequest = { kind: WorkspaceCreationRequest.KIND, ...request };
-      return workspaceApi(request.serviceUrl).serviceWorkspacePost({ workspaceCreationRequest }, createConfig());
+      return workspaceApi(request.serviceUrl).serviceWorkspacePost({ workspaceCreationRequest }, createConfig(timeout));
     }
 
-    export async function deleteWorkspace(request: WorkspaceDeletionRequest): Promise<boolean> {
+    export async function deleteWorkspace(request: WorkspaceDeletionRequest, timeout?: number): Promise<boolean> {
       const workspaceDeletionRequest = { kind: WorkspaceDeletionRequest.KIND, ...request };
-      return workspaceApi(request.serviceUrl).serviceWorkspaceDelete({ workspaceDeletionRequest }, createConfig());
+      return workspaceApi(request.serviceUrl).serviceWorkspaceDelete({ workspaceDeletionRequest }, createConfig(timeout));
     }
   }
 }
@@ -174,8 +176,8 @@ function createUser(): string {
   return uuidv4() + '@theia.cloud';
 }
 
-function createConfig(): RequestInit {
+function createConfig(timeout = DEFAULT_TIMEOUT): RequestInit {
   const controller = new AbortController();
-  setTimeout(() => controller.abort(), 30000);
+  setTimeout(() => controller.abort(), timeout);
   return { signal: controller.signal };
 }
