@@ -84,7 +84,9 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
 	}));
 
 	try {
-	    latch.await(timeout, unit);
+	    if (!latch.await(timeout, unit)) {
+		throw new InterruptedException("Timeout reached. Interrupt Watch.");
+	    }
 	} finally {
 	    watch.close();
 	}
