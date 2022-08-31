@@ -112,7 +112,7 @@ export namespace TheiaCloud {
   export async function launch(request: LaunchRequest, retries = 0, timeout?: number): Promise<void> {
     const launchRequest = { kind: LaunchRequest.KIND, ...request };
     try {
-      const response = await rootApi(request.serviceUrl).servicePost({ launchRequest }, createConfig(timeout || request.timeout));
+      const response = await rootApi(request.serviceUrl).servicePost({ launchRequest }, createConfig(timeout));
       const sessionLaunch = response;
       if (sessionLaunch.success) {
         console.log(`Redirect to: https://${sessionLaunch.url}`);
