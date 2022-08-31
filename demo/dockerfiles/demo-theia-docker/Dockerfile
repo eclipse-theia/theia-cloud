@@ -1,4 +1,4 @@
-FROM node:12-bullseye as build-stage
+FROM node:16-bullseye as build-stage
 RUN apt-get update && apt-get install -y libxkbfile-dev libsecret-1-dev
 WORKDIR /home/theia
 RUN git clone https://github.com/eclipse-theia/theia-blueprint.git && \
@@ -13,7 +13,7 @@ RUN git clone https://github.com/eclipse-theia/theia-blueprint.git && \
     yarn autoclean --force && \
     yarn cache clean
 
-FROM node:12-bullseye-slim as production-stage
+FROM node:16-bullseye-slim as production-stage
 RUN adduser --system --group theia
 RUN chmod g+rw /home && \
     mkdir -p /home/project && \

@@ -36,8 +36,16 @@ public class SessionLaunchResponse extends ServiceResponse {
 	this.url = url;
     }
 
+    /**
+     * @param session the {@link SessionSpec}
+     * @return A {@link SessionLaunchResponse} if the spec has an URL or an Error,
+     *         <code>null</code> otherwise.
+     */
     public static SessionLaunchResponse from(SessionSpec session) {
-	return new SessionLaunchResponse(session.getUrl() != null, session.getError(), session.getUrl());
+	if (session.hasUrl() || session.hasError()) {
+	    return new SessionLaunchResponse(session.hasUrl(), session.getError(), session.getUrl());
+	}
+	return null;
     }
 
     public static SessionLaunchResponse error(String error) {
