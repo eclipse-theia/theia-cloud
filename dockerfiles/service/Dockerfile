@@ -13,5 +13,8 @@ FROM openjdk:11-jre-slim-buster
 WORKDIR /service
 COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-0.7.0-SNAPSHOT-runner.jar .
 ENV APPID default-app-id
-ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} -jar ./service-0.7.0-SNAPSHOT-runner.jar
+ENV SERVICE_PORT 8081
+ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} \
+    -Dquarkus.http.port=${SERVICE_PORT} \
+    -jar ./service-0.7.0-SNAPSHOT-runner.jar
 CMD [ "" ]

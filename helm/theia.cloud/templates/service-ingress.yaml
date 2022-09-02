@@ -20,6 +20,6 @@ spec:
           service:
             name: service-service
             port:
-              number: 8081
+              number: {{ .Values.hosts.servicePort }}
         path: /service
         pathType: ImplementationSpecific
