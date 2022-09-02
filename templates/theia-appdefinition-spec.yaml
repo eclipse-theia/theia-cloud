@@ -6,7 +6,7 @@ spec:
   name: theia-cloud-demo
   image: {{ .Values.image.name }}
   pullSecret: {{ .Values.image.pullSecret }}
-  uid: 101
+  uid: {{ .Values.image.uid | default "101" }}
   port: 3000
   host: {{ tpl .Values.hosts.instance . }}
   ingressname: theia-cloud-demo-ws-ingress
@@ -21,4 +21,4 @@ spec:
   limitsCpu: {{ .Values.image.limitsCpu | default 2 | quote }}
   downlinkLimit: 30000
   uplinkLimit: 30000
-  mountPath: "/home/project/persisted"
+  mountPath: "/projects"

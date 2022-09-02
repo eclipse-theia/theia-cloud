@@ -62,7 +62,7 @@ spec:
                   type: string
     - name : v2beta
       served: true
-      storage: true
+      storage: false
       schema:
         openAPIV3Schema:
           type: object

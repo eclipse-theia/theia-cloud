@@ -5,3 +5,4 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   APPID: {{ .Values.app.id }}
+  QUARKUS_HTTP_READ_TIMEOUT: "5M"

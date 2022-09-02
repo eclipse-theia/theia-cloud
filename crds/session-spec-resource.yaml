@@ -37,7 +37,7 @@ spec:
                   type: integer
     - name : v1beta
       served: true
-      storage: true
+      storage: false
       schema:
         openAPIV3Schema:
           type: object
