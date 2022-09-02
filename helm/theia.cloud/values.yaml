@@ -40,6 +40,9 @@ hosts:
   # protocol of the REST-API
   serviceProtocol: https
 
+  # service port (default: 8081)
+  servicePort: 8081
+
   # whether the service port needs to be part of the service URL (default: false)
   useServicePortInHostname: false
 

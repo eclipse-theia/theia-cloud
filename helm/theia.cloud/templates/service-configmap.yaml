@@ -5,3 +5,4 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   APPID: {{ .Values.app.id }}
+  SERVICE_PORT: {{ .Values.hosts.servicePort | quote }}
