@@ -103,37 +103,6 @@ export interface SessionActivityRequest {
     'sessionName': string;
 }
 /**
- * Response for a session launch. Allows to access the URL of the session or the error that occured during launch.
- * @export
- * @interface SessionLaunchResponse
- */
-export interface SessionLaunchResponse {
-    /**
-     * Specifies which kind of response this is. This is optional.
-     * @type {string}
-     * @memberof SessionLaunchResponse
-     */
-    'kind'?: string;
-    /**
-     * Whether the request was successful
-     * @type {boolean}
-     * @memberof SessionLaunchResponse
-     */
-    'success': boolean;
-    /**
-     * The error message. Empty if request was successful.
-     * @type {string}
-     * @memberof SessionLaunchResponse
-     */
-    'error'?: string;
-    /**
-     * The URL of the running workspace or empty if there was an error.
-     * @type {string}
-     * @memberof SessionLaunchResponse
-     */
-    'url'?: string;
-}
-/**
  * A request to list the sessions of a user.
  * @export
  * @interface SessionListRequest
@@ -332,74 +301,6 @@ export interface WorkspaceCreationRequest {
     'label'?: string;
 }
 /**
- * Response of a workspace creation. Allows to retrieve whether the creation was successfull or to get the error that occurred.
- * @export
- * @interface WorkspaceCreationResponse
- */
-export interface WorkspaceCreationResponse {
-    /**
-     * Specifies which kind of response this is. This is optional.
-     * @type {string}
-     * @memberof WorkspaceCreationResponse
-     */
-    'kind'?: string;
-    /**
-     * Whether the request was successful
-     * @type {boolean}
-     * @memberof WorkspaceCreationResponse
-     */
-    'success': boolean;
-    /**
-     * The error message. Empty if request was successful.
-     * @type {string}
-     * @memberof WorkspaceCreationResponse
-     */
-    'error'?: string;
-    /**
-     * 
-     * @type {WorkspaceCreationResponseWorkspace}
-     * @memberof WorkspaceCreationResponse
-     */
-    'workspace': WorkspaceCreationResponseWorkspace;
-}
-/**
- * 
- * @export
- * @interface WorkspaceCreationResponseWorkspace
- */
-export interface WorkspaceCreationResponseWorkspace {
-    /**
-     * The name of the workspace
-     * @type {string}
-     * @memberof WorkspaceCreationResponseWorkspace
-     */
-    'name': string;
-    /**
-     * The label of the workspace
-     * @type {string}
-     * @memberof WorkspaceCreationResponseWorkspace
-     */
-    'label': string;
-    /**
-     * The app this workspace was used with.
-     * @type {string}
-     * @memberof WorkspaceCreationResponseWorkspace
-     */
-    'appDefinition'?: string;
-    /**
-     * The user identification, usually the email address.
-     * @type {string}
-     * @memberof WorkspaceCreationResponseWorkspace
-     */
-    'user': string;
-    /**
-     * Whether the workspace is in use at the moment.
-     * @type {boolean}
-     * @memberof WorkspaceCreationResponseWorkspace
-     */
-    'active': boolean;
-}
-/**
  * Request to delete a workspace
  * @export
  * @interface WorkspaceDeletionRequest
@@ -485,7 +386,7 @@ export const RootResourceApiAxiosParamCreator = function (configuration?: Config
             };
         },
         /**
-         * Launches a session and creates a workspace if required.
+         * Launches a session and creates a workspace if required. Responds with the URL of the launched session.
          * @summary Launch Session
          * @param {LaunchRequest} [launchRequest] 
          * @param {*} [options] Override http request option.
@@ -540,13 +441,13 @@ export const RootResourceApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Launches a session and creates a workspace if required.
+         * Launches a session and creates a workspace if required. Responds with the URL of the launched session.
          * @summary Launch Session
          * @param {LaunchRequest} [launchRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async servicePost(launchRequest?: LaunchRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SessionLaunchResponse>> {
+        async servicePost(launchRequest?: LaunchRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.servicePost(launchRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -571,13 +472,13 @@ export const RootResourceApiFactory = function (configuration?: Configuration, b
             return localVarFp.serviceAppIdGet(appId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Launches a session and creates a workspace if required.
+         * Launches a session and creates a workspace if required. Responds with the URL of the launched session.
          * @summary Launch Session
          * @param {LaunchRequest} [launchRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        servicePost(launchRequest?: LaunchRequest, options?: any): AxiosPromise<SessionLaunchResponse> {
+        servicePost(launchRequest?: LaunchRequest, options?: any): AxiosPromise<string> {
             return localVarFp.servicePost(launchRequest, options).then((request) => request(axios, basePath));
         },
     };
@@ -603,7 +504,7 @@ export class RootResourceApi extends BaseAPI {
     }
 
     /**
-     * Launches a session and creates a workspace if required.
+     * Launches a session and creates a workspace if required. Responds with the URL of the launched session.
      * @summary Launch Session
      * @param {LaunchRequest} [launchRequest] 
      * @param {*} [options] Override http request option.
@@ -729,7 +630,7 @@ export const SessionResourceApiAxiosParamCreator = function (configuration?: Con
             };
         },
         /**
-         * Starts a new session for an existing workspace.
+         * Starts a new session for an existing workspace and responds with the URL of the started session.
          * @summary Start a new session
          * @param {SessionStartRequest} [sessionStartRequest] 
          * @param {*} [options] Override http request option.
@@ -807,13 +708,13 @@ export const SessionResourceApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Starts a new session for an existing workspace.
+         * Starts a new session for an existing workspace and responds with the URL of the started session.
          * @summary Start a new session
          * @param {SessionStartRequest} [sessionStartRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async serviceSessionPost(sessionStartRequest?: SessionStartRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SessionLaunchResponse>> {
+        async serviceSessionPost(sessionStartRequest?: SessionStartRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.serviceSessionPost(sessionStartRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -859,13 +760,13 @@ export const SessionResourceApiFactory = function (configuration?: Configuration
             return localVarFp.serviceSessionPatch(sessionActivityRequest, options).then((request) => request(axios, basePath));
         },
         /**
-         * Starts a new session for an existing workspace.
+         * Starts a new session for an existing workspace and responds with the URL of the started session.
          * @summary Start a new session
          * @param {SessionStartRequest} [sessionStartRequest] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceSessionPost(sessionStartRequest?: SessionStartRequest, options?: any): AxiosPromise<SessionLaunchResponse> {
+        serviceSessionPost(sessionStartRequest?: SessionStartRequest, options?: any): AxiosPromise<string> {
             return localVarFp.serviceSessionPost(sessionStartRequest, options).then((request) => request(axios, basePath));
         },
     };
@@ -916,7 +817,7 @@ export class SessionResourceApi extends BaseAPI {
     }
 
     /**
-     * Starts a new session for an existing workspace.
+     * Starts a new session for an existing workspace and responds with the URL of the started session.
      * @summary Start a new session
      * @param {SessionStartRequest} [sessionStartRequest] 
      * @param {*} [options] Override http request option.
@@ -1081,7 +982,7 @@ export const WorkspaceResourceApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async serviceWorkspacePost(workspaceCreationRequest?: WorkspaceCreationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkspaceCreationResponse>> {
+        async serviceWorkspacePost(workspaceCreationRequest?: WorkspaceCreationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserWorkspace>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.serviceWorkspacePost(workspaceCreationRequest, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1123,7 +1024,7 @@ export const WorkspaceResourceApiFactory = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceWorkspacePost(workspaceCreationRequest?: WorkspaceCreationRequest, options?: any): AxiosPromise<WorkspaceCreationResponse> {
+        serviceWorkspacePost(workspaceCreationRequest?: WorkspaceCreationRequest, options?: any): AxiosPromise<UserWorkspace> {
             return localVarFp.serviceWorkspacePost(workspaceCreationRequest, options).then((request) => request(axios, basePath));
         },
     };

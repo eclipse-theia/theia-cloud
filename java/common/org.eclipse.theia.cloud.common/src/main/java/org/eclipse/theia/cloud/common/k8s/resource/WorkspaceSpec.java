@@ -16,6 +16,8 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource;
 
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -93,6 +95,10 @@ public class WorkspaceSpec implements UserScopedSpec {
 
     public String getError() {
 	return error;
+    }
+
+    public void setError(TheiaCloudError error) {
+	setError(error.asString());
     }
 
     public void setError(String error) {

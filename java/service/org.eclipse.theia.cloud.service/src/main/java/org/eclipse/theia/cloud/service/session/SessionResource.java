@@ -15,9 +15,6 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.session;
 
-import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,8 +28,10 @@ import javax.ws.rs.PathParam;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
+import org.eclipse.theia.cloud.service.TheiaCloudWebException;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 @Path("/service/session")
@@ -43,23 +42,15 @@ public class SessionResource extends BaseResource {
     @Path("/{appId}/{user}")
     public List<SessionSpec> list(@PathParam("appId") String appId, @PathParam("user") String user) {
 	SessionListRequest request = new SessionListRequest(appId, user);
-	String correlationId = generateCorrelationId();
-	if (!isValidRequest(request)) {
-	    info(correlationId, "List sessions call without matching appId: " + request.appId);
-	    return Collections.emptyList();
-	}
+	String correlationId = evaluateRequest(request);
 	info(correlationId, "Listing sessions " + request);
 	return K8sUtil.listSessions(request.user);
     }
 
-    @Operation(summary = "Start a new session", description = "Starts a new session for an existing workspace.")
+    @Operation(summary = "Start a new session", description = "Starts a new session for an existing workspace and responds with the URL of the started session.")
     @POST
-    public SessionLaunchResponse start(SessionStartRequest request) {
-	String correlationId = generateCorrelationId();
-	if (!isValidRequest(request)) {
-	    info(correlationId, "Launching session call without matching appId: " + request.appId);
-	    return SessionLaunchResponse.error("AppId is not matching.");
-	}
+    public String start(SessionStartRequest request) {
+	String correlationId = evaluateRequest(request);
 	info(correlationId, "Launching session " + request);
 	if (request.isEphemeral()) {
 	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout);
@@ -69,7 +60,7 @@ public class SessionResource extends BaseResource {
 		org.eclipse.theia.cloud.common.util.NamingUtil.asValidName(request.workspaceName));
 	if (workspace.isEmpty()) {
 	    info(correlationId, "No workspace for given workspace name: " + request);
-	    return SessionLaunchResponse.error("No workspace for given name: " + request.workspaceName);
+	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_WORKSPACE_NAME);
 	}
 
 	if (request.appDefinition != null) {
@@ -84,15 +75,9 @@ public class SessionResource extends BaseResource {
     @Operation(summary = "Stop session", description = "Stops a session.")
     @DELETE
     public boolean stop(SessionStopRequest request) {
-	String correlationId = generateCorrelationId();
-	if (!isValidRequest(request)) {
-	    info(correlationId, "Stop session call without matching appId: " + request.appId);
-	    return false;
-	}
+	String correlationId = evaluateRequest(request);
 	if (request.sessionName == null) {
-	    // check if we are allowed to launch another workspace
-	    info(correlationId, "No session name");
-	    return false;
+	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_SESSION_NAME);
 	}
 	info(correlationId, "Stop session: " + request);
 	return K8sUtil.stopSession(correlationId, request.sessionName, request.user);
@@ -101,14 +86,9 @@ public class SessionResource extends BaseResource {
     @Operation(summary = "Report session activity", description = "Updates the last activity timestamp for a session to monitor activity.")
     @PATCH
     public boolean activity(SessionActivityRequest request) {
-	String correlationId = generateCorrelationId();
-	if (!isValidRequest(request)) {
-	    info(correlationId, "Report activity call without matching appId: " + request.appId);
-	    return false;
-	}
+	String correlationId = evaluateRequest(request);
 	if (request.sessionName == null) {
-	    info(correlationId, "No session name given");
-	    return false;
+	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_SESSION_NAME);
 	}
 	info(correlationId, "Report session activity: " + request);
 	return K8sUtil.reportSessionActivity(correlationId, request.sessionName);

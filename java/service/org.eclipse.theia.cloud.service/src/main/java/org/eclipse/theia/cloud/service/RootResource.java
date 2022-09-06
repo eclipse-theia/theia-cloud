@@ -15,7 +15,6 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
-import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
 import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.Optional;
@@ -27,7 +26,6 @@ import javax.ws.rs.PathParam;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.service.session.SessionLaunchResponse;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 @Path("/service")
@@ -37,27 +35,14 @@ public class RootResource extends BaseResource {
     @GET
     @Path("/{appId}")
     public boolean ping(@PathParam("appId") String appId) {
-	if (appId == null) {
-	    return false;
-	}
-	PingRequest request = new PingRequest(appId);
-	String correlationId = generateCorrelationId();
-	if (!isValidRequest(request)) {
-	    info(correlationId, "Ping without matching appId: " + request.appId);
-	    return false;
-	}
+	evaluateRequest(new PingRequest(appId));
 	return true;
     }
 
-    @Operation(summary = "Launch Session", description = "Launches a session and creates a workspace if required.")
+    @Operation(summary = "Launch Session", description = "Launches a session and creates a workspace if required. Responds with the URL of the launched session.")
     @POST
-    public SessionLaunchResponse launch(LaunchRequest request) {
-	String correlationId = generateCorrelationId();
-	if (!isValidRequest(request)) {
-	    info(correlationId, "Launch call without matching appId: " + request.appId);
-	    return SessionLaunchResponse.error("Launch call without matching appId: " + request.appId);
-	}
-
+    public String launch(LaunchRequest request) {
+	String correlationId = evaluateRequest(request);
 	if (request.isEphemeral()) {
 	    info(correlationId, "Launching ephemeral session " + request);
 	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout);
@@ -75,17 +60,16 @@ public class RootResource extends BaseResource {
 	info(correlationId, "Create workspace " + request);
 	Workspace workspace = K8sUtil.createWorkspace(correlationId,
 		new UserWorkspace(request.appDefinition, request.user, request.workspaceName, request.label));
-	if (workspace.getSpec().getError() != null) {
-	    K8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());
-	    return SessionLaunchResponse.error(workspace.getSpec().getError());
-	}
+	TheiaCloudWebException.throwIfErroneous(workspace);
+
 	info(correlationId, "Launch workspace session " + request);
-	SessionLaunchResponse response = K8sUtil.launchWorkspaceSession(correlationId,
-		new UserWorkspace(workspace.getSpec()), request.timeout);
-	if (response.error != null) {
+	try {
+	    return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.getSpec()),
+		    request.timeout);
+	} catch (Exception exception) {
 	    info(correlationId, "Delete workspace due to launch error " + request);
 	    K8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());
+	    throw exception;
 	}
-	return response;
     }
 }

@@ -43,11 +43,7 @@
 		<!-- Quarkus Extensions -->
 		<dependency>
 			<groupId>io.quarkus</groupId>
-			<artifactId>quarkus-resteasy</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.quarkus</groupId>
-			<artifactId>quarkus-resteasy-jackson</artifactId>
+			<artifactId>quarkus-resteasy-reactive-jackson</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.quarkus</groupId>
@@ -67,7 +63,7 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>${log4j.version}</version><!--$NO-MVN-MAN-VER$-->
+			<version>${log4j.version}</version><!--$NO-MVN-MAN-VER$ -->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>

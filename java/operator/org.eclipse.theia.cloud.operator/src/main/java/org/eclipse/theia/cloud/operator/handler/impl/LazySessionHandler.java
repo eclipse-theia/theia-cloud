@@ -33,6 +33,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
@@ -196,7 +197,7 @@ public class LazySessionHandler implements SessionHandler {
 	    LOGGER.info(formatLogMessage(correlationId, "Max instances for " + appDefinition.getSpec().getName()
 		    + " reached. Cannot create " + session.getSpec()));
 	    client.sessions().edit(correlationId, session.getMetadata().getName(),
-		    toEdit -> toEdit.getSpec().setError("Max instances reached. Could not create session"));
+		    toEdit -> toEdit.getSpec().setError(TheiaCloudError.SESSION_SERVER_LIMIT_REACHED));
 	    return true;
 	}
 	return false;
@@ -209,7 +210,7 @@ public class LazySessionHandler implements SessionHandler {
 		LOGGER.info(formatLogMessage(correlationId,
 			"No sessions allowed for this user. Could not create session " + session.getSpec()));
 		client.sessions().edit(correlationId, session.getMetadata().getName(),
-			ws -> ws.getSpec().setError("Max sessions reached. Could not create session"));
+			ws -> ws.getSpec().setError(TheiaCloudError.SESSION_USER_NO_SESSIONS));
 		return true;
 	    }
 
@@ -217,8 +218,8 @@ public class LazySessionHandler implements SessionHandler {
 	    if (userSessions > arguments.getSessionsPerUser()) {
 		LOGGER.info(formatLogMessage(correlationId,
 			"No more sessions allowed for this user, limit is  " + arguments.getSessionsPerUser()));
-		client.sessions().edit(correlationId, session.getMetadata().getName(), toEdit -> toEdit.getSpec()
-			.setError("No more sessions allowed for this user, you reached your limit."));
+		client.sessions().edit(correlationId, session.getMetadata().getName(),
+			toEdit -> toEdit.getSpec().setError(TheiaCloudError.SESSION_USER_LIMIT_REACHED));
 		return true;
 	    }
 	}

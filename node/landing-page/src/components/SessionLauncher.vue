@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts">
+import { LaunchRequest, TheiaCloud } from '@eclipse-theiacloud/common';
 import { defineComponent } from 'vue';
-import axios from 'axios';
 
 export default defineComponent({
   name: 'SessionLauncher',
@@ -40,37 +40,17 @@ export default defineComponent({
   methods: {
     startSession(retries: number) {
       console.log('Calling to ' + this.serviceUrl);
-      axios
-        .post(
-          this.serviceUrl + '/service',
-          {
-            appDefinition: this.appDefinition,
-            user: this.email,
-            appId: this.appId,
-            ephemeral: this.useEphemeralStorage,
-            workspaceName: this.workspaceName
-          },
-          {
-            timeout: 300000
-          }
-        )
-        .then(response => {
-          if (response.data.success) {
-            console.log('Redirect to : https://' + response.data.url);
-            location.replace('https://' + response.data.url);
-          } else {
-            this.text = response.data.error;
+      TheiaCloud.launch(this.useEphemeralStorage
+          ? LaunchRequest.ephemeral(this.serviceUrl!, this.appId!, this.appDefinition!)
+          : LaunchRequest.createWorkspace(this.serviceUrl!, this.appId!, this.appDefinition!)
+      , retries, 300000).catch(error => {
+            this.text = error;
             this.showSpinner = false;
-            console.error(response.data.error);
-          }
-        })
-        .catch(error => {
-          console.error(error.message);
-          this.startSession(retries - 1);
-        });
+            console.error(error);
+          });
+        }
     }
-  }
-});
+  });
 </script>
 
 <style scoped>
