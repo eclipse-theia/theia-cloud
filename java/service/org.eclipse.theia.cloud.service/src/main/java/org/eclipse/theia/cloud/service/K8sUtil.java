@@ -52,7 +52,7 @@ public final class K8sUtil {
     }
 
     public static List<SessionSpec> listSessions(String user) {
-	return CLIENT.sessions().specs();
+	return CLIENT.sessions().specs(user);
     }
 
     public static Optional<SessionSpec> findExistingSession(SessionSpec spec) {
