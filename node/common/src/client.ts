@@ -3,9 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   LaunchRequest as ClientLaunchRequest,
-  PingRequest as ClientPingRequest, RootResourceApi, SessionActivityRequest as ClientSessionActivityRequest, SessionLaunchResponse, SessionListRequest as ClientSessionListRequest,
+  PingRequest as ClientPingRequest, RootResourceApi, SessionActivityRequest as ClientSessionActivityRequest, SessionListRequest as ClientSessionListRequest,
   SessionResourceApi, SessionSpec, SessionStartRequest as ClientSessionStartRequest, SessionStopRequest as ClientSessionStopRequest,
-  UserWorkspace, WorkspaceCreationRequest as ClientWorkspaceCreationRequest, WorkspaceCreationResponse,
+  UserWorkspace, WorkspaceCreationRequest as ClientWorkspaceCreationRequest,
   WorkspaceDeletionRequest as ClientWorkspaceDeletionRequest, WorkspaceListRequest as ClientWorkspaceListRequest,
   WorkspaceResourceApi
 } from './client/api';
@@ -109,17 +109,13 @@ export namespace TheiaCloud {
     }
   }
 
-  export async function launch(request: LaunchRequest, retries = 0, timeout?: number): Promise<void> {
+  export async function launch(request: LaunchRequest, retries = 0, timeout?: number, redirect = true): Promise<void> {
     const launchRequest = { kind: LaunchRequest.KIND, ...request };
     try {
-      const response = await getData(() => rootApi(request.serviceUrl).servicePost(launchRequest, createConfig(timeout)));
-      const sessionLaunch = response;
-      if (sessionLaunch.success) {
-        console.log(`Redirect to: https://${sessionLaunch.url}`);
-        location.replace(`https://${sessionLaunch.url}`);
-      } else {
-        console.error(sessionLaunch.error);
-        throw new Error(`Could not launch session: ${sessionLaunch.error}`);
+      const url = await getData(() => rootApi(request.serviceUrl).servicePost(launchRequest, createConfig(timeout)));
+      if(redirect) {
+        console.log(`Redirect to: https://${url}`);
+        location.replace(`https://${url}`);
       }
     } catch (error) {
       // Request timed out or returned an error with an error HTTP code.
@@ -137,7 +133,7 @@ export namespace TheiaCloud {
       return getData(() => sessionApi(request.serviceUrl).serviceSessionAppIdUserGet(request.appId, request.user, createConfig(timeout)));
     }
 
-    export async function startSession(request: SessionStartRequest, timeout?: number): Promise<SessionLaunchResponse> {
+    export async function startSession(request: SessionStartRequest, timeout?: number): Promise<string> {
       const sessionStartRequest = { kind: SessionStartRequest.KIND, ...request };
       return getData(() => sessionApi(request.serviceUrl).serviceSessionPost(sessionStartRequest, createConfig(timeout)));
     }
@@ -158,7 +154,7 @@ export namespace TheiaCloud {
       return getData(() => workspaceApi(request.serviceUrl).serviceWorkspaceAppIdUserGet(request.appId, request.user, createConfig(timeout)));
     }
 
-    export async function createWorkspace(request: WorkspaceCreationRequest, timeout?: number): Promise<WorkspaceCreationResponse> {
+    export async function createWorkspace(request: WorkspaceCreationRequest, timeout?: number): Promise<UserWorkspace> {
       const workspaceCreationRequest = { kind: WorkspaceCreationRequest.KIND, ...request };
       return getData(() => workspaceApi(request.serviceUrl).serviceWorkspacePost(workspaceCreationRequest, createConfig(timeout)));
     }

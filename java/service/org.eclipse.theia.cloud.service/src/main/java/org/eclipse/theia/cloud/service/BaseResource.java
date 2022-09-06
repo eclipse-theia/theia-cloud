@@ -15,7 +15,10 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
+
 import org.eclipse.theia.cloud.common.util.LogMessageUtil;
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.jboss.logging.Logger;
 
 public class BaseResource {
@@ -29,8 +32,14 @@ public class BaseResource {
 	logger = Logger.getLogger(getClass().getSuperclass());
     }
 
-    protected boolean isValidRequest(ServiceRequest request) {
-	return request != null && request.appId != null && request.appId.equals(appId);
+    protected String evaluateRequest(ServiceRequest request) {
+	String correlationId = generateCorrelationId();
+	if (request == null || request.appId == null || !request.appId.equals(appId)) {
+	    String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
+	    info(correlationId, "Callling '" + methodName + "' without matching appId: " + request.appId);
+	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_ID);
+	}
+	return correlationId;
     }
 
     public void info(String correlationId, String message) {

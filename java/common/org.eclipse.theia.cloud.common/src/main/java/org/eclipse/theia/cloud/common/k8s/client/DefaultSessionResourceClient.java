@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
@@ -69,7 +70,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 		    timeout, unit);
 	} catch (InterruptedException exception) {
 	    error(correlationId, "Timeout while waiting for URL for " + spec.getName(), exception);
-	    sessionSpec.setError("Unable to start session.");
+	    sessionSpec.setError(TheiaCloudError.SESSION_LAUNCH_TIMEOUT);
 	}
 	return session;
     }

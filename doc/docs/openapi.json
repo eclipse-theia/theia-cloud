@@ -9,7 +9,7 @@
       "post" : {
         "tags" : [ "Root Resource" ],
         "summary" : "Launch Session",
-        "description" : "Launches a session and creates a workspace if required.",
+        "description" : "Launches a session and creates a workspace if required. Responds with the URL of the launched session.",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -25,7 +25,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SessionLaunchResponse"
+                  "type" : "string"
                 }
               }
             }
@@ -37,7 +37,7 @@
       "post" : {
         "tags" : [ "Session Resource" ],
         "summary" : "Start a new session",
-        "description" : "Starts a new session for an existing workspace.",
+        "description" : "Starts a new session for an existing workspace and responds with the URL of the started session.",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -53,7 +53,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SessionLaunchResponse"
+                  "type" : "string"
                 }
               }
             }
@@ -170,7 +170,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/WorkspaceCreationResponse"
+                  "$ref" : "#/components/schemas/UserWorkspace"
                 }
               }
             }
@@ -333,29 +333,6 @@
           }
         }
       },
-      "SessionLaunchResponse" : {
-        "description" : "Response for a session launch. Allows to access the URL of the session or the error that occured during launch.",
-        "required" : [ "success" ],
-        "type" : "object",
-        "properties" : {
-          "kind" : {
-            "description" : "Specifies which kind of response this is. This is optional.",
-            "type" : "string"
-          },
-          "success" : {
-            "description" : "Whether the request was successful",
-            "type" : "boolean"
-          },
-          "error" : {
-            "description" : "The error message. Empty if request was successful.",
-            "type" : "string"
-          },
-          "url" : {
-            "description" : "The URL of the running workspace or empty if there was an error.",
-            "type" : "string"
-          }
-        }
-      },
       "SessionListRequest" : {
         "description" : "A request to list the sessions of a user.",
         "required" : [ "appId", "user" ],
@@ -492,32 +469,6 @@
           "label" : {
             "description" : "The label of the workspace",
             "type" : "string"
-          }
-        }
-      },
-      "WorkspaceCreationResponse" : {
-        "description" : "Response of a workspace creation. Allows to retrieve whether the creation was successfull or to get the error that occurred.",
-        "required" : [ "success", "workspace" ],
-        "type" : "object",
-        "properties" : {
-          "kind" : {
-            "description" : "Specifies which kind of response this is. This is optional.",
-            "type" : "string"
-          },
-          "success" : {
-            "description" : "Whether the request was successful",
-            "type" : "boolean"
-          },
-          "error" : {
-            "description" : "The error message. Empty if request was successful.",
-            "type" : "string"
-          },
-          "workspace" : {
-            "allOf" : [ {
-              "$ref" : "#/components/schemas/UserWorkspace"
-            }, {
-              "description" : "The workspace."
-            } ]
           }
         }
       },

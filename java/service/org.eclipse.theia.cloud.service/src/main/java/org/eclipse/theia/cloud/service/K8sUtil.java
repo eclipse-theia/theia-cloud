@@ -25,12 +25,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
-import org.eclipse.theia.cloud.service.session.SessionLaunchResponse;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
@@ -59,24 +57,22 @@ public final class K8sUtil {
 	return CLIENT.sessions().specs().stream().filter(sessionSpec -> sessionSpec.equals(spec)).findAny();
     }
 
-    public static SessionLaunchResponse launchEphemeralSession(String correlationId, String appDefinition, String user,
-	    int timeout) {
+    public static String launchEphemeralSession(String correlationId, String appDefinition, String user, int timeout) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition), appDefinition, user);
 	return launchSession(correlationId, sessionSpec, timeout);
     }
 
-    public static SessionLaunchResponse launchWorkspaceSession(String correlationId, UserWorkspace workspace,
-	    int timeout) {
+    public static String launchWorkspaceSession(String correlationId, UserWorkspace workspace, int timeout) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(workspace.name), workspace.appDefinition,
 		workspace.user, workspace.name);
 	return launchSession(correlationId, sessionSpec, timeout);
     }
 
-    private static SessionLaunchResponse launchSession(String correlationId, SessionSpec sessionSpec, int timeout) {
-	return findExistingSession(sessionSpec).map(SessionLaunchResponse::from).orElseGet(() -> {
-	    Session session = CLIENT.sessions().launch(correlationId, sessionSpec, timeout);
-	    return SessionLaunchResponse.from(session.getSpec());
-	});
+    private static String launchSession(String correlationId, SessionSpec sessionSpec, int timeout) {
+	SessionSpec spec = findExistingSession(sessionSpec)
+		.orElseGet(() -> CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getSpec());
+	TheiaCloudWebException.throwIfErroneous(spec);
+	return spec.getUrl();
     }
 
     public static boolean reportSessionActivity(String correlationId, String sessionName) {

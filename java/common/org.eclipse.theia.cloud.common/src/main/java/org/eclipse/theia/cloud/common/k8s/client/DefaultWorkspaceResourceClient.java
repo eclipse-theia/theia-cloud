@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
@@ -65,7 +66,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	} catch (InterruptedException exception) {
 	    error(correlationId, "Timeout while waiting for workspace storage " + workspaceSpec.getName()
 		    + ". Deleting workspace again.", exception);
-	    workspaceSpec.setError("Unable to launch workspace.");
+	    workspaceSpec.setError(TheiaCloudError.WORKSPACE_LAUNCH_TIMEOUT);
 	}
 	return workspace;
     }

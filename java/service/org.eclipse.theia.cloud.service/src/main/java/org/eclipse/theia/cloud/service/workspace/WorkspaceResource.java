@@ -16,8 +16,6 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.workspace;
 
-import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
-
 import java.util.List;
 
 import javax.ws.rs.DELETE;
@@ -28,8 +26,10 @@ import javax.ws.rs.PathParam;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
+import org.eclipse.theia.cloud.service.TheiaCloudWebException;
 
 @Path("/service/workspace")
 public class WorkspaceResource extends BaseResource {
@@ -39,43 +39,28 @@ public class WorkspaceResource extends BaseResource {
     @Path("/{appId}/{user}")
     public List<UserWorkspace> list(@PathParam("appId") String appId, @PathParam("user") String user) {
 	WorkspaceListRequest request = new WorkspaceListRequest(appId, user);
-	String correlationId = generateCorrelationId();
-	if (!isValidRequest(request)) {
-	    info(correlationId, "List workspaces call without matching appId: " + request.appId);
-	    return List.of();
-	}
+	String correlationId = evaluateRequest(request);
 	info(correlationId, "Listing workspaces " + request);
 	return K8sUtil.listWorkspaces(request.user);
     }
 
     @Operation(summary = "Create workspace", description = "Creates a new workspace for a user.")
     @POST
-    public WorkspaceCreationResponse create(WorkspaceCreationRequest request) {
-	String correlationId = generateCorrelationId();
-	if (!isValidRequest(request)) {
-	    info(correlationId, "Create workspace call without matching appId: " + request.appId);
-	    return WorkspaceCreationResponse.error("Create workspace call without matching appId: " + request.appId);
-	}
+    public UserWorkspace create(WorkspaceCreationRequest request) {
+	String correlationId = evaluateRequest(request);
 	info(correlationId, "Creating workspace " + request);
 	Workspace workspace = K8sUtil.createWorkspace(correlationId,
 		new UserWorkspace(request.appDefinition, request.user, request.label));
-	if (workspace.getSpec().getError() != null) {
-	    return WorkspaceCreationResponse.error(workspace.getSpec().getError());
-	}
-	return WorkspaceCreationResponse.ok(new UserWorkspace(workspace.getSpec()));
+	TheiaCloudWebException.throwIfErroneous(workspace);
+	return new UserWorkspace(workspace.getSpec());
     }
 
     @Operation(summary = "Delete workspace", description = "Deletes a workspace.")
     @DELETE
     public boolean delete(WorkspaceDeletionRequest request) {
-	String correlationId = generateCorrelationId();
-	if (!isValidRequest(request)) {
-	    info(correlationId, "Delete workspace call without matching appId: " + request.appId);
-	    return false;
-	}
+	String correlationId = evaluateRequest(request);
 	if (request.workspaceName == null) {
-	    info(correlationId, "No workspace name given");
-	    return false;
+	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_WORKSPACE_NAME);
 	}
 	info(correlationId, "Deleting workspace " + request);
 	return K8sUtil.deleteWorkspace(correlationId, request.workspaceName);
