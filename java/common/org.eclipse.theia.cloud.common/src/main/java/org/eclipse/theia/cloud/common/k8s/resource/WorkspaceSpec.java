@@ -110,7 +110,7 @@ public class WorkspaceSpec implements UserScopedSpec {
     }
 
     public boolean hasError() {
-	return getError() != null && !getError().isBlank();
+	return TheiaCloudError.isErrorString(getError());
     }
 
     @Override

@@ -40,10 +40,10 @@ export default defineComponent({
   methods: {
     startSession(retries: number) {
       console.log('Calling to ' + this.serviceUrl);
-      TheiaCloud.launch(this.useEphemeralStorage
-          ? LaunchRequest.ephemeral(this.serviceUrl!, this.appId!, this.appDefinition!)
-          : LaunchRequest.createWorkspace(this.serviceUrl!, this.appId!, this.appDefinition!)
-      , retries, 300000).catch(error => {
+      TheiaCloud.launchAndRedirect(this.useEphemeralStorage
+          ? LaunchRequest.ephemeral(this.serviceUrl!, this.appId!, this.appDefinition!, undefined, this.email)
+          : LaunchRequest.createWorkspace(this.serviceUrl!, this.appId!, this.appDefinition!, undefined, this.email, this.workspaceName)
+      , 300000, retries).catch(error => {
             this.text = error;
             this.showSpinner = false;
             console.error(error);
