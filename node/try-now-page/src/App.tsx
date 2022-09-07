@@ -29,7 +29,7 @@ function App(): JSX.Element {
     TheiaCloud.ping(PingRequest.create(config.serviceUrl, config.appId))
       .then(() => {
         // ping successfull continue with launch
-        TheiaCloud.launch(config.useEphemeralStorage
+        TheiaCloud.launchAndRedirect(config.useEphemeralStorage
           ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, config.appDefinition)
           : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, config.appDefinition)
         )

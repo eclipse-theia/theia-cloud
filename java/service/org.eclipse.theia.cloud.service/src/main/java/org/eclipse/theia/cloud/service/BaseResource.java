@@ -35,8 +35,8 @@ public class BaseResource {
     protected String evaluateRequest(ServiceRequest request) {
 	String correlationId = generateCorrelationId();
 	if (request == null || request.appId == null || !request.appId.equals(appId)) {
-	    String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
-	    info(correlationId, "Callling '" + methodName + "' without matching appId: " + request.appId);
+	    info(correlationId, "Request '" + request.kind + "' without matching appId: " + request.appId);
+	    trace(correlationId, request.toString());
 	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_ID);
 	}
 	return correlationId;

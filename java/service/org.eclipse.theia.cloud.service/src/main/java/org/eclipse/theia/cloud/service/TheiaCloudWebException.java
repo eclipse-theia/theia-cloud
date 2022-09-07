@@ -51,7 +51,9 @@ public class TheiaCloudWebException extends WebApplicationException {
     }
 
     public static SessionSpec throwIfErroneous(SessionSpec spec) {
-	throwIfError(spec.getError());
+	if (spec.hasError()) {
+	    throw new TheiaCloudWebException(TheiaCloudError.fromString(spec.getError()));
+	}
 	return spec;
     }
 
@@ -61,12 +63,14 @@ public class TheiaCloudWebException extends WebApplicationException {
     }
 
     public static WorkspaceSpec throwIfErroneous(WorkspaceSpec spec) {
-	throwIfError(spec.getError());
+	if (spec.hasError()) {
+	    throw new TheiaCloudWebException(TheiaCloudError.fromString(spec.getError()));
+	}
 	return spec;
     }
 
     public static void throwIfError(String error) {
-	if (error != null) {
+	if (TheiaCloudError.isErrorString(error)) {
 	    throw new TheiaCloudWebException(TheiaCloudError.fromString(error));
 	}
     }

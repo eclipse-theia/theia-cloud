@@ -92,7 +92,7 @@ public class TheiaCloudError {
     }
 
     public static TheiaCloudError fromString(String error) {
-	if (error == null) {
+	if (!isErrorString(error)) {
 	    return null;
 	}
 	try {
@@ -107,5 +107,9 @@ public class TheiaCloudError {
 	} catch (Exception exception) {
 	    return new TheiaCloudError(error);
 	}
+    }
+
+    public static boolean isErrorString(String error) {
+	return error != null && !error.isBlank();
     }
 }

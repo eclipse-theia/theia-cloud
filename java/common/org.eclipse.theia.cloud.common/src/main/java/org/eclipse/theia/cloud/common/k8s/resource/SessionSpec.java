@@ -106,7 +106,7 @@ public class SessionSpec implements UserScopedSpec {
     }
 
     public boolean hasError() {
-	return getError() != null && !getError().isBlank();
+	return TheiaCloudError.isErrorString(getError());
     }
 
     public long getLastActivity() {
