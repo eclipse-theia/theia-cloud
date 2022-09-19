@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: landing-page-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+    acme.cert-manager.io/http01-edit-in-place: "true"
+  namespace: {{ .Release.Namespace }}
+spec:
+  tls: 
+  - hosts:
+    - {{ .Values.hosts.landing }}
+    secretName: landing-page-cert-secret
+  rules:
+  - host: {{ .Values.hosts.landing }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: landing-page-service
+            port:
+              number: 80
+        path: /
+        pathType: Prefix

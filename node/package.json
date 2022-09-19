@@ -1,0 +1,24 @@
+{
+  "name": "theia-cloud-node",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.24.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-header": "^3.1.1",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-no-null": "^1.0.2",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "prettier": "^2.6.2"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces --if-present"
+  },
+  "workspaces": [
+    "common",
+    "theia-activity-tracker",
+    "try-now-page"
+  ]
+}

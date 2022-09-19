@@ -1,0 +1,14 @@
+{
+  "extends": "./configs/base.tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+  },
+  "include": [
+    "common/src",
+    "theia-activity-tracker/src",
+    "try-now-page/src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

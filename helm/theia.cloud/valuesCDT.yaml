@@ -1,0 +1,47 @@
+app:
+  id: asdfghjkl
+  name: CDT.cloud Blueprint
+  logo: cdtcloud.png
+
+issuer:
+  email: mmorlock@example.com
+
+image:
+  name: theiacloud/cdt-blueprint:0.8.0.MS6
+  pullSecret: ""
+  timeoutStrategy: "FIXEDTIME"
+  timeoutLimit: "30"
+
+hosts:
+  service: service.192.168.39.173.nip.io
+  serviceProtocol: https
+  landing: theia.cloud.192.168.39.173.nip.io
+  instance: ws.192.168.39.173.nip.io
+
+landingPage:
+  image: theiacloud/theia-cloud-landing-page:0.8.0.MS6
+  appDefinition: "theia-cloud-demo"
+  ephemeralStorage: true
+
+keycloak:
+  enable: false
+  authUrl: "https://keycloak.url/auth/"
+  realm: "TheiaCloud"
+  clientId: "theia-cloud"
+  clientSecret: "RZdfb7bbhy26C6EObmvlHiZcZhar34O0"
+  cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
+
+operator:
+  image: theiacloud/theia-cloud-operator:0.8.0.MS6
+  eagerStart: false
+  cloudProvider: "K8S"
+  bandwidthLimiter: "K8SANNOTATION"
+  sessionsPerUser: "1"
+
+service:
+  image: theiacloud/theia-cloud-service:0.8.0.MS6
+
+ingress:
+  instanceName: "theia-cloud-demo-ws-ingress"
+  clusterIssuer: letsencrypt-prod
+  theiaCloudCommonName: false

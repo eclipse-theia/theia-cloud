@@ -1,0 +1,148 @@
+# General information about the deployed app
+app:
+  # The app id which is used in the communication between website and REST-API
+  # as a spam migitation. This id is public. Please choose an random generated string.
+  id: asdfghjkl
+
+  # The name of the application that should be displayed on the landing pages
+  name: Theia Blueprint
+
+  # The logo of the application that should be displayed on the landing pages
+  logo: theiablueprint.png
+
+# Values related to certificates/Cert-manager
+issuer:
+  # EMail address of the certificate issuer.
+  email: mmorlock@example.com
+
+# Docker image of the main application
+image:
+  # The name of docker image to be used
+  name: theiacloud/theia-cloud-demo:0.8.0.MS6
+
+  # the image pull secret. Leave empty if registry is public
+  pullSecret: ""
+
+  # Configures how sessions will be stopped. This defines the strategy and the limit in minutes and will override any specification from an appDefinition.
+  # Possible values for strategy:
+  # - FIXEDTIME   Sessions will be stopped after a fixed limit
+  # - INACTIVITY  Sessions will be stopped after user inactivity limit
+  timeoutStrategy: "FIXEDTIME"
+
+  # Limit in minutes
+  timeoutLimit: "30"
+
+# You may adjust the hostname below.
+hosts:
+  # hostname of the REST-API
+  service: service.192.168.39.173.nip.io
+
+  # protocol of the REST-API
+  serviceProtocol: https
+
+  # service port (default: 8081)
+  servicePort: 8081
+
+  # whether the service port needs to be part of the service URL (default: false)
+  useServicePortInHostname: false
+
+  # hostname of the landing page
+  landing: theia.cloud.192.168.39.173.nip.io
+
+  # hostname for the launched Theia-applications
+  instance: ws.192.168.39.173.nip.io
+
+# Values related to the landing page
+landingPage:
+  # the landing page image to use
+  image: theiacloud/theia-cloud-landing-page:0.8.0.MS6
+
+  # Optional: the image pull secret
+  imagePullSecret: pullsecret
+
+  # the app id to launch
+  appDefinition: "theia-cloud-demo"
+
+  # If set to true no persisted storage is used when creating sessions on the landing page.
+  # Set to false if you want to use persisted storage.
+  ephemeralStorage: true
+
+# Values related to Keycloak
+keycloak:
+  # Whether keycloak authentication shall be used
+  enable: false
+
+  # Key cloak auth URL. Only has to be specified when enable: true
+  authUrl: "https://keycloak.url/auth/"
+
+  # The Keycloak Realm. Only has to be specified when enable: true
+  realm: "TheiaCloud"
+
+  # The client-id. Only has to be specified when enable: true
+  clientId: "theia-cloud"
+
+  # The oaid client secret. In case you configure your keycloak client as confindential,
+  # then you may specfiy the secret here.
+  # If you stick with our default public client, you may leave below value. For public clients
+  # keycloak does not generate a client-secret, but in order to make oath2-proxy happy,
+  # we will pass a value
+  clientSecret: "publicbutoauth2proxywantsasecret"
+
+  # The cookie secret. This should not be public! Only has to be specified when enable: true
+  # See https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#generating-a-cookie-secret
+  # for how to generate a strong cookie secret.
+  cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
+
+# Values related to the operator
+operator:
+  # The operator image
+  image: theiacloud/theia-cloud-operator:0.8.0.MS6
+
+  # Optional: the image pull secret
+  imagePullSecret: pullsecret
+
+  # Whether theia applications shall be started eager. This means that the application is already
+  # running without a user. When a user requests a new session, one of the already launched ones
+  # is assigned.
+  #
+  # Currently only false is fully supported.
+  eagerStart: false
+
+  # Select your cloude provider. Possible values:
+  # - K8S   Plain Kubernetes
+  # - GKE   Google Kubernetes Engine
+  cloudProvider: "K8S"
+
+  # Whether Theia Cloud shall limit network speed. This might not be fully supported
+  # on all cloud provider/in all clusters. Possible values:
+  # - K8SANNOTATION                   Set via kubernetes annotations (kubernetes.io/egress-bandwidth and kubernetes.io/ingress-bandwidth)
+  # - WONDERSHAPER                    Set via wondershaper init container
+  # - K8SANNOTATIONANDWONDERSHAPER    Set Kubernetes annotations and use wondershaper init container
+  bandwidthLimiter: "K8SANNOTATION"
+
+  # Set the number of active sessions a single user can launch
+  sessionsPerUser: "1"
+
+# Values of the Theia.cloud REST service
+service:
+  # The image to use
+  image: theiacloud/theia-cloud-service:0.8.0.MS6
+
+  # Optional: the image pull secret
+  imagePullSecret: pullsecret
+
+# Values to influence the ingresses
+ingress:
+  # The name of the ingress which will be updated to publish new theia application.
+  # If this is not existing it will be created.
+  # You may chose to set the ingress up yourself and point theia.cloud to the ingress via
+  # the name
+  instanceName: "theia-cloud-demo-ws-ingress"
+
+  # The cluster issuer to use
+  clusterIssuer: letsencrypt-prod
+
+  # When set to true the cert-manager.io/common-name annotation will be set.
+  # This is only required when the issued certificate by the cert-manager misses a
+  # common-name
+  theiaCloudCommonName: false

@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: placeholder-depname
+  namespace: placeholder-namespace
+  ownerReferences:
+    - apiVersion: theia.cloud/v3beta
+      kind: AppDefinition
+      name: placeholder
+      uid: placeholder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: placeholder-app
+  template:
+    metadata:
+      labels:
+        app: placeholder-app
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: oauth2-proxy
+          image: quay.io/oauth2-proxy/oauth2-proxy
+          imagePullPolicy: Always
+          args:
+            - --config=/etc/oauth2-proxy.cfg
+            - --authenticated-emails-file=/emails/authenticated-emails-list
+            - --gcp-healthchecks
+            - --reverse-proxy
+          ports:
+            - containerPort: 5000
+              name: web
+          volumeMounts:
+            - name: oauth2-proxy-config
+              mountPath: /etc/oauth2-proxy.cfg
+              subPath: oauth2-proxy.cfg
+            - name: oauth2-templates
+              mountPath: /templates
+            - name: oauth2-emails
+              mountPath: /emails
+        - name: placeholder-definitionname
+          image: placeholder-image
+          ports:
+            - containerPort: placeholder-port
+          resources:
+            limits:
+              cpu: placeholder-cpu-limits
+              memory: placeholder-memory-limits
+            requests:
+              cpu: placeholder-cpu-requests
+              memory: placeholder-memory-requests
+          env:
+          - name: THEIA_CLOUD_APP_ID
+            value: placeholder-env-app-id
+          - name: THEIA_CLOUD_SERVICE_URL
+            value: placeholder-env-service-url
+          - name: THEIA_CLOUD_SESSION_UID
+            value: placeholder-env-session-uid
+          - name: THEIA_CLOUD_SESSION_NAME
+            value: placeholder-env-session-name
+          - name: THEIA_CLOUD_SESSION_USER
+            value: placeholder-env-session-user
+          - name: THEIA_CLOUD_SESSION_URL
+            value: placeholder-env-session-url
+      securityContext:
+        runAsUser: placeholder-uid
+        runAsGroup: placeholder-uid
+        fsGroup: placeholder-uid
+      volumes:
+        - name: oauth2-proxy-config
+          configMap:
+            name: placeholder-configname
+        - name: oauth2-templates
+          configMap:
+            name: oauth2-templates
+        - name: oauth2-emails
+          configMap:
+            name: placeholder-emailsconfigname

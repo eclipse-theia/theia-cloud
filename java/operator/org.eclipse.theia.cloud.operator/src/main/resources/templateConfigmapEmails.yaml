@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: placeholder-emailsconfigname
+  labels:
+    theiacloud: emails
+  namespace: placeholder-namespace
+  ownerReferences:
+    - apiVersion: theia.cloud/v3beta
+      kind: AppDefinition
+      name: placeholder
+      uid: placeholder
+data:
+  authenticated-emails-list: 
