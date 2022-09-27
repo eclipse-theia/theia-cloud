@@ -69,8 +69,7 @@ public final class K8sUtil {
     }
 
     private static String launchSession(String correlationId, SessionSpec sessionSpec, int timeout) {
-	SessionSpec spec = findExistingSession(sessionSpec)
-		.orElseGet(() -> CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getSpec());
+	SessionSpec spec = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getSpec();
 	TheiaCloudWebException.throwIfErroneous(spec);
 	return spec.getUrl();
     }
