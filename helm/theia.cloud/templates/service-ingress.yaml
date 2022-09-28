@@ -4,22 +4,22 @@ metadata:
   name: service-ingress
   annotations:
     kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ tpl (.Values.ingress.clusterIssuer | toString) . }}
     acme.cert-manager.io/http01-edit-in-place: "true"
   namespace: {{ .Release.Namespace }}
 spec:
   tls: 
   - hosts:
-    - {{ .Values.hosts.service }}
+    - {{ tpl (.Values.hosts.service | toString) . }}
     secretName: service-cert-secret
   rules:
-  - host: {{ .Values.hosts.service }}
+  - host: {{ tpl (.Values.hosts.service | toString) . }}
     http:
       paths:
       - backend:
           service:
             name: service-service
             port:
-              number: {{ .Values.hosts.servicePort }}
+              number: {{ tpl (.Values.hosts.servicePort | toString) . }}
         path: /service
         pathType: ImplementationSpecific

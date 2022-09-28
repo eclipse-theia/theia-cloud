@@ -20,17 +20,17 @@ spec:
       serviceAccountName: service-api-service-account
       containers:
       - name: service-container
-        image: {{ .Values.service.image }}
+        image: {{ tpl (.Values.service.image | toString) . }}
         ports:
         - name: http
-          containerPort: {{ .Values.hosts.servicePort }}
+          containerPort: {{ tpl (.Values.hosts.servicePort | toString) . }}
           protocol: TCP
         envFrom:
         - configMapRef:
             name: service-config
       {{- if .Values.service.imagePullSecret }}
       imagePullSecrets:
-        - name: {{ .Values.service.imagePullSecret }}
+        - name: {{ tpl (.Values.service.imagePullSecret | toString) . }}
       {{- end }}
 ---
 apiVersion: v1
@@ -47,5 +47,5 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: {{ .Values.hosts.servicePort }}
-      targetPort: {{ .Values.hosts.servicePort }}
+      port: {{ tpl (.Values.hosts.servicePort | toString) . }}
+      targetPort: {{ tpl (.Values.hosts.servicePort | toString) . }}
