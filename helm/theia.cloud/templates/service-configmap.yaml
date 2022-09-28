@@ -4,5 +4,5 @@ metadata:
   name: service-config
   namespace: {{ .Release.Namespace }}
 data:
-  APPID: {{ .Values.app.id }}
-  SERVICE_PORT: {{ .Values.hosts.servicePort | quote }}
+  APPID: {{ tpl (.Values.app.id | toString) . }}
+  SERVICE_PORT: {{ tpl (.Values.hosts.servicePort | toString) . | quote }}

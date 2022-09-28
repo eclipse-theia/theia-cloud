@@ -18,7 +18,7 @@ spec:
       automountServiceAccountToken: false
       containers:
         - name: landing-page-container
-          image: {{ .Values.landingPage.image }}
+          image: {{ tpl (.Values.landingPage.image | toString) . }}
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -39,7 +39,7 @@ spec:
               subPath: logo.png
       {{- if .Values.landingPage.imagePullSecret }}
       imagePullSecrets:
-        - name: {{ .Values.landingPage.imagePullSecret }}
+        - name: {{ tpl (.Values.landingPage.imagePullSecret | toString) . }}
       {{- end }}
       volumes:
         - name: landing-page-config

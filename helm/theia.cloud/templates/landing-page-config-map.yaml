@@ -6,15 +6,15 @@ metadata:
 data:
   config.js: |
     window.theiaCloudConfig = {
-      appId: "{{ .Values.app.id }}",
-      appName: "{{ .Values.app.name }}",
-      useEphemeralStorage: {{ .Values.landingPage.ephemeralStorage }},
-      useKeycloak: {{ .Values.keycloak.enable }},
-      keycloakAuthUrl: "{{ .Values.keycloak.authUrl }}",
-      keycloakRealm: "{{ .Values.keycloak.realm }}",
-      keycloakClientId: "{{ .Values.keycloak.clientId }}",
-      serviceUrl: "{{ .Values.hosts.serviceProtocol }}://{{ .Values.hosts.service }}{{ if .Values.hosts.useServicePortInHostname }}:{{ .Values.hosts.servicePort }}{{ end }}",
-      appDefinition: "{{ .Values.landingPage.appDefinition }}",
+      appId: "{{ tpl (.Values.app.id | toString) . }}",
+      appName: "{{ tpl (.Values.app.name | toString) . }}",
+      useEphemeralStorage: {{ tpl (.Values.landingPage.ephemeralStorage | toString) . }},
+      useKeycloak: {{ tpl (.Values.keycloak.enable | toString) . }},
+      keycloakAuthUrl: "{{ tpl (.Values.keycloak.authUrl | toString) . }}",
+      keycloakRealm: "{{ tpl (.Values.keycloak.realm | toString) . }}",
+      keycloakClientId: "{{ tpl (.Values.keycloak.clientId | toString) . }}",
+      serviceUrl: "{{ tpl (.Values.hosts.serviceProtocol | toString) . }}://{{ tpl (.Values.hosts.service | toString) . }}{{ if .Values.hosts.useServicePortInHostname }}:{{ tpl (.Values.hosts.servicePort | toString) . }}{{ end }}",
+      appDefinition: "{{ tpl (.Values.landingPage.appDefinition | toString) . }}",
     };
 binaryData:
   {{ range $path, $bytes := .Files.Glob (printf "logos/%s" .Values.app.logo)}}
