@@ -374,6 +374,10 @@ export const RootResourceApiAxiosParamCreator = function (configuration?: Config
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -404,6 +408,10 @@ export const RootResourceApiAxiosParamCreator = function (configuration?: Config
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
 
 
     
@@ -550,6 +558,10 @@ export const SessionResourceApiAxiosParamCreator = function (configuration?: Con
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -580,6 +592,10 @@ export const SessionResourceApiAxiosParamCreator = function (configuration?: Con
             const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
 
 
     
@@ -615,6 +631,10 @@ export const SessionResourceApiAxiosParamCreator = function (configuration?: Con
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
+
 
     
             localVarHeaderParameter['Content-Type'] = 'application/json';
@@ -648,6 +668,10 @@ export const SessionResourceApiAxiosParamCreator = function (configuration?: Con
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
 
 
     
@@ -863,6 +887,10 @@ export const WorkspaceResourceApiAxiosParamCreator = function (configuration?: C
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -893,6 +921,10 @@ export const WorkspaceResourceApiAxiosParamCreator = function (configuration?: C
             const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
 
 
     
@@ -927,6 +959,10 @@ export const WorkspaceResourceApiAxiosParamCreator = function (configuration?: C
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
 
 
     

@@ -7,6 +7,7 @@
     :appId="appId"
     :useEphemeralStorage="useEphemeralStorage"
     :workspaceName="workspaceName"
+    :token="token"
   />
 </template>
 
@@ -18,6 +19,7 @@ import { v4 as uuidv4 } from "uuid";
 
 interface AppData {
   email: string | undefined;
+  token: string | undefined;
   workspaceName?: string;
 }
 
@@ -40,6 +42,7 @@ export default defineComponent({
   data() {
     return {
       email: undefined,
+      token: undefined,
       workspaceName: undefined
     } as AppData;
   },
@@ -71,6 +74,7 @@ export default defineComponent({
               const userMail = parsedToken.email;
               this.workspaceName = this.useEphemeralStorage ? undefined : 'ws-' + this.appId + '-' + this.appDefinition + '-' + userMail;
               this.email = userMail;
+              this.token = keycloak.idToken;
             }
           }
         })

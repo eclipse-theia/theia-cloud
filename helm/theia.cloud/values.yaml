@@ -81,8 +81,8 @@ keycloak:
   # The client-id. Only has to be specified when enable: true
   clientId: "theia-cloud"
 
-  # The oaid client secret. In case you configure your keycloak client as confindential,
-  # then you may specfiy the secret here.
+  # The oaid client secret. In case you configure your keycloak client as confidential,
+  # then you may specifiy the secret here.
   # If you stick with our default public client, you may leave below value. For public clients
   # keycloak does not generate a client-secret, but in order to make oath2-proxy happy,
   # we will pass a value

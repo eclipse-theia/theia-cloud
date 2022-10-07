@@ -8,7 +8,8 @@ Finally we will install and try Theia.Cloud using helm.
 
 If minikube is not installed on your system, go to https://minikube.sigs.k8s.io/docs/start/ and follow the instructions in Step 1 Installation.
 
-Create a new Minikube cluster using the `minikube start` command. You may adjust the available RAM and CPU-cores depending on you system.\
+Create a new Minikube cluster using the `minikube start` command.\
+You may adjust the available RAM and CPU-cores depending on your system.\
 `minikube start --addons=ingress --vm=true --memory=8192 --cpus=4`
 
 **Please note:** Minikube has some issues with persisted volumes and permissions. This will only be a problem in this demo, if you want to create files inside the `"./persisted/"` directory available in the demo workspace.\
@@ -30,7 +31,7 @@ Theia.cloud depends on some prerequisite applications to be available on your sy
 ### Helm 3
 
 Follow the steps in https://helm.sh/docs/intro/install/ to install Helm on your system.\
-Helm is a package manager for kubernetes which is required to install some of the preqequiste and Theia.Cloud itself.
+Helm is a package manager for kubernetes which is required to install some of the prerequisite and Theia.Cloud itself.
 
 ### Cert-Manager
 
@@ -63,7 +64,7 @@ Run the following command from the theia-cloud root repository. This uses the va
 helm repo add codecentric https://codecentric.github.io/helm-charts
 
 # install keycloak. 
-helm install keycloak codecentric/keycloak --namespace keycloak --create-namespace --values ./doc/docs/platforms/keycloak-minikube-values.yaml --set ingress.rules[0].host=keycloak.$(minikube ip).nip.io --set ingress.tls[0].hosts={keycloak.$(minikube ip).nip.io}
+helm install keycloak codecentric/keycloak --namespace keycloak --create-namespace --values ./doc/docs/platforms/keycloak-minikube-values.yaml --set "ingress.rules[0].host=keycloak.$(minikube ip).nip.io" --set "ingress.tls[0].hosts={keycloak.$(minikube ip).nip.io}"
 ```
 
 #### Administration
@@ -141,3 +142,17 @@ The very first launch may take a bit longer, since the docker image for the sess
 ### Uninstall Theia.Cloud
 
 Simply run `helm uninstall theia-cloud -n theiacloud`
+
+### Testing local images
+
+You can test locally build images (e.g. of the landing page, service, or operator) by building them in Minikube and then using them in the Minikube Helm chart.
+
+To build images directly in Minikube, execute `eval $(minikube docker-env)` in a terminal.
+With this, the `docker` command in this terminal runs inside Minikube.
+
+Build the docker image as usual.
+
+Adapt [valuesMinikube.yaml](../../../helm/theia.cloud/valuesMinikube.yaml):
+
+* Adapt the `image` value to match your built image.
+* Specify `imagePullPolicy: Never` to prevent Kubernetes from trying to download the image.

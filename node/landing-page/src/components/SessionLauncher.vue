@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { LaunchRequest, TheiaCloud } from '@eclipse-theiacloud/common';
+import { LaunchRequest, TheiaCloud, RequestOptions } from '@eclipse-theiacloud/common';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -17,7 +17,8 @@ export default defineComponent({
     email: String,
     appId: String,
     useEphemeralStorage: Boolean,
-    workspaceName: String
+    workspaceName: String,
+    token: String
   },
   created() {
     if (this.email) {
@@ -40,10 +41,15 @@ export default defineComponent({
   methods: {
     startSession(retries: number) {
       console.log('Calling to ' + this.serviceUrl);
-      TheiaCloud.launchAndRedirect(this.useEphemeralStorage
+      const launchRequest = this.useEphemeralStorage
           ? LaunchRequest.ephemeral(this.serviceUrl!, this.appId!, this.appDefinition!, undefined, this.email)
-          : LaunchRequest.createWorkspace(this.serviceUrl!, this.appId!, this.appDefinition!, undefined, this.email, this.workspaceName)
-      , 300000, retries).catch(error => {
+          : LaunchRequest.createWorkspace(this.serviceUrl!, this.appId!, this.appDefinition!, undefined, this.email, this.workspaceName);
+      const options: RequestOptions = {
+        accessToken: this.token,
+        retries,
+        timeout: 300000
+      }
+      TheiaCloud.launchAndRedirect(launchRequest, options).catch(error => {
             this.text = error;
             this.showSpinner = false;
             console.error(error);

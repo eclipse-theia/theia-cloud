@@ -19,6 +19,7 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.Optional;
 
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -28,12 +29,16 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
+import io.quarkus.security.Authenticated;
+
 @Path("/service")
+@Authenticated
 public class RootResource extends BaseResource {
 
     @Operation(summary = "Ping", description = "Replies if the service is available.")
     @GET
     @Path("/{appId}")
+    @PermitAll
     public boolean ping(@PathParam("appId") String appId) {
 	evaluateRequest(new PingRequest(appId));
 	return true;

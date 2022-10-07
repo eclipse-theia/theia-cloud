@@ -31,6 +31,9 @@ import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.TheiaCloudWebException;
 
+import io.quarkus.security.Authenticated;
+
+@Authenticated
 @Path("/service/workspace")
 public class WorkspaceResource extends BaseResource {
 

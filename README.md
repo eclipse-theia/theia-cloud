@@ -8,7 +8,7 @@ Theia.cloud consists of the following components.
 
 ### Kubernetes Custom Resource Definitions and Operator
 
-Theia.cloud brings simple custom resource definitions (CRDs) that allow to specify the required conifugration, like the docker image of the Theia-based product.\
+Theia.cloud brings simple custom resource definitions (CRDs) that allow to specify the required configuration, like the docker image of the Theia-based product.\
 A Java-based operator will listen for the creation, modification, and deletion of custom resources based on those CRDs and will manage the application.\
 See [Architecture.md](doc/docs/Architecture.md) for more information on the architecture.
 
