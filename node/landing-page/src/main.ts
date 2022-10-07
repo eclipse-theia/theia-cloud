@@ -16,16 +16,16 @@
  ********************************************************************************/
 
 import { getTheiaCloudConfig } from '@eclipse-theiacloud/common';
-import { createApp } from "vue";
-import App from "./App.vue";
+import { createApp } from 'vue';
+import App from './App.vue';
 
 const config = getTheiaCloudConfig() || {
-  appId: "",
-  appName: "",
+  appId: '',
+  appName: '',
   useKeycloak: false,
-  serviceUrl: "",
-  appDefinition: "",
+  serviceUrl: '',
+  appDefinition: '',
   useEphemeralStorage: true
 };
 
-createApp(App, { ...config }).mount("#app");
+createApp(App, { ...config }).mount('#app');

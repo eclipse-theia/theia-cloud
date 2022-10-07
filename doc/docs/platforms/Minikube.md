@@ -31,7 +31,7 @@ Theia.cloud depends on some prerequisite applications to be available on your sy
 ### Helm 3
 
 Follow the steps in https://helm.sh/docs/intro/install/ to install Helm on your system.\
-Helm is a package manager for kubernetes which is required to install some of the prerequisite and Theia.Cloud itself.
+Helm is a package manager for kubernetes which is required to install some of the prerequisites and Theia.Cloud itself.
 
 ### Cert-Manager
 

@@ -42,21 +42,28 @@ export default defineComponent({
     startSession(retries: number) {
       console.log('Calling to ' + this.serviceUrl);
       const launchRequest = this.useEphemeralStorage
-          ? LaunchRequest.ephemeral(this.serviceUrl!, this.appId!, this.appDefinition!, undefined, this.email)
-          : LaunchRequest.createWorkspace(this.serviceUrl!, this.appId!, this.appDefinition!, undefined, this.email, this.workspaceName);
+        ? LaunchRequest.ephemeral(this.serviceUrl!, this.appId!, this.appDefinition!, undefined, this.email)
+        : LaunchRequest.createWorkspace(
+            this.serviceUrl!,
+            this.appId!,
+            this.appDefinition!,
+            undefined,
+            this.email,
+            this.workspaceName
+          );
       const options: RequestOptions = {
         accessToken: this.token,
         retries,
         timeout: 300000
-      }
+      };
       TheiaCloud.launchAndRedirect(launchRequest, options).catch(error => {
-            this.text = error;
-            this.showSpinner = false;
-            console.error(error);
-          });
-        }
+        this.text = error;
+        this.showSpinner = false;
+        console.error(error);
+      });
     }
-  });
+  }
+});
 </script>
 
 <style scoped>
