@@ -6,7 +6,21 @@ Start Theia.cloud service from IDE (which starts quarkus in dev mode).
 
 Access generated specs at <http://localhost:8081/q/openapi?format=json>
 
-Commit results [here](openapi.json).
+Copy the results [here](openapi.json) and remove the `authorizationUrl`, `tokenUrl`, and `refreshUrl` properties from the OAuth2 security scheme at the bottom.
+Afterwards, it should look like this:
+
+```json
+"securitySchemes" : {
+  "SecurityScheme" : {
+    "type" : "oauth2",
+    "description" : "Authentication",
+    "flows" : {
+      "implicit" : {
+      }
+    }
+  }
+}
+```
 
 ## Exploring API
 

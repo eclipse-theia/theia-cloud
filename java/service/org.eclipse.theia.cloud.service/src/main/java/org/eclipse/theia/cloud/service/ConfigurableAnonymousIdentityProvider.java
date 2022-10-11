@@ -38,32 +38,32 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class ConfigurableAnonymousIdentityProvider extends AnonymousIdentityProvider {
 
-	private static final String THEIA_CLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
+    private static final String THEIA_CLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
 
-	private final Logger logger;
-	private final boolean useKeycloak;
+    private final Logger logger;
+    private final boolean useKeycloak;
 
-	public ConfigurableAnonymousIdentityProvider() {
+    public ConfigurableAnonymousIdentityProvider() {
 	logger = Logger.getLogger(getClass());
 	useKeycloak = Boolean.valueOf(System.getProperty(THEIA_CLOUD_USE_KEYCLOAK, "true"));
 	if (!useKeycloak) {
-		logger.warn("Keycloak integration was disabled. Anonymous requests are allowed!");
+	    logger.warn("Keycloak integration was disabled. Anonymous requests are allowed!");
 	}
-	}
+    }
 
-	@Override
-	public Class<AnonymousAuthenticationRequest> getRequestType() {
+    @Override
+    public Class<AnonymousAuthenticationRequest> getRequestType() {
 	return AnonymousAuthenticationRequest.class;
-	}
+    }
 
-	@Override
-	public Uni<SecurityIdentity> authenticate(AnonymousAuthenticationRequest request,
-		AuthenticationRequestContext context) {
+    @Override
+    public Uni<SecurityIdentity> authenticate(AnonymousAuthenticationRequest request,
+	    AuthenticationRequestContext context) {
 	if (useKeycloak) {
-		// If keycloak is used, anonymous requests are handled with their default
-		// behavior. That is, the user will not be authenticated and won't be able to
-		// access any resources requiring authentication.
-		return super.authenticate(request, context);
+	    // If keycloak is used, anonymous requests are handled with their default
+	    // behavior. That is, the user will not be authenticated and won't be able to
+	    // access any resources requiring authentication.
+	    return super.authenticate(request, context);
 	}
 
 	// We don't use keycloak. Thus, anonymous requests must be treated as
@@ -73,21 +73,21 @@ public class ConfigurableAnonymousIdentityProvider extends AnonymousIdentityProv
 	SecurityIdentity authenticatedIdentity = QuarkusSecurityIdentity.builder()
 		.setPrincipal(AnonymousPrincipal.getInstance()).setAnonymous(false).build();
 	return Uni.createFrom().item(authenticatedIdentity);
-	}
+    }
 
-	private static class AnonymousPrincipal extends QuarkusPrincipal {
+    private static class AnonymousPrincipal extends QuarkusPrincipal {
 
 	private static AnonymousPrincipal instance = new AnonymousPrincipal();
 
 	private AnonymousPrincipal() {
-		super("anonymous");
+	    super("anonymous");
 	}
 
 	static AnonymousPrincipal getInstance() {
-		if (instance == null) {
+	    if (instance == null) {
 		instance = new AnonymousPrincipal();
-		}
-		return AnonymousPrincipal.instance;
+	    }
+	    return AnonymousPrincipal.instance;
 	}
-	}
+    }
 }

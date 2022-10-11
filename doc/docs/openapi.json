@@ -594,9 +594,6 @@
         "description" : "Authentication",
         "flows" : {
           "implicit" : {
-            "authorizationUrl" : "http://localhost:35789/realms/quarkus/protocol/openid-connect/auth",
-            "tokenUrl" : "http://localhost:35789/realms/quarkus/protocol/openid-connect/token/introspect",
-            "refreshUrl" : "http://localhost:35789/realms/quarkus/protocol/openid-connect/token"
           }
         }
       }

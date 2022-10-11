@@ -75,8 +75,8 @@ export default defineComponent({
               this.workspaceName = this.useEphemeralStorage
                 ? undefined
                 : 'ws-' + this.appId + '-' + this.appDefinition + '-' + userMail;
-              this.email = userMail;
               this.token = keycloak.idToken;
+              this.email = userMail;
             }
           }
         })
