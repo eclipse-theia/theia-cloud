@@ -6,7 +6,7 @@ The goal of Theia.cloud is to simplify the deployment of Theia-based (and simila
 
 If you encounter any problems feel free to [open an issue](https://github.com/eclipsesource/theia-cloud/issues/new/choose) on the repo.
 For questions and discussions please use the [the Github discussions](https://github.com/eclipsesource/theia-cloud/discussions).
-You can also reach us via [email](mailto:support@theia-cloud.io?subject=JSON%20Forms).
+You can also reach us via [email](mailto:support@theia-cloud.io?subject=Theia.cloud).
 In addition, EclipseSource also offers [professional support](https://eclipsesource.com/services/developer-support/) for Theia and Theia.cloud.
 
 ## Components
