@@ -1,6 +1,13 @@
 # Theia.cloud
 
-The goal of Theia.cloud is to simplify the deployment of Theia-based (and similar) products on Kubernetes. We follow a convention over configuration approach allowing users to get started fast. At the same time, we aim for extensibility allowing developers to customize certain aspects of the kubernetes deployment if required.
+The goal of Theia.cloud is to simplify the deployment of Theia-based (and similar) products on Kubernetes. We follow a convention over configuration approach allowing users to get started fast. At the same time, we aim for extensibility allowing developers to customize all aspects of the kubernetes deployment as required.
+
+## Feedback, Help and Support
+
+If you encounter any problems feel free to [open an issue](https://github.com/eclipsesource/theia-cloud/issues/new/choose) on the repo.
+For questions and discussions please use the [the Github discussions](https://github.com/eclipsesource/theia-cloud/discussions).
+You can also reach us via [email](mailto:support@theia-cloud.io?subject=JSON%20Forms).
+In addition, EclipseSource also offers [professional support](https://eclipsesource.com/services/developer-support/) for Theia and Theia.cloud.
 
 ## Components
 
