@@ -34,6 +34,9 @@ import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.TheiaCloudWebException;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
+import io.quarkus.security.Authenticated;
+
+@Authenticated
 @Path("/service/session")
 public class SessionResource extends BaseResource {
 

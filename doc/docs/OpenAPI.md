@@ -6,7 +6,21 @@ Start Theia.cloud service from IDE (which starts quarkus in dev mode).
 
 Access generated specs at <http://localhost:8081/q/openapi?format=json>
 
-Commit results [here](openapi.json).
+Copy the results [here](openapi.json) and remove the `authorizationUrl`, `tokenUrl`, and `refreshUrl` properties from the OAuth2 security scheme at the bottom.
+Afterwards, it should look like this:
+
+```json
+"securitySchemes" : {
+  "SecurityScheme" : {
+    "type" : "oauth2",
+    "description" : "Authentication",
+    "flows" : {
+      "implicit" : {
+      }
+    }
+  }
+}
+```
 
 ## Exploring API
 
@@ -22,7 +36,7 @@ Then browse to <http://localhost/> and explore the spec from here: <https://raw.
 You can generate the typescript client used in the common package by using the following command from the root of this repository:
 
 ```bash
-openapi-generator-cli generate -g typescript-axios -i ./doc/docs/openapi.json -o node/common/src/client/ --additional-properties=supportsES6=true,typescriptThreePlus=true
+openapi-generator-cli generate -g typescript-axios -i ./doc/docs/openapi.json -o node/common/src/client/ --additional-properties=supportsES6=true,typescriptThreePlus=true --skip-validate-spec
 ```
 
 If the command is not found, you may install the generator with:

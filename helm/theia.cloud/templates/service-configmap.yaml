@@ -6,3 +6,7 @@ metadata:
 data:
   APPID: {{ tpl (.Values.app.id | toString) . }}
   SERVICE_PORT: {{ tpl (.Values.hosts.servicePort | toString) . | quote }}
+  KEYCLOAK_ENABLE: {{ tpl (.Values.keycloak.enable | toString) . | quote }}
+  KEYCLOAK_SERVERURL: {{ tpl (.Values.keycloak.authUrl | toString) . }}realms/{{ tpl (.Values.keycloak.realm | toString) . }}
+  KEYCLOAK_CLIENTID: {{ tpl (.Values.keycloak.clientId | toString) . }}
+  KEYCLOAK_CLIENTSECRET: {{ tpl (.Values.keycloak.clientSecret | toString) . }}

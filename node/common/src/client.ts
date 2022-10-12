@@ -14,6 +14,12 @@ import { Configuration } from './client/configuration';
 export const DEFAULT_CALL_TIMEOUT = 30000;
 export const DEFAULT_CALL_RETRIES = 0;
 
+export interface RequestOptions {
+  accessToken?: string;
+  retries?: number;
+  timeout?: number;
+}
+
 export interface ServiceRequest {
   serviceUrl: string;
   kind?: string;
@@ -94,68 +100,77 @@ export namespace TheiaCloud {
     return url.endsWith(pathName) ? url.substring(0, url.length - new URL(url).pathname.length) : url;
   }
 
-  function rootApi(url: string): RootResourceApi {
-    return new RootResourceApi(new Configuration({ basePath: basePath(url) }));
+  function rootApi(url: string, accessToken: string | undefined): RootResourceApi {
+    return new RootResourceApi(new Configuration({ basePath: basePath(url), accessToken }));
   }
 
-  function sessionApi(url: string): SessionResourceApi {
-    return new SessionResourceApi(new Configuration({ basePath: basePath(url) }));
+  function sessionApi(url: string, accessToken: string | undefined): SessionResourceApi {
+    return new SessionResourceApi(new Configuration({ basePath: basePath(url), accessToken }));
   }
 
-  function workspaceApi(url: string): WorkspaceResourceApi {
-    return new WorkspaceResourceApi(new Configuration({ basePath: basePath(url) }));
+  function workspaceApi(url: string, accessToken: string | undefined): WorkspaceResourceApi {
+    return new WorkspaceResourceApi(new Configuration({ basePath: basePath(url), accessToken }));
   }
 
-  export async function ping(request: PingRequest): Promise<boolean> {
-    return call(() => rootApi(request.serviceUrl).serviceAppIdGet(request.appId, createConfig()));
+  export async function ping(request: PingRequest, options: RequestOptions = {}): Promise<boolean> {
+    const { accessToken, retries, timeout } = options;
+    return call(() => rootApi(request.serviceUrl, accessToken).serviceAppIdGet(request.appId, createConfig(timeout)), retries);
   }
 
-  export async function launch(request: LaunchRequest, timeout?: number, retries?: number): Promise<string> {
+  export async function launch(request: LaunchRequest, options: RequestOptions = {}): Promise<string> {
+    const { accessToken, retries, timeout } = options;
     const launchRequest = { kind: LaunchRequest.KIND, ...request };
-    return call(() => rootApi(request.serviceUrl).servicePost(launchRequest, createConfig(timeout)), retries);
+    return call(() => rootApi(request.serviceUrl, accessToken).servicePost(launchRequest, createConfig(timeout)), retries);
   }
 
-  export async function launchAndRedirect(request: LaunchRequest, timeout?: number, retries?: number): Promise<string> {
-    const url = await launch(request, timeout, retries);
+  export async function launchAndRedirect(request: LaunchRequest, options: RequestOptions = {}): Promise<string> {
+    const url = await launch(request, options);
     console.log(`Redirect to: https://${url}`);
     location.replace(`https://${url}`);
     return url;
   }
 
   export namespace Session {
-    export async function listSessions(request: SessionListRequest, timeout?: number, retries?: number): Promise<SessionSpec[]> {
-      return call(() => sessionApi(request.serviceUrl).serviceSessionAppIdUserGet(request.appId, request.user, createConfig(timeout)), retries);
+    export async function listSessions(request: SessionListRequest, options: RequestOptions = {}): Promise<SessionSpec[]> {
+      const { accessToken, retries, timeout } = options;
+      return call(() => sessionApi(request.serviceUrl, accessToken).serviceSessionAppIdUserGet(request.appId, request.user, createConfig(timeout)), retries);
     }
 
-    export async function startSession(request: SessionStartRequest, timeout?: number, retries?: number): Promise<string> {
+    export async function startSession(request: SessionStartRequest, options: RequestOptions = {}): Promise<string> {
+      const { accessToken, retries, timeout } = options;
       const sessionStartRequest = { kind: SessionStartRequest.KIND, ...request };
-      return call(() => sessionApi(request.serviceUrl).serviceSessionPost(sessionStartRequest, createConfig(timeout)), retries);
+      return call(() => sessionApi(request.serviceUrl, accessToken).serviceSessionPost(sessionStartRequest, createConfig(timeout)), retries);
     }
 
-    export async function stopSession(request: SessionStopRequest, timeout?: number, retries?: number): Promise<boolean> {
+    export async function stopSession(request: SessionStopRequest, options: RequestOptions = {}): Promise<boolean> {
+      const { accessToken, retries, timeout } = options;
       const sessionStopRequest = { kind: SessionStopRequest.KIND, ...request };
-      return call(() => sessionApi(request.serviceUrl).serviceSessionDelete(sessionStopRequest, createConfig(timeout)), retries);
+      return call(() => sessionApi(request.serviceUrl, accessToken).serviceSessionDelete(sessionStopRequest, createConfig(timeout)), retries);
     }
 
-    export async function reportSessionActivity(request: SessionActivityRequest, timeout?: number, retries?: number): Promise<boolean> {
+    export async function reportSessionActivity(request: SessionActivityRequest, options: RequestOptions = {}): Promise<boolean> {
+      const { accessToken, retries, timeout } = options;
       const sessionActivityRequest = { kind: SessionActivityRequest.KIND, ...request };
-      return call(() => sessionApi(request.serviceUrl).serviceSessionPatch(sessionActivityRequest, createConfig(timeout)), retries);
+      return call(() => sessionApi(request.serviceUrl, accessToken).serviceSessionPatch(sessionActivityRequest, createConfig(timeout)), retries);
     }
   }
 
   export namespace Workspace {
-    export async function listWorkspaces(request: WorkspaceListRequest, timeout?: number, retries?: number): Promise<UserWorkspace[]> {
-      return call(() => workspaceApi(request.serviceUrl).serviceWorkspaceAppIdUserGet(request.appId, request.user, createConfig(timeout)), retries);
+    export async function listWorkspaces(request: WorkspaceListRequest, options: RequestOptions = {}): Promise<UserWorkspace[]> {
+      const { accessToken, retries, timeout } = options;
+      return call(() => workspaceApi(request.serviceUrl, accessToken).serviceWorkspaceAppIdUserGet(request.appId, request.user, createConfig(timeout)), retries);
     }
 
-    export async function createWorkspace(request: WorkspaceCreationRequest, timeout?: number, retries?: number): Promise<UserWorkspace> {
+    export async function createWorkspace(request: WorkspaceCreationRequest, options: RequestOptions = {}): Promise<UserWorkspace> {
+      const { accessToken, retries, timeout } = options;
       const workspaceCreationRequest = { kind: WorkspaceCreationRequest.KIND, ...request };
-      return call(() => workspaceApi(request.serviceUrl).serviceWorkspacePost(workspaceCreationRequest, createConfig(timeout)), retries);
+      return call(() => workspaceApi(request.serviceUrl, accessToken).serviceWorkspacePost(workspaceCreationRequest, createConfig(timeout)), retries);
     }
 
-    export async function deleteWorkspace(request: WorkspaceDeletionRequest, timeout?: number, retries?: number): Promise<boolean> {
+    export async function deleteWorkspace(request: WorkspaceDeletionRequest, options: RequestOptions = {}): Promise<boolean> {
+      const { accessToken, retries, timeout } = options;
       const workspaceDeletionRequest = { kind: WorkspaceDeletionRequest.KIND, ...request };
-      return call(() => workspaceApi(request.serviceUrl).serviceWorkspaceDelete(workspaceDeletionRequest, createConfig(timeout)), retries);
+      return call(() => workspaceApi(request.serviceUrl, accessToken).serviceWorkspaceDelete(workspaceDeletionRequest, createConfig(timeout)), retries);
     }
   }
 }

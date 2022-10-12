@@ -29,8 +29,17 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
           }
-        }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
       }
     },
     "/service/session" : {
@@ -57,8 +66,17 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
           }
-        }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
       },
       "delete" : {
         "tags" : [ "Session Resource" ],
@@ -83,8 +101,17 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
           }
-        }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
       },
       "patch" : {
         "tags" : [ "Session Resource" ],
@@ -109,8 +136,17 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
           }
-        }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
       }
     },
     "/service/session/{appId}/{user}" : {
@@ -146,8 +182,17 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
           }
-        }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
       }
     },
     "/service/workspace" : {
@@ -174,8 +219,17 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
           }
-        }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
       },
       "delete" : {
         "tags" : [ "Workspace Resource" ],
@@ -200,8 +254,17 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
           }
-        }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
       }
     },
     "/service/workspace/{appId}/{user}" : {
@@ -237,8 +300,17 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
           }
-        }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
       }
     },
     "/service/{appId}" : {
@@ -264,8 +336,17 @@
                 }
               }
             }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
           }
-        }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
       }
     }
   },
@@ -503,6 +584,16 @@
           "user" : {
             "description" : "The user identification, usually the email address.",
             "type" : "string"
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "SecurityScheme" : {
+        "type" : "oauth2",
+        "description" : "Authentication",
+        "flows" : {
+          "implicit" : {
           }
         }
       }
