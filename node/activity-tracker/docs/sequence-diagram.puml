@@ -1,0 +1,45 @@
+@startuml "live-validation"
+
+hide footbox
+
+participant "Theia.cloud Monitoring Service" as mon
+participant "VSCode extension" as vscode
+participant "User" as user
+
+vscode -> vscode: init timestamp
+user -> vscode: trigger event
+vscode -> vscode: update timestamp
+mon -> vscode: GET /activity (every x minutes)
+vscode -> mon: send last timestamp
+
+mon -> mon: compare last timestamp with timeout
+
+alt within timeout
+
+mon -> vscode: GET /activity (every x minutes)
+
+else notify window reached (timeout - notifyMinutes)
+
+
+mon -> vscode: POST /popup
+vscode -> user: display message with ok button
+alt
+user -> vscode: presses button
+else
+user -> vscode: does other action
+else or does nothing
+end
+
+
+mon -> vscode: GET /activity (every x minutes)
+
+vscode -> mon: return last timestamp
+mon -> mon: compare last timestamp with timeout
+
+else timeout reached
+
+mon -> mon: shutdown pod
+
+end
+
+@enduml
