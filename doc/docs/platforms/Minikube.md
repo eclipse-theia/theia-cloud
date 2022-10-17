@@ -4,6 +4,8 @@ Minikube is a local Kubernetes that allows you to test and develop for Kubernete
 In this guide we will show you how to install minikube and helm 3 as well as cert-manager, the cloud native certificate management, the NginX Ingress Controller and Keycloak. We will use existing installation methods for all of the Theia.Cloud preqrequisites.\
 Finally we will install and try Theia.Cloud using helm.
 
+If you have no experience with Kubernetes/Minikube yet, we encourage you to check out some basic tutorials first, e.g. https://kubernetes.io/docs/tutorials/hello-minikube/ and https://kubernetes.io/docs/tutorials/kubernetes-basics/
+
 ## Install and start minikube
 
 If minikube is not installed on your system, go to https://minikube.sigs.k8s.io/docs/start/ and follow the instructions in Step 1 Installation.
@@ -143,7 +145,7 @@ The very first launch may take a bit longer, since the docker image for the sess
 
 Simply run `helm uninstall theia-cloud -n theiacloud`
 
-### Testing local images
+## Testing local Theia.cloud images
 
 You can test locally build images (e.g. of the landing page, service, or operator) by building them in Minikube and then using them in the Minikube Helm chart.
 
@@ -155,4 +157,4 @@ Build the docker image as usual.
 Adapt [valuesMinikube.yaml](../../../helm/theia.cloud/valuesMinikube.yaml):
 
 * Adapt the `image` value to match your built image.
-* Specify `imagePullPolicy: Never` to prevent Kubernetes from trying to download the image.
+* Specify `imagePullPolicy: Never` in the helm-template (e.g. for the landing page this would be in `helm/theia.cloud/templates/landing-page.yaml`) to prevent Kubernetes from trying to download the image.
