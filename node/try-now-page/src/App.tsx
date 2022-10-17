@@ -1,10 +1,15 @@
 import './App.css';
 
 import { getTheiaCloudConfig, LaunchRequest, PingRequest, TheiaCloud } from '@eclipse-theiacloud/common';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { AppLogo } from './components/AppLogo';
 import { Spinner } from './components/Spinner';
+
+// global state to be kept between render calls
+let initialised = false;
+let initialAppName = '';
+let initialAppDefinition = '';
 
 function App(): JSX.Element {
   const [config] = useState(() => getTheiaCloudConfig());
@@ -19,9 +24,39 @@ function App(): JSX.Element {
     );
   }
 
-  document.title = `${config.appName} - Try Now`;
+  if (!initialised) {
+    initialAppName = config.appName;
+    initialAppDefinition = config.appDefinition;
+  }
 
-  const handleStartSession = (): void => {
+  const [selectedAppName, setSelectedAppName] = useState(initialAppName);
+  const [selectedAppDefinition, setSelectedAppDefinition] = useState(initialAppDefinition);
+
+  useEffect(() => {
+    if (!initialised) {
+      initialised = true;
+      const element = document.getElementById('selectapp');
+      const urlParams = new URLSearchParams(window.location.search);
+      // eslint-disable-next-line no-null/no-null
+      if (element !== null && urlParams.has('appDef')) {
+        const defaultSelection = urlParams.get('appDef');
+        // eslint-disable-next-line no-null/no-null
+        if (defaultSelection !== null) {
+          (element as HTMLSelectElement).value = defaultSelection;
+          setSelectedAppName((element as HTMLSelectElement).options[(element as HTMLSelectElement).selectedIndex].text);
+          setSelectedAppDefinition((element as HTMLSelectElement).value);
+          initialAppName = selectedAppName;
+          initialAppDefinition = selectedAppDefinition;
+          console.log('Set ' + defaultSelection + ' as default selection');
+        }
+      }
+    }
+  },[]);
+
+  document.title = `${selectedAppName} - Try Now`;
+
+  const handleStartSession = (appDefinition: string): void => {
+    console.log('Launching ' + appDefinition);
     setLoading(true);
     setError(undefined);
 
@@ -30,8 +65,9 @@ function App(): JSX.Element {
       .then(() => {
         // ping successfull continue with launch
         TheiaCloud.launchAndRedirect(config.useEphemeralStorage
-          ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, config.appDefinition)
-          : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, config.appDefinition)
+          ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5)
+          : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5),
+        { timeout: 30000, retries: 3 }
         )
           .catch((_err: Error) => {
             setError('Sorry, there are no more available instances in the cluster.\n'
@@ -51,9 +87,22 @@ function App(): JSX.Element {
 
   return (
     <div className='App'>
-      {loading ? <Loading /> : <LaunchApp appName={config.appName} onStartSession={handleStartSession} />}
+      {loading ? <Loading /> :
+        <LaunchApp appName={selectedAppName} appDefinition={selectedAppDefinition} onStartSession={handleStartSession} />}
       <ErrorComponent message={error} />
       <div className='App__footer'>
+        { config.additionalApps && config.additionalApps.length > 0 &&
+          <p>
+            <label htmlFor="selectapp">Select app to launch </label>
+            <select name="apps" id="selectapp" onChange={event => {
+              setSelectedAppName(event.target.options[event.target.selectedIndex].text);
+              setSelectedAppDefinition(event.target.value);
+            }}>
+              <option value={config.appDefinition}>{config.appName}</option>
+              { config.additionalApps.map((app, index) => <option key={index + 1} value={app.appId}>{app.appName}</option>)}
+            </select>
+          </p>
+        }
         <p>
           Powered by{' '}
           <a href='http://theia-cloud.io' target='_blank' rel='noreferrer'>
@@ -81,9 +130,10 @@ const Loading = (): JSX.Element => <div>
 
 interface LaunchAppProps {
   appName: string;
-  onStartSession: () => void;
+  appDefinition: string;
+  onStartSession: (appDefinition: string) => void;
 }
-const LaunchApp: React.FC<LaunchAppProps> = ({ appName, onStartSession }) => {
+const LaunchApp: React.FC<LaunchAppProps> = ({ appName, appDefinition, onStartSession }) => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   return (
     <div>
@@ -92,7 +142,7 @@ const LaunchApp: React.FC<LaunchAppProps> = ({ appName, onStartSession }) => {
         <button
           className='App__try-now-button'
           disabled={!acceptedTerms}
-          onClick={onStartSession} >
+          onClick={() => onStartSession(appDefinition)} >
           Launch {appName} &nbsp;&nbsp;&rarr;
         </button>
       </p>
