@@ -19,14 +19,18 @@ Theia.cloud brings simple custom resource definitions (CRDs) that allow to speci
 A Java-based operator will listen for the creation, modification, and deletion of custom resources based on those CRDs and will manage the application.\
 See [Architecture.md](doc/docs/Architecture.md) for more information on the architecture.
 
-### Theia.cloud REST Service
+### Theia.cloud Service
 
 This REST Service acts as the API for creating and stopping Theia-based products for an authenticated user as well as providing additional information.\
 The Theia.cloud service creates, modifies, and deletes the custom resources the operator listens to.
 
-### Dashboard and resusable UI components
+### Sample Dashboard and resusable JS/UI components
 
-The UI components communicating with the REST service.
+Theia.cloud comes with a basic landing page/dashboard which allows to launch sessions.
+
+We offer a common ts library for the API of the Theia.cloud service, which may be resued by clients to write their own custom dashboards.
+
+We plan to offer reusable ui components in the future as well.
 
 ## Building
 

@@ -1,12 +1,15 @@
 # Architecture Overview
 
-The Theia.Cloud Operator listens for changes to custom resources inside the cluster. With those custom resources clients may trigger the creation/deletion/handling of sessions. The Operator is responsible for handling all things that are related to the Kubernetes-Resources for sessions.
-
-## Overall Overview
+The Theia.Cloud Operator listens for changes to custom resources inside the cluster. With those custom resources clients may trigger the creation/deletion/handling of workspaces and sessions. The Operator is responsible for handling all things that are related to the Kubernetes-Resources for workspaces and sessions. All access is authenticated via an Authenticator. 
 
 ![Theia.Cloud Diagram](theia.cloud.png "Theia.Cloud")
 
-## Operator Overview
+## Operator Java Overview
+
+The Java operator is created via a dependency injection module.
+In the future the operator will be provided as a library with defined interfaces end users may exchange to customize the operator based on their needs.
+
+The following diagram sketches the basic idea.
 
 ![Operator Diagram](operator.png "Operator")
 
@@ -14,12 +17,13 @@ The Theia.Cloud Operator listens for changes to custom resources inside the clus
 
 |Option|Type|Used for|
 |---|---|---|
-|--keycloak|boolean|Whether sessions will be created with a reverse proxy authing against keycloak|
-|--eagerStart|boolean|Whether sessions will be created before there is a user to speed up starts (not (fully) supported yet)|
+|--keycloak|boolean|Whether sessions will be created with a reverse proxy authenticating against keycloak|
 |--cloudProvider|null, GKE|Cloud Provider specific configs|
 |--bandwidthLimiter|null, K8SANNOTATION, WONDERSHAPER, K8SANNOTATIONANDWONDERSHAPER|How to limit ingress/egress bandwidth|
 |--sessionsPerUser|number|The number of active sessions a user is allowed to have|
 |--appId|string|The id of the application which sends requests to the REST service|
+||the following options are not fully supported at the moment:|
+|--eagerStart|boolean|Whether sessions will be created before there is a user to speed up starts|
 
 ## Custom Resources
 
