@@ -1,0 +1,25 @@
+apiVersion: theia.cloud/v3beta
+kind: AppDefinition
+metadata:
+  name: cdt-cloud-demo
+  namespace: theiacloud
+spec:
+  name: cdt-cloud-demo
+  image: theiacloud/cdt-blueprint
+  pullSecret: ""
+  uid: 101
+  port: 3000
+  host: ws.34.141.62.32.nip.io
+  ingressname: theia-cloud-demo-ws-ingress
+  minInstances: 0
+  maxInstances: 10
+  timeout:
+    limit: 30
+    strategy: FIXEDTIME
+  requestsMemory: 1000M
+  limitsMemory: 1200M
+  requestsCpu: "100m"
+  limitsCpu: "2"
+  downlinkLimit: 30000
+  uplinkLimit: 30000
+  mountPath: "/home/project/persisted"
