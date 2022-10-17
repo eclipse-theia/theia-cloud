@@ -15,6 +15,14 @@ data:
       keycloakClientId: "{{ tpl (.Values.keycloak.clientId | toString) . }}",
       serviceUrl: "{{ tpl (.Values.hosts.serviceProtocol | toString) . }}://{{ tpl (.Values.hosts.service | toString) . }}{{ if .Values.hosts.useServicePortInHostname }}:{{ tpl (.Values.hosts.servicePort | toString) . }}{{ end }}",
       appDefinition: "{{ tpl (.Values.landingPage.appDefinition | toString) . }}",
+      additionalApps: [
+        {{- range $key, $val := .Values.landingPage.additionalApps }}
+        {
+          appId: {{ $key | quote}},
+          appName: {{ $val.label | quote }},
+        },
+        {{- end }}
+      ],
     };
 binaryData:
   {{ range $path, $bytes := .Files.Glob (printf "logos/%s" .Values.app.logo)}}

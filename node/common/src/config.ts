@@ -26,12 +26,15 @@ export namespace KeycloakConfig {
 }
 
 interface BaseTheiaCloudConfig {
-  appId: string;
-  appName: string;
   useKeycloak: boolean;
   serviceUrl: string;
   appDefinition: string;
   useEphemeralStorage: boolean;
+  additionalApps?: AppDefinition[]
+}
+export interface AppDefinition {
+  appId: string;
+  appName: string;
 }
 
 export interface KeycloakConfig {
@@ -40,7 +43,7 @@ export interface KeycloakConfig {
   keycloakClientId: string;
 }
 
-export type TheiaCloudConfig = BaseTheiaCloudConfig & Partial<KeycloakConfig>;
+export type TheiaCloudConfig = AppDefinition & BaseTheiaCloudConfig & Partial<KeycloakConfig>;
 
 declare global {
   interface Window {

@@ -12,7 +12,7 @@ If minikube is not installed on your system, go to https://minikube.sigs.k8s.io/
 
 Create a new Minikube cluster using the `minikube start` command.\
 You may adjust the available RAM and CPU-cores depending on your system.\
-`minikube start --addons=ingress --vm=true --memory=8192 --cpus=4`
+`minikube start --addons=ingress --vm=true --memory=8192 --cpus=4 --disk-size=50g`
 
 **Please note:** Minikube has some issues with persisted volumes and permissions. This will only be a problem in this demo, if you want to create files inside the `"./persisted/"` directory available in the demo workspace.\
 If you want to try the persisted storage, please mount a directory from your hostsystem into minikube like follows.\

@@ -67,6 +67,15 @@ landingPage:
   # Set to false if you want to use persisted storage.
   ephemeralStorage: true
 
+  # The page may show these additional apps in a drop down. This is a map. 
+  # The key maps to the app definition name
+  # The value is the label that is supposed to be shown in the UI
+  additionalApps: 
+    # different-app-definition:
+    #   label: "Different App Definition"
+    # further-app-definition:
+    #   label: "Further App Definition"
+
 # Values related to Keycloak
 keycloak:
   # Whether keycloak authentication shall be used

@@ -23,6 +23,11 @@ landingPage:
   # imagePullSecret: pullsecret
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: false
+  # additionalApps: 
+  #   coffee-editor:
+  #     label: "Coffee Editor"
+  #   cdt-cloud-demo:
+  #     label: "CDT.cloud Blueprint"
 
 keycloak:
   enable: true
