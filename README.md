@@ -54,3 +54,7 @@ helm uninstall theia-cloud -n theiacloud
 [...Minikube](doc/docs/platforms/Minikube.md)
 
 [...configuring the Keycloak Realm](doc/docs/Keycloak.md)
+
+## Security
+
+Our Security Vulnerability Process may be found [here](SECURITY.md).
