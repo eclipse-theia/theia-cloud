@@ -42,6 +42,9 @@ public class TheiaCloudArguments {
 	    "--bandwidthLimiter" }, description = "The method of limiting network bandwidth", required = false)
     private BandwidthLimiter bandwidthLimiter;
 
+    @Option(names = { "--wondershaperImage" }, description = "Wondershaper Image", required = false)
+    private String wondershaperImage = "theiacloud/theia-cloud-wondershaper";
+
     @Option(names = { "--serviceUrl" }, description = "URL of the Theia Cloud Service", required = false)
     private String serviceUrl;
 
@@ -75,6 +78,10 @@ public class TheiaCloudArguments {
 	return bandwidthLimiter;
     }
 
+    public String getWondershaperImage() {
+	return wondershaperImage;
+    }
+
     public String getServiceUrl() {
 	return serviceUrl;
     }
@@ -103,11 +110,12 @@ public class TheiaCloudArguments {
 	result = prime * result + ((bandwidthLimiter == null) ? 0 : bandwidthLimiter.hashCode());
 	result = prime * result + ((cloudProvider == null) ? 0 : cloudProvider.hashCode());
 	result = prime * result + (eagerStart ? 1231 : 1237);
+	result = prime * result + ((instancesPath == null) ? 0 : instancesPath.hashCode());
 	result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
 	result = prime * result + ((sessionsPerUser == null) ? 0 : sessionsPerUser.hashCode());
 	result = prime * result + (useKeycloak ? 1231 : 1237);
 	result = prime * result + (usePaths ? 1231 : 1237);
-	result = prime * result + ((instancesPath == null) ? 0 : instancesPath.hashCode());
+	result = prime * result + ((wondershaperImage == null) ? 0 : wondershaperImage.hashCode());
 	return result;
     }
 
@@ -131,6 +139,11 @@ public class TheiaCloudArguments {
 	    return false;
 	if (eagerStart != other.eagerStart)
 	    return false;
+	if (instancesPath == null) {
+	    if (other.instancesPath != null)
+		return false;
+	} else if (!instancesPath.equals(other.instancesPath))
+	    return false;
 	if (serviceUrl == null) {
 	    if (other.serviceUrl != null)
 		return false;
@@ -143,13 +156,12 @@ public class TheiaCloudArguments {
 	    return false;
 	if (useKeycloak != other.useKeycloak)
 	    return false;
-	if (usePaths != other.usePaths) {
+	if (usePaths != other.usePaths)
 	    return false;
-	}
-	if (instancesPath == null) {
-	    if (other.instancesPath != null)
+	if (wondershaperImage == null) {
+	    if (other.wondershaperImage != null)
 		return false;
-	} else if (!instancesPath.equals(other.instancesPath))
+	} else if (!wondershaperImage.equals(other.wondershaperImage))
 	    return false;
 	return true;
     }
@@ -157,9 +169,9 @@ public class TheiaCloudArguments {
     @Override
     public String toString() {
 	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", cloudProvider="
-		+ cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter + ", serviceUrl=" + serviceUrl
-		+ ", sessionsPerUser=" + sessionsPerUser + ", appId=" + appId + ", usePaths=" + usePaths
-		+ ", instancesPath=" + instancesPath + "]";
+		+ cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter + ", wondershaperImage=" + wondershaperImage
+		+ ", serviceUrl=" + serviceUrl + ", sessionsPerUser=" + sessionsPerUser + ", appId=" + appId
+		+ ", usePaths=" + usePaths + ", instancesPath=" + instancesPath + "]";
     }
 
 }

@@ -29,6 +29,8 @@ spec:
           - {{ tpl (.Values.operator.cloudProvider | toString) . }}
           - "--bandwidthLimiter"
           - {{ tpl (.Values.operator.bandwidthLimiter | toString) . }}
+          - "--wondershaperImage"
+          - {{ tpl (.Values.operator.wondershaperImage | toString) . }}
           - "--serviceUrl"
           {{- if .Values.hosts.usePaths }}
           - {{ tpl (.Values.hosts.serviceProtocol | toString) . }}://{{ tpl (.Values.hosts.paths.baseHost | toString) . }}/{{ tpl (.Values.hosts.paths.service | toString) . }}

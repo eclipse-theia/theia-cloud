@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.operator.TheiaCloudArguments.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 import org.eclipse.theia.cloud.operator.di.DefaultTheiaCloudOperatorModule;
 
@@ -59,6 +60,11 @@ public class Main {
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: eagerStart " + arguments.isEagerStart()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: cloudProvider " + arguments.getCloudProvider()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: bandwidthLimiter " + arguments.getBandwidthLimiter()));
+	if (arguments.getBandwidthLimiter() == BandwidthLimiter.K8SANNOTATIONANDWONDERSHAPER
+		|| arguments.getBandwidthLimiter() == BandwidthLimiter.WONDERSHAPER) {
+	    LOGGER.info(formatLogMessage(COR_ID_INIT,
+		    "Parsing args: bandwidthLimiter " + arguments.getWondershaperImage()));
+	}
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: appId " + arguments.getAppId()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: serviceUrl " + arguments.getServiceUrl()));
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsing args: sessionsPerUser " + arguments.getSessionsPerUser()));

@@ -20,6 +20,7 @@ The following diagram sketches the basic idea.
 |--keycloak|boolean|Whether sessions will be created with a reverse proxy authenticating against keycloak|
 |--cloudProvider|null, GKE|Cloud Provider specific configs|
 |--bandwidthLimiter|null, K8SANNOTATION, WONDERSHAPER, K8SANNOTATIONANDWONDERSHAPER|How to limit ingress/egress bandwidth|
+|--wondershaperImage|string|The image of the wondershaper init container|
 |--sessionsPerUser|number|The number of active sessions a user is allowed to have|
 |--appId|string|The id of the application which sends requests to the REST service|
 ||the following options are not fully supported at the moment:|

@@ -143,6 +143,9 @@ operator:
   # - K8SANNOTATIONANDWONDERSHAPER    Set Kubernetes annotations and use wondershaper init container
   bandwidthLimiter: "K8SANNOTATION"
 
+  # If bandwidthLimiter is set to WONDERSHAPER or K8SANNOTATIONANDWONDERSHAPER this image will be used for the wondershaper init container
+  wondershaperImage: theiacloud/theia-cloud-wondershaper:0.8.0.MS7
+
   # Set the number of active sessions a single user can launch
   sessionsPerUser: "1"
 
