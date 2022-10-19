@@ -41,6 +41,7 @@ operator:
   eagerStart: false
   cloudProvider: "GKE"
   bandwidthLimiter: "WONDERSHAPER"
+  wondershaperImage: theiacloud/theia-cloud-wondershaper:0.8.0.MS7
   sessionsPerUser: "1"
 
 service:

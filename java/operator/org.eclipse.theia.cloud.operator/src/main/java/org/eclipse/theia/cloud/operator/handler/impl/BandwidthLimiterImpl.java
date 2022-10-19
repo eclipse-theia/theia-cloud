@@ -89,7 +89,7 @@ public class BandwidthLimiterImpl implements BandwidthLimiter {
 	    initContainers.add(wondershaperInitContainer);
 
 	    wondershaperInitContainer.setName("wondershaper-init");
-	    wondershaperInitContainer.setImage("gcr.io/kubernetes-238012/theia-cloud-wondershaper");
+	    wondershaperInitContainer.setImage(arguments.getWondershaperImage());
 
 	    SecurityContext securityContext = new SecurityContext();
 	    wondershaperInitContainer.setSecurityContext(securityContext);
