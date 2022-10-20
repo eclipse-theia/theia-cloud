@@ -10,7 +10,7 @@
     "url": "https://github.com/eclipsesource/theia-cloud.git"
   },
   "engines": {
-    "vscode": "^1.71.0"
+    "vscode": "^1.70.0"
   },
   "categories": [
     "Other"
@@ -35,7 +35,7 @@
     "express": "^4.18.1"
   },
   "devDependencies": {
-    "@types/vscode": "^1.71.0",
+    "@types/vscode": "^1.70.0",
     "@types/express": "^4.17.13",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
@@ -50,6 +50,6 @@
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
     "@vscode/test-electron": "^2.1.5",
-    "vsce": "2.11.0"
+    "vsce": "2.12.0"
   }
 }

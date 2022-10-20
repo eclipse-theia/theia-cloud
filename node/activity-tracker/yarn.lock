@@ -228,10 +228,10 @@
     "@types/mime" "*"
     "@types/node" "*"
 
-"@types/vscode@^1.71.0":
-  version "1.71.0"
-  resolved "https://registry.npmjs.org/@types/vscode/-/vscode-1.71.0.tgz#a8d9bb7aca49b0455060e6eb978711b510bdd2e2"
-  integrity sha512-nB50bBC9H/x2CpwW9FzRRRDrTZ7G0/POttJojvN/LiVfzTGfLyQIje1L1QRMdFXK9G41k5UJN/1B9S4of7CSzA==
+"@types/vscode@^1.70.0":
+  version "1.72.0"
+  resolved "https://registry.npmjs.org/@types/vscode/-/vscode-1.72.0.tgz#56447ca2eaca34f0d0797c8bb9e51de132f6bb0a"
+  integrity sha512-WvHluhUo+lQvE3I4wUagRpnkHuysB4qSyOQUyIAS9n9PYMJjepzTUD8Jyks0YeXoPD0UGctjqp2u84/b3v6Ydw==
 
 "@typescript-eslint/eslint-plugin@^5.31.0":
   version "5.36.1"
@@ -2851,10 +2851,10 @@ vary@~1.1.2:
   resolved "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
 
-vsce@2.11.0:
-  version "2.11.0"
-  resolved "https://registry.npmjs.org/vsce/-/vsce-2.11.0.tgz#e60aac58ecfc3aec6e40024e13ea8c8d29764aef"
-  integrity sha512-pr9Y0va/HCer0tTifeqaUrK24JJSpRd6oLeF/PY6FtrY41e+lwxiAq6jfMXx4ShAZglYg2rFKoKROwa7E7SEqQ==
+vsce@2.12.0:
+  version "2.12.0"
+  resolved "https://registry.npmjs.org/vsce/-/vsce-2.12.0.tgz#0526c2e4ce0ac4d80597bc81eeda66ab0065a81c"
+  integrity sha512-PKBjIsZxZbm6I4hpikkUX7CNh7UpPflDm3aCCBCFn3ffzQlyUNCQOcaObrhMkRNy4xyvL4hs7ryhE3IKQ6FTIQ==
   dependencies:
     azure-devops-node-api "^11.0.1"
     chalk "^2.4.2"
