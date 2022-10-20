@@ -1,5 +1,5 @@
 <template>
-  <img alt="Theia logo" src="/logo.png" />
+  <img className='logo' alt="Theia logo" src="/logo.svg" />
   <SessionLauncher
     :serviceUrl="serviceUrl"
     :appDefinition="appDefinition"
@@ -103,5 +103,10 @@ export default defineComponent({
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+.logo {
+  height: 10rem;
+  align-self: center;
 }
 </style>
