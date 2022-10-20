@@ -1,4 +1,4 @@
-@startuml "live-validation"
+@startuml "sequence-diagram"
 
 hide footbox
 

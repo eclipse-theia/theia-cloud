@@ -6,7 +6,10 @@ export const GET_ACTIVITY_PATH = '/activity';
 export const POST_POPUP = '/popup';
 export const COMMAND_ACTIVITY_REPORT_TITLE = 'activity.report';
 
-export class ActivityTrackerModule implements TrackerModule{
+/**
+ * This module tracks the last activity of the user.
+ */
+export class ActivityTrackerModule implements TrackerModule {
     protected lastActivity: Date;
 
     constructor() {
@@ -28,19 +31,33 @@ export class ActivityTrackerModule implements TrackerModule{
         return app;
     }
 
+    /**
+     * Sets the lastActivity to the current timestamp
+     * @param reason optional parameter to log a reason for the activity
+     */
     protected reportActivity(reason?: string): void {
         console.debug(`Activity reported: ${new Date().toISOString()} (${reason ?? 'unknown'})`);
         this.lastActivity = new Date();
     }
 
+    /**
+     * @returns the lastActivity timestamp as an ISOString
+     */
     protected getLastActivity(): string {
         return this.lastActivity.toISOString();
     }
 
+    /**
+     * Registers a command that can be executed to report activity in custom behavior
+     */
     protected registerCommand(): void {
         vscode.commands.registerCommand(COMMAND_ACTIVITY_REPORT_TITLE, (reason) => this.reportActivity(`${reason ?? 'activity'} (via command)`));
     }
 
+    /**
+     * Creates a popup to the user to ask if he is still active
+     * If the user confirms an activity is reported
+     */
     protected createPopup(): void {
         const options: vscode.MessageOptions = {
             detail: 'Pod will be shutdown after some inactivity',
@@ -58,6 +75,9 @@ export class ActivityTrackerModule implements TrackerModule{
         });
     }
 
+    /**
+     * Sets up all VSCode extension API listeners to report activity when triggered
+     */
     protected setupListeners(): void {
         vscode.authentication.onDidChangeSessions(() => this.reportActivity('sessionChange'));
         vscode.debug.onDidChangeActiveDebugSession(() => this.reportActivity('changeDebugSession'));
