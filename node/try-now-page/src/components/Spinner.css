@@ -9,7 +9,7 @@
   align-self: center;
 }
 
-.custom-spinner svg {
+.custom-spinner img {
   animation-delay: 0;
   animation-duration: 2s;
   animation-iteration-count: infinite;
@@ -19,17 +19,17 @@
 
 @keyframes blueprint-spinner {
   0% {
-    filter: invert(49%) sepia(71%) saturate(5980%) hue-rotate(199deg) brightness(103%) contrast(101%);
+    filter: hue-rotate(25deg) brightness(103%) contrast(101%);
     transform: scale(1.0);
   }
 
   50% {
-    filter: invert(57%) sepia(52%) saturate(1900%) hue-rotate(160deg) brightness(100%) contrast(102%);
+    filter: hue-rotate(-25deg) brightness(100%) contrast(102%);
     transform: scale(0.8);
   }
 
   100% {
-    filter: invert(49%) sepia(71%) saturate(5980%) hue-rotate(199deg) brightness(103%) contrast(101%);
+    filter: hue-rotate(25deg) brightness(103%) contrast(101%);
     transform: scale(1.0);
   }
 }

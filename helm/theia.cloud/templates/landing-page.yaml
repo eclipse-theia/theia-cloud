@@ -35,8 +35,8 @@ spec:
               mountPath: /usr/share/nginx/html/config.js
               subPath: config.js
             - name: landing-page-config
-              mountPath: /usr/share/nginx/html/logo.png
-              subPath: logo.png
+              mountPath: /usr/share/nginx/html/logo.svg
+              subPath: logo.svg
       {{- if .Values.landingPage.imagePullSecret }}
       imagePullSecrets:
         - name: {{ tpl (.Values.landingPage.imagePullSecret | toString) . }}

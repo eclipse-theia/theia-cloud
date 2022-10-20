@@ -26,5 +26,5 @@ data:
     };
 binaryData:
   {{ range $path, $bytes := .Files.Glob (printf "logos/%s" .Values.app.logo)}}
-  {{ print "logo.png: "}}{{ $.Files.Get $path | b64enc }}
+  {{ print "logo.svg: "}}{{ $.Files.Get $path | b64enc }}
   {{ end }}

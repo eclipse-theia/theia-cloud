@@ -1,7 +1,7 @@
 app:
   id: asdfghjkl
   name: CDT.cloud Blueprint
-  logo: cdtcloud.png
+  logo: cdtcloud.svg
 
 issuer:
   email: mmorlock@example.com
