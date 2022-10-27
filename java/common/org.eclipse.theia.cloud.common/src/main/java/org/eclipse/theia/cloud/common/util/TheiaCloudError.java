@@ -23,6 +23,7 @@ public class TheiaCloudError {
     // client errors: 47x
     public static final TheiaCloudError INVALID_APP_ID = new TheiaCloudError(470, "Invalid application id.");
     public static final TheiaCloudError INVALID_WORKSPACE_NAME = new TheiaCloudError(471, "Invalid workspace name.");
+    public static final TheiaCloudError INVALID_REQUEST = new TheiaCloudError(472, "Invalid request.");
     public static final TheiaCloudError INVALID_APP_DEFINITION_NAME = new TheiaCloudError(473,
 	    "Invalid app definition name.");
     public static final TheiaCloudError MISSING_WORKSPACE_NAME = new TheiaCloudError(480, "Missing workspace name.");

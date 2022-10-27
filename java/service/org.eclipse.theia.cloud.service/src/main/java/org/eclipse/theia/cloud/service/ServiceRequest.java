@@ -15,9 +15,14 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import java.util.List;
 
-public class ServiceRequest {
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.theia.cloud.service.validation.Validate;
+import org.eclipse.theia.cloud.service.validation.ValidationProblem;
+import org.eclipse.theia.cloud.service.validation.ValidationResult;
+
+public abstract class ServiceRequest {
 
     @Schema(description = "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.", required = true)
     public String appId;
@@ -32,6 +37,24 @@ public class ServiceRequest {
     public ServiceRequest(String kind, String appId) {
 	this.appId = appId;
 	this.kind = kind;
+    }
+
+    /**
+     * Validate whether the data in the request is of the expected format.
+     * 
+     * This check should e.g. detect potential escape and injection attacks.
+     * 
+     * After this check was performed the business logic will further check whether
+     * the well-formatted values actually make sense.
+     */
+    public abstract ValidationResult validateDataFormat();
+
+    /**
+     * Validates {@link #appId} and {@link #kind}.
+     */
+    protected final void validateServiceRequest(List<ValidationProblem> problems) {
+	Validate.appId(appId).ifPresent(problems::add);
+	Validate.kind(kind).ifPresent(problems::add);
     }
 
     @Override

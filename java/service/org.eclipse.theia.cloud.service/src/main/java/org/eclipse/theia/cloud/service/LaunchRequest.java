@@ -15,10 +15,16 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.theia.cloud.service.validation.Validate;
+import org.eclipse.theia.cloud.service.validation.ValidationProblem;
+import org.eclipse.theia.cloud.service.validation.ValidationResult;
 
 @Schema(name = "LaunchRequest", description = "A request to launch a new session.")
-public class LaunchRequest extends ServiceRequest {
+public final class LaunchRequest extends ServiceRequest {
     public static final String KIND = "launchRequest";
 
     @Schema(description = "The user identification, usually the email address.", required = true)
@@ -63,6 +69,18 @@ public class LaunchRequest extends ServiceRequest {
 	return "LaunchRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName=" + workspaceName
 		+ ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + ", timeout="
 		+ timeout + "]";
+    }
+
+    @Override
+    public ValidationResult validateDataFormat() {
+	List<ValidationProblem> problems = new ArrayList<ValidationProblem>();
+	validateServiceRequest(problems);
+	Validate.user(user).ifPresent(problems::add);
+	Validate.optionalAppDefinition(appDefinition).ifPresent(problems::add);
+	Validate.workspaceName(workspaceName).ifPresent(problems::add);
+	Validate.label(label).ifPresent(problems::add);
+	Validate.timeoutMinutes(timeout).ifPresent(problems::add);
+	return new ValidationResult(problems);
     }
 
 }

@@ -11,6 +11,7 @@
 	<description>Common properties and configuration</description>
 
 	<properties>
+		<commons-validator.version>1.7</commons-validator.version>
 		<failsafe.useModulePath>false</failsafe.useModulePath>
 		<guice.version>5.0.1</guice.version>
 		<kubernetes-client.version>5.11.2</kubernetes-client.version>

@@ -15,11 +15,17 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.session;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
+import org.eclipse.theia.cloud.service.validation.Validate;
+import org.eclipse.theia.cloud.service.validation.ValidationProblem;
+import org.eclipse.theia.cloud.service.validation.ValidationResult;
 
 @Schema(name = "SessionActivityRequest", description = "A request to report activity for a running session.")
-public class SessionActivityRequest extends ServiceRequest {
+public final class SessionActivityRequest extends ServiceRequest {
     public static final String KIND = "sessionActivityRequest";
 
     @Schema(description = "The name of the session for which activity is reported.", required = true)
@@ -37,6 +43,14 @@ public class SessionActivityRequest extends ServiceRequest {
     @Override
     public String toString() {
 	return "SessionActivityRequest [sessionName=" + sessionName + ", appId=" + appId + ", kind=" + kind + "]";
+    }
+
+    @Override
+    public ValidationResult validateDataFormat() {
+	List<ValidationProblem> problems = new ArrayList<ValidationProblem>();
+	validateServiceRequest(problems);
+	Validate.existingSessionName(sessionName).ifPresent(problems::add);
+	return new ValidationResult(problems);
     }
 
 }

@@ -15,11 +15,17 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.session;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
+import org.eclipse.theia.cloud.service.validation.Validate;
+import org.eclipse.theia.cloud.service.validation.ValidationProblem;
+import org.eclipse.theia.cloud.service.validation.ValidationResult;
 
 @Schema(name = "SessionStopRequest", description = "A request to stop a session")
-public class SessionStopRequest extends ServiceRequest {
+public final class SessionStopRequest extends ServiceRequest {
     public static final String KIND = "sessionStopRequest";
 
     @Schema(description = "The user identification, usually the email address.", required = true)
@@ -44,4 +50,12 @@ public class SessionStopRequest extends ServiceRequest {
 		+ kind + "]";
     }
 
+    @Override
+    public ValidationResult validateDataFormat() {
+	List<ValidationProblem> problems = new ArrayList<ValidationProblem>();
+	validateServiceRequest(problems);
+	Validate.user(user).ifPresent(problems::add);
+	Validate.existingSessionName(sessionName).ifPresent(problems::add);
+	return new ValidationResult(problems);
+    }
 }

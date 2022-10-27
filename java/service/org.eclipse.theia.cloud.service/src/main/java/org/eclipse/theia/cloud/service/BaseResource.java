@@ -19,6 +19,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrela
 
 import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
+import org.eclipse.theia.cloud.service.validation.ValidationResult;
 import org.jboss.logging.Logger;
 
 public class BaseResource {
@@ -38,6 +39,13 @@ public class BaseResource {
 	    info(correlationId, "Request '" + request.kind + "' without matching appId: " + request.appId);
 	    trace(correlationId, request.toString());
 	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_ID);
+	}
+	ValidationResult validationResult = request.validateDataFormat();
+	if (!validationResult.isOK()) {
+	    info(correlationId, "Request '" + request.kind + "' did not pass validation.");
+	    trace(correlationId, request.toString());
+	    trace(correlationId, validationResult.toString());
+	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_REQUEST);
 	}
 	return correlationId;
     }

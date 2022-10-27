@@ -15,11 +15,17 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.workspace;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
+import org.eclipse.theia.cloud.service.validation.Validate;
+import org.eclipse.theia.cloud.service.validation.ValidationProblem;
+import org.eclipse.theia.cloud.service.validation.ValidationResult;
 
 @Schema(name = "WorkspaceDeletionRequest", description = "Request to delete a workspace")
-public class WorkspaceDeletionRequest extends ServiceRequest {
+public final class WorkspaceDeletionRequest extends ServiceRequest {
     public static final String KIND = "workspaceDeletionRequest";
 
     @Schema(description = "The user identification, usually the email address.", required = true)
@@ -42,6 +48,15 @@ public class WorkspaceDeletionRequest extends ServiceRequest {
     public String toString() {
 	return "WorkspaceDeletionRequest [user=" + user + ", workspaceName=" + workspaceName + ", appId=" + appId
 		+ ", kind=" + kind + "]";
+    }
+
+    @Override
+    public ValidationResult validateDataFormat() {
+	List<ValidationProblem> problems = new ArrayList<ValidationProblem>();
+	validateServiceRequest(problems);
+	Validate.user(user).ifPresent(problems::add);
+	Validate.workspaceName(workspaceName).ifPresent(problems::add);
+	return new ValidationResult(problems);
     }
 
 }

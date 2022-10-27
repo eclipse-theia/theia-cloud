@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022 EclipseSource, STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,38 +13,31 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service;
+package org.eclipse.theia.cloud.service.validation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.service.validation.ValidationProblem;
-import org.eclipse.theia.cloud.service.validation.ValidationResult;
+public class ValidationResult {
 
-@Schema(name = "PingRequest", description = "Request to ping the availability of the service.")
-public final class PingRequest extends ServiceRequest {
+    /* package */ List<ValidationProblem> problems;
 
-    public static final String KIND = "pingRequest";
-
-    public PingRequest() {
-	super(KIND);
+    public ValidationResult(List<ValidationProblem> problems) {
+	this.problems = new ArrayList<ValidationProblem>(problems);
     }
 
-    public PingRequest(String appId) {
-	super(KIND, appId);
+    public boolean isOK() {
+	return problems.isEmpty();
     }
 
     @Override
     public String toString() {
-	return "PingRequest [appId=" + appId + ", kind=" + kind + "]";
+	return "ValidationResult [problems=\n" + toString(problems) + "\n]";
     }
 
-    @Override
-    public ValidationResult validateDataFormat() {
-	List<ValidationProblem> problems = new ArrayList<ValidationProblem>();
-	validateServiceRequest(problems);
-	return new ValidationResult(problems);
+    private String toString(List<ValidationProblem> problems) {
+	return problems.stream().map(ValidationProblem::toString).collect(Collectors.joining("\n"));
     }
 
 }

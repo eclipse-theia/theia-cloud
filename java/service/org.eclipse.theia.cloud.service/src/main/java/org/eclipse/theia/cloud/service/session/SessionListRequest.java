@@ -16,11 +16,17 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.session;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
+import org.eclipse.theia.cloud.service.validation.Validate;
+import org.eclipse.theia.cloud.service.validation.ValidationProblem;
+import org.eclipse.theia.cloud.service.validation.ValidationResult;
 
 @Schema(name = "SessionListRequest", description = "A request to list the sessions of a user.")
-public class SessionListRequest extends ServiceRequest {
+public final class SessionListRequest extends ServiceRequest {
     public static final String KIND = "sessionListRequest";
 
     @Schema(description = "The user identification, usually the email address.", required = true)
@@ -38,6 +44,14 @@ public class SessionListRequest extends ServiceRequest {
     @Override
     public String toString() {
 	return "SessionListRequest [user=" + user + ", appId=" + appId + ", kind=" + kind + "]";
+    }
+
+    @Override
+    public ValidationResult validateDataFormat() {
+	List<ValidationProblem> problems = new ArrayList<ValidationProblem>();
+	validateServiceRequest(problems);
+	Validate.user(user).ifPresent(problems::add);
+	return new ValidationResult(problems);
     }
 
 }

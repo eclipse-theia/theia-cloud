@@ -16,11 +16,17 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service.workspace;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.ServiceRequest;
+import org.eclipse.theia.cloud.service.validation.Validate;
+import org.eclipse.theia.cloud.service.validation.ValidationProblem;
+import org.eclipse.theia.cloud.service.validation.ValidationResult;
 
 @Schema(name = "WorkspaceCreationRequest", description = "Request to create a new workspace.")
-public class WorkspaceCreationRequest extends ServiceRequest {
+public final class WorkspaceCreationRequest extends ServiceRequest {
     public static final String KIND = "workspaceCreationRequest";
 
     @Schema(description = "The user identification, usually the email address.", required = true)
@@ -47,6 +53,16 @@ public class WorkspaceCreationRequest extends ServiceRequest {
     public String toString() {
 	return "WorkspaceCreationRequest [user=" + user + ", appDefinition=" + appDefinition + ", label=" + label
 		+ ", appId=" + appId + ", kind=" + kind + "]";
+    }
+
+    @Override
+    public ValidationResult validateDataFormat() {
+	List<ValidationProblem> problems = new ArrayList<ValidationProblem>();
+	validateServiceRequest(problems);
+	Validate.user(user).ifPresent(problems::add);
+	Validate.optionalAppDefinition(appDefinition).ifPresent(problems::add);
+	Validate.label(label).ifPresent(problems::add);
+	return new ValidationResult(problems);
     }
 
 }
