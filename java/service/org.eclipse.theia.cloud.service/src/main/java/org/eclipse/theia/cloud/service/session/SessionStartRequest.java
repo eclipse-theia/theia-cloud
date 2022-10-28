@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.theia.cloud.common.validation.Validate;
+import org.eclipse.theia.cloud.common.validation.ValidationProblem;
+import org.eclipse.theia.cloud.common.validation.ValidationResult;
 import org.eclipse.theia.cloud.service.ServiceRequest;
-import org.eclipse.theia.cloud.service.validation.Validate;
-import org.eclipse.theia.cloud.service.validation.ValidationProblem;
-import org.eclipse.theia.cloud.service.validation.ValidationResult;
 
 @Schema(name = "SessionStartRequest", description = "A request to start a session")
 public final class SessionStartRequest extends ServiceRequest {
@@ -82,7 +82,7 @@ public final class SessionStartRequest extends ServiceRequest {
 	List<ValidationProblem> problems = new ArrayList<ValidationProblem>();
 	validateServiceRequest(problems);
 	Validate.user(user).ifPresent(problems::add);
-	Validate.appDefinition(appDefinition).ifPresent(problems::add);
+	Validate.appDefinitionName(appDefinition).ifPresent(problems::add);
 	Validate.workspaceName(workspaceName).ifPresent(problems::add);
 	Validate.timeoutMinutes(timeout).ifPresent(problems::add);
 	return new ValidationResult(problems);

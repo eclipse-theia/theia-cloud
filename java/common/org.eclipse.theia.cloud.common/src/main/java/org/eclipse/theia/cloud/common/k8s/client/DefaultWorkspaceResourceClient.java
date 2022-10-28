@@ -42,6 +42,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	workspace.setMetadata(metadata);
 
 	info(correlationId, "Create Workspace " + workspace.getSpec());
+	// TODO ES validate before creating
 	return operation().create(workspace);
     }
 

@@ -46,6 +46,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	session.setMetadata(metadata);
 
 	info(correlationId, "Create Session " + session.getSpec());
+	// TODO ES validate before creating
 	return operation().create(session);
     }
 

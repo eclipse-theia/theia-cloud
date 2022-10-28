@@ -13,27 +13,31 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service.validation;
+package org.eclipse.theia.cloud.common.validation;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ValidationResult {
 
-    /* package */ List<ValidationProblem> problems;
+    private List<ValidationProblem> problems;
 
     public ValidationResult(List<ValidationProblem> problems) {
-	this.problems = new ArrayList<ValidationProblem>(problems);
+	this.problems = Collections.unmodifiableList(problems);
     }
 
     public boolean isOK() {
-	return problems.isEmpty();
+	return getProblems().isEmpty();
+    }
+
+    public List<ValidationProblem> getProblems() {
+	return problems;
     }
 
     @Override
     public String toString() {
-	return "ValidationResult [problems=\n" + toString(problems) + "\n]";
+	return "ValidationResult [problems=\n" + toString(getProblems()) + "\n]";
     }
 
     private String toString(List<ValidationProblem> problems) {

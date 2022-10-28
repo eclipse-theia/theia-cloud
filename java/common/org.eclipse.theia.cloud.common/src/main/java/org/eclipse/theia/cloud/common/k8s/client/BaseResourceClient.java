@@ -95,6 +95,7 @@ public class BaseResourceClient<T extends HasMetadata, L extends KubernetesResou
 	    customization.accept(newItem);
 
 	    trace(correlationId, "Creating new " + getTypeName());
+	    // TODO ES validate before creating. Check if new Item offers validate method
 	    operation().create(newItem);
 	    info(correlationId, "Created a new " + getTypeName());
 

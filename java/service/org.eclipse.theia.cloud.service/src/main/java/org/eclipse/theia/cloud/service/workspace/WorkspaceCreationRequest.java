@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.theia.cloud.common.validation.Validate;
+import org.eclipse.theia.cloud.common.validation.ValidationProblem;
+import org.eclipse.theia.cloud.common.validation.ValidationResult;
 import org.eclipse.theia.cloud.service.ServiceRequest;
-import org.eclipse.theia.cloud.service.validation.Validate;
-import org.eclipse.theia.cloud.service.validation.ValidationProblem;
-import org.eclipse.theia.cloud.service.validation.ValidationResult;
 
 @Schema(name = "WorkspaceCreationRequest", description = "Request to create a new workspace.")
 public final class WorkspaceCreationRequest extends ServiceRequest {
@@ -60,7 +60,7 @@ public final class WorkspaceCreationRequest extends ServiceRequest {
 	List<ValidationProblem> problems = new ArrayList<ValidationProblem>();
 	validateServiceRequest(problems);
 	Validate.user(user).ifPresent(problems::add);
-	Validate.optionalAppDefinition(appDefinition).ifPresent(problems::add);
+	Validate.optionalAppDefinitionName(appDefinition).ifPresent(problems::add);
 	Validate.label(label).ifPresent(problems::add);
 	return new ValidationResult(problems);
     }

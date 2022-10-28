@@ -13,13 +13,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service.validation;
+package org.eclipse.theia.cloud.common.validation;
 
 public class ValidationProblem {
 
-    /* package */ String field;
-    /* package */ Object value;
-    /* package */ String reason;
+    private String field;
+    private Object value;
+    private String reason;
 
     public ValidationProblem(String field, Object value, String reason) {
 	this.field = field;
@@ -27,16 +27,20 @@ public class ValidationProblem {
 	this.reason = reason;
     }
 
+    public String getField() {
+	return field;
+    }
+
     @Override
     public String toString() {
-	return field + " with value '" + value + "' is not valid. Reason: " + reason;
+	return getField() + " with value '" + value + "' is not valid. Reason: " + reason;
     }
 
     @Override
     public int hashCode() {
 	final int prime = 31;
 	int result = 1;
-	result = prime * result + ((field == null) ? 0 : field.hashCode());
+	result = prime * result + ((getField() == null) ? 0 : getField().hashCode());
 	result = prime * result + ((reason == null) ? 0 : reason.hashCode());
 	result = prime * result + ((value == null) ? 0 : value.hashCode());
 	return result;
@@ -51,10 +55,10 @@ public class ValidationProblem {
 	if (getClass() != obj.getClass())
 	    return false;
 	ValidationProblem other = (ValidationProblem) obj;
-	if (field == null) {
-	    if (other.field != null)
+	if (getField() == null) {
+	    if (other.getField() != null)
 		return false;
-	} else if (!field.equals(other.field))
+	} else if (!getField().equals(other.getField()))
 	    return false;
 	if (reason == null) {
 	    if (other.reason != null)

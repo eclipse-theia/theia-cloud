@@ -13,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service.validation;
+package org.eclipse.theia.cloud.common.validation;
 
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -24,6 +24,9 @@ public final class Validate {
 
     private static final String ALPHANUMERIC_PLUS_MINUS_REGEX = "^[a-zA-Z0-9.\\-]+$";
     private static final Pattern ALPHANUMERIC_PLUS_MINUS_PATTERN = Pattern.compile(ALPHANUMERIC_PLUS_MINUS_REGEX);
+
+    private static final String DOCKER_IMAGE_REGEX = "^((?:((?:(?:localhost|[\\w-]+(?:\\.[\\w-]+)+)(?::\\d+)?)|[\\w]+:\\d+)/)?([a-z0-9_.\\-]+(?:/[a-z0-9_.\\-]+)*))(?::([\\w][\\w.\\-]{0,127}))?(?:@([A-Za-z][A-Za-z0-9]*(?:[+.-_][A-Za-z][A-Za-z0-9]*)*:[0-9a-fA-F]{32,}))?$";
+    private static final Pattern DOCKER_IMAGE_PATTERN = Pattern.compile(DOCKER_IMAGE_REGEX);
 
     /**
      * 60 is picked arbitrarily at the moment and may be changed if required.
@@ -97,7 +100,7 @@ public final class Validate {
      * attempted escape attacks. Only allow valid DNS subdomains.</li>
      * </ul>
      */
-    public static Optional<ValidationProblem> optionalAppDefinition(String appDefinition) {
+    public static Optional<ValidationProblem> optionalAppDefinitionName(String appDefinition) {
 	if (appDefinition == null || appDefinition.isEmpty()) {
 	    return Optional.empty();
 	}
@@ -110,7 +113,7 @@ public final class Validate {
      * attempted escape attacks. Only allow valid DNS subdomains.</li>
      * </ul>
      */
-    public static Optional<ValidationProblem> appDefinition(String appDefinition) {
+    public static Optional<ValidationProblem> appDefinitionName(String appDefinition) {
 	return notNullAndNotBlank("appDefinition", appDefinition)//
 		.or(() -> dnsSubDomainRfc1123("appDefinition", appDefinition));
     }
@@ -224,6 +227,62 @@ public final class Validate {
 	    return Optional.empty();
 	}
 	return noLineBreaks("workspaceName", workspaceName);
+    }
+
+// test values from regex page
+//    alpine
+//    alpine:latest
+//    library/alpine
+//    localhost/test
+//    localhost:1234/test
+//    test:1234/bla
+//    alpine:3.7
+//    docker.example.com/gmr/alpine:3.7
+//    docker.example.com/gmr/alpine/test2:3.7
+//    docker.example.com/gmr/alpine/test2/test3:3.7
+//    docker.example.com:5000/gmr/alpine:latest
+//    docker.example.com:5000/gmr/alpine:latest@sha256:5ae13221a775e9ded1d00f4dd6a3ad869ed1d662eb8cf81cb1fc2ba06f2b7172
+//    docker.example.com:5000/gmr/alpine/test2:latest@sha256:5ae13221a775e9ded1d00f4dd6a3ad869ed1d662eb8cf81cb1fc2ba06f2b7172
+//    docker.example.com/gmr/alpine/test2:latest@sha256:5ae13221a775e9ded1d00f4dd6a3ad869ed1d662eb8cf81cb1fc2ba06f2b7172
+//    docker.example.com/gmr/alpine/test2@sha256:5ae13221a775e9ded1d00f4dd6a3ad869ed1d662eb8cf81cb1fc2ba06f2b7172
+//    portainer/portainer:latest
+//    registry:2@sha256:5a156ff125e5a12ac7fdec2b90b7e2ae5120fa249cf62248337b6d04abc574c8
+    public static Optional<ValidationProblem> dockerImage(String image) {
+	if (image == null || image.isEmpty()) {
+	    return Optional.empty();
+	}
+	if (!DOCKER_IMAGE_PATTERN.matcher(image).matches()) {
+	    return Optional.of(new ValidationProblem("image", image, "Not a valid docker image name"));
+	}
+	return Optional.empty();
+    }
+
+    public static Optional<ValidationProblem> pullSecret(String pullSecret) {
+	if (pullSecret == null || pullSecret.isEmpty()) {
+	    return Optional.empty();
+	}
+	return noLineBreaks("pullSecret", pullSecret);
+    }
+
+    public static Optional<ValidationProblem> unixUserId(int uid) {
+	if (uid < 0) {
+	    return Optional.of(new ValidationProblem("uid", uid, "Not a valid unix user identifier"));
+	}
+	return Optional.empty();
+    }
+
+    public static Optional<ValidationProblem> port(int port) {
+	if (port < 0 || port > 65353) {
+	    return Optional.of(new ValidationProblem("port", port, "Not a valid port"));
+	}
+	return Optional.empty();
+    }
+
+    public static Optional<ValidationProblem> host(String host) {
+	if (host == null || host.isEmpty()) {
+	    return Optional.empty();
+	}
+	return dnsSubDomainRfc1123("host", host);
     }
 
 }

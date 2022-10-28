@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.service.validation.ValidationProblem;
-import org.eclipse.theia.cloud.service.validation.ValidationResult;
+import org.eclipse.theia.cloud.common.validation.ValidationProblem;
+import org.eclipse.theia.cloud.common.validation.ValidationResult;
 
 @Schema(name = "PingRequest", description = "Request to ping the availability of the service.")
 public final class PingRequest extends ServiceRequest {

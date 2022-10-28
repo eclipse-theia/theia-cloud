@@ -39,6 +39,7 @@ public class DefaultAppDefinitionResourceClient extends BaseResourceClient<AppDe
 	appDefinition.setMetadata(metadata);
 
 	info(correlationId, "Create AppDefinition " + appDefinition.getSpec());
+	// TODO ES validate before creating
 	return operation().create(appDefinition);
     }
 

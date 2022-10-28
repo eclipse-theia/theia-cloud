@@ -19,7 +19,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrela
 
 import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
-import org.eclipse.theia.cloud.service.validation.ValidationResult;
+import org.eclipse.theia.cloud.common.validation.ValidationResult;
 import org.jboss.logging.Logger;
 
 public class BaseResource {

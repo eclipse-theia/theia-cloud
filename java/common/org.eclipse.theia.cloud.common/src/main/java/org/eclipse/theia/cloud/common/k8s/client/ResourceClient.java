@@ -37,6 +37,7 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
     NonNamespaceOperation<T, L, Resource<T>> operation();
 
     default Resource<T> resource(String name) {
+	// TODO ES validate read resource
 	return operation().withName(name);
     }
 
@@ -70,6 +71,7 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
     }
 
     default List<T> list() {
+	// TODO ES validate read items
 	return operation().list().getItems();
     }
 

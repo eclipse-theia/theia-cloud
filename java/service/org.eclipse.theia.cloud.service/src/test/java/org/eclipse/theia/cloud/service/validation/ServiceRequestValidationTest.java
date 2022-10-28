@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.eclipse.theia.cloud.common.validation.ValidationResult;
 import org.eclipse.theia.cloud.service.LaunchRequest;
 import org.junit.jupiter.api.Test;
 
@@ -102,8 +103,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("appId", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("appId", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -117,8 +118,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("kind", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("kind", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -132,8 +133,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("user", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("user", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -147,8 +148,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("user", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("user", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -162,8 +163,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("user", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("user", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -177,8 +178,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("user", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("user", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -192,8 +193,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("user", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("user", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -207,8 +208,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("user", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("user", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -235,8 +236,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("appDefinition", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("appDefinition", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -250,8 +251,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("appDefinition", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("appDefinition", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -265,8 +266,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("appDefinition", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("appDefinition", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -281,8 +282,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("appDefinition", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("appDefinition", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -310,8 +311,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("workspaceName", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("workspaceName", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -325,8 +326,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("workspaceName", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("workspaceName", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -340,8 +341,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("workspaceName", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("workspaceName", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -356,8 +357,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("workspaceName", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("workspaceName", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -385,8 +386,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("label", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("label", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -400,8 +401,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("timeout", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("timeout", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -415,8 +416,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("timeout", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("timeout", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test
@@ -430,8 +431,8 @@ public class ServiceRequestValidationTest {
 
 	/* assert */
 	assertFalse(result.isOK(), result.toString());
-	assertEquals(1, result.problems.size(), result.toString());
-	assertEquals("timeout", result.problems.get(0).field, result.toString());
+	assertEquals(1, result.getProblems().size(), result.toString());
+	assertEquals("timeout", result.getProblems().get(0).getField(), result.toString());
     }
 
     @Test

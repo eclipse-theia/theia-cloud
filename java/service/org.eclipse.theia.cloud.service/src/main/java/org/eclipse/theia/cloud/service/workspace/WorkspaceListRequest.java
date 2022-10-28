@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.theia.cloud.common.validation.Validate;
+import org.eclipse.theia.cloud.common.validation.ValidationProblem;
+import org.eclipse.theia.cloud.common.validation.ValidationResult;
 import org.eclipse.theia.cloud.service.ServiceRequest;
-import org.eclipse.theia.cloud.service.validation.Validate;
-import org.eclipse.theia.cloud.service.validation.ValidationProblem;
-import org.eclipse.theia.cloud.service.validation.ValidationResult;
 
 @Schema(name = "WorkspaceListRequest", description = "Request to list workspaces of a user.")
 public final class WorkspaceListRequest extends ServiceRequest {

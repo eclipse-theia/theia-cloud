@@ -18,9 +18,9 @@ package org.eclipse.theia.cloud.service;
 import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.service.validation.Validate;
-import org.eclipse.theia.cloud.service.validation.ValidationProblem;
-import org.eclipse.theia.cloud.service.validation.ValidationResult;
+import org.eclipse.theia.cloud.common.validation.Validate;
+import org.eclipse.theia.cloud.common.validation.ValidationProblem;
+import org.eclipse.theia.cloud.common.validation.ValidationResult;
 
 public abstract class ServiceRequest {
 
