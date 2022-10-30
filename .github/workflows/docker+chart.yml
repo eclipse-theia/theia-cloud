@@ -1,0 +1,79 @@
+name: Build and publish Docker images, Helm chart
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  release: "0.8.0-MS6.${{ github.run_id }}"
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+        - landing-page
+        - operator
+        - service
+        - try-now-page
+        - wondershaper
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build the Docker image
+      run: docker build -t ghcr.io/${{ github.repository_owner }}/theia-cloud-${{ matrix. image }}:${release} -f dockerfiles/${{ matrix. image }}/Dockerfile .
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      if: ${{ github.ref_name == 'main' }}
+
+    - name: Build the Docker image
+      run: docker push ghcr.io/${{ github.repository_owner }}/theia-cloud-${{ matrix.image }}:${release}
+      if: ${{ github.ref_name == 'main' }}
+
+  helm:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: azure/setup-helm@v3
+      with:
+        version: '3.10.1'
+
+    - name: Update version numbers in Helm chart
+      run: |
+          yq e ".version=\"${release}\"" -i helm/theia.cloud/Chart.yaml
+          yq e ".appVersion=\"${release}\"" -i helm/theia.cloud/Chart.yaml
+          yq e ".landingPage.image=\"ghcr.io/${{ github.repository_owner }}/theia-cloud-landing-page:${release}\"" -i helm/theia.cloud/values.yaml
+          yq e ".operator.image=\"ghcr.io/${{ github.repository_owner }}/theia-cloud-operator:${release}\"" -i helm/theia.cloud/values.yaml
+          yq e ".service.image=\"ghcr.io/${{ github.repository_owner }}/theia-cloud-service:${release}\"" -i helm/theia.cloud/values.yaml
+
+    - name: Package Helm chart
+      run: helm package helm/theia.cloud
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      if: ${{ github.ref_name == 'main' }}
+
+    - name: Publish Helm chart to GitHub registry
+      run: helm push theia-cloud-${release}.tgz oci://ghcr.io/${GITHUB_REPOSITORY_OWNER}/
+      if: ${{ github.ref_name == 'main' }}
+
+    - name: Publish Helm chart as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: theia-cloud-${{ env.release }}
+        path: theia-cloud-${{ env.release }}.tgz
