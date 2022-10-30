@@ -1,5 +1,5 @@
 # build stage
-FROM node:lts-alpine as build-stage
+FROM node:16-alpine as build-stage
 # disable eslint during build
 ENV DISABLE_ESLINT_PLUGIN=true
 WORKDIR /app
