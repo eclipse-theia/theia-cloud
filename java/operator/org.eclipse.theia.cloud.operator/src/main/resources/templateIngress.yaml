@@ -32,3 +32,5 @@ spec:
         #         name: nginx-ok-service
         #         port:
         #           number: 80 
+    - host: "*.webview.placeholder-host"
+      http:

@@ -159,9 +159,11 @@ public class LazySessionHandler implements SessionHandler {
 		storageName, arguments.isUseKeycloak());
 
 	/* adjust the ingress */
+	String webViewHost;
 	String host;
 	try {
-	    host = updateIngress(ingress, serviceToUse, session, appDefinition, correlationId);
+	    host = updateIngress(ingress, serviceToUse, session, appDefinition, correlationId, "");
+	    webViewHost = updateIngress(ingress, serviceToUse, session, appDefinition, correlationId, "*.webview.");
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
@@ -366,8 +368,8 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
-	    Session session, AppDefinition appDefinition, String correlationId) {
-	String host = appDefinition.getSpec().getHost();
+	    Session session, AppDefinition appDefinition, String correlationId, String prefix) {
+	String host = prefix + appDefinition.getSpec().getHost();
 	String path = ingressPathProvider.getPath(appDefinition, session);
 	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(), ingressToUpdate -> {
 	    IngressRule ingressRule = new IngressRule();

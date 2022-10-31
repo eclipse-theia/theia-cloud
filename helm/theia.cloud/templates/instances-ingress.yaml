@@ -16,8 +16,10 @@ spec:
   tls: 
   - hosts:
     - {{ tpl (.Values.hosts.instance | toString) . }}
+    - "*.webview.{{ tpl (.Values.hosts.instance | toString) . }}"
     secretName: ws-cert-secret
   rules:
     - host: {{ tpl (.Values.hosts.instance | toString) . }}
       http:
-      
+    - host: "*.webview.{{ .Values.hosts.instance }}"
+      http:
