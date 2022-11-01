@@ -47,6 +47,7 @@ import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudK8sUtil;
 import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudPersistentVolumeUtil;
 import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudServiceUtil;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
+import org.yaml.snakeyaml.Yaml;
 
 import com.google.inject.Inject;
 
@@ -58,13 +59,8 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
-import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
-import io.fabric8.kubernetes.api.model.networking.v1.IngressBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
-import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
-import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
 public class LazySessionHandler implements SessionHandler {
@@ -159,11 +155,9 @@ public class LazySessionHandler implements SessionHandler {
 		storageName, arguments.isUseKeycloak());
 
 	/* adjust the ingress */
-	String webViewHost;
 	String host;
 	try {
-	    host = updateIngress(ingress, serviceToUse, session, appDefinition, correlationId, "");
-	    webViewHost = updateIngress(ingress, serviceToUse, session, appDefinition, correlationId, "*.webview.");
+	    host = updateIngress(ingress, serviceToUse, session, appDefinition, correlationId);
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
@@ -368,33 +362,35 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
-	    Session session, AppDefinition appDefinition, String correlationId, String prefix) {
-	String host = prefix + appDefinition.getSpec().getHost();
-	String path = ingressPathProvider.getPath(appDefinition, session);
+	    Session session, AppDefinition appDefinition, String correlationId) {
+			String host = appDefinition.getSpec().getHost();
+			String path = ingressPathProvider.getPath(appDefinition, session);
+
+			Map<String, String> replacements = TheiaCloudIngressUtil.getIngressHostReplacements(
+				appDefinition,
+				path + AddedHandlerUtil.INGRESS_REWRITE_PATH,
+				serviceToUse);
+			String ingressRulesYaml;
+
+			try
+			{
+				ingressRulesYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
+					AddedHandlerUtil.TEMPLATE_INGRESS_HOSTS_YAML,
+					replacements,
+					correlationId);
+			} catch (IOException | URISyntaxException e) {
+	    		LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for session " + session), e);
+				return host + path + "/";
+			}
+
+			Yaml yaml = new Yaml();
+			IngressRule[] ingressRules = yaml.loadAs(ingressRulesYaml, IngressRule[].class);
+
 	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(), ingressToUpdate -> {
-	    IngressRule ingressRule = new IngressRule();
-	    ingressToUpdate.getSpec().getRules().add(ingressRule);
-
-	    ingressRule.setHost(host);
-
-	    HTTPIngressRuleValue http = new HTTPIngressRuleValue();
-	    ingressRule.setHttp(http);
-
-	    HTTPIngressPath httpIngressPath = new HTTPIngressPath();
-	    http.getPaths().add(httpIngressPath);
-	    httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
-	    httpIngressPath.setPathType("Prefix");
-
-	    IngressBackend ingressBackend = new IngressBackend();
-	    httpIngressPath.setBackend(ingressBackend);
-
-	    IngressServiceBackend ingressServiceBackend = new IngressServiceBackend();
-	    ingressBackend.setService(ingressServiceBackend);
-	    ingressServiceBackend.setName(serviceToUse.get().getMetadata().getName());
-
-	    ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
-	    ingressServiceBackend.setPort(serviceBackendPort);
-	    serviceBackendPort.setNumber(appDefinition.getSpec().getPort());
+		for (int i = 0; i < ingressRules.length; i++)
+		{
+			ingressToUpdate.getSpec().getRules().add(ingressRules[i]);
+		}
 	});
 	return host + path + "/";
     }

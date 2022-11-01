@@ -1,0 +1,20 @@
+- host: placeholder-host
+  http:
+    paths:
+      - path: placeholder-path
+        pathType: Prefix
+        backend:
+          service:
+            name: placeholder-service-name
+            port:
+              number: placeholder-service-port
+- host: "*.webview.placeholder-host"
+  http:
+    paths:
+      - path: placeholder-path
+        pathType: Prefix
+        backend:
+          service:
+            name: placeholder-service-name
+            port:
+              number: placeholder-service-port

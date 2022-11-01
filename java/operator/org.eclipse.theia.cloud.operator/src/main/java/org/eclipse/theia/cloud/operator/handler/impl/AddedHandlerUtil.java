@@ -67,6 +67,7 @@ public final class AddedHandlerUtil {
     private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
     public static final String TEMPLATE_INGRESS_YAML = "/templateIngress.yaml";
+    public static final String TEMPLATE_INGRESS_HOSTS_YAML = "/templateIngressHosts.yaml";
     public static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     public static final String TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML = "/templateServiceWithoutOAuthProxy.yaml";
     public static final String TEMPLATE_CONFIGMAP_EMAILS_YAML = "/templateConfigmapEmails.yaml";

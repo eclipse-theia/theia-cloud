@@ -31,6 +31,7 @@ import org.eclipse.theia.cloud.operator.handler.impl.AddedHandlerUtil;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -43,6 +44,9 @@ public final class TheiaCloudIngressUtil {
 
     public static final String PLACEHOLDER_INGRESSNAME = "placeholder-ingressname";
     public static final String PLACEHOLDER_HOST = "placeholder-host";
+	public static final String PLACEHOLDER_PATH = "placeholder-path";
+	public static final String PLACEHOLDER_SERVICE_NAME = "placeholder-service-name";
+	public static final String PLACEHOLDER_SERVICE_PORT = "placeholder-service-port";
 
     private TheiaCloudIngressUtil() {
     }
@@ -76,6 +80,15 @@ public final class TheiaCloudIngressUtil {
 	replacements.put(PLACEHOLDER_INGRESSNAME, getIngressName(appDefinition));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(PLACEHOLDER_HOST, appDefinition.getSpec().getHost());
+	return replacements;
+    }
+
+    public static Map<String, String> getIngressHostReplacements(AppDefinition appDefinition, String path, Optional<Service> serviceToUse) {
+	Map<String, String> replacements = new LinkedHashMap<String, String>();
+	replacements.put(PLACEHOLDER_HOST, appDefinition.getSpec().getHost());
+	replacements.put(PLACEHOLDER_PATH, path);
+	replacements.put(PLACEHOLDER_SERVICE_NAME, serviceToUse.get().getMetadata().getName());
+	replacements.put(PLACEHOLDER_SERVICE_PORT, Integer.toString(appDefinition.getSpec().getPort()));
 	return replacements;
     }
 
