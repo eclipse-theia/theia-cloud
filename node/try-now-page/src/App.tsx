@@ -1,6 +1,6 @@
 import './App.css';
 
-import { getTheiaCloudConfig, LaunchRequest, PingRequest, TheiaCloud } from '@eclipse-theiacloud/common';
+import { AppDefinition, getTheiaCloudConfig, LaunchRequest, PingRequest, TheiaCloud } from '@eclipse-theiacloud/common';
 import React, { useEffect, useState } from 'react';
 
 import { AppLogo } from './components/AppLogo';
@@ -41,7 +41,7 @@ function App(): JSX.Element {
       if (element !== null && urlParams.has('appDef')) {
         const defaultSelection = urlParams.get('appDef');
         // eslint-disable-next-line no-null/no-null
-        if (defaultSelection !== null) {
+        if (defaultSelection !== null && isDefaultSelectionValueValid(defaultSelection, config.appDefinition, config.additionalApps)) {
           (element as HTMLSelectElement).value = defaultSelection;
           setSelectedAppName((element as HTMLSelectElement).options[(element as HTMLSelectElement).selectedIndex].text);
           setSelectedAppDefinition((element as HTMLSelectElement).value);
@@ -191,4 +191,15 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ accepted, onTer
   </div>
 );
 
+function isDefaultSelectionValueValid(defaultSelection: string, appDefinition: string, additionalApps?: AppDefinition[]): boolean {
+  if (defaultSelection === appDefinition) {
+    return true;
+  }
+  if (additionalApps) {
+    return additionalApps.map(def => def.appId).filter(appId => appId === defaultSelection).length > 0;
+  }
+  return false;
+}
+
 export default App;
+
