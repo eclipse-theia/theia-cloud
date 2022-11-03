@@ -10,41 +10,48 @@ export const COMMAND_ACTIVITY_REPORT_TITLE = 'activity.report';
  * This module tracks the last activity of the user.
  */
 export class ActivityTrackerModule implements TrackerModule {
-    protected lastActivity: Date;
+    protected timeInMilliseconds: number;
 
     constructor() {
-        this.lastActivity = new Date();
+        this.timeInMilliseconds = Date.now();
         this.registerCommand();
         this.setupListeners();
     }
 
     registerEndpoints(app: Express): Express {
         app.get(GET_ACTIVITY_PATH, async (req, res) => {
-            res.end(this.getLastActivity());
+            res.end(this.getLastActivity().toString());
+            res.status(200);
         });
     
         app.post(POST_POPUP, (req, res) => {
+            console.debug('POPUP REQUESTED');
             this.createPopup();
-            res.status(200);
             res.end('success');
-        });    
+            res.status(200);
+        });
         return app;
     }
 
     /**
-     * Sets the lastActivity to the current timestamp
+     * Sets the timeInMilliseconds to the current timestamp
      * @param reason optional parameter to log a reason for the activity
      */
     protected reportActivity(reason?: string): void {
-        console.debug(`Activity reported: ${new Date().toISOString()} (${reason ?? 'unknown'})`);
-        this.lastActivity = new Date();
+        this.timeInMilliseconds = Date.now();
+        console.debug(`Activity reported: ${this.formatTime(this.timeInMilliseconds)} (${reason ?? 'unknown'})`);
+    }
+
+    private formatTime(timeInMilliseconds: number): string {
+        const date = new Date(timeInMilliseconds);
+        return date.toISOString();
     }
 
     /**
-     * @returns the lastActivity timestamp as an ISOString
+     * @returns the timeInMilliseconds timestamp as an ISOString
      */
-    protected getLastActivity(): string {
-        return this.lastActivity.toISOString();
+    protected getLastActivity(): number {
+        return this.timeInMilliseconds;
     }
 
     /**

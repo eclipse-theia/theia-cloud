@@ -17,8 +17,6 @@
 			],
 			"preLaunchTask": "${defaultBuildTask}",
 			"env": {
-				"THEIA_CLOUD_ACTIVITY_SERVICE_HOST": "localhost",
-				"THEIA_CLOUD_ACTIVITY_SERVICE_PORT": "8081",
 				"THEIA_CLOUD_ACTIVITY_SERVICE_ENABLE_TRACKER": "1"
 			}
 		},

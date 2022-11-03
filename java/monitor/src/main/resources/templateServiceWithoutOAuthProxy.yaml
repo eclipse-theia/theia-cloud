@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: placeholder-servicename
+  labels:
+    app: placeholder-app
+  namespace: placeholder-namespace
+  ownerReferences:
+    - apiVersion: theia.cloud/v3beta
+      kind: AppDefinition
+      name: placeholder
+      uid: placeholder
+spec:
+  ports:
+    - name: http
+      port: placeholder-port
+      protocol: TCP
+      targetPort: placeholder-port
+  selector:
+    app: placeholder-app
+  type: ClusterIP
