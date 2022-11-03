@@ -18,7 +18,7 @@ issuer:
 # Docker image of the main application
 image:
   # The name of docker image to be used
-  name: theiacloud/theia-cloud-demo:0.8.0.MS6
+  name: theiacloud/theia-cloud-demo:0.8.0.MS7
 
   # the image pull secret. Leave empty if registry is public
   pullSecret: ""
@@ -55,7 +55,7 @@ hosts:
 # Values related to the landing page
 landingPage:
   # the landing page image to use
-  image: theiacloud/theia-cloud-landing-page:0.8.0.MS6
+  image: theiacloud/theia-cloud-landing-page:0.8.0.MS7
 
   # Optional: the image pull secret
   imagePullSecret: pullsecret
@@ -105,7 +105,7 @@ keycloak:
 # Values related to the operator
 operator:
   # The operator image
-  image: theiacloud/theia-cloud-operator:0.8.0.MS6
+  image: theiacloud/theia-cloud-operator:0.8.0.MS7
 
   # Optional: the image pull secret
   imagePullSecret: pullsecret
@@ -135,7 +135,7 @@ operator:
 # Values of the Theia.cloud REST service
 service:
   # The image to use
-  image: theiacloud/theia-cloud-service:0.8.0.MS6
+  image: theiacloud/theia-cloud-service:0.8.0.MS7
 
   # Optional: the image pull secret
   imagePullSecret: pullsecret

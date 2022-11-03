@@ -7,7 +7,7 @@ issuer:
   email: mmorlock@example.com
 
 image:
-  name: theiacloud/cdt-blueprint:0.8.0.MS6
+  name: theiacloud/cdt-blueprint:0.8.0.MS7
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
@@ -19,7 +19,7 @@ hosts:
   instance: ws.192.168.39.173.nip.io
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.8.0.MS6
+  image: theiacloud/theia-cloud-landing-page:0.8.0.MS7
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
 
@@ -32,14 +32,14 @@ keycloak:
   cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
 
 operator:
-  image: theiacloud/theia-cloud-operator:0.8.0.MS6
+  image: theiacloud/theia-cloud-operator:0.8.0.MS7
   eagerStart: false
   cloudProvider: "K8S"
   bandwidthLimiter: "K8SANNOTATION"
   sessionsPerUser: "1"
 
 service:
-  image: theiacloud/theia-cloud-service:0.8.0.MS6
+  image: theiacloud/theia-cloud-service:0.8.0.MS7
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"

@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.service.session;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
@@ -88,7 +89,12 @@ public class SessionResource extends BaseResource {
 
     @Operation(summary = "Report session activity", description = "Updates the last activity timestamp for a session to monitor activity.")
     @PATCH
+    @PermitAll
     public boolean activity(SessionActivityRequest request) {
+	// TODO activity reporting will be removed from this service
+	// There will be a dedicated service that will have direct communication with
+	// the pods
+	// Permit All until this is implemented
 	String correlationId = evaluateRequest(request);
 	if (request.sessionName == null) {
 	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_SESSION_NAME);

@@ -1,6 +1,6 @@
 {
   "name": "@eclipse-theiacloud/theia-activity-tracker",
-  "version": "0.8.0-alpha.23",
+  "version": "0.8.0-alpha.25",
   "description": "Notifies Theia.cloud about user workspace activity",
   "license": "EPL-2.0",
   "keywords": [ "theia-extension", "theia", "cloud", "kubernetes", "k8s" ],
@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "@theia/core": "^1.0.0",
-    "@eclipse-theiacloud/common": "0.8.0-alpha.19"
+    "@eclipse-theiacloud/common": "0.8.0-alpha.21"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
