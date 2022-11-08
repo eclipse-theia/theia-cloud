@@ -9,8 +9,11 @@ docker build -t theia-cloud-wondershaper -f dockerfiles/wondershaper/Dockerfile 
 # Build the Theia Demo application with:
 docker build -t theia-cloud-demo -f demo/dockerfiles/demo-theia-docker/Dockerfile demo/dockerfiles/demo-theia-docker/.
 
-# Build the Landing page/Dashboard with:
+# Build the Landing page/Dashboard with (based on released common package):
 docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile .
+
+# Build the Landing page/Dashboard with (based on local common code):
+docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile.local .
 
 # Build the Try Now page with:
 docker build -t theia-cloud-try-now-page -f dockerfiles/try-now-page/Dockerfile .
