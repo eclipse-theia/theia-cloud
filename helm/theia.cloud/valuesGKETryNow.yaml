@@ -30,10 +30,10 @@ landingPage:
 
 keycloak:
   enable: false
-  authUrl: "https://keycloak.34.141.62.32.nip.io"
+  authUrl: ""
   realm: ""
-  clientId: "id"
-  clientSecret: "secret"
+  clientId: ""
+  clientSecret: ""
   cookieSecret: ""
 
 operator:
