@@ -22,13 +22,18 @@ landingPage:
   image: theiacloud/theia-cloud-try-now-page:0.8.0.MS7
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
+  additionalApps: 
+    coffee-editor:
+      label: "Coffee Editor"
+    cdt-cloud-demo:
+      label: "CDT.cloud Blueprint"
 
 keycloak:
   enable: false
-  authUrl: ""
+  authUrl: "https://keycloak.34.141.62.32.nip.io"
   realm: ""
-  clientId: ""
-  clientSecret: ""
+  clientId: "id"
+  clientSecret: "secret"
   cookieSecret: ""
 
 operator:

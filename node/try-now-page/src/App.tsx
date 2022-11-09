@@ -67,7 +67,7 @@ function App(): JSX.Element {
         TheiaCloud.launchAndRedirect(config.useEphemeralStorage
           ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5)
           : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5),
-        { timeout: 30000, retries: 3 }
+        { timeout: 60000, retries: 5 }
         )
           .catch((_err: Error) => {
             setError('Sorry, there are no more available instances in the cluster.\n'
