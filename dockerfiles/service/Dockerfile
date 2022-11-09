@@ -25,7 +25,6 @@ ENV KEYCLOAK_CLIENTSECRET publicbutoauth2proxywantsasecret
 ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} \
     -Dquarkus.http.port=${SERVICE_PORT} \
     -Dtheia.cloud.use.keycloak=${KEYCLOAK_ENABLE} \
-    -Dquarkus.oidc.enabled=${KEYCLOAK_ENABLE} \
     -Dquarkus.oidc.auth-server-url=${KEYCLOAK_SERVERURL} \
     -Dquarkus.oidc.client-id=${KEYCLOAK_CLIENTID} \
     -Dquarkus.oidc.credentials.secret=${KEYCLOAK_CLIENTSECRET} \
