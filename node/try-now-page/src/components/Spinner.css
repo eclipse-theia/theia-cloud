@@ -19,17 +19,17 @@
 
 @keyframes blueprint-spinner {
   0% {
-    filter: hue-rotate(25deg) brightness(103%) contrast(101%);
+    filter: hue-rotate(15deg) brightness(103%) contrast(101%);
     transform: scale(1.0);
   }
 
   50% {
-    filter: hue-rotate(-25deg) brightness(100%) contrast(102%);
+    filter: hue-rotate(-15deg) brightness(100%) contrast(102%);
     transform: scale(0.8);
   }
 
   100% {
-    filter: hue-rotate(25deg) brightness(103%) contrast(101%);
+    filter: hue-rotate(15deg) brightness(103%) contrast(101%);
     transform: scale(1.0);
   }
 }
