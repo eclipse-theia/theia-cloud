@@ -7,16 +7,16 @@ issuer:
   email: jfaltermeier@eclipsesource.com
 
 image:
-  name: theiacloud/theia-cloud-demo:0.8.0.MS7
+  name: theiacloud/theia-cloud-demo:0.8.0.MS8
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
 
 hosts:
-  service: service.34.141.62.32.nip.io
+  service: service.theia-cloud.io
   serviceProtocol: https
-  landing: theia.cloud.34.141.62.32.nip.io
-  instance: ws.34.141.62.32.nip.io
+  landing: try.theia-cloud.io
+  instance: ws.theia-cloud.io
 
 landingPage:
   image: theiacloud/theia-cloud-try-now-page:0.8.0.MS7
