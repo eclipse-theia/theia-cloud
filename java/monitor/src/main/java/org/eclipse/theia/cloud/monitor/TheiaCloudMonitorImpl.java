@@ -30,9 +30,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-
-import com.google.inject.Inject;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -53,9 +50,6 @@ public class TheiaCloudMonitorImpl implements TheiaCloudMonitor {
     private int port;
     private int shutdownAfter;
     private int notifyAfter;
-
-    @Inject
-    private TheiaCloudClient resourceClient;
 
     @Override
     public void start(int port, int interval, int shutdownAfter, int notifyAfter) {
@@ -139,7 +133,8 @@ public class TheiaCloudMonitorImpl implements TheiaCloudMonitor {
 
 	try {
 	    logInfo(sessionName, "Deleting session as timeout of " + shutdownAfter + " minutes was reached!");
-	    resourceClient.sessions().delete(COR_ID_NOACTIVITYPREFIX + correlationId, sessionName);
+	    // resourceClient.sessions().delete(COR_ID_NOACTIVITYPREFIX + correlationId,
+	    // sessionName);
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(COR_ID_NOACTIVITYPREFIX, correlationId, "Exception trying to delete session"),
 		    e);
