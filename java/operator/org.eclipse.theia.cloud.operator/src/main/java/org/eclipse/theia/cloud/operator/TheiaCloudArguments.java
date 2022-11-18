@@ -35,6 +35,18 @@ public class TheiaCloudArguments {
     private boolean eagerStart;
 
     @Option(names = {
+	    "--enableMonitor" }, description = "Whether the monitor service should be started.", required = false)
+    private boolean enableMonitor;
+
+    @Option(names = {
+	    "--enableActivityTracker" }, description = "Whether the activityTracker module is activated.", required = false)
+    private boolean enableActivityTracker;
+
+    @Option(names = {
+	    "--monitorInterval" }, description = "Number of minutes between each ping of the monitor.", required = false, defaultValue = "1")
+    private Integer monitorInterval;
+
+    @Option(names = {
 	    "--cloudProvider" }, description = "The cloud provider where Theia.Cloud is deployed", required = false)
     private CloudProvider cloudProvider;
 
@@ -70,6 +82,14 @@ public class TheiaCloudArguments {
 	return eagerStart;
     }
 
+    public boolean isEnableMonitor() {
+	return enableMonitor;
+    }
+
+    public boolean isEnableActivityTracker() {
+	return enableActivityTracker;
+    }
+
     public CloudProvider getCloudProvider() {
 	return cloudProvider;
     }
@@ -88,6 +108,10 @@ public class TheiaCloudArguments {
 
     public Integer getSessionsPerUser() {
 	return sessionsPerUser;
+    }
+
+    public Integer getMonitorInterval() {
+	return monitorInterval;
     }
 
     public String getAppId() {
@@ -111,8 +135,11 @@ public class TheiaCloudArguments {
 	result = prime * result + ((cloudProvider == null) ? 0 : cloudProvider.hashCode());
 	result = prime * result + (eagerStart ? 1231 : 1237);
 	result = prime * result + ((instancesPath == null) ? 0 : instancesPath.hashCode());
+	result = prime * result + (enableMonitor ? 1231 : 1237);
+	result = prime * result + (enableActivityTracker ? 1231 : 1237);
 	result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
 	result = prime * result + ((sessionsPerUser == null) ? 0 : sessionsPerUser.hashCode());
+	result = prime * result + ((monitorInterval == null) ? 0 : monitorInterval.hashCode());
 	result = prime * result + (useKeycloak ? 1231 : 1237);
 	result = prime * result + (usePaths ? 1231 : 1237);
 	result = prime * result + ((wondershaperImage == null) ? 0 : wondershaperImage.hashCode());
@@ -143,6 +170,9 @@ public class TheiaCloudArguments {
 	    if (other.instancesPath != null)
 		return false;
 	} else if (!instancesPath.equals(other.instancesPath))
+	if (enableMonitor != other.enableMonitor)
+	    return false;
+	if (enableActivityTracker != other.enableActivityTracker)
 	    return false;
 	if (serviceUrl == null) {
 	    if (other.serviceUrl != null)
@@ -153,6 +183,11 @@ public class TheiaCloudArguments {
 	    if (other.sessionsPerUser != null)
 		return false;
 	} else if (!sessionsPerUser.equals(other.sessionsPerUser))
+	    return false;
+	if (monitorInterval == null) {
+	    if (other.monitorInterval != null)
+		return false;
+	} else if (!monitorInterval.equals(other.monitorInterval))
 	    return false;
 	if (useKeycloak != other.useKeycloak)
 	    return false;
@@ -171,7 +206,8 @@ public class TheiaCloudArguments {
 	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", cloudProvider="
 		+ cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter + ", wondershaperImage=" + wondershaperImage
 		+ ", serviceUrl=" + serviceUrl + ", sessionsPerUser=" + sessionsPerUser + ", appId=" + appId
-		+ ", usePaths=" + usePaths + ", instancesPath=" + instancesPath + "]";
+		+ ", usePaths=" + usePaths + ", instancesPath=" + instancesPath + ", enableMonitor=" + enableMonitor
+		+ ", enableActivityTracker=" + enableActivityTracker + ", monitorInterval=" + monitorInterval + "]";
     }
 
 }

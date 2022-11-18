@@ -44,6 +44,8 @@ public final class TheiaCloudHandlerUtil {
     public static final String PLACEHOLDER_EMAILSCONFIGNAME = "placeholder-emailsconfigname";
     public static final String PLACEHOLDER_CONFIGNAME = "placeholder-configname";
 
+    public static final String PLACEHOLDER_MONITOR_PORT = "placeholder-monitor-port";
+
     private TheiaCloudHandlerUtil() {
     }
 

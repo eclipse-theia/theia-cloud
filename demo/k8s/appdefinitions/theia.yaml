@@ -27,3 +27,7 @@ spec:
   downlinkLimit: 30000
   uplinkLimit: 30000
   mountPath: "/home/project/persisted"
+  monitor:
+    timeoutAfter: 30
+    notifyAfter: 25
+    port: 8081

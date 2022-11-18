@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
@@ -57,7 +58,13 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     public static final String PLACEHOLDER_ENV_SESSION_USER = "placeholder-env-session-user";
     public static final String PLACEHOLDER_ENV_SESSION_URL = "placeholder-env-session-url";
 
+    public static final String PLACEHOLDER_MONITOR_PORT = "placeholder-monitor-port";
+    public static final String PLACEHOLDER_ENABLE_ACTIVITY_TRACKER = "placeholder-enable-activity-tracker";
+
     protected static final String DEFAULT_UID = "1000";
+
+    @Inject
+    private TheiaCloudClient resourceClient;
 
     @Inject
     protected TheiaCloudArguments arguments;
@@ -101,26 +108,29 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     }
 
     protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, Session session) {
-	Map<String, String> environmentVariables = getEnvironmentVariables(Optional.of(session));
+	Map<String, String> environmentVariables = getEnvironmentVariables(appDefinition, Optional.of(session));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL,
 		TheiaCloudDeploymentUtil.getSessionURL(ingressPathProvider, appDefinition, session));
 	return environmentVariables;
     }
 
     protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, int instance) {
-	Map<String, String> environmentVariables = getEnvironmentVariables(Optional.empty());
+	Map<String, String> environmentVariables = getEnvironmentVariables(appDefinition, Optional.empty());
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL,
 		TheiaCloudDeploymentUtil.getSessionURL(ingressPathProvider, appDefinition, instance));
 	return environmentVariables;
     }
 
-    protected Map<String, String> getEnvironmentVariables(Optional<Session> session) {
+    protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, Optional<Session> session) {
 	Map<String, String> environmentVariables = new LinkedHashMap<String, String>();
 	environmentVariables.put(PLACEHOLDER_ENV_APP_ID, arguments.getAppId());
 	environmentVariables.put(PLACEHOLDER_ENV_SERVICE_URL, arguments.getServiceUrl());
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_UID, session.map(s -> s.getMetadata().getUid()).orElse(""));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_NAME, session.map(s -> s.getSpec().getName()).orElse(""));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_USER, session.map(s -> s.getSpec().getUser()).orElse(""));
+	environmentVariables.put(PLACEHOLDER_ENABLE_ACTIVITY_TRACKER, arguments.isEnableActivityTracker() ? "1" : "0");
+	environmentVariables.put(PLACEHOLDER_MONITOR_PORT,
+		String.valueOf(appDefinition.getSpec().getMonitor().getPort()));
 	return environmentVariables;
     }
 

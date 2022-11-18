@@ -40,6 +40,7 @@ import org.eclipse.theia.cloud.operator.handler.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.SessionHandler;
 import org.eclipse.theia.cloud.operator.handler.TimeoutStrategy;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
+import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTracker;
 
 import com.google.inject.Inject;
 
@@ -60,6 +61,9 @@ public class TheiaCloudImpl implements TheiaCloud {
     private TheiaCloudClient resourceClient;
 
     @Inject
+    private MonitorActivityTracker theiaCloudMonitor;
+
+    @Inject
     private AppDefinitionHandler appDefinitionAddedHandler;
 
     @Inject
@@ -71,12 +75,18 @@ public class TheiaCloudImpl implements TheiaCloud {
     @Inject
     private Set<TimeoutStrategy> timeoutStrategies;
 
+    @Inject
+    private TheiaCloudArguments arguments;
+
     private final Map<String, AppDefinition> appDefinitionCache = new ConcurrentHashMap<>();
     private final Map<String, Workspace> workspaceCache = new ConcurrentHashMap<>();
     private final Map<String, Session> sessionCache = new ConcurrentHashMap<>();
 
     @Override
     public void start() {
+	if (arguments.isEnableMonitor() && arguments.isEnableActivityTracker()) {
+	    theiaCloudMonitor.start(arguments.getMonitorInterval());
+	}
 	initAppDefinitionsAndWatchForChanges();
 	initWorkspacesAndWatchForChanges();
 	initSessionsAndWatchForChanges();

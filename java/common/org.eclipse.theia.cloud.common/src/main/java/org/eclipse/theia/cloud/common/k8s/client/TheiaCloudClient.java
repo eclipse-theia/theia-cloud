@@ -15,14 +15,20 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.client;
 
+import java.util.Optional;
+
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
 import io.fabric8.kubernetes.api.model.PersistentVolumeList;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressList;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -67,5 +73,17 @@ public interface TheiaCloudClient {
     default <T extends HasMetadata, L extends KubernetesResourceList<T>> ResourceClient<T, L> client(
 	    NonNamespaceOperation<T, L, Resource<T>> operation, Class<T> typeClass) {
 	return new BaseResourceClient<T, L>(kubernetes(), operation, typeClass);
+    }
+
+    default Optional<String> getClusterIPFromSessionName(String sessionName) {
+	try (final KubernetesClient client = new DefaultKubernetesClient()) {
+	    ServiceList svcList = client.services().inNamespace(namespace()).list();
+	    for (Service svc : svcList.getItems()) {
+		if (svc.getMetadata().getLabels().get("app").equals(sessionName)) {
+		    return Optional.of(svc.getSpec().getClusterIP());
+		}
+	    }
+	}
+	return Optional.empty();
     }
 }

@@ -19,7 +19,7 @@ landingPage:
   imagePullPolicy: Always
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: false
-  # additionalApps: 
+  # additionalApps:
   #   coffee-editor:
   #     label: "Coffee Editor"
   #   cdt-cloud-demo:
