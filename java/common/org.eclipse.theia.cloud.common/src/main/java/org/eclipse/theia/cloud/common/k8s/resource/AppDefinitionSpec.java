@@ -80,6 +80,9 @@ public class AppDefinitionSpec {
     @JsonProperty("mountPath")
     private String mountPath;
 
+    @JsonProperty("monitor")
+    private Monitor monitor;
+
     public String getName() {
 	return name;
     }
@@ -152,6 +155,10 @@ public class AppDefinitionSpec {
 	return mountPath;
     }
 
+    public Monitor getMonitor() {
+	return monitor;
+    }
+
     @Override
     public String toString() {
 	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
@@ -188,6 +195,43 @@ public class AppDefinitionSpec {
 	@Override
 	public String toString() {
 	    return "Timeout [limit=" + limit + ", strategy=" + strategy + "]";
+	}
+    }
+
+    public static class Monitor {
+	@JsonProperty("timeoutAfter")
+	private int timeoutAfter;
+
+	@JsonProperty("notifyAfter")
+	private int notifyAfter;
+
+	@JsonProperty("port")
+	private int port;
+
+	public Monitor() {
+	}
+
+	public Monitor(int timeoutAfter, int notifyAfter, int port) {
+	    this.timeoutAfter = timeoutAfter;
+	    this.notifyAfter = notifyAfter;
+	    this.port = port;
+	}
+
+	public int getTimeoutAfter() {
+	    return timeoutAfter;
+	}
+
+	public int getNotifyAfter() {
+	    return notifyAfter;
+	}
+
+	public int getPort() {
+	    return port;
+	}
+
+	@Override
+	public String toString() {
+	    return "Monitor [timeoutAfter=" + timeoutAfter + ", notifyAfter=" + notifyAfter + ", port=" + port + "]";
 	}
     }
 }

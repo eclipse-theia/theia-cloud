@@ -1,0 +1,9 @@
+{
+    "$schema": "./template.schema.json",
+    "name": "theia-cloud.demo",
+    "image": "my.docker.registry/theia-cloud-demo",
+    "limits": {
+        "cpu": "1",
+        "memory": "2000M"
+    }
+}

@@ -38,6 +38,10 @@ import org.eclipse.theia.cloud.operator.handler.impl.BandwidthLimiterImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultDeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultPersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.impl.IngressPathProviderImpl;
+import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTracker;
+import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTrackerImpl;
+import org.eclipse.theia.cloud.operator.monitor.MonitorMessagingService;
+import org.eclipse.theia.cloud.operator.monitor.MonitorMessagingServiceImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -58,6 +62,9 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 	bind(AppDefinitionHandler.class).to(bindAppDefinitionHandler()).in(Singleton.class);
 	bind(SessionHandler.class).to(bindSessionHandler()).in(Singleton.class);
 	bind(WorkspaceHandler.class).to(bindWorkspaceHandler()).in(Singleton.class);
+
+	bind(MonitorActivityTracker.class).to(bindMonitorActivityTracker()).in(Singleton.class);
+	bind(MonitorMessagingService.class).to(bindMonitorMessagingService()).in(Singleton.class);
 
 	configure(MultiBinding.create(TimeoutStrategy.class), this::configureTimeoutStrategies);
     }
@@ -85,6 +92,14 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
     protected Class<? extends DeploymentTemplateReplacements> bindDeploymentTemplateReplacements() {
 	return DefaultDeploymentTemplateReplacements.class;
+    }
+
+    protected Class<? extends MonitorActivityTracker> bindMonitorActivityTracker() {
+	return MonitorActivityTrackerImpl.class;
+    }
+
+    protected Class<? extends MonitorMessagingService> bindMonitorMessagingService() {
+	return MonitorMessagingServiceImpl.class;
     }
 
     protected abstract Class<? extends WorkspaceHandler> bindWorkspaceHandler();

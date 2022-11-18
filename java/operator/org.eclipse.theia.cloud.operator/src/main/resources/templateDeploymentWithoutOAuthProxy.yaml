@@ -32,6 +32,9 @@ spec:
           imagePullPolicy: placeholder-pull-policy
           ports:
             - containerPort: placeholder-port
+              name: application
+            - containerPort: placeholder-monitor-port
+              name: monitor
           resources:
             limits:
               cpu: placeholder-cpu-limits
@@ -40,15 +43,19 @@ spec:
               cpu: placeholder-cpu-requests
               memory: placeholder-memory-requests
           env:
-          - name: THEIA_CLOUD_APP_ID
+          - name: THEIACLOUD_APP_ID
             value: placeholder-env-app-id
-          - name: THEIA_CLOUD_SERVICE_URL
+          - name: THEIACLOUD_SERVICE_URL
             value: placeholder-env-service-url
-          - name: THEIA_CLOUD_SESSION_UID
+          - name: THEIACLOUD_SESSION_UID
             value: placeholder-env-session-uid
-          - name: THEIA_CLOUD_SESSION_NAME
+          - name: THEIACLOUD_SESSION_NAME
             value: placeholder-env-session-name
-          - name: THEIA_CLOUD_SESSION_USER
+          - name: THEIACLOUD_SESSION_USER
             value: placeholder-env-session-user
-          - name: THEIA_CLOUD_SESSION_URL
+          - name: THEIACLOUD_SESSION_URL
             value: placeholder-env-session-url
+          - name: THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER
+            value: placeholder-enable-activity-tracker
+          - name: THEIACLOUD_MONITOR_PORT
+            value: placeholder-monitor-port

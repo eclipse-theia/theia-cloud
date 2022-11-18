@@ -126,7 +126,7 @@ public class LazySessionHandler implements SessionHandler {
 	}
 
 	Optional<Service> serviceToUse = createAndApplyService(correlationId, sessionResourceName, sessionResourceUID,
-		session, appDefinition.getSpec().getPort(), arguments.isUseKeycloak());
+		session, appDefinition.getSpec(), arguments.isUseKeycloak());
 	if (serviceToUse.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "Unable to create service for session " + sessionSpec));
 	    return false;
@@ -259,9 +259,9 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected Optional<Service> createAndApplyService(String correlationId, String sessionResourceName,
-	    String sessionResourceUID, Session session, int port, boolean useOAuth2Proxy) {
+	    String sessionResourceUID, Session session, AppDefinitionSpec appDefinitionSpec, boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(client.namespace(), session,
-		port);
+		appDefinitionSpec);
 	String templateYaml = useOAuth2Proxy ? AddedHandlerUtil.TEMPLATE_SERVICE_YAML
 		: AddedHandlerUtil.TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML;
 	String serviceYaml;

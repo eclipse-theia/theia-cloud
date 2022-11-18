@@ -16,6 +16,11 @@ spec:
       port: placeholder-port 
       protocol: TCP
       targetPort: web
+    - name: express
+      port: placeholder-monitor-port
+      targetPort: placeholder-monitor-port
+      protocol: TCP
+
   selector:
     app: placeholder-app
   type: ClusterIP

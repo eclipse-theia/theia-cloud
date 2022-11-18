@@ -26,9 +26,13 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
+
+import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
@@ -40,6 +44,9 @@ public final class TheiaCloudServiceUtil {
     public static final String SERVICE_NAME = "service";
 
     public static final String PLACEHOLDER_SERVICENAME = "placeholder-servicename";
+
+    @Inject
+    private TheiaCloudClient resourceClient;
 
     private TheiaCloudServiceUtil() {
     }
@@ -76,15 +83,20 @@ public final class TheiaCloudServiceUtil {
 		TheiaCloudHandlerUtil.getAppSelector(appDefinition, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinition.getSpec().getPort()));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT,
+		String.valueOf(appDefinition.getSpec().getMonitor().getPort()));
 	return replacements;
     }
 
-    public static Map<String, String> getServiceReplacements(String namespace, Session session, int port) {
+    public static Map<String, String> getServiceReplacements(String namespace, Session session,
+	    AppDefinitionSpec appDefinitionSpec) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_SERVICENAME, getServiceName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(port));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinitionSpec.getPort()));
+	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT,
+		String.valueOf(appDefinitionSpec.getMonitor().getPort()));
 	return replacements;
     }
 
