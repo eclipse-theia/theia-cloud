@@ -52,6 +52,13 @@ public class TheiaCloudArguments {
     @Option(names = { "--appId" }, description = "Application ID necessary for service calls", required = false)
     private String appId;
 
+    @Option(names = {
+	    "--usePaths" }, description = "Whether paths instead of subdomains are used for the various components", required = false)
+    private boolean usePaths;
+
+    @Option(names = { "--instancesPath" }, description = "Subpath instances are hosted at", required = false)
+    private String instancesPath;
+
     public boolean isUseKeycloak() {
 	return useKeycloak;
     }
@@ -80,6 +87,14 @@ public class TheiaCloudArguments {
 	return appId;
     }
 
+    public boolean isUsePaths() {
+	return usePaths;
+    }
+
+    public String getInstancesPath() {
+	return instancesPath;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -91,6 +106,8 @@ public class TheiaCloudArguments {
 	result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
 	result = prime * result + ((sessionsPerUser == null) ? 0 : sessionsPerUser.hashCode());
 	result = prime * result + (useKeycloak ? 1231 : 1237);
+	result = prime * result + (usePaths ? 1231 : 1237);
+	result = prime * result + ((instancesPath == null) ? 0 : instancesPath.hashCode());
 	return result;
     }
 
@@ -126,6 +143,14 @@ public class TheiaCloudArguments {
 	    return false;
 	if (useKeycloak != other.useKeycloak)
 	    return false;
+	if (usePaths != other.usePaths) {
+	    return false;
+	}
+	if (instancesPath == null) {
+	    if (other.instancesPath != null)
+		return false;
+	} else if (!instancesPath.equals(other.instancesPath))
+	    return false;
 	return true;
     }
 
@@ -133,7 +158,8 @@ public class TheiaCloudArguments {
     public String toString() {
 	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", cloudProvider="
 		+ cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter + ", serviceUrl=" + serviceUrl
-		+ ", sessionsPerUser=" + sessionsPerUser + ", appId=" + appId + "]";
+		+ ", sessionsPerUser=" + sessionsPerUser + ", appId=" + appId + ", usePaths=" + usePaths
+		+ ", instancesPath=" + instancesPath + "]";
     }
 
 }

@@ -114,6 +114,7 @@ public final class AddedHandlerUtil {
 
     }
 
+    // FIXME adjust ingress template to paths
     public static void createAndApplyIngress(NamespacedKubernetesClient client, String namespace, String correlationId,
 	    String templateResourceName, String templateResourceUID, AppDefinition appDefinition) {
 	Map<String, String> replacements = TheiaCloudIngressUtil.getIngressReplacements(namespace, appDefinition);

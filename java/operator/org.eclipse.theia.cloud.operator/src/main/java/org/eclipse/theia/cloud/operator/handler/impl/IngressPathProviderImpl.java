@@ -16,20 +16,39 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
+
+import com.google.inject.Inject;
 
 public class IngressPathProviderImpl implements IngressPathProvider {
 
+    private static final Logger LOGGER = LogManager.getLogger(IngressPathProviderImpl.class);
+
+    @Inject
+    TheiaCloudArguments arguments;
+
     @Override
     public String getPath(AppDefinition appDefinition, int instance) {
-	return "/" + appDefinition.getSpec() + "-" + instance;
+	return getBasePath() + appDefinition.getSpec() + "-" + instance;
     }
 
     @Override
     public String getPath(AppDefinition appDefinition, Session session) {
-	return "/" + session.getMetadata().getUid();
+	return getBasePath() + session.getMetadata().getUid();
     }
 
+    protected String getBasePath() {
+	if (arguments.isUsePaths() && arguments.getInstancesPath() != null && !arguments.getInstancesPath().isBlank()) {
+	    return "/" + arguments.getInstancesPath().trim() + "/";
+	} else if (arguments.isUsePaths()) {
+	    LOGGER.warn(
+		    "Theia cloud is configured to use paths instead of subdomains but no instace subpath was provided");
+	}
+	return "/";
+    }
 }
