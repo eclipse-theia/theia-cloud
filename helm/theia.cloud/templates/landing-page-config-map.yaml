@@ -13,7 +13,11 @@ data:
       keycloakAuthUrl: "{{ tpl (.Values.keycloak.authUrl | toString) . }}",
       keycloakRealm: "{{ tpl (.Values.keycloak.realm | toString) . }}",
       keycloakClientId: "{{ tpl (.Values.keycloak.clientId | toString) . }}",
+      {{- if .Values.hosts.usePaths }}
+      serviceUrl: "{{ tpl (.Values.hosts.serviceProtocol | toString) . }}://{{ tpl (.Values.hosts.paths.baseHost | toString) . }}/{{ tpl (.Values.hosts.paths.service | toString) . }}",
+      {{- else }}
       serviceUrl: "{{ tpl (.Values.hosts.serviceProtocol | toString) . }}://{{ tpl (.Values.hosts.service | toString) . }}{{ if .Values.hosts.useServicePortInHostname }}:{{ tpl (.Values.hosts.servicePort | toString) . }}{{ end }}",
+      {{- end }}
       appDefinition: "{{ tpl (.Values.landingPage.appDefinition | toString) . }}",
       additionalApps: [
         {{- range $key, $val := .Values.landingPage.additionalApps }}

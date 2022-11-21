@@ -21,6 +21,7 @@ spec:
       containers:
       - name: operator-container
         image: {{ tpl (.Values.operator.image | toString) . }}
+        imagePullPolicy: IfNotPresent
         args:
           {{ if .Values.keycloak.enable }}- "--keycloak"{{ end }}
           {{ if .Values.operator.eagerStart }}- "--eagerStart"{{ end }}
@@ -29,11 +30,20 @@ spec:
           - "--bandwidthLimiter"
           - {{ tpl (.Values.operator.bandwidthLimiter | toString) . }}
           - "--serviceUrl"
+          {{- if .Values.hosts.usePaths }}
+          - {{ tpl (.Values.hosts.serviceProtocol | toString) . }}://{{ tpl (.Values.hosts.paths.baseHost | toString) . }}/{{ tpl (.Values.hosts.paths.service | toString) . }}
+          {{- else}}
           - {{ tpl (.Values.hosts.serviceProtocol | toString) . }}://{{ tpl (.Values.hosts.service | toString) . }}{{ if .Values.hosts.useServicePortInHostname }}:{{ tpl (.Values.hosts.servicePort | toString) . }}{{ end }}
+          {{- end }}
           - "--sessionsPerUser"
           - "{{ tpl (.Values.operator.sessionsPerUser | toString) . }}"
           - "--appId"
           - {{ tpl (.Values.app.id | toString) . }}
+          {{- if .Values.hosts.usePaths }}
+          - "--usePaths"
+          - "--instancesPath"
+          - "{{ tpl (.Values.hosts.paths.instance | toString) . }}"
+          {{- end }}
       {{- if .Values.operator.imagePullSecret }}
       imagePullSecrets:
         - name: {{ tpl (.Values.operator.imagePullSecret | toString) . }}

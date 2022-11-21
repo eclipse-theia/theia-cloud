@@ -8,7 +8,11 @@ spec:
   pullSecret: {{ tpl (.Values.image.pullSecret | toString) . }}
   uid: 101
   port: 3000
+  {{- if .Values.hosts.usePaths }}
+  host: {{ tpl (.Values.hosts.paths.baseHost | toString) . }}
+  {{- else }}
   host: {{ tpl (.Values.hosts.instance | toString) . }}
+  {{- end }}
   ingressname: theia-cloud-demo-ws-ingress
   minInstances: 0
   maxInstances: 10

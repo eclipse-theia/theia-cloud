@@ -96,8 +96,10 @@ export namespace WorkspaceDeletionRequest {
 export namespace TheiaCloud {
   function basePath(url: string): string {
     // remove any path names as they are provided by the APIs
-    const pathName = new URL(url).pathname;
-    return url.endsWith(pathName) ? url.substring(0, url.length - new URL(url).pathname.length) : url;
+    // TODO Do not remove path names anymore as this is needed for deployment on sub paths. Is this an issue
+    // const pathName = new URL(url).pathname;
+    // return url.endsWith(pathName) ? url.substring(0, url.length - new URL(url).pathname.length) : url;
+    return url;
   }
 
   function rootApi(url: string, accessToken: string | undefined): RootResourceApi {

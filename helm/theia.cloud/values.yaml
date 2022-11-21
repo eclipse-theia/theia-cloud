@@ -34,6 +34,20 @@ image:
 
 # You may adjust the hostname below.
 hosts:
+
+  # Use paths configures that all services should run on the same host but on different paths.
+  # true uses paths
+  # false uses an explicit host for each service
+  usePaths: false
+
+  # Only needed when usePaths == true. Contains the baseHost and paths for all services
+  paths:
+    # baseHost configures the host for all services when usePaths == true. Otherwise the explicit host definitions of the services are used.
+    baseHost: 192.168.39.173.nip.io
+    service: servicex
+    landing: "trynow"
+    instance: ws
+
   # hostname of the REST-API
   service: service.192.168.39.173.nip.io
 
