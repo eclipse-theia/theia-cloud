@@ -51,6 +51,21 @@ This is installed in minikube already when started with the `--addons=ingress` a
 
 If you want to run the Minikube-Demo path on an actual cluster, please see https://kubernetes.github.io/ingress-nginx/deploy/ on how to install the controller.
 
+### Global certificate - ONLY when using paths
+
+If Theia Cloud is used with paths instead of subdomains, the global HTTPS certificate should exist and be configured as the NginX Ingress Controller's default certificate.
+
+In [global-certificate.yaml](./platforms/global-certificate.yaml), replace `example.com` with `$(minikube ip).nip.io`  and `letsencrypt-prod` with `theia-cloud-selfsigned-issuer`.
+Apply the configuration with `kubectl apply -f  ./doc/docs/platforms/global-certificate.yaml`.
+
+Configure the nginx controllers deployment to use the certificate `default-tls` in the default namespace as its default certificate.
+For this, add argument `"--default-ssl-certificate=default/default-tls"` to the container by patching the controller's deployment.
+
+```bash
+kubectl patch deploy ingress-nginx-controller --type='json' -n ingress-nginx \
+-p '[{ "op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--default-ssl-certificate=default/default-tls" }]'
+```
+
 ### Keycloak
 
 Keycloak is the identify and access management tool used by Theia.Cloud.
