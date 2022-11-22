@@ -19,7 +19,6 @@ spec:
   - hosts:
   {{- if .Values.hosts.usePaths }}
     - {{ tpl (.Values.hosts.paths.baseHost | toString) . }}
-    secretName: universal-cert-secret
   {{- else }}
     - {{ tpl (.Values.hosts.instance | toString) . }}
     secretName: ws-cert-secret

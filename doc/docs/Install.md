@@ -18,6 +18,22 @@ As of writing this guide the installation command looks like this:\
 Follow the installation guide for your platform:\
 https://kubernetes.github.io/ingress-nginx/deploy/
 
+### Global certificate (Only when using paths)
+
+If Theia Cloud is used with paths instead of subdomains, the global HTTPS certificate should exist and be configured as the NginX Ingress Controller's default certificate.
+
+You can either provide the default certificate yourself or use a dummy service to initially generate the certificate.
+In [global-certificate.yaml](./platforms/global-certificate.yaml), replace `example.com` with your own host and `letsencrypt-prod` with your certificate issuer of choice.
+Apply the configuration with `kubectl apply -f  ./doc/docs/platforms/global-certificate.yaml`.
+
+Configure the nginx controllers deployment to use the certificate `default-tls` in the default namespace as its default certificate.
+For this, add argument `"--default-ssl-certificate=default/default-tls"` to the container by patching the controller's deployment.
+
+```bash
+kubectl patch deploy ingress-nginx-controller --type='json' -n ingress-nginx \
+-p '[{ "op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--default-ssl-certificate=default/default-tls" }]'
+```
+
 ### Optional: Keycloak
 
 ## Install
