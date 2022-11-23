@@ -45,6 +45,17 @@ As of writing this guide the installation command looks like this:\
 Cert-Manager is used to manage certificates für https.\
 Theia.Cloud offers support for Let's Encrypt Certificates out of the box, but cert-manager may also be used to manage your certificates.
 
+### Metric Server
+
+Please check https://github.com/kubernetes-sigs/metrics-server#installation for the latest installation instructions.
+
+As of writing this guide the installation command looks like this:\
+`kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml`
+
+With `kubectl edit deployment -n kube-system metrics-server` add `--kubelet-insecure-tls` to `spec.templates.spec.containers.args`
+
+Metrics Server is used to get usage information of pods.
+
 ### NginX Ingress Controller
 
 This is installed in minikube already when started with the `--addons=ingress` argument, so nothing has to be installed for the Minikube Guide.
@@ -80,7 +91,7 @@ Run the following command from the theia-cloud root repository. This uses the va
 # add the codecentric helm repository
 helm repo add codecentric https://codecentric.github.io/helm-charts
 
-# install keycloak. 
+# install keycloak.
 helm install keycloak codecentric/keycloak --namespace keycloak --create-namespace --values ./doc/docs/platforms/keycloak-minikube-values.yaml --set "ingress.rules[0].host=keycloak.$(minikube ip).nip.io" --set "ingress.tls[0].hosts={keycloak.$(minikube ip).nip.io}"
 ```
 
@@ -96,16 +107,16 @@ Import `doc/docs/platforms/realm-export.json` via `Select file` and click `Creat
 Go to `Manage -> Users` in the left panel and select `Add user`.
 Set
 
-* Username, e.g. `foo`
-* Email, e.g. `foo@theia-cloud.io`
-* Email verified to On
+- Username, e.g. `foo`
+- Email, e.g. `foo@theia-cloud.io`
+- Email verified to On
 
 Select `Save` and go to `Credentials` Tab.
 Set
 
-* Password
-* Password Confirmation
-* Temporary to OFF
+- Password
+- Password Confirmation
+- Temporary to OFF
 
 Select `Set Password`
 
@@ -144,7 +155,7 @@ In Firefox:
 `Warning: Potential Security Risk Ahead -> Advanced... -> Accept the Risk and Continue`
 
 https://service.192.168.39.81.nip.io \
-https://ws.192.168.39.81.nip.io  \
+https://ws.192.168.39.81.nip.io \
 https://keycloak.192.168.39.81.nip.io/
 
 ### Launch Theia using Theia.Cloud
@@ -171,5 +182,5 @@ Build the docker image as usual.
 
 Adapt [valuesMinikube.yaml](../../../helm/theia.cloud/valuesMinikube.yaml):
 
-* Adapt the `image` value to match your built image.
-* Specify `imagePullPolicy: Never` in the helm-template (e.g. for the landing page this would be in `helm/theia.cloud/templates/landing-page.yaml`) to prevent Kubernetes from trying to download the image.
+- Adapt the `image` value to match your built image.
+- Specify `imagePullPolicy: Never` in the helm-template (e.g. for the landing page this would be in `helm/theia.cloud/templates/landing-page.yaml`) to prevent Kubernetes from trying to download the image.

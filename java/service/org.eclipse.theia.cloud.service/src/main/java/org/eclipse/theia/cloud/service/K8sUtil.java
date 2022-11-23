@@ -25,12 +25,21 @@ import java.util.stream.Collectors;
 
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
+import org.eclipse.theia.cloud.service.session.SessionPerformance;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.metrics.v1beta1.ContainerMetrics;
+import io.fabric8.kubernetes.api.model.metrics.v1beta1.PodMetrics;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public final class K8sUtil {
@@ -98,6 +107,54 @@ public final class K8sUtil {
 	    userWorkspace.active = CLIENT.sessions().has(sessionName);
 	}
 	return userWorkspaces;
+    }
+
+    public static SessionPerformance reportPerformance(String sessionName) {
+	try {
+	    Optional<Session> optionalSession = CLIENT.sessions().get(sessionName);
+	    if (optionalSession.isEmpty()) {
+		return null;
+	    }
+	    Session session = optionalSession.get();
+	    Optional<Pod> optionalPod = getPodForSession(session);
+	    if (optionalPod.isEmpty()) {
+		return null;
+	    }
+	    PodMetrics test = CLIENT.kubernetes().top().pods().metrics("theiacloud",
+		    optionalPod.get().getMetadata().getName());
+	    Optional<ContainerMetrics> optionalContainer = test.getContainers().stream()
+		    .filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
+	    if (optionalContainer.isEmpty()) {
+		return null;
+	    }
+	    ContainerMetrics container = optionalContainer.get();
+	    return new SessionPerformance(container.getUsage().get("cpu").getAmount(),
+		    container.getUsage().get("cpu").getFormat(),
+		    String.valueOf(Quantity.getAmountInBytes(container.getUsage().get("memory"))), "B");
+	} catch (Exception e) {
+	    return null;
+	}
+    }
+
+    public static Optional<Pod> getPodForSession(Session session) {
+	PodList podlist = CLIENT.kubernetes().pods().list();
+	return podlist.getItems().stream().filter(pod -> isPodFromSession(pod, session)).findFirst();
+    }
+
+    private static boolean isPodFromSession(Pod pod, Session session) {
+	Optional<Container> optionalContainer = pod.getSpec().getContainers().stream()
+		.filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
+	if (optionalContainer.isEmpty()) {
+	    return false;
+	}
+	Container container = optionalContainer.get();
+	Optional<EnvVar> optionalEnv = container.getEnv().stream()
+		.filter(env -> env.getName().equals("THEIA_CLOUD_SESSION_NAME")).findFirst();
+	if (optionalEnv.isEmpty()) {
+	    return false;
+	}
+	EnvVar env = optionalEnv.get();
+	return env.getValue().equals(session.getSpec().getName()) ? true : false;
     }
 
 }

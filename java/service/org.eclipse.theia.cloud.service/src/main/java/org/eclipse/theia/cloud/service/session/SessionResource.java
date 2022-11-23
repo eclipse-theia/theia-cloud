@@ -102,4 +102,18 @@ public class SessionResource extends BaseResource {
 	info(correlationId, "Report session activity: " + request);
 	return K8sUtil.reportSessionActivity(correlationId, request.sessionName);
     }
+
+    @Operation(summary = "Get performance metrics", description = "Returns the current CPU and memory usage of the session's pod.")
+    @GET
+    @Path("/performance/{appId}/{sessionName}")
+    public SessionPerformance performance(@PathParam("appId") String appId,
+	    @PathParam("sessionName") String sessionName) {
+	SessionPerformanceRequest request = new SessionPerformanceRequest(appId, sessionName);
+	evaluateRequest(request);
+	SessionPerformance performance = K8sUtil.reportPerformance(sessionName);
+	if (performance == null) {
+	    throw new TheiaCloudWebException(TheiaCloudError.METRICS_SERVER_UNAVAILABLE);
+	}
+	return performance;
+    }
 }
