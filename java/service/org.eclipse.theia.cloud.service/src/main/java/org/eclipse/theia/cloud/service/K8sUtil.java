@@ -110,30 +110,26 @@ public final class K8sUtil {
     }
 
     public static SessionPerformance reportPerformance(String sessionName) {
-	try {
-	    Optional<Session> optionalSession = CLIENT.sessions().get(sessionName);
-	    if (optionalSession.isEmpty()) {
-		return null;
-	    }
-	    Session session = optionalSession.get();
-	    Optional<Pod> optionalPod = getPodForSession(session);
-	    if (optionalPod.isEmpty()) {
-		return null;
-	    }
-	    PodMetrics test = CLIENT.kubernetes().top().pods().metrics("theiacloud",
-		    optionalPod.get().getMetadata().getName());
-	    Optional<ContainerMetrics> optionalContainer = test.getContainers().stream()
-		    .filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
-	    if (optionalContainer.isEmpty()) {
-		return null;
-	    }
-	    ContainerMetrics container = optionalContainer.get();
-	    return new SessionPerformance(container.getUsage().get("cpu").getAmount(),
-		    container.getUsage().get("cpu").getFormat(),
-		    String.valueOf(Quantity.getAmountInBytes(container.getUsage().get("memory"))), "B");
-	} catch (Exception e) {
+	Optional<Session> optionalSession = CLIENT.sessions().get(sessionName);
+	if (optionalSession.isEmpty()) {
 	    return null;
 	}
+	Session session = optionalSession.get();
+	Optional<Pod> optionalPod = getPodForSession(session);
+	if (optionalPod.isEmpty()) {
+	    return null;
+	}
+	PodMetrics test = CLIENT.kubernetes().top().pods().metrics(CLIENT.namespace(),
+		optionalPod.get().getMetadata().getName());
+	Optional<ContainerMetrics> optionalContainer = test.getContainers().stream()
+		.filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
+	if (optionalContainer.isEmpty()) {
+	    return null;
+	}
+	ContainerMetrics container = optionalContainer.get();
+	return new SessionPerformance(container.getUsage().get("cpu").getAmount(),
+		container.getUsage().get("cpu").getFormat(),
+		String.valueOf(Quantity.getAmountInBytes(container.getUsage().get("memory"))), "B");
     }
 
     public static Optional<Pod> getPodForSession(Session session) {
