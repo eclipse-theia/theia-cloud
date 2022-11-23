@@ -29,6 +29,8 @@ public class TheiaCloudError {
     // server errors: 52x workspace
     public static final TheiaCloudError WORKSPACE_LAUNCH_TIMEOUT = new TheiaCloudError(520,
 	    "Unable to launch workspace within time limit.");
+    public static final TheiaCloudError METRICS_SERVER_UNAVAILABLE = new TheiaCloudError(521,
+	    "Metrics server not ready (yet).");
 
     // server errors: 55x session
     public static final TheiaCloudError SESSION_LAUNCH_TIMEOUT = new TheiaCloudError(551,

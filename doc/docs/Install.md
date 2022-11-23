@@ -13,6 +13,13 @@ Please check https://cert-manager.io/docs/installation/ for the latest installat
 As of writing this guide the installation command looks like this:\
 `kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.yaml`
 
+### Metrics Server
+
+Please check https://github.com/kubernetes-sigs/metrics-server#installation for the latest installation instructions.
+
+As of writing this guide the installation command looks like this:\
+`kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml`
+
 ### NginX Ingress Controller
 
 Follow the installation guide for your platform:\
@@ -68,6 +75,7 @@ helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-name
 ```
 
 ### Trouble shooting
+
 Recreate tls secret for sessions:
 
 `kubectl delete secret ws-cert-secret -n theiacloud`
