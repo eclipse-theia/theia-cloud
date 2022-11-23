@@ -153,4 +153,7 @@ public final class K8sUtil {
 	return env.getValue().equals(session.getSpec().getName()) ? true : false;
     }
 
+    public static boolean hasAppDefinition(String appDefinition) {
+	return CLIENT.appDefinitions().get(appDefinition).isPresent();
+    }
 }
