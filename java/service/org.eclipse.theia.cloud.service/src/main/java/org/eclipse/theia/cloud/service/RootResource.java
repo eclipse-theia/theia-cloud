@@ -27,6 +27,7 @@ import javax.ws.rs.PathParam;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 import io.quarkus.security.Authenticated;
@@ -48,6 +49,13 @@ public class RootResource extends BaseResource {
     @POST
     public String launch(LaunchRequest request) {
 	String correlationId = evaluateRequest(request);
+
+	if (!K8sUtil.hasAppDefinition(request.appDefinition)) {
+	    error(correlationId,
+		    "Failed to lauch session. App Definition '" + request.appDefinition + "' does not exist.");
+	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_DEFINITION_NAME);
+	}
+
 	if (request.isEphemeral()) {
 	    info(correlationId, "Launching ephemeral session " + request);
 	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout);

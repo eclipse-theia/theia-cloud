@@ -10,6 +10,7 @@ rules:
       - theia.cloud
       - metrics.k8s.io
     resources:
+      - appdefinitions
       - sessions
       - workspaces
       - pods

@@ -75,7 +75,12 @@ function App(): JSX.Element {
           : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5),
         { timeout: 60000, retries: 5 }
         )
-          .catch((_err: Error) => {
+          .catch((err: Error) => {
+            if (err && (err as any).status === 473) {
+              setError(`The app definition '${appDefinition}' is not available in the cluster.\n` +
+                'Please try launching another application.');
+              return;
+            };
             setError('Sorry, there are no more available instances in the cluster.\n'
           + 'Please try again later, instances are shut down after 30 minutes.\n\n'
           + 'Note: this is not a technical limit of Theia.cloud, but was intentionally set by us to keep this free offer within its intended budget.');
