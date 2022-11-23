@@ -61,4 +61,8 @@ public class BaseResource {
     public void trace(String correlationId, String message) {
 	logger.trace(LogMessageUtil.formatLogMessage(correlationId, message));
     }
+
+    public void trace(String correlationId, String message, Throwable throwable) {
+	logger.trace(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
+    }
 }

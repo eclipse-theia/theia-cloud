@@ -109,8 +109,14 @@ public class SessionResource extends BaseResource {
     public SessionPerformance performance(@PathParam("appId") String appId,
 	    @PathParam("sessionName") String sessionName) {
 	SessionPerformanceRequest request = new SessionPerformanceRequest(appId, sessionName);
-	evaluateRequest(request);
-	SessionPerformance performance = K8sUtil.reportPerformance(sessionName);
+	String correlationId = evaluateRequest(request);
+	SessionPerformance performance;
+	try {
+	    performance = K8sUtil.reportPerformance(sessionName);
+	} catch (Exception e) {
+	    trace(correlationId, "", e);
+	    performance = null;
+	}
 	if (performance == null) {
 	    throw new TheiaCloudWebException(TheiaCloudError.METRICS_SERVER_UNAVAILABLE);
 	}

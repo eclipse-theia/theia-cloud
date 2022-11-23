@@ -47,14 +47,9 @@ Theia.Cloud offers support for Let's Encrypt Certificates out of the box, but ce
 
 ### Metric Server
 
-Please check https://github.com/kubernetes-sigs/metrics-server#installation for the latest installation instructions.
-
-As of writing this guide the installation command looks like this:\
-`kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml`
-
-With `kubectl edit deployment -n kube-system metrics-server` add `--kubelet-insecure-tls` to `spec.templates.spec.containers.args`
-
 Metrics Server is used to get usage information of pods.
+
+On Minikube you may use `minikube addons enable metrics-server` to enable the metrics server.
 
 ### NginX Ingress Controller
 
