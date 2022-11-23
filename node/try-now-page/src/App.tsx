@@ -37,14 +37,20 @@ function App(): JSX.Element {
       initialised = true;
       const element = document.getElementById('selectapp');
       const urlParams = new URLSearchParams(window.location.search);
-      // eslint-disable-next-line no-null/no-null
-      if (element !== null && urlParams.has('appDef')) {
+      if (urlParams.has('appDef')) {
         const defaultSelection = urlParams.get('appDef');
         // eslint-disable-next-line no-null/no-null
         if (defaultSelection !== null && isDefaultSelectionValueValid(defaultSelection, config.appDefinition, config.additionalApps)) {
-          (element as HTMLSelectElement).value = defaultSelection;
-          setSelectedAppName((element as HTMLSelectElement).options[(element as HTMLSelectElement).selectedIndex].text);
-          setSelectedAppDefinition((element as HTMLSelectElement).value);
+          // eslint-disable-next-line no-null/no-null
+          if (element !== null && config.additionalApps && config.additionalApps.length > 0) {
+            (element as HTMLSelectElement).value = defaultSelection;
+            setSelectedAppName((element as HTMLSelectElement).options[(element as HTMLSelectElement).selectedIndex].text);
+            setSelectedAppDefinition((element as HTMLSelectElement).value);
+          } else {
+            // If there are no additional apps, just use the application id as the name
+            setSelectedAppDefinition(defaultSelection);
+            setSelectedAppName(defaultSelection);
+          }
           initialAppName = selectedAppName;
           initialAppDefinition = selectedAppDefinition;
           console.log('Set ' + defaultSelection + ' as default selection');
@@ -63,7 +69,7 @@ function App(): JSX.Element {
     // first check if the service is available. if not we are doing maintenance and should adapt the error message accordingly
     TheiaCloud.ping(PingRequest.create(config.serviceUrl, config.appId))
       .then(() => {
-        // ping successfull continue with launch
+        // ping successful continue with launch
         TheiaCloud.launchAndRedirect(config.useEphemeralStorage
           ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5)
           : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5),
@@ -195,10 +201,11 @@ function isDefaultSelectionValueValid(defaultSelection: string, appDefinition: s
   if (defaultSelection === appDefinition) {
     return true;
   }
-  if (additionalApps) {
+  if (additionalApps && additionalApps.length > 0) {
     return additionalApps.map(def => def.appId).filter(appId => appId === defaultSelection).length > 0;
   }
-  return false;
+  // If there are no additional apps explicitly configured, we accept any app definition given via url parameter
+  return true;
 }
 
 export default App;
