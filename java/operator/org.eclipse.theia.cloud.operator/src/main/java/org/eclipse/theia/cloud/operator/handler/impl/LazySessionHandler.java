@@ -100,7 +100,7 @@ public class LazySessionHandler implements SessionHandler {
 	}
 	AppDefinition appDefinition = optionalAppDefinition.get();
 
-	if (hasMaxInstancesReachted(appDefinition, session, correlationId)) {
+	if (hasMaxInstancesReached(appDefinition, session, correlationId)) {
 	    return false;
 	}
 
@@ -191,7 +191,7 @@ public class LazySessionHandler implements SessionHandler {
 	}
     }
 
-    protected boolean hasMaxInstancesReachted(AppDefinition appDefinition, Session session, String correlationId) {
+    protected boolean hasMaxInstancesReached(AppDefinition appDefinition, Session session, String correlationId) {
 	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), session.getSpec(),
 		appDefinition.getSpec(), correlationId)) {
 	    LOGGER.info(formatLogMessage(correlationId, "Max instances for " + appDefinition.getSpec().getName()

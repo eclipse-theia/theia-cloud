@@ -44,11 +44,18 @@ public final class TheiaCloudK8sUtil {
 	    return false;
 	}
 
+	final String appDefinitionName = appDefinitionSpec.getName();
+	if (appDefinitionName == null || appDefinitionName.isBlank()) {
+	    LOGGER.error(
+		    formatLogMessage(correlationId, "The App Definition does not have a name: " + appDefinitionSpec));
+	    return true;
+	}
+
 	long currentInstances = client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
 		.list().getItems().stream()//
 		.filter(w -> {
-		    String appDefinition = w.getSpec().getAppDefinition();
-		    boolean result = appDefinition.equals(appDefinitionSpec.getName());
+		    String sessionAppDefinition = w.getSpec().getAppDefinition();
+		    boolean result = appDefinitionName.equals(sessionAppDefinition);
 		    LOGGER.trace(formatLogMessage(correlationId, "Counting instances of app definition "
 			    + appDefinitionSpec.getName() + ": Is " + w.getSpec() + " of app definition? " + result));
 		    return result;
