@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 /**
- * Starts the REST service and registers the endpoints of all enabled TrackerModules's
+ * Starts the REST service and registers the endpoints of all enabled TrackerModules
  */
  export function startServer(port: number): void {
 	const app = express();
@@ -44,12 +44,12 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 /**
- * Utility method to check which TrackerModules's are enabled
- * @returns the list of enabled TrackerModule's
+ * Utility method to check which TrackerModules are enabled
+ * @returns the list of enabled TrackerModules
  */
 export function getEnabledModules(): MonitorModule[] {
 	const modules: MonitorModule[] = [new MessagingModule()];
-	if (getFromEnv(MONITOR_ENABLE_ACTIVITY_TRACKER) === '1') {
+	if (getFromEnv(MONITOR_ENABLE_ACTIVITY_TRACKER) === 'true') {
 		modules.push(new ActivityTrackerModule());
 	}
 	return modules;

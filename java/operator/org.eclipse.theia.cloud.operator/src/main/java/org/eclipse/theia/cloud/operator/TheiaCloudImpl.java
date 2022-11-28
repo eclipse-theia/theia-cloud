@@ -61,7 +61,7 @@ public class TheiaCloudImpl implements TheiaCloud {
     private TheiaCloudClient resourceClient;
 
     @Inject
-    private MonitorActivityTracker theiaCloudMonitor;
+    private MonitorActivityTracker monitorActivityTracker;
 
     @Inject
     private AppDefinitionHandler appDefinitionAddedHandler;
@@ -85,7 +85,7 @@ public class TheiaCloudImpl implements TheiaCloud {
     @Override
     public void start() {
 	if (arguments.isEnableMonitor() && arguments.isEnableActivityTracker()) {
-	    theiaCloudMonitor.start(arguments.getMonitorInterval());
+	    monitorActivityTracker.start(arguments.getMonitorInterval());
 	}
 	initAppDefinitionsAndWatchForChanges();
 	initWorkspacesAndWatchForChanges();

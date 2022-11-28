@@ -4,7 +4,7 @@ import { MonitorModule } from '../monitor-module';
 
 export const GET_ACTIVITY_PATH = '/activity';
 export const POST_POPUP = '/popup';
-export const COMMAND_ACTIVITY_REPORT_TITLE = 'activity.report';
+export const COMMAND_ACTIVITY_REPORT_TITLE = 'theia.cloud.monitor.activity.report';
 
 /**
  * This module tracks the last activity of the user.

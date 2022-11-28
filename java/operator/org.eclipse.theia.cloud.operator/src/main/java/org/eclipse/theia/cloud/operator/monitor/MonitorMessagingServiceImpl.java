@@ -18,6 +18,8 @@ package org.eclipse.theia.cloud.operator.monitor;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
@@ -35,6 +37,8 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 
     private static final String POST_MESSAGE = "/message";
 
+    private static final Logger LOGGER = LogManager.getLogger(MonitorMessagingServiceImpl.class);
+
     @Inject
     private TheiaCloudClient resourceClient;
 
@@ -43,7 +47,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 
     @Override
     public void sendMessage(Session session, String level, String message) {
-	if (arguments.isEnableMonitor()) {
+	if (isEnabled()) {
 	    postMessage(session, level, message, true, "");
 	}
 
@@ -51,7 +55,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 
     @Override
     public void sendFullscreenMessage(Session session, String level, String message, String detail) {
-	if (arguments.isEnableMonitor()) {
+	if (isEnabled()) {
 	    postMessage(session, level, message, true, detail);
 	}
 
@@ -59,7 +63,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 
     @Override
     public void sendTimeoutMessage(Session session, String detail) {
-	if (arguments.isEnableMonitor()) {
+	if (isEnabled()) {
 	    postMessage(session, "info", "Your session has timed out!", true, detail);
 	}
     }
@@ -78,8 +82,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 	    try {
 		client.newCall(postRequest).execute();
 	    } catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+		LOGGER.info("[" + session.getSpec().getName() + "] Could not send message to extension:" + e);
 	    }
 	}
     }
@@ -105,6 +108,10 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 	    return Optional.of(optionalAppDefinition.get().getSpec().getMonitor().getPort());
 	}
 	return Optional.empty();
+    }
+
+    protected boolean isEnabled() {
+	return arguments.isEnableMonitor();
     }
 
 }

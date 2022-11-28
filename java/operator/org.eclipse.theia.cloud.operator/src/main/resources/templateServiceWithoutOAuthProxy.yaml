@@ -16,7 +16,7 @@ spec:
       port: placeholder-port
       protocol: TCP
       targetPort: placeholder-port
-    - name: express
+    - name: monitor-express
       port: placeholder-monitor-port
       targetPort: placeholder-monitor-port
       protocol: TCP
