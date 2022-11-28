@@ -17,7 +17,7 @@
 			],
 			"preLaunchTask": "${defaultBuildTask}",
 			"env": {
-				"THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER": "1"
+				"THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER": "true"
 			}
 		},
 		{

@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.client;
 
+import java.util.Map;
 import java.util.Optional;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -79,7 +80,8 @@ public interface TheiaCloudClient {
 	try (final KubernetesClient client = new DefaultKubernetesClient()) {
 	    ServiceList svcList = client.services().inNamespace(namespace()).list();
 	    for (Service svc : svcList.getItems()) {
-		if (svc.getMetadata().getLabels().get("app").equals(sessionName)) {
+		Map<String, String> labels = svc.getMetadata().getLabels();
+		if (labels != null && sessionName.equals(labels.get("app"))) {
 		    return Optional.of(svc.getSpec().getClusterIP());
 		}
 	    }

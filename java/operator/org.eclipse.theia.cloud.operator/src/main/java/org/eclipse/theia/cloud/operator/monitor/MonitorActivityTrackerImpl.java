@@ -122,7 +122,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	logInfo(sessionName, "Last reported activity was: " + formatDate(lastActivityDate) + " (" + minutesPassed + " "
 		+ minutes + " ago)");
 
-	if (!(minutesPassed >= shutdownAfter)) {
+	if (minutesPassed < shutdownAfter) {
 	    if (minutesPassed >= notifyAfter) {
 		logInfo(sessionName, "Notifying session as timeout of " + notifyAfter + " minutes was reached!");
 		String postPopupURL = getURL(sessionURL, port, POST_POPUP);
