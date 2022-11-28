@@ -5,7 +5,7 @@ metadata:
   namespace: theiacloud
 spec:
   name: cdt-cloud-demo
-  image: eu.gcr.io/kubernetes-238012/coffee-editor:v0.7.12
+  image: eu.gcr.io/kubernetes-238012/coffee-editor:v0.7.13
   pullSecret: ""
   uid: 1000
   port: 3000
