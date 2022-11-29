@@ -9,8 +9,8 @@ spec:
   pullSecret: ""
   uid: 1000
   port: 3000
-  host: ws.theia-cloud.io
-  ingressname: theia-cloud-demo-ws-ingress
+  host: {{ tpl (.Values.hosts.instance | toString) . }}
+  ingressname: {{ tpl (.Values.ingress.instanceName | toString) . }}
   minInstances: 0
   maxInstances: 10
   timeout:
