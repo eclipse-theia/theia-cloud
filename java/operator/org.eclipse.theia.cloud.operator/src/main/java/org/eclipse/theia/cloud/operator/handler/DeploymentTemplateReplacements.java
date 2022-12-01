@@ -28,4 +28,8 @@ public interface DeploymentTemplateReplacements {
     default String orEmpty(String string) {
 	return string == null ? "" : string;
     }
+
+    default String orDefault(String string, String defaultValue) {
+	return string == null ? defaultValue : string;
+    }
 }
