@@ -21,7 +21,7 @@ spec:
       containers:
       - name: operator-container
         image: {{ tpl (.Values.operator.image | toString) . }}
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ if .Values.operator.imagePullPolicy }}{{ tpl (.Values.operator.imagePullPolicy | toString) . }}{{ else }}{{ tpl (.Values.imagePullPolicy | toString) . }}{{ end }}
         args:
           {{ if .Values.keycloak.enable }}- "--keycloak"{{ end }}
           {{ if .Values.operator.eagerStart }}- "--eagerStart"{{ end }}

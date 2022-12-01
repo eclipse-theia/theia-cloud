@@ -1,3 +1,11 @@
+# The default imagePullPolicy for containers of theia cloud.
+# Can be overridden for individual components by specifying the imagePullPolicy variable there.
+# Possible values:
+# - Always
+# - IfNotPresent
+# - Never
+imagePullPolicy: Always
+
 # General information about the deployed app
 app:
   # The app id which is used in the communication between website and REST-API
@@ -19,6 +27,10 @@ issuer:
 image:
   # The name of docker image to be used
   name: theiacloud/theia-cloud-demo:0.8.0.MS7
+
+  # Optional: Override the imagePullPolicy for the main application's docker image.
+  # If this is omitted or empty, the root at .Values.imagePullPolicy is used.
+  # imagePullPolicy: IfNotPresent
 
   # the image pull secret. Leave empty if registry is public
   pullSecret: ""
@@ -71,6 +83,10 @@ landingPage:
   # the landing page image to use
   image: theiacloud/theia-cloud-landing-page:0.8.0.MS7
 
+  # Optional: Override the imagePullPolicy for the landing page's docker image.
+  # If this is omitted or empty, the root at .Values.imagePullPolicy is used.
+  # imagePullPolicy: IfNotPresent
+
   # Optional: the image pull secret
   imagePullSecret: pullsecret
 
@@ -121,6 +137,10 @@ operator:
   # The operator image
   image: theiacloud/theia-cloud-operator:0.8.0.MS7
 
+  # Optional: Override the imagePullPolicy for the operator's docker image.
+  # If this is omitted or empty, the root at .Values.imagePullPolicy is used.
+  # imagePullPolicy: IfNotPresent
+
   # Optional: the image pull secret
   imagePullSecret: pullsecret
 
@@ -153,6 +173,10 @@ operator:
 service:
   # The image to use
   image: theiacloud/theia-cloud-service:0.8.0.MS7
+
+  # Optional: Override the imagePullPolicy for the service's docker image.
+  # If this is omitted or empty, the root at .Values.imagePullPolicy is used.
+  # imagePullPolicy: IfNotPresent
 
   # Optional: the image pull secret
   imagePullSecret: pullsecret

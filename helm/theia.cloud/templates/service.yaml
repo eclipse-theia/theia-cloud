@@ -21,6 +21,7 @@ spec:
       containers:
       - name: service-container
         image: {{ tpl (.Values.service.image | toString) . }}
+        imagePullPolicy: {{ if .Values.service.imagePullPolicy }}{{ tpl (.Values.service.imagePullPolicy | toString) . }}{{ else }}{{ tpl (.Values.imagePullPolicy | toString) . }}{{ end }}
         ports:
         - name: http
           containerPort: {{ tpl (.Values.hosts.servicePort | toString) . }}
