@@ -25,6 +25,9 @@ spec:
                   type: string
                 image:
                   type: string
+                imagePullPolicy:
+                  type: string
+                  enum: ["Always", "IfNotPresent", "Never"]
                 pullSecret:
                   type: string
                 uid:

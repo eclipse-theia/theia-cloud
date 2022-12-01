@@ -1,3 +1,5 @@
+imagePullPolicy: IfNotPresent
+
 app:
   id: asdfghjkl
   name: Theia Blueprint
