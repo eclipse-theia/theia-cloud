@@ -32,6 +32,9 @@ public class AppDefinitionSpec {
     @JsonProperty("image")
     private String image;
 
+    @JsonProperty("imagePullPolicy")
+    private String imagePullPolicy;
+
     @JsonProperty("pullSecret")
     private String pullSecret;
 
@@ -83,6 +86,10 @@ public class AppDefinitionSpec {
 
     public String getImage() {
 	return image;
+    }
+
+    public String getImagePullPolicy() {
+	return imagePullPolicy;
     }
 
     public String getPullSecret() {
@@ -147,12 +154,12 @@ public class AppDefinitionSpec {
 
     @Override
     public String toString() {
-	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", pullSecret=" + pullSecret + ", uid=" + uid
-		+ ", port=" + port + ", host=" + host + ", ingressname=" + ingressname + ", minInstances="
-		+ minInstances + ", maxInstances=" + maxInstances + ", timeout=" + timeout + ", requestsMemory="
-		+ requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory=" + limitsMemory + ", limitsCpu="
-		+ limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit=" + uplinkLimit + ", mountPath="
-		+ mountPath + "]";
+	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
+		+ ", pullSecret=" + pullSecret + ", uid=" + uid + ", port=" + port + ", host=" + host + ", ingressname="
+		+ ingressname + ", minInstances=" + minInstances + ", maxInstances=" + maxInstances + ", timeout="
+		+ timeout + ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="
+		+ limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit="
+		+ uplinkLimit + ", mountPath=" + mountPath + "]";
     }
 
     public static class Timeout {

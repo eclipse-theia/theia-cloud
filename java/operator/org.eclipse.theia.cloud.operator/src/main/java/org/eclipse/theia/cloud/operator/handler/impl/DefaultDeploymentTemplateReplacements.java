@@ -40,6 +40,10 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     public static final String PLACEHOLDER_DEPLOYMENTNAME = "placeholder-depname";
     public static final String PLACEHOLDER_APPDEFINITIONNAME = "placeholder-definitionname";
     public static final String PLACEHOLDER_IMAGE = "placeholder-image";
+    public static final String PLACEHOLDER_IMAGE_PULL_POLICY = "placeholder-pull-policy";
+    // TODO Is "Always" the correct default? Should it be setable as an operator
+    // argument?
+    public static final String DEFAULT_IMAGE_PULL_POLICY = "Always";
     public static final String PLACEHOLDER_CPU_LIMITS = "placeholder-cpu-limits";
     public static final String PLACEHOLDER_MEMORY_LIMITS = "placeholder-memory-limits";
     public static final String PLACEHOLDER_CPU_REQUESTS = "placeholder-cpu-requests";
@@ -85,6 +89,8 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	Map<String, String> appDefinitionData = new LinkedHashMap<String, String>();
 	appDefinitionData.put(PLACEHOLDER_APPDEFINITIONNAME, appDefinition.getSpec().getName());
 	appDefinitionData.put(PLACEHOLDER_IMAGE, appDefinition.getSpec().getImage());
+	appDefinitionData.put(PLACEHOLDER_IMAGE_PULL_POLICY,
+		orDefault(appDefinition.getSpec().getImagePullPolicy(), DEFAULT_IMAGE_PULL_POLICY));
 	appDefinitionData.put(PLACEHOLDER_PORT, String.valueOf(appDefinition.getSpec().getPort()));
 	appDefinitionData.put(PLACEHOLDER_CPU_LIMITS, orEmpty(appDefinition.getSpec().getLimitsCpu()));
 	appDefinitionData.put(PLACEHOLDER_MEMORY_LIMITS, orEmpty(appDefinition.getSpec().getLimitsMemory()));

@@ -29,6 +29,7 @@ spec:
       containers:
         - name: placeholder-definitionname
           image: placeholder-image
+          imagePullPolicy: placeholder-pull-policy
           ports:
             - containerPort: placeholder-port
           resources:
