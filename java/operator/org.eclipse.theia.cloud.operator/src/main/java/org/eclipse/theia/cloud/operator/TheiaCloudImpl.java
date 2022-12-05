@@ -231,6 +231,9 @@ public class TheiaCloudImpl implements TheiaCloud {
 	int limit = timeout.get().getLimit();
 	Optional<TimeoutStrategy> strategy = timeoutStrategies.stream()
 		.filter(registeredStrategy -> registeredStrategy.getName().equals(strategyName)).findAny();
+	if (!strategy.isPresent()) {
+	    LOGGER.warn(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "No strategy configured."));
+	}
 	if (strategy.isPresent() && strategy.get().evaluate(COR_ID_TIMEOUTPREFIX, session, now, limit)) {
 	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Session " + session.getSpec().getName()
 		    + " was stopped after " + limit + " minutes [" + strategyName + "]."));

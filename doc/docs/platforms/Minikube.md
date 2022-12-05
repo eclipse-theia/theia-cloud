@@ -123,7 +123,7 @@ $ minikube ip
 
 # If you don't use Minikube or your shell does not support $(), replace $(minikube ip) with the IP you determined above
 
-helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace --values ./helm/theia.cloud/valuesMinikube.yaml --set hosts.service=service.$(minikube ip).nip.io --set hosts.landing=theia.cloud.$(minikube ip).nip.io --set hosts.instance=ws.$(minikube ip).nip.io --set keycloak.authUrl=https://keycloak.$(minikube ip).nip.io/auth/
+helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace --values ./helm/theia.cloud/valuesMinikube.yaml --set hosts.service=service.$(minikube ip).nip.io --set hosts.landing=theia.cloud.$(minikube ip).nip.io --set hosts.instance=ws.$(minikube ip).nip.io --set keycloak.authUrl=https://keycloak.$(minikube ip).nip.io/auth/ --set hosts.paths.baseHost=$(minikube ip).nip.io
 
 # Optional: switch to the newly created namespace
 kubectl config set-context --current --namespace=theiacloud

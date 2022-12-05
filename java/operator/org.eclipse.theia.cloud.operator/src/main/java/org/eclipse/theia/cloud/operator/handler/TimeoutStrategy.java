@@ -15,20 +15,29 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 
 public interface TimeoutStrategy {
+
     String getName();
 
     boolean evaluate(String correlationId, Session session, Instant now, Integer limit);
 
     static class Inactivity implements TimeoutStrategy {
+
+	private static final String INACTIVITY = "INACTIVITY";
+	private static final Logger LOGGER = LogManager.getLogger(Inactivity.class);
+
 	@Override
 	public String getName() {
-	    return "INACTIVITY";
+	    return INACTIVITY;
 	}
 
 	@Override
@@ -36,15 +45,22 @@ public interface TimeoutStrategy {
 	    long lastActivity = session.getSpec().getLastActivity();
 	    Instant parse = Instant.ofEpochMilli(lastActivity);
 	    long minutesSinceLastActivity = ChronoUnit.MINUTES.between(parse, now);
+	    LOGGER.trace(formatLogMessage(INACTIVITY, correlationId,
+		    "Checking " + session.getSpec().getName() + ". lastActivity: " + lastActivity
+			    + ". minutesSinceLastActivity: " + minutesSinceLastActivity + ". limit: " + limit));
 	    return minutesSinceLastActivity > limit;
 	}
 
     }
 
     static class FixedTime implements TimeoutStrategy {
+
+	private static final String FIXEDTIME = "FIXEDTIME";
+	private static final Logger LOGGER = LogManager.getLogger(FixedTime.class);
+
 	@Override
 	public String getName() {
-	    return "FIXEDTIME";
+	    return FIXEDTIME;
 	}
 
 	@Override
@@ -52,6 +68,8 @@ public interface TimeoutStrategy {
 	    String creationTimestamp = session.getMetadata().getCreationTimestamp();
 	    Instant parse = Instant.parse(creationTimestamp);
 	    long minutesSinceCreation = ChronoUnit.MINUTES.between(parse, now);
+	    LOGGER.trace(formatLogMessage(FIXEDTIME, correlationId, "Checking " + session.getSpec().getName()
+		    + ". minutesSinceLastActivity: " + minutesSinceCreation + ". limit: " + limit));
 	    return minutesSinceCreation > limit;
 	}
 
