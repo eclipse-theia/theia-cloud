@@ -16,10 +16,10 @@ For an example on setting these environment variables, take a look at the `Run e
 
 ## List of modules
 
-|Name|description|ENV to enable|
-|---|---|---|
-|MessagingModule|Allows the backend to send messages to be displayed to the user|(always enabled)|
-|ActivityTrackerModule|Allows the backend to ask about the users last activity and show a warning if the pod is about to be timed out|THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER|
+| Name                  | description                                                                                                    | ENV to enable                              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| MessagingModule       | Allows the backend to send messages to be displayed to the user                                                | (always enabled)                           |
+| ActivityTrackerModule | Allows the backend to ask about the users last activity and show a warning if the pod is about to be timed out | THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER |
 
 ## Debugging the extension
 
