@@ -1,9 +1,10 @@
+import express from 'express';
 import * as vscode from 'vscode';
-import * as express from 'express';
+
+import { getFromEnv, MONITOR_ENABLE_ACTIVITY_TRACKER, MONITOR_PORT } from './env-variables';
 import { ActivityTrackerModule } from './modules/activity-tracker-module';
-import { MonitorModule } from './monitor-module';
-import { MONITOR_ENABLE_ACTIVITY_TRACKER, MONITOR_PORT, getFromEnv } from './env-variables';
 import { MessagingModule } from './modules/messaging-module';
+import { MonitorModule } from './monitor-module';
 
 /**
  * Entry point of the extension.
@@ -12,35 +13,35 @@ import { MessagingModule } from './modules/messaging-module';
  * If no values are defined it will fallback to `localhost:8081`
  */
 export function activate(context: vscode.ExtensionContext) {
-	const hostPort = Number(getFromEnv(MONITOR_PORT) ?? 8081);
+  const hostPort = Number(getFromEnv(MONITOR_PORT) ?? 8081);
 
-	startServer(hostPort);
+  startServer(hostPort);
 }
 
 /**
  * Starts the REST service and registers the endpoints of all enabled TrackerModules
  */
- export function startServer(port: number): void {
-	const app = express();
-	const modules = getEnabledModules();
+export function startServer(port: number): void {
+  const app = express();
+  const modules = getEnabledModules();
 
-	for (const module of modules) {
-		module.registerEndpoints(app);
-	}
-	const server = app.listen(port, function() {
-		const address = server.address();
-		if( address) {
-			if(typeof address === 'string') {
-				console.debug(`http://${address}`);
-			} else {
-				var host = address.address;
-				var port = address.port;
-				console.debug(`http://${host}:${port}`);
-			}
-		} else {
-			console.debug(`Server not started`);
-		}
-	});
+  for (const module of modules) {
+    module.registerEndpoints(app);
+  }
+  const server = app.listen(port, function () {
+    const address = server.address();
+    if (address) {
+      if (typeof address === 'string') {
+        console.debug(`http://${address}`);
+      } else {
+        const host = address.address;
+        const addressPort = address.port;
+        console.debug(`http://${host}:${addressPort}`);
+      }
+    } else {
+      console.debug('Server not started');
+    }
+  });
 }
 
 /**
@@ -48,11 +49,11 @@ export function activate(context: vscode.ExtensionContext) {
  * @returns the list of enabled TrackerModules
  */
 export function getEnabledModules(): MonitorModule[] {
-	const modules: MonitorModule[] = [new MessagingModule()];
-	if (getFromEnv(MONITOR_ENABLE_ACTIVITY_TRACKER) === 'true') {
-		modules.push(new ActivityTrackerModule());
-	}
-	return modules;
+  const modules: MonitorModule[] = [new MessagingModule()];
+  if (getFromEnv(MONITOR_ENABLE_ACTIVITY_TRACKER) === 'true') {
+    modules.push(new ActivityTrackerModule());
+  }
+  return modules;
 }
 
 export function deactivate() {}

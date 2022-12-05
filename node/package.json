@@ -18,6 +18,7 @@
   },
   "workspaces": [
     "common",
+    "monitor",
     "theia-activity-tracker",
     "try-now-page"
   ]
