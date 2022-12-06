@@ -45,14 +45,14 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));
 
 	String appDefinitionResourceName = appDefinition.getMetadata().getName();
-	String appDefinitionResourceUID = appDefinition.getMetadata().getUid();
 
 	/* Create ingress if not existing */
 	if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client.kubernetes(),
 		client.namespace(), appDefinition, correlationId)) {
-	    LOGGER.trace(formatLogMessage(correlationId, "No existing Ingress"));
-	    AddedHandlerUtil.createAndApplyIngress(client.kubernetes(), client.namespace(), correlationId,
-		    appDefinitionResourceName, appDefinitionResourceUID, appDefinition);
+	    LOGGER.error(formatLogMessage(correlationId,
+		    "Expected ingress '" + spec.getIngressname() + "' for app definition '" + appDefinitionResourceName
+			    + "' does not exist. Abort handling app definition."));
+	    return false;
 	} else {
 	    LOGGER.trace(formatLogMessage(correlationId, "Ingress available already"));
 	}
