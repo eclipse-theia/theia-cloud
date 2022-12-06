@@ -182,7 +182,7 @@ interface TermsAndConditionsProps {
   onTermsAccepted: (accepted: boolean) => void;
 }
 const openTerms = (): boolean => {
-  window.open('/terms.html', 'popup', 'width=600,height=600');
+  window.open('./terms.html', 'popup', 'width=600,height=600');
   return false;
 };
 const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ accepted, onTermsAccepted }) => (
@@ -195,7 +195,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ accepted, onTer
     />
     <label htmlFor='accept-terms'>
         I accept the{' '}
-      <a target='popup' href='/terms.html' onClick={openTerms}>
+      <a target='popup' href='./terms.html' onClick={openTerms}>
           terms and conditions.
       </a>
     </label>
