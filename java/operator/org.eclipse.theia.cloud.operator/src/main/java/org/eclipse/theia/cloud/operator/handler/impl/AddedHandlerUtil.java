@@ -20,7 +20,6 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 import static org.eclipse.theia.cloud.operator.handler.util.TheiaCloudDeploymentUtil.HOST_PROTOCOL;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -44,13 +43,8 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
-import org.eclipse.theia.cloud.operator.handler.util.K8sUtil;
-import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudIngressUtil;
-import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
@@ -66,7 +60,6 @@ public final class AddedHandlerUtil {
 
     private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
-    public static final String TEMPLATE_INGRESS_YAML = "/templateIngress.yaml";
     public static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     public static final String TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML = "/templateServiceWithoutOAuthProxy.yaml";
     public static final String TEMPLATE_CONFIGMAP_EMAILS_YAML = "/templateConfigmapEmails.yaml";
@@ -112,22 +105,6 @@ public final class AddedHandlerUtil {
 
     private AddedHandlerUtil() {
 
-    }
-
-    // FIXME adjust ingress template to paths
-    public static void createAndApplyIngress(NamespacedKubernetesClient client, String namespace, String correlationId,
-	    String templateResourceName, String templateResourceUID, AppDefinition appDefinition) {
-	Map<String, String> replacements = TheiaCloudIngressUtil.getIngressReplacements(namespace, appDefinition);
-	String ingressYaml;
-	try {
-	    ingressYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(TEMPLATE_INGRESS_YAML, replacements,
-		    correlationId);
-	} catch (IOException | URISyntaxException e) {
-	    return;
-	}
-
-	K8sUtil.loadAndCreateIngressWithOwnerReference(client, namespace, correlationId, ingressYaml,
-		AppDefinitionSpec.API, AppDefinitionSpec.KIND, templateResourceName, templateResourceUID, 0);
     }
 
     public static void updateProxyConfigMap(NamespacedKubernetesClient client, String namespace, ConfigMap configMap,

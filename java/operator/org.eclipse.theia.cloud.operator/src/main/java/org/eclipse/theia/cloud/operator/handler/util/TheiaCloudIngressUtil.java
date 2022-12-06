@@ -18,8 +18,6 @@ package org.eclipse.theia.cloud.operator.handler.util;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -40,9 +38,6 @@ import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 public final class TheiaCloudIngressUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudIngressUtil.class);
-
-    public static final String PLACEHOLDER_INGRESSNAME = "placeholder-ingressname";
-    public static final String PLACEHOLDER_HOST = "placeholder-host";
 
     private TheiaCloudIngressUtil() {
     }
@@ -69,14 +64,6 @@ public final class TheiaCloudIngressUtil {
 
     public static String getIngressName(AppDefinition appDefinition) {
 	return appDefinition.getSpec().getIngressname();
-    }
-
-    public static Map<String, String> getIngressReplacements(String namespace, AppDefinition appDefinition) {
-	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(PLACEHOLDER_INGRESSNAME, getIngressName(appDefinition));
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	replacements.put(PLACEHOLDER_HOST, appDefinition.getSpec().getHost());
-	return replacements;
     }
 
     public static void addOwnerReferenceToIngress(NamespacedKubernetesClient client, String namespace, Ingress ingress,
