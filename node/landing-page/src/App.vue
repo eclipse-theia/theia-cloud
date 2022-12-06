@@ -1,5 +1,5 @@
 <template>
-  <img className='logo' alt="Theia logo" src="/logo.svg" />
+  <img className="logo" alt="Theia logo" :src="logo" />
   <SessionLauncher
     :serviceUrl="serviceUrl"
     :appDefinition="appDefinition"
@@ -21,6 +21,7 @@ interface AppData {
   email: string | undefined;
   token: string | undefined;
   workspaceName?: string;
+  logo: string;
 }
 
 export default defineComponent({
@@ -43,7 +44,9 @@ export default defineComponent({
     return {
       email: undefined,
       token: undefined,
-      workspaceName: undefined
+      workspaceName: undefined,
+      // https://cli.vuejs.org/guide/html-and-static-assets.html#the-public-folder
+      logo: process.env.BASE_URL + 'logo.svg'
     } as AppData;
   },
   created() {
