@@ -21,6 +21,7 @@ export interface RequestOptions {
 }
 
 export interface ServiceRequest {
+  /** The root URL of the service. */
   serviceUrl: string;
   kind?: string;
 }
@@ -94,24 +95,16 @@ export namespace WorkspaceDeletionRequest {
 }
 
 export namespace TheiaCloud {
-  function basePath(url: string): string {
-    // remove any path names as they are provided by the APIs
-    // TODO Do not remove path names anymore as this is needed for deployment on sub paths. Is this an issue
-    // const pathName = new URL(url).pathname;
-    // return url.endsWith(pathName) ? url.substring(0, url.length - new URL(url).pathname.length) : url;
-    return url;
+  function rootApi(serviceUrl: string, accessToken: string | undefined): RootResourceApi {
+    return new RootResourceApi(new Configuration({ basePath: serviceUrl, accessToken }));
   }
 
-  function rootApi(url: string, accessToken: string | undefined): RootResourceApi {
-    return new RootResourceApi(new Configuration({ basePath: basePath(url), accessToken }));
+  function sessionApi(serviceUrl: string, accessToken: string | undefined): SessionResourceApi {
+    return new SessionResourceApi(new Configuration({ basePath: serviceUrl, accessToken }));
   }
 
-  function sessionApi(url: string, accessToken: string | undefined): SessionResourceApi {
-    return new SessionResourceApi(new Configuration({ basePath: basePath(url), accessToken }));
-  }
-
-  function workspaceApi(url: string, accessToken: string | undefined): WorkspaceResourceApi {
-    return new WorkspaceResourceApi(new Configuration({ basePath: basePath(url), accessToken }));
+  function workspaceApi(serviceUrl: string, accessToken: string | undefined): WorkspaceResourceApi {
+    return new WorkspaceResourceApi(new Configuration({ basePath: serviceUrl, accessToken }));
   }
 
   export async function ping(request: PingRequest, options: RequestOptions = {}): Promise<boolean> {
