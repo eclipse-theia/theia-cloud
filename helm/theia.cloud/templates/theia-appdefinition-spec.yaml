@@ -13,7 +13,7 @@ spec:
   {{- else }}
   host: {{ tpl (.Values.hosts.instance | toString) . }}
   {{- end }}
-  ingressname: theia-cloud-demo-ws-ingress
+  ingressname: {{ tpl (.Values.ingress.instanceName | toString) . }}
   minInstances: 0
   maxInstances: 10
   timeout:
