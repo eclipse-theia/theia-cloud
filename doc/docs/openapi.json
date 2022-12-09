@@ -149,6 +149,49 @@
         } ]
       }
     },
+    "/service/session/performance/{appId}/{sessionName}" : {
+      "get" : {
+        "tags" : [ "Session Resource" ],
+        "summary" : "Get performance metrics",
+        "description" : "Returns the current CPU and memory usage of the session's pod.",
+        "parameters" : [ {
+          "name" : "appId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sessionName",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SessionPerformance"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          },
+          "403" : {
+            "description" : "Not Allowed"
+          }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
+      }
+    },
     "/service/session/{appId}/{user}" : {
       "get" : {
         "tags" : [ "Session Resource" ],
@@ -425,6 +468,44 @@
           },
           "user" : {
             "description" : "The user identification, usually the email address.",
+            "type" : "string"
+          }
+        }
+      },
+      "SessionPerformance" : {
+        "description" : "Description of the performance of a session",
+        "required" : [ "cpuAmount", "cpuFormat", "memoryAmount", "memoryFormat" ],
+        "type" : "object",
+        "properties" : {
+          "cpuAmount" : {
+            "description" : "Used CPU amount of the workspace",
+            "type" : "string"
+          },
+          "cpuFormat" : {
+            "description" : "Used CPU format of the workspace",
+            "type" : "string"
+          },
+          "memoryAmount" : {
+            "description" : "Used memory amount of the workspace",
+            "type" : "string"
+          },
+          "memoryFormat" : {
+            "description" : "Used memory format of the workspace",
+            "type" : "string"
+          }
+        }
+      },
+      "SessionPerformanceRequest" : {
+        "description" : "A request to list the sessions of a user.",
+        "required" : [ "appId", "sessionName" ],
+        "type" : "object",
+        "properties" : {
+          "appId" : {
+            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "type" : "string"
+          },
+          "sessionName" : {
+            "description" : "The name of the session",
             "type" : "string"
           }
         }

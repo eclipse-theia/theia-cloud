@@ -122,6 +122,56 @@ export interface SessionListRequest {
     'user': string;
 }
 /**
+ * Description of the performance of a session
+ * @export
+ * @interface SessionPerformance
+ */
+export interface SessionPerformance {
+    /**
+     * Used CPU amount of the workspace
+     * @type {string}
+     * @memberof SessionPerformance
+     */
+    'cpuAmount': string;
+    /**
+     * Used CPU format of the workspace
+     * @type {string}
+     * @memberof SessionPerformance
+     */
+    'cpuFormat': string;
+    /**
+     * Used memory amount of the workspace
+     * @type {string}
+     * @memberof SessionPerformance
+     */
+    'memoryAmount': string;
+    /**
+     * Used memory format of the workspace
+     * @type {string}
+     * @memberof SessionPerformance
+     */
+    'memoryFormat': string;
+}
+/**
+ * A request to list the sessions of a user.
+ * @export
+ * @interface SessionPerformanceRequest
+ */
+export interface SessionPerformanceRequest {
+    /**
+     * The App Id of this Theia.cloud instance. Request without a matching Id will be denied.
+     * @type {string}
+     * @memberof SessionPerformanceRequest
+     */
+    'appId': string;
+    /**
+     * The name of the session
+     * @type {string}
+     * @memberof SessionPerformanceRequest
+     */
+    'sessionName': string;
+}
+/**
  * 
  * @export
  * @interface SessionSpec
@@ -650,6 +700,48 @@ export const SessionResourceApiAxiosParamCreator = function (configuration?: Con
             };
         },
         /**
+         * Returns the current CPU and memory usage of the session\'s pod.
+         * @summary Get performance metrics
+         * @param {string} appId 
+         * @param {string} sessionName 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceSessionPerformanceAppIdSessionNameGet: async (appId: string, sessionName: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'appId' is not null or undefined
+            assertParamExists('serviceSessionPerformanceAppIdSessionNameGet', 'appId', appId)
+            // verify required parameter 'sessionName' is not null or undefined
+            assertParamExists('serviceSessionPerformanceAppIdSessionNameGet', 'sessionName', sessionName)
+            const localVarPath = `/service/session/performance/{appId}/{sessionName}`
+                .replace(`{${"appId"}}`, encodeURIComponent(String(appId)))
+                .replace(`{${"sessionName"}}`, encodeURIComponent(String(sessionName)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Starts a new session for an existing workspace and responds with the URL of the started session.
          * @summary Start a new session
          * @param {SessionStartRequest} [sessionStartRequest] 
@@ -732,6 +824,18 @@ export const SessionResourceApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Returns the current CPU and memory usage of the session\'s pod.
+         * @summary Get performance metrics
+         * @param {string} appId 
+         * @param {string} sessionName 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async serviceSessionPerformanceAppIdSessionNameGet(appId: string, sessionName: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SessionPerformance>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.serviceSessionPerformanceAppIdSessionNameGet(appId, sessionName, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Starts a new session for an existing workspace and responds with the URL of the started session.
          * @summary Start a new session
          * @param {SessionStartRequest} [sessionStartRequest] 
@@ -782,6 +886,17 @@ export const SessionResourceApiFactory = function (configuration?: Configuration
          */
         serviceSessionPatch(sessionActivityRequest?: SessionActivityRequest, options?: any): AxiosPromise<boolean> {
             return localVarFp.serviceSessionPatch(sessionActivityRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Returns the current CPU and memory usage of the session\'s pod.
+         * @summary Get performance metrics
+         * @param {string} appId 
+         * @param {string} sessionName 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceSessionPerformanceAppIdSessionNameGet(appId: string, sessionName: string, options?: any): AxiosPromise<SessionPerformance> {
+            return localVarFp.serviceSessionPerformanceAppIdSessionNameGet(appId, sessionName, options).then((request) => request(axios, basePath));
         },
         /**
          * Starts a new session for an existing workspace and responds with the URL of the started session.
@@ -838,6 +953,19 @@ export class SessionResourceApi extends BaseAPI {
      */
     public serviceSessionPatch(sessionActivityRequest?: SessionActivityRequest, options?: AxiosRequestConfig) {
         return SessionResourceApiFp(this.configuration).serviceSessionPatch(sessionActivityRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns the current CPU and memory usage of the session\'s pod.
+     * @summary Get performance metrics
+     * @param {string} appId 
+     * @param {string} sessionName 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SessionResourceApi
+     */
+    public serviceSessionPerformanceAppIdSessionNameGet(appId: string, sessionName: string, options?: AxiosRequestConfig) {
+        return SessionResourceApiFp(this.configuration).serviceSessionPerformanceAppIdSessionNameGet(appId, sessionName, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
