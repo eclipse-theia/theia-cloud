@@ -9,6 +9,10 @@ metadata:
     acme.cert-manager.io/http01-edit-in-place: "true"
     {{- else }}
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # Rewrite all URLs not ending with a segment containing . or ? with a trailing slash
+    # This is necessary to correctly resolve relative paths (e.g. for css files) from the landing page.
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^([^.?]*[^/])$ $1/ redirect;
     {{- end }}
   namespace: {{ .Release.Namespace }}
 spec:
