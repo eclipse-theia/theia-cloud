@@ -8,13 +8,18 @@ rules:
     apiGroups:
       - ""
       - theia.cloud
-      - metrics.k8s.io
     resources:
       - appdefinitions
       - sessions
       - workspaces
-      - pods
     verbs: ["list", "create", "watch", "get", "patch", "delete"]
+  -
+    apiGroups:
+      - ""
+      - metrics.k8s.io
+    resources:
+      - pods
+    verbs: ["list", "get", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
