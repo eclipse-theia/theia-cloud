@@ -37,8 +37,8 @@ function App(): JSX.Element {
       initialised = true;
       const element = document.getElementById('selectapp');
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('appDef')) {
-        const defaultSelection = urlParams.get('appDef');
+      if (urlParams.has('appDef') || urlParams.has('appdef')) {
+        const defaultSelection = urlParams.get('appDef') || urlParams.get('appdef');
         // eslint-disable-next-line no-null/no-null
         if (defaultSelection !== null && isDefaultSelectionValueValid(defaultSelection, config.appDefinition, config.additionalApps)) {
           // eslint-disable-next-line no-null/no-null
