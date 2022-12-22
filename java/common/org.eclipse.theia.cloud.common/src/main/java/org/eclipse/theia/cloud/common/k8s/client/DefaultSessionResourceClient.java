@@ -16,6 +16,7 @@
 package org.eclipse.theia.cloud.common.k8s.client;
 
 import java.time.Instant;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
@@ -40,6 +41,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	Session session = new Session();
 	session.setSpec(spec);
 	spec.setLastActivity(Instant.now().toEpochMilli());
+	spec.setSessionSecret(UUID.randomUUID().toString());
 
 	ObjectMeta metadata = new ObjectMeta();
 	metadata.setName(spec.getName());

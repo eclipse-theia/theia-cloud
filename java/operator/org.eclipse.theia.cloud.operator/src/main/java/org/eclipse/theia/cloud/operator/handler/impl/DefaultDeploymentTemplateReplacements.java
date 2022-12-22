@@ -57,6 +57,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     public static final String PLACEHOLDER_ENV_SESSION_NAME = "placeholder-env-session-name";
     public static final String PLACEHOLDER_ENV_SESSION_USER = "placeholder-env-session-user";
     public static final String PLACEHOLDER_ENV_SESSION_URL = "placeholder-env-session-url";
+    public static final String PLACEHOLDER_ENV_SESSION_SECRET = "placeholder-env-session-secret";
 
     public static final String PLACEHOLDER_MONITOR_PORT = "placeholder-monitor-port";
     public static final String PLACEHOLDER_ENABLE_ACTIVITY_TRACKER = "placeholder-enable-activity-tracker";
@@ -128,6 +129,8 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_UID, session.map(s -> s.getMetadata().getUid()).orElse(""));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_NAME, session.map(s -> s.getSpec().getName()).orElse(""));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_USER, session.map(s -> s.getSpec().getUser()).orElse(""));
+	environmentVariables.put(PLACEHOLDER_ENV_SESSION_SECRET,
+		session.map(s -> s.getSpec().getSessionSecret()).orElse(""));
 	environmentVariables.put(PLACEHOLDER_ENABLE_ACTIVITY_TRACKER,
 		arguments.isEnableActivityTracker() ? "true" : "false");
 	environmentVariables.put(PLACEHOLDER_MONITOR_PORT,

@@ -1,9 +1,11 @@
-import { Express } from 'express';
+import { json, Router } from 'express';
 import * as vscode from 'vscode';
 
 import { MonitorModule } from '../monitor-module';
+import { isAuthorized } from '../util/util';
 
-export const GET_ACTIVITY_PATH = '/activity';
+export const ACTIVITY_TRACKER_PATH = '/activity';
+export const LAST_ACTIVITY_PATH = '/lastActivity';
 export const POST_POPUP = '/popup';
 export const COMMAND_ACTIVITY_REPORT_TITLE = 'theia.cloud.monitor.activity.report';
 
@@ -19,19 +21,32 @@ export class ActivityTrackerModule implements MonitorModule {
     this.setupListeners();
   }
 
-  registerEndpoints(app: Express): Express {
-    app.get(GET_ACTIVITY_PATH, async (req, res) => {
-      res.end(this.getLastActivity().toString());
-      res.status(200);
+  registerEndpoints(router: Router): Router {
+    const activityRouter = Router();
+    activityRouter.use(json());
+    activityRouter.get(LAST_ACTIVITY_PATH, async (req, res) => {
+      if (isAuthorized(req)) {
+        res.status(200);
+        res.end(this.getLastActivity().toString());
+      } else {
+        res.status(401);
+        res.end('Unauthorized');
+      }
     });
 
-    app.post(POST_POPUP, (req, res) => {
-      console.debug('POPUP REQUESTED');
-      this.createPopup();
-      res.end('success');
-      res.status(200);
+    activityRouter.post(POST_POPUP, (req, res) => {
+      if (isAuthorized(req)) {
+        console.debug('POPUP REQUESTED');
+        this.createPopup();
+        res.status(200);
+        res.end('success');
+      } else {
+        res.status(401);
+        res.end('Unauthorized');
+      }
     });
-    return app;
+    router.use(ACTIVITY_TRACKER_PATH, activityRouter);
+    return router;
   }
 
   /**
@@ -97,42 +112,42 @@ export class ActivityTrackerModule implements MonitorModule {
     vscode.debug.onDidTerminateDebugSession(() => this.reportActivity('terminateDebugSession'));
     vscode.env.onDidChangeTelemetryEnabled(() => this.reportActivity('changeTelemetryEnabled'));
     // vscode.extensions.onDidChange(() => this.reportActivity(`extensionsChanged`));
-    vscode.languages.onDidChangeDiagnostics(() => this.reportActivity(`changeDiagnostics`));
-    vscode.tasks.onDidEndTask(() => this.reportActivity(`taskEnd`));
-    vscode.tasks.onDidEndTaskProcess(() => this.reportActivity(`taskEndProcess`));
-    vscode.tasks.onDidStartTask(() => this.reportActivity(`startTask`));
-    vscode.tasks.onDidStartTaskProcess(() => this.reportActivity(`startTaskProcess`));
-    vscode.window.onDidChangeActiveColorTheme(() => this.reportActivity(`changeColorTheme`));
+    vscode.languages.onDidChangeDiagnostics(() => this.reportActivity('changeDiagnostics'));
+    vscode.tasks.onDidEndTask(() => this.reportActivity('taskEnd'));
+    vscode.tasks.onDidEndTaskProcess(() => this.reportActivity('taskEndProcess'));
+    vscode.tasks.onDidStartTask(() => this.reportActivity('startTask'));
+    vscode.tasks.onDidStartTaskProcess(() => this.reportActivity('startTaskProcess'));
+    vscode.window.onDidChangeActiveColorTheme(() => this.reportActivity('changeColorTheme'));
     // vscode.window.onDidChangeActiveNotebookEditor(() => this.reportActivity(`changeNotebookEditor`));
-    vscode.window.onDidChangeActiveTerminal(() => this.reportActivity(`changeTerminal`));
-    vscode.window.onDidChangeActiveTextEditor(() => this.reportActivity(`changeTextEditor`));
+    vscode.window.onDidChangeActiveTerminal(() => this.reportActivity('changeTerminal'));
+    vscode.window.onDidChangeActiveTextEditor(() => this.reportActivity('changeTextEditor'));
     // vscode.window.onDidChangeNotebookEditorSelection(() => this.reportActivity(`changeNotebookEditorSelection`));
     // vscode.window.onDidChangeNotebookEditorVisibleRanges(() => this.reportActivity(`changeNotebookEditorVisibleRanges`));
     // vscode.window.onDidChangeTerminalState(() => this.reportActivity(`changeTerminalState`));
-    vscode.window.onDidChangeTextEditorOptions(() => this.reportActivity(`changeTextEditorOptions`));
-    vscode.window.onDidChangeTextEditorSelection(() => this.reportActivity(`changeTextEditorSelection`));
-    vscode.window.onDidChangeTextEditorViewColumn(() => this.reportActivity(`changeTextEditorViewColumn`));
-    vscode.window.onDidChangeTextEditorVisibleRanges(() => this.reportActivity(`changeTextEditorVisibleRanges`));
+    vscode.window.onDidChangeTextEditorOptions(() => this.reportActivity('changeTextEditorOptions'));
+    vscode.window.onDidChangeTextEditorSelection(() => this.reportActivity('changeTextEditorSelection'));
+    vscode.window.onDidChangeTextEditorViewColumn(() => this.reportActivity('changeTextEditorViewColumn'));
+    vscode.window.onDidChangeTextEditorVisibleRanges(() => this.reportActivity('changeTextEditorVisibleRanges'));
     // vscode.window.onDidChangeVisibleNotebookEditors(() => this.reportActivity(`changeVisibleNotebookEditors`));
-    vscode.window.onDidChangeVisibleTextEditors(() => this.reportActivity(`changeVisibleTextEditors`));
-    vscode.window.onDidChangeWindowState(() => this.reportActivity(`changeWindowState`));
-    vscode.workspace.onDidChangeConfiguration(() => this.reportActivity(`changeConfiguration`));
+    vscode.window.onDidChangeVisibleTextEditors(() => this.reportActivity('changeVisibleTextEditors'));
+    vscode.window.onDidChangeWindowState(() => this.reportActivity('changeWindowState'));
+    vscode.workspace.onDidChangeConfiguration(() => this.reportActivity('changeConfiguration'));
     // vscode.workspace.onDidChangeNotebookDocument(() => this.reportActivity(`changeNotebookDocument`));
-    vscode.workspace.onDidChangeTextDocument(() => this.reportActivity(`changeTextDocument`));
-    vscode.workspace.onDidChangeWorkspaceFolders(() => this.reportActivity(`changeWorkspaceFolders`));
+    vscode.workspace.onDidChangeTextDocument(() => this.reportActivity('changeTextDocument'));
+    vscode.workspace.onDidChangeWorkspaceFolders(() => this.reportActivity('changeWorkspaceFolders'));
     // vscode.workspace.onDidCloseNotebookDocument(() => this.reportActivity(`closeNotebookDocument`));
-    vscode.workspace.onDidCloseTextDocument(() => this.reportActivity(`closeTextDocument`));
-    vscode.workspace.onDidCreateFiles(() => this.reportActivity(`createFiles`));
-    vscode.workspace.onDidDeleteFiles(() => this.reportActivity(`deleteFiles`));
-    vscode.workspace.onDidGrantWorkspaceTrust(() => this.reportActivity(`grantWorkspaceTrust`));
+    vscode.workspace.onDidCloseTextDocument(() => this.reportActivity('closeTextDocument'));
+    vscode.workspace.onDidCreateFiles(() => this.reportActivity('createFiles'));
+    vscode.workspace.onDidDeleteFiles(() => this.reportActivity('deleteFiles'));
+    vscode.workspace.onDidGrantWorkspaceTrust(() => this.reportActivity('grantWorkspaceTrust'));
     // vscode.workspace.onDidOpenNotebookDocument(() => this.reportActivity(`openNotebookDocument`));
-    vscode.workspace.onDidOpenTextDocument(() => this.reportActivity(`openTextDocument`));
-    vscode.workspace.onDidRenameFiles(() => this.reportActivity(`renameFiles`));
+    vscode.workspace.onDidOpenTextDocument(() => this.reportActivity('openTextDocument'));
+    vscode.workspace.onDidRenameFiles(() => this.reportActivity('renameFiles'));
     // vscode.workspace.onDidSaveNotebookDocument(() => this.reportActivity(`saveNotebookDocument`));
-    vscode.workspace.onDidSaveTextDocument(() => this.reportActivity(`saveTextDocument`));
-    vscode.workspace.onWillCreateFiles(() => this.reportActivity(`willCreateFiles`));
-    vscode.workspace.onWillDeleteFiles(() => this.reportActivity(`willDeleteFiles`));
-    vscode.workspace.onWillRenameFiles(() => this.reportActivity(`willRenameFiles`));
-    vscode.workspace.onWillSaveTextDocument(() => this.reportActivity(`willSaveTextDocument`));
+    vscode.workspace.onDidSaveTextDocument(() => this.reportActivity('saveTextDocument'));
+    vscode.workspace.onWillCreateFiles(() => this.reportActivity('willCreateFiles'));
+    vscode.workspace.onWillDeleteFiles(() => this.reportActivity('willDeleteFiles'));
+    vscode.workspace.onWillRenameFiles(() => this.reportActivity('willRenameFiles'));
+    vscode.workspace.onWillSaveTextDocument(() => this.reportActivity('willSaveTextDocument'));
   }
 }

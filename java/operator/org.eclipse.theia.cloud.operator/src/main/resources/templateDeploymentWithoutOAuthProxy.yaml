@@ -55,6 +55,8 @@ spec:
             value: placeholder-env-session-user
           - name: THEIACLOUD_SESSION_URL
             value: placeholder-env-session-url
+          - name: THEIACLOUD_SESSION_SECRET
+            value: placeholder-env-session-secret
           - name: THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER
             value: placeholder-enable-activity-tracker
           - name: THEIACLOUD_MONITOR_PORT

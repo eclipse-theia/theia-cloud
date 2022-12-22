@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import * as vscode from 'vscode';
 
 import { getFromEnv, MONITOR_ENABLE_ACTIVITY_TRACKER, MONITOR_PORT } from './env-variables';
@@ -12,7 +12,7 @@ import { MonitorModule } from './monitor-module';
  * Reads out the hostName and hostPort from env and starts the server.
  * If no values are defined it will fallback to `localhost:8081`
  */
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
   const hostPort = Number(getFromEnv(MONITOR_PORT) ?? 8081);
 
   startServer(hostPort);
@@ -24,10 +24,11 @@ export function activate(context: vscode.ExtensionContext) {
 export function startServer(port: number): void {
   const app = express();
   const modules = getEnabledModules();
-
+  const monitorRouter = Router();
   for (const module of modules) {
-    module.registerEndpoints(app);
+    module.registerEndpoints(monitorRouter);
   }
+  app.use('/monitor', monitorRouter);
   const server = app.listen(port, function () {
     const address = server.address();
     if (address) {
@@ -56,4 +57,4 @@ export function getEnabledModules(): MonitorModule[] {
   return modules;
 }
 
-export function deactivate() {}
+export function deactivate(): void {}

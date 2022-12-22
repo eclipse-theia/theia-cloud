@@ -35,6 +35,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.json.JSONObject;
 
 import com.google.inject.Inject;
 
@@ -96,7 +97,11 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	String getActivityURL = getURL(sessionURL, port, GET_ACTIVITY);
 	logInfo(sessionName, "GET " + getActivityURL);
 
-	Request getActivityRequest = new Request.Builder().url(getActivityURL).method("GET", null).build();
+	MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+	String secretJson = new JSONObject().put("secret", session.getSpec().getSessionSecret()).toString();
+	RequestBody bodyWithSecret = RequestBody.create(mediaType, secretJson);
+
+	Request getActivityRequest = new Request.Builder().url(getActivityURL).method("GET", bodyWithSecret).build();
 	Response getActivityResponse;
 	try {
 	    getActivityResponse = client.newCall(getActivityRequest).execute();
@@ -127,9 +132,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 		logInfo(sessionName, "Notifying session as timeout of " + notifyAfter + " minutes was reached!");
 		String postPopupURL = getURL(sessionURL, port, POST_POPUP);
 		logInfo(sessionName, "POST " + postPopupURL);
-		MediaType mediaType = MediaType.parse("text/plain");
-		RequestBody body = RequestBody.create(mediaType, "");
-		Request postRequest = new Request.Builder().url(postPopupURL).method("POST", body).build();
+		Request postRequest = new Request.Builder().url(postPopupURL).method("POST", bodyWithSecret).build();
 		try {
 		    client.newCall(postRequest).execute();
 		} catch (IOException e) {
@@ -145,7 +148,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
     protected void updateLastActivity(Session session, long reportedTimestamp) {
 	long currentTimestamp = session.getSpec().getLastActivity();
 	if (currentTimestamp < reportedTimestamp) {
-	    logInfo(session.getSpec().getName(), "Update lastActivityMonitor in CR");
+	    logInfo(session.getSpec().getName(), "Update lastActivity in CR");
 	    session.getSpec().setLastActivity(reportedTimestamp);
 	}
     }

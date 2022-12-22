@@ -531,6 +531,9 @@
           "workspace" : {
             "type" : "string"
           },
+          "sessionSecret" : {
+            "type" : "string"
+          },
           "lastActivity" : {
             "format" : "int64",
             "type" : "integer"
