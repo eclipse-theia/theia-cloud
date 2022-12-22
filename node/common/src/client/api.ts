@@ -215,6 +215,12 @@ export interface SessionSpec {
     'workspace'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof SessionSpec
+     */
+    'sessionSecret'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof SessionSpec
      */

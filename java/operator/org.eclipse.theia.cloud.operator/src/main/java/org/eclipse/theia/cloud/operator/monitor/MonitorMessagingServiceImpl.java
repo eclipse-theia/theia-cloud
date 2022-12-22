@@ -74,8 +74,8 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 	Optional<String> postMessageURL = getURL(session);
 	if (postMessageURL.isPresent()) {
 	    MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-	    String json = new JSONObject().put("message", message).put("level", level).put("fullscreen", fullscreen)
-		    .put("detail", detail).toString();
+	    String json = new JSONObject().put("secret", session.getSpec().getSessionSecret()).put("message", message)
+		    .put("level", level).put("fullscreen", fullscreen).put("detail", detail).toString();
 
 	    RequestBody body = RequestBody.create(mediaType, json);
 	    Request postRequest = new Request.Builder().url(postMessageURL.get()).method("POST", body).build();

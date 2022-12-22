@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class SessionSpec implements UserScopedSpec {
 
-    public static final String API = "theia.cloud/v2beta";
+    public static final String API = "theia.cloud/v3beta";
     public static final String KIND = "Session";
     public static final String CRD_NAME = "sessions.theia.cloud";
 
@@ -49,6 +49,9 @@ public class SessionSpec implements UserScopedSpec {
 
     @JsonProperty("lastActivity")
     private long lastActivity;
+
+    @JsonProperty("sessionSecret")
+    private String sessionSecret;
 
     public SessionSpec() {
     }
@@ -83,6 +86,14 @@ public class SessionSpec implements UserScopedSpec {
 
     public String getUrl() {
 	return url;
+    }
+
+    public String getSessionSecret() {
+	return sessionSecret;
+    }
+
+    public void setSessionSecret(String sessionSecret) {
+	this.sessionSecret = sessionSecret;
     }
 
     public void setUrl(String url) {
@@ -166,7 +177,8 @@ public class SessionSpec implements UserScopedSpec {
     @Override
     public String toString() {
 	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
-		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity + "]";
+		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity
+		+ ", sessionSecret=" + sessionSecret + "]";
     }
 
     public static boolean isEphemeral(String workspace) {

@@ -3,6 +3,7 @@
  */
 export const MONITOR_PORT = 'THEIACLOUD_MONITOR_PORT';
 export const MONITOR_ENABLE_ACTIVITY_TRACKER = 'THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER';
+export const THEIACLOUD_SESSION_SECRET = 'THEIACLOUD_SESSION_SECRET';
 
 /**
  * Utility function to check the value of an environment variable
