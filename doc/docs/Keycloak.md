@@ -13,6 +13,7 @@ The main difference is that our client is not confidential but public, since we 
     * *Please note:* Don't use * in production but use your actual URIs that need to be redirected too.
   * \* under Web Origins
     * *Please note:* Don't use * in production but use your actual allowed CORS Origins
+* On the `Client Scopes` tab of the new client make sure `email` is part of the `Assigned Default Client Scopes`.
 * On the mappers tab of the new client create two mappers
   * Group Mapper
     * Name: groups
