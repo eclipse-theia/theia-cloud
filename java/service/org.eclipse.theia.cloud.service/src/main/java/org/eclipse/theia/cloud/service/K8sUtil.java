@@ -66,6 +66,10 @@ public final class K8sUtil {
 	return CLIENT.sessions().specs().stream().filter(sessionSpec -> sessionSpec.equals(spec)).findAny();
     }
 
+    public static Optional<SessionSpec> findSession(String sessionName) {
+	return CLIENT.sessions().get(sessionName).map(Session::getSpec);
+    }
+
     public static String launchEphemeralSession(String correlationId, String appDefinition, String user, int timeout) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition), appDefinition, user);
 	return launchSession(correlationId, sessionSpec, timeout);
@@ -89,6 +93,10 @@ public final class K8sUtil {
 
     public static boolean stopSession(String correlationId, String sessionName, String user) {
 	return CLIENT.sessions().delete(correlationId, sessionName);
+    }
+
+    public static Optional<WorkspaceSpec> findWorkspace(String workspaceName) {
+	return CLIENT.workspaces().get(workspaceName).map(Workspace::getSpec);
     }
 
     public static Optional<Workspace> getWorkspace(String user, String workspaceName) {

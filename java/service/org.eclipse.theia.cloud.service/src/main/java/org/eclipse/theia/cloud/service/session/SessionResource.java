@@ -19,12 +19,14 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
@@ -32,6 +34,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
+import org.eclipse.theia.cloud.service.TheiaCloudUser;
 import org.eclipse.theia.cloud.service.TheiaCloudWebException;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
@@ -40,6 +43,9 @@ import io.quarkus.security.Authenticated;
 @Authenticated
 @Path("/service/session")
 public class SessionResource extends BaseResource {
+
+    @Inject
+    private TheiaCloudUser theiaCloudUser;
 
     @Operation(summary = "List sessions", description = "List sessions of a user.")
     @GET
@@ -83,6 +89,20 @@ public class SessionResource extends BaseResource {
 	if (request.sessionName == null) {
 	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_SESSION_NAME);
 	}
+
+	SessionSpec existingSession = K8sUtil.findSession(request.sessionName).orElse(null);
+	if (existingSession == null) {
+	    info(correlationId, "Session " + request.sessionName + " does not exist.");
+	    // Return true because the goal of not having a running session of the
+	    // given name is reached
+	    return true;
+	}
+	if (!isOwner(theiaCloudUser, existingSession)) {
+	    info(correlationId, "User " + theiaCloudUser.getName() + " does not own session " + request.sessionName);
+	    trace(correlationId, "Session: " + existingSession);
+	    throw new TheiaCloudWebException(Status.FORBIDDEN);
+	}
+
 	info(correlationId, "Stop session: " + request);
 	return K8sUtil.stopSession(correlationId, request.sessionName, request.user);
     }
@@ -121,5 +141,19 @@ public class SessionResource extends BaseResource {
 	    throw new TheiaCloudWebException(TheiaCloudError.METRICS_SERVER_UNAVAILABLE);
 	}
 	return performance;
+    }
+
+    protected boolean isOwner(TheiaCloudUser user, SessionSpec session) {
+	if (user.isAnonymous()) {
+	    logger.debugv("User is anonymous and cannot own session {0}", session);
+	    return false;
+	}
+
+	if (session.getUser() == null || session.getUser().isBlank()) {
+	    logger.warnv("Session does not have a user. {0}", session);
+	    return false;
+	}
+
+	return session.getUser().equals(user.getName());
     }
 }
