@@ -1,29 +1,25 @@
+app:
+  name: Landing Page Test Application
+  # logo: test.svg use full path; not working yet after helm-repository switch
+
 image:
-  timeoutStrategy: "FIXEDTIME"
-  timeoutLimit: "30"
+  name: theiacloud/theia-cloud-activity-demo:0.8.0.MS8
+  timeoutStrategy: "INACTIVITY"
+  timeoutLimit: "3"
   imagePullPolicy: IfNotPresent
 
 hosts:
   usePaths: false
-  paths:
-    baseHost: 192.168.39.3.nip.io
-    service: servicex
-    landing: trynow
-    instance: instances
   service: service.192.168.39.3.nip.io
   serviceProtocol: https
   landing: theia.cloud.192.168.39.3.nip.io
   instance: ws.192.168.39.3.nip.io
 
 landingPage:
+  image: theiacloud/theia-cloud-landing-page:0.8.0.MS8
   imagePullPolicy: Always
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: false
-  # additionalApps: 
-  #   coffee-editor:
-  #     label: "Coffee Editor"
-  #   cdt-cloud-demo:
-  #     label: "CDT.cloud Blueprint"
 
 keycloak:
   enable: true

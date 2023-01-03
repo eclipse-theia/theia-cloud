@@ -3,7 +3,6 @@ imagePullPolicy: Always
 app:
   id: asdfghjkl
   name: Theia Blueprint
-  logo: theiablueprint.svg
 
 issuer:
   email: jfaltermeier@eclipsesource.com

@@ -48,7 +48,7 @@ Helm is a package manager for kubernetes which is required to install some of th
 Please check https://cert-manager.io/docs/installation/ for the latest installation instructions.
 
 As of writing this guide the installation command looks like this:\
-`kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.yaml`
+`kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml`
 
 Cert-Manager is used to manage certificates für https.\
 Theia.Cloud offers support for Let's Encrypt Certificates out of the box, but cert-manager may also be used to manage your certificates.
@@ -130,14 +130,22 @@ Add more users if you want to.
 We use the Minikube IP for our hostnames as we did for keycloak already.
 
 ```bash
-$ minikube ip
-192.168.39.81
+# Add the Theia Cloud Helm repository
+helm repo add theia-cloud-remote https://github.eclipsesource.com/theia-cloud-helm
+helm repo update
+
+# --devel flag allows to see pre release versions of helm charts
+
+# Install the cluster wide Theia Cloud resources
+helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --devel
+
+
 # for other platforms determine the external nginx ingress controller ip with
 # kubectl get services ingress-nginx-controller -n ingress-nginx'
-
 # If you don't use Minikube or your shell does not support $(), replace $(minikube ip) with the IP you determined above
 
-helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace --values ./helm/theia.cloud/valuesMinikube.yaml --set hosts.service=service.$(minikube ip).nip.io --set hosts.landing=theia.cloud.$(minikube ip).nip.io --set hosts.instance=ws.$(minikube ip).nip.io --set keycloak.authUrl=https://keycloak.$(minikube ip).nip.io/auth/ --set hosts.paths.baseHost=$(minikube ip).nip.io
+# Install Theia Cloud
+helm install theia-cloud theia-cloud-remote/theia-cloud  --devel --namespace theiacloud --create-namespace -f ./helm/theia.cloud/valuesMinikube.yaml --set hosts.service=service.$(minikube ip).nip.io --set hosts.landing=theia.cloud.$(minikube ip).nip.io --set hosts.instance=ws.$(minikube ip).nip.io --set keycloak.authUrl=https://keycloak.$(minikube ip).nip.io/auth/ --set hosts.paths.baseHost=$(minikube ip).nip.io
 
 # Optional: switch to the newly created namespace
 kubectl config set-context --current --namespace=theiacloud

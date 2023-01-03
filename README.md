@@ -38,10 +38,16 @@ All components are deployed as docker images and may be built with docker. See [
 
 ## Installation
 
-We offer a helm chart under `helm/theia.cloud` which may be used to install Theia.cloud. Please check our getting started guides below as well, which will explain the possible values in more detail.
+We offer a helm chart at <https://github.com/eclipsesource/theia-cloud-helm> which may be used to install Theia.cloud. Please check our getting started guides below as well, which will explain the possible values in more detail.
 
 ```bash
-helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace
+helm repo add theia-cloud-remote https://github.eclipsesource.com/theia-cloud-helm
+helm repo update
+
+helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --devel
+
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --create-namespace --devel 
+
 # Optional: switch to the newly created namespace
 kubectl config set-context --current --namespace=theiacloud
 

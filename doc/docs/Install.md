@@ -11,7 +11,7 @@ Follow the steps in https://helm.sh/docs/intro/install/ to install Helm on your 
 Please check https://cert-manager.io/docs/installation/ for the latest installation instructions.
 
 As of writing this guide the installation command looks like this:\
-`kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.yaml`
+`kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml`
 
 ### Metrics Server
 
@@ -67,11 +67,17 @@ hosts:
 
 ```bash
 kubectl config set-context --current --namespace=theiacloud
-# Setup without Keycloak
-helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace
 
-# Setup with keycloak
-helm install theia-cloud ./helm/theia.cloud --namespace theiacloud --create-namespace --values ./helm/theia.cloud/valuesKeycloak.yaml
+helm repo add theia-cloud-remote https://github.eclipsesource.com/theia-cloud-helm
+helm repo update
+
+helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --devel
+
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --create-namespace --devel 
+
+# Uninstall
+helm uninstall theia-cloud -n theiacloud
+
 ```
 
 ### Trouble shooting
