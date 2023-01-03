@@ -9,16 +9,12 @@ spec:
   pullSecret: ""
   uid: 101
   port: 3000
-  {{- if .Values.hosts.usePaths }}
-  host: {{ tpl (.Values.hosts.paths.baseHost | toString) . }}
-  {{- else }}
-  host: {{ tpl (.Values.hosts.instance | toString) . }}
-  {{- end }}
-  ingressname: {{ tpl (.Values.ingress.instanceName | toString) . }}
+  host: ws.192.168.39.3.nip.io
+  ingressname: theia-cloud-demo-ws-ingress
   minInstances: 0
   maxInstances: 10
   timeout:
-    limit: 30
+    limit: 3
     strategy: FIXEDTIME
   requestsMemory: 500M
   limitsMemory: 1200M

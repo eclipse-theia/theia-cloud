@@ -11,7 +11,7 @@ RUN cd /service/common/maven-conf && \
 
 FROM openjdk:11-jre-slim-buster
 WORKDIR /service
-COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-0.7.0-SNAPSHOT-runner.jar .
+COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-0.8.0-SNAPSHOT-runner.jar .
 ENV APPID default-app-id
 ENV SERVICE_PORT 8081
 
@@ -28,5 +28,5 @@ ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} \
     -Dquarkus.oidc.auth-server-url=${KEYCLOAK_SERVERURL} \
     -Dquarkus.oidc.client-id=${KEYCLOAK_CLIENTID} \
     -Dquarkus.oidc.credentials.secret=${KEYCLOAK_CLIENTSECRET} \
-    -jar ./service-0.7.0-SNAPSHOT-runner.jar
+    -jar ./service-0.8.0-SNAPSHOT-runner.jar
 CMD [ "" ]

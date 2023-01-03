@@ -1,0 +1,38 @@
+app:
+  name: Try Now Page Test Application
+  # logo: test.svg use full path; not working yet after helm-repository switch
+
+image:
+  timeoutStrategy: "FIXEDTIME"
+  timeoutLimit: "3"
+  imagePullPolicy: IfNotPresent
+
+hosts:
+  usePaths: true
+  paths:
+    baseHost: 192.168.39.3.nip.io
+    service: servicex
+    landing: trynow
+    instance: instances
+
+landingPage:
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS8
+  imagePullPolicy: Always
+  appDefinition: "theia-cloud-demo"
+  ephemeralStorage: true
+  additionalApps:
+    cdt-cloud-demo:
+      label: "CDT.cloud Blueprint"
+
+keycloak:
+  enable: false
+
+operator:
+  imagePullPolicy: Always
+
+service:
+  imagePullPolicy: Always
+
+ingress:
+  clusterIssuer: theia-cloud-selfsigned-issuer
+  theiaCloudCommonName: true
