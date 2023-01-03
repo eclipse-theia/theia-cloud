@@ -4,11 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   LaunchRequest as ClientLaunchRequest,
   PingRequest as ClientPingRequest, RootResourceApi, SessionActivityRequest as ClientSessionActivityRequest, SessionListRequest as ClientSessionListRequest,
+  SessionPerformance, SessionPerformanceRequest as ClientSessionPerformanceRequest,
   SessionResourceApi, SessionSpec, SessionStartRequest as ClientSessionStartRequest, SessionStopRequest as ClientSessionStopRequest,
   UserWorkspace, WorkspaceCreationRequest as ClientWorkspaceCreationRequest,
   WorkspaceDeletionRequest as ClientWorkspaceDeletionRequest, WorkspaceListRequest as ClientWorkspaceListRequest,
-  WorkspaceResourceApi
-} from './client/api';
+  WorkspaceResourceApi } from './client/api';
 import { Configuration } from './client/configuration';
 
 export const DEFAULT_CALL_TIMEOUT = 30000;
@@ -79,6 +79,11 @@ export namespace SessionActivityRequest {
   export const KIND = 'sessionActivityRequest';
 }
 
+export type SessionPerformanceRequest = ClientSessionPerformanceRequest & ServiceRequest;
+export namespace SessionPerformanceRequest {
+  export const KIND = 'sessionPerformanceRequest';
+}
+
 export type WorkspaceListRequest = ClientWorkspaceListRequest & ServiceRequest;
 export namespace WorkspaceListRequest {
   export const KIND = 'workspaceListRequest';
@@ -147,6 +152,14 @@ export namespace TheiaCloud {
       const { accessToken, retries, timeout } = options;
       const sessionActivityRequest = { kind: SessionActivityRequest.KIND, ...request };
       return call(() => sessionApi(request.serviceUrl, accessToken).serviceSessionPatch(sessionActivityRequest, createConfig(timeout)), retries);
+    }
+
+    export async function getSessionPerformance(request: SessionPerformanceRequest, options: RequestOptions = {}): Promise<SessionPerformance> {
+      const { accessToken, retries, timeout } = options;
+      return call(
+        () => sessionApi(request.serviceUrl, accessToken).serviceSessionPerformanceAppIdSessionNameGet(request.appId, request.sessionName, createConfig(timeout)),
+        retries
+      );
     }
   }
 
