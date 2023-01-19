@@ -6,6 +6,14 @@ Finally we will install and try Theia.Cloud using helm.
 
 If you have no experience with Kubernetes/Minikube yet, we encourage you to check out some basic tutorials first, e.g. https://kubernetes.io/docs/tutorials/hello-minikube/ and https://kubernetes.io/docs/tutorials/kubernetes-basics/
 
+## Check out the latest tag
+
+Rather than using the latest changes on the `main` branch, please **check out the latest tag**: https://github.com/eclipsesource/theia-cloud/tags
+
+For every tag the checked in helm chart and the built Dockerimages will work together as expected. 
+
+The helm chart on main works for yet unreleased images based on the latest changes. 
+
 ## Install and start minikube
 
 If minikube is not installed on your system, go to https://minikube.sigs.k8s.io/docs/start/ and follow the instructions in Step 1 Installation.
