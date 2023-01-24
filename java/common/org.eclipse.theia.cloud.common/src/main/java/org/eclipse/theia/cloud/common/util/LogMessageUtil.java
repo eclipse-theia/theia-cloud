@@ -23,6 +23,8 @@ public final class LogMessageUtil {
 
     private static final String LOG_MSG_PATTERN = "[{0}] {1}";
 
+    private static final String METRIC_PATTERN = "[{0}] METRIC: {1}";
+
     private LogMessageUtil() {
     }
 
@@ -36,6 +38,10 @@ public final class LogMessageUtil {
 
     public static String formatLogMessage(String correlationID, String message) {
 	return MessageFormat.format(LOG_MSG_PATTERN, correlationID, message);
+    }
+
+    public static String formatMetric(String correlationID, String message) {
+	return MessageFormat.format(METRIC_PATTERN, correlationID, message);
     }
 
 }
