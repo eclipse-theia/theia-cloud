@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.operator.handler.impl;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatMetric;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -194,8 +195,7 @@ public class LazySessionHandler implements SessionHandler {
     protected boolean hasMaxInstancesReached(AppDefinition appDefinition, Session session, String correlationId) {
 	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), session.getSpec(),
 		appDefinition.getSpec(), correlationId)) {
-	    LOGGER.info(formatLogMessage(correlationId, "Max instances for " + appDefinition.getSpec().getName()
-		    + " reached. Cannot create " + session.getSpec()));
+	    LOGGER.info(formatMetric(correlationId, "Max instances reached for " + appDefinition.getSpec().getName()));
 	    client.sessions().edit(correlationId, session.getMetadata().getName(),
 		    toEdit -> toEdit.getSpec().setError(TheiaCloudError.SESSION_SERVER_LIMIT_REACHED));
 	    return true;

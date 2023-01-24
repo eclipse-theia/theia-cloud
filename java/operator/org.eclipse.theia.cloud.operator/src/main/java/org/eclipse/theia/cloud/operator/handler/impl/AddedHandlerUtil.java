@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.operator.handler.impl;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatMetric;
 import static org.eclipse.theia.cloud.operator.handler.util.TheiaCloudDeploymentUtil.HOST_PROTOCOL;
 
 import java.io.IOException;
@@ -164,6 +165,8 @@ public final class AddedHandlerUtil {
 				ws.getSpec().setUrl(url);
 				return ws;
 			    });
+		    LOGGER.info(
+			    formatMetric(correlationId, "Running session for " + session.getSpec().getAppDefinition()));
 		    break;
 		} else {
 		    LOGGER.trace(formatLogMessage(correlationId, url + " is NOT available yet."));
