@@ -54,3 +54,21 @@ If you want to learn more about building native executables, please consult http
 Easily start your RESTful Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+
+## Unit tests
+
+Unit tests use the Quarkus test infrastructure.
+
+When running the tests from an IDE, the following VM argument should be set to enable logging during tests:
+
+```
+-Djava.util.logging.manager=org.jboss.logmanager.LogManager
+```
+
+See [here](https://quarkus.io/guides/getting-started-testing#test-from-ide) for more information.
+
+Further helpful links:
+
+- [Getting started with Quarkus testing](https://quarkus.io/guides/getting-started-testing)
+- [Security testing (configure auth for tests)](https://quarkus.io/guides/security-testing)
+

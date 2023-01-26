@@ -45,6 +45,9 @@ import io.quarkus.security.Authenticated;
 public class SessionResource extends BaseResource {
 
     @Inject
+    private K8sUtil k8sUtil;
+
+    @Inject
     private TheiaCloudUser theiaCloudUser;
 
     @Operation(summary = "List sessions", description = "List sessions of a user.")
@@ -54,7 +57,7 @@ public class SessionResource extends BaseResource {
 	SessionListRequest request = new SessionListRequest(appId, user);
 	String correlationId = evaluateRequest(request);
 	info(correlationId, "Listing sessions " + request);
-	return K8sUtil.listSessions(request.user);
+	return k8sUtil.listSessions(request.user);
     }
 
     @Operation(summary = "Start a new session", description = "Starts a new session for an existing workspace and responds with the URL of the started session.")
@@ -63,10 +66,10 @@ public class SessionResource extends BaseResource {
 	String correlationId = evaluateRequest(request);
 	info(correlationId, "Launching session " + request);
 	if (request.isEphemeral()) {
-	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout);
+	    return k8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout);
 	}
 
-	Optional<Workspace> workspace = K8sUtil.getWorkspace(request.user,
+	Optional<Workspace> workspace = k8sUtil.getWorkspace(request.user,
 		org.eclipse.theia.cloud.common.util.NamingUtil.asValidName(request.workspaceName));
 	if (workspace.isEmpty()) {
 	    info(correlationId, "No workspace for given workspace name: " + request);
@@ -78,7 +81,7 @@ public class SessionResource extends BaseResource {
 	    workspace.get().getSpec().setAppDefinition(request.appDefinition);
 	}
 	info(correlationId, "Launch workspace session: " + request);
-	return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
+	return k8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
 		request.timeout);
     }
 
@@ -90,7 +93,7 @@ public class SessionResource extends BaseResource {
 	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_SESSION_NAME);
 	}
 
-	SessionSpec existingSession = K8sUtil.findSession(request.sessionName).orElse(null);
+	SessionSpec existingSession = k8sUtil.findSession(request.sessionName).orElse(null);
 	if (existingSession == null) {
 	    info(correlationId, "Session " + request.sessionName + " does not exist.");
 	    // Return true because the goal of not having a running session of the
@@ -104,7 +107,7 @@ public class SessionResource extends BaseResource {
 	}
 
 	info(correlationId, "Stop session: " + request);
-	return K8sUtil.stopSession(correlationId, request.sessionName, request.user);
+	return k8sUtil.stopSession(correlationId, request.sessionName, request.user);
     }
 
     @Operation(summary = "Report session activity", description = "Updates the last activity timestamp for a session to monitor activity.")
@@ -120,7 +123,7 @@ public class SessionResource extends BaseResource {
 	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_SESSION_NAME);
 	}
 	info(correlationId, "Report session activity: " + request);
-	return K8sUtil.reportSessionActivity(correlationId, request.sessionName);
+	return k8sUtil.reportSessionActivity(correlationId, request.sessionName);
     }
 
     @Operation(summary = "Get performance metrics", description = "Returns the current CPU and memory usage of the session's pod.")
@@ -132,7 +135,7 @@ public class SessionResource extends BaseResource {
 	String correlationId = evaluateRequest(request);
 	SessionPerformance performance;
 	try {
-	    performance = K8sUtil.reportPerformance(sessionName);
+	    performance = k8sUtil.reportPerformance(sessionName);
 	} catch (Exception e) {
 	    trace(correlationId, "", e);
 	    performance = null;
