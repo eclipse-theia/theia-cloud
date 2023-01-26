@@ -35,6 +35,7 @@ import okhttp3.RequestBody;
 
 public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 
+    private static final String MONITOR_BASE_PATH = "/monitor";
     private static final String POST_MESSAGE = "/message";
 
     private static final Logger LOGGER = LogManager.getLogger(MonitorMessagingServiceImpl.class);
@@ -74,11 +75,13 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 	Optional<String> postMessageURL = getURL(session);
 	if (postMessageURL.isPresent()) {
 	    MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-	    String json = new JSONObject().put("secret", session.getSpec().getSessionSecret()).put("message", message)
-		    .put("level", level).put("fullscreen", fullscreen).put("detail", detail).toString();
+	    String json = new JSONObject().put("message", message).put("level", level).put("fullscreen", fullscreen)
+		    .put("detail", detail).toString();
 
 	    RequestBody body = RequestBody.create(mediaType, json);
-	    Request postRequest = new Request.Builder().url(postMessageURL.get()).method("POST", body).build();
+	    Request postRequest = new Request.Builder().url(postMessageURL.get())
+		    .addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).method("POST", body)
+		    .build();
 	    try {
 		client.newCall(postRequest).execute();
 	    } catch (IOException e) {
@@ -91,7 +94,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 	Optional<String> ip = getIP(session);
 	Optional<Integer> port = getPort(session);
 	if (ip.isPresent() && port.isPresent()) {
-	    return Optional.of("http://" + ip.get() + ":" + port.get() + POST_MESSAGE);
+	    return Optional.of("http://" + ip.get() + ":" + port.get() + MONITOR_BASE_PATH + POST_MESSAGE);
 	}
 	return Optional.empty();
     }

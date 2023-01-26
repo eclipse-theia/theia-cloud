@@ -35,7 +35,6 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.json.JSONObject;
 
 import com.google.inject.Inject;
 
@@ -51,7 +50,9 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 
     private static final Logger LOGGER = LogManager.getLogger(MonitorActivityTrackerImpl.class);
 
-    private static final String GET_ACTIVITY = "/activity";
+    private static final String MONITOR_BASE_PATH = "/monitor";
+    private static final String ACTIVITY_TRACKER_BASE_PATH = "/activity";
+    private static final String GET_ACTIVITY = "/lastActivity";
     private static final String POST_POPUP = "/popup";
     private static final String COR_ID_NOACTIVITYPREFIX = "no-activity-";
 
@@ -97,11 +98,8 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	String getActivityURL = getURL(sessionURL, port, GET_ACTIVITY);
 	logInfo(sessionName, "GET " + getActivityURL);
 
-	MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-	String secretJson = new JSONObject().put("secret", session.getSpec().getSessionSecret()).toString();
-	RequestBody bodyWithSecret = RequestBody.create(mediaType, secretJson);
-
-	Request getActivityRequest = new Request.Builder().url(getActivityURL).method("GET", bodyWithSecret).build();
+	Request getActivityRequest = new Request.Builder().url(getActivityURL)
+		.addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).get().build();
 	Response getActivityResponse;
 	try {
 	    getActivityResponse = client.newCall(getActivityRequest).execute();
@@ -132,7 +130,11 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 		logInfo(sessionName, "Notifying session as timeout of " + notifyAfter + " minutes was reached!");
 		String postPopupURL = getURL(sessionURL, port, POST_POPUP);
 		logInfo(sessionName, "POST " + postPopupURL);
-		Request postRequest = new Request.Builder().url(postPopupURL).method("POST", bodyWithSecret).build();
+		MediaType mediaType = MediaType.parse("text/plain");
+		RequestBody body = RequestBody.create(mediaType, "");
+		Request postRequest = new Request.Builder().url(postPopupURL)
+			.addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).post(body)
+			.build();
 		try {
 		    client.newCall(postRequest).execute();
 		} catch (IOException e) {
@@ -177,7 +179,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
     }
 
     protected String getURL(String sessionUrl, int port, String endpoint) {
-	return "http://" + sessionUrl + ":" + port + endpoint;
+	return "http://" + sessionUrl + ":" + port + MONITOR_BASE_PATH + ACTIVITY_TRACKER_BASE_PATH + endpoint;
     }
 
     protected String formatDate(Date date) {
