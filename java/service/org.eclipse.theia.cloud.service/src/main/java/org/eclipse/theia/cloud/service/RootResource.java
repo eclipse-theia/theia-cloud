@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 import java.util.Optional;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -36,6 +37,9 @@ import io.quarkus.security.Authenticated;
 @Authenticated
 public class RootResource extends BaseResource {
 
+    @Inject
+    private K8sUtil k8sUtil;
+
     @Operation(summary = "Ping", description = "Replies if the service is available.")
     @GET
     @Path("/{appId}")
@@ -50,7 +54,7 @@ public class RootResource extends BaseResource {
     public String launch(LaunchRequest request) {
 	String correlationId = evaluateRequest(request);
 
-	if (!K8sUtil.hasAppDefinition(request.appDefinition)) {
+	if (!k8sUtil.hasAppDefinition(request.appDefinition)) {
 	    error(correlationId,
 		    "Failed to lauch session. App Definition '" + request.appDefinition + "' does not exist.");
 	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_DEFINITION_NAME);
@@ -58,30 +62,30 @@ public class RootResource extends BaseResource {
 
 	if (request.isEphemeral()) {
 	    info(correlationId, "Launching ephemeral session " + request);
-	    return K8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout);
+	    return k8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout);
 	}
 
 	if (request.isExistingWorkspace()) {
-	    Optional<Workspace> workspace = K8sUtil.getWorkspace(request.user, asValidName(request.workspaceName));
+	    Optional<Workspace> workspace = k8sUtil.getWorkspace(request.user, asValidName(request.workspaceName));
 	    if (workspace.isPresent()) {
 		info(correlationId, "Launching existing workspace session " + request);
-		return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
+		return k8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
 			request.timeout);
 	    }
 	}
 
 	info(correlationId, "Create workspace " + request);
-	Workspace workspace = K8sUtil.createWorkspace(correlationId,
+	Workspace workspace = k8sUtil.createWorkspace(correlationId,
 		new UserWorkspace(request.appDefinition, request.user, request.workspaceName, request.label));
 	TheiaCloudWebException.throwIfErroneous(workspace);
 
 	info(correlationId, "Launch workspace session " + request);
 	try {
-	    return K8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.getSpec()),
+	    return k8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.getSpec()),
 		    request.timeout);
 	} catch (Exception exception) {
 	    info(correlationId, "Delete workspace due to launch error " + request);
-	    K8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());
+	    k8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());
 	    throw exception;
 	}
     }

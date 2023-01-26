@@ -42,6 +42,9 @@ import io.quarkus.security.Authenticated;
 public class WorkspaceResource extends BaseResource {
 
     @Inject
+    private K8sUtil k8sUtil;
+
+    @Inject
     private TheiaCloudUser theiaCloudUser;
 
     @Operation(summary = "List workspaces", description = "Lists the workspaces of a user.")
@@ -51,7 +54,7 @@ public class WorkspaceResource extends BaseResource {
 	WorkspaceListRequest request = new WorkspaceListRequest(appId, user);
 	String correlationId = evaluateRequest(request);
 	info(correlationId, "Listing workspaces " + request);
-	return K8sUtil.listWorkspaces(request.user);
+	return k8sUtil.listWorkspaces(request.user);
     }
 
     @Operation(summary = "Create workspace", description = "Creates a new workspace for a user.")
@@ -59,7 +62,7 @@ public class WorkspaceResource extends BaseResource {
     public UserWorkspace create(WorkspaceCreationRequest request) {
 	String correlationId = evaluateRequest(request);
 	info(correlationId, "Creating workspace " + request);
-	Workspace workspace = K8sUtil.createWorkspace(correlationId,
+	Workspace workspace = k8sUtil.createWorkspace(correlationId,
 		new UserWorkspace(request.appDefinition, request.user, request.label));
 	TheiaCloudWebException.throwIfErroneous(workspace);
 	return new UserWorkspace(workspace.getSpec());
@@ -73,7 +76,7 @@ public class WorkspaceResource extends BaseResource {
 	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_WORKSPACE_NAME);
 	}
 
-	WorkspaceSpec existingWorkspace = K8sUtil.findWorkspace(request.workspaceName).orElse(null);
+	WorkspaceSpec existingWorkspace = k8sUtil.findWorkspace(request.workspaceName).orElse(null);
 	if (existingWorkspace == null) {
 	    info(correlationId, "Workspace " + request.workspaceName + " does not exist.");
 	    // Return true because the goal of not having a workspace of the given name is
@@ -89,7 +92,7 @@ public class WorkspaceResource extends BaseResource {
 	}
 
 	info(correlationId, "Deleting workspace " + request);
-	return K8sUtil.deleteWorkspace(correlationId, request.workspaceName);
+	return k8sUtil.deleteWorkspace(correlationId, request.workspaceName);
     }
 
     protected boolean isOwner(TheiaCloudUser user, WorkspaceSpec workspace) {
