@@ -132,7 +132,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_SECRET,
 		session.map(s -> s.getSpec().getSessionSecret()).orElse(""));
 	if (arguments.isEnableMonitor()) {
-	    if (appDefinition.getSpec().getMonitor() != null && appDefinition.getSpec().getMonitor().getPort() != 0) {
+	    if (appDefinition.getSpec().getMonitor() != null && appDefinition.getSpec().getMonitor().getPort() > 0) {
 		environmentVariables.put(PLACEHOLDER_MONITOR_PORT,
 			String.valueOf(appDefinition.getSpec().getMonitor().getPort()));
 	    }
