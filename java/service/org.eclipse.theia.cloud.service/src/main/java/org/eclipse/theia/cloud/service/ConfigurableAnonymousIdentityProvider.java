@@ -23,7 +23,6 @@ import io.quarkus.security.identity.AuthenticationRequestContext;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.quarkus.security.identity.request.AnonymousAuthenticationRequest;
 import io.quarkus.security.runtime.AnonymousIdentityProvider;
-import io.quarkus.security.runtime.QuarkusPrincipal;
 import io.quarkus.security.runtime.QuarkusSecurityIdentity;
 import io.smallrye.mutiny.Uni;
 
@@ -73,21 +72,5 @@ public class ConfigurableAnonymousIdentityProvider extends AnonymousIdentityProv
 	SecurityIdentity authenticatedIdentity = QuarkusSecurityIdentity.builder()
 		.setPrincipal(AnonymousPrincipal.getInstance()).setAnonymous(false).build();
 	return Uni.createFrom().item(authenticatedIdentity);
-    }
-
-    private static class AnonymousPrincipal extends QuarkusPrincipal {
-
-	private static AnonymousPrincipal instance = new AnonymousPrincipal();
-
-	private AnonymousPrincipal() {
-	    super("anonymous");
-	}
-
-	static AnonymousPrincipal getInstance() {
-	    if (instance == null) {
-		instance = new AnonymousPrincipal();
-	    }
-	    return AnonymousPrincipal.instance;
-	}
     }
 }

@@ -101,7 +101,7 @@ public class SessionResource extends BaseResource {
 	    return true;
 	}
 	if (!isOwner(theiaCloudUser, existingSession)) {
-	    info(correlationId, "User " + theiaCloudUser.getName() + " does not own session " + request.sessionName);
+	    info(correlationId, "User " + theiaCloudUser.getIdentifier() + " does not own session " + request.sessionName);
 	    trace(correlationId, "Session: " + existingSession);
 	    throw new TheiaCloudWebException(Status.FORBIDDEN);
 	}
@@ -157,6 +157,6 @@ public class SessionResource extends BaseResource {
 	    return false;
 	}
 
-	return session.getUser().equals(user.getName());
+	return session.getUser().equals(user.getIdentifier());
     }
 }
