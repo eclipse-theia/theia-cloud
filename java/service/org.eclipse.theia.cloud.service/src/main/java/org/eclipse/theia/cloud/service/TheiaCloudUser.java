@@ -15,31 +15,56 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import java.util.Objects;
+
 /**
  * Represents a Theia Cloud user independent of the authentication mechanism.
  */
 public class TheiaCloudUser {
 
-    public static TheiaCloudUser EMPTY = new TheiaCloudUser(null);
+    public static TheiaCloudUser ANONYMOUS = new TheiaCloudUser(null);
 
-    private String name;
+    private String identifier;
 
-    public TheiaCloudUser(String name) {
-	this.name = name;
+    public TheiaCloudUser(String identifier) {
+	this.identifier = identifier;
     }
 
     /**
-     * The name identifying the user. Note that this is not necessarily an actual
-     * name but the identifier of users used for sessions, etc. This could be any
-     * unique identifier such as a user name, email address or UUID.
+     * The user's unique identifier. This is not guaranteed to be suitable as a
+     * display name because it can be any unique identifier such as a user name,
+     * email address or UUID.
      * 
-     * @return the name
+     * @return the unique identifier
      */
-    public String getName() {
-	return name;
+    public String getIdentifier() {
+	return identifier;
     }
 
     public boolean isAnonymous() {
-	return name == null || name.isBlank();
+	return identifier == null || identifier.isBlank();
     }
+
+    @Override
+    public int hashCode() {
+	return Objects.hash(identifier);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	TheiaCloudUser other = (TheiaCloudUser) obj;
+	return Objects.equals(identifier, other.identifier);
+    }
+
+    @Override
+    public String toString() {
+	return "TheiaCloudUser [identifier=" + identifier + "]";
+    }
+
 }

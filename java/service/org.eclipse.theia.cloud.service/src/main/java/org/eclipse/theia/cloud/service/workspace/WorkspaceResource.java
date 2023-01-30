@@ -86,7 +86,7 @@ public class WorkspaceResource extends BaseResource {
 	}
 	if (!isOwner(theiaCloudUser, existingWorkspace)) {
 	    info(correlationId,
-		    "User " + theiaCloudUser.getName() + " does not own workspace " + request.workspaceName);
+		    "User " + theiaCloudUser.getIdentifier() + " does not own workspace " + request.workspaceName);
 	    trace(correlationId, "Workspace: " + existingWorkspace);
 	    throw new TheiaCloudWebException(Status.FORBIDDEN);
 	}
@@ -106,6 +106,6 @@ public class WorkspaceResource extends BaseResource {
 	    return false;
 	}
 
-	return workspace.getUser().equals(user.getName());
+	return workspace.getUser().equals(user.getIdentifier());
     }
 }

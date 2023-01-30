@@ -208,7 +208,7 @@ public class WorkspaceResourceTests {
 
     private void mockUser(boolean anonymous, String name) {
 	Mockito.when(user.isAnonymous()).thenReturn(anonymous);
-	Mockito.when(user.getName()).thenReturn(name);
+	Mockito.when(user.getIdentifier()).thenReturn(name);
     }
 
     private WorkspaceSpec mockDefaultWorkspace() {

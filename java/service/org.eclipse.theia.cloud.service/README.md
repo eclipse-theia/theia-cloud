@@ -59,7 +59,9 @@ Easily start your RESTful Web Services
 
 Unit tests use the Quarkus test infrastructure.
 
-When running the tests from an IDE, the following VM argument should be set to enable logging during tests:
+All tests can be run in Eclipse via launch config [TheiaCloud Service Tests](./TheiaCloud Service Tests.launch).
+
+When running tests from an IDE, the following VM argument might need to be set to enable logging during tests  (this is pre-configured in the launch config):
 
 ```
 -Djava.util.logging.manager=org.jboss.logmanager.LogManager
@@ -67,7 +69,11 @@ When running the tests from an IDE, the following VM argument should be set to e
 
 See [here](https://quarkus.io/guides/getting-started-testing#test-from-ide) for more information.
 
-Further helpful links:
+### Conventions
+
+For unit test naming, we use the naming pattern `MethodName_StateUnderTest_ExpectedBehavior`, e.g. `authenticate_anonymousUser_throwForbidden`.
+
+### Further links
 
 - [Getting started with Quarkus testing](https://quarkus.io/guides/getting-started-testing)
 - [Security testing (configure auth for tests)](https://quarkus.io/guides/security-testing)
