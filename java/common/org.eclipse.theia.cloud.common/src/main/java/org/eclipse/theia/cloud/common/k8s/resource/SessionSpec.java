@@ -144,6 +144,7 @@ public class SessionSpec implements UserScopedSpec {
 	result = prime * result + ((appDefinition == null) ? 0 : appDefinition.hashCode());
 	result = prime * result + ((user == null) ? 0 : user.hashCode());
 	result = prime * result + ((workspace == null) ? 0 : workspace.hashCode());
+	result = prime * result + ((sessionSecret == null) ? 0 : sessionSecret.hashCode());
 	return result;
     }
 
@@ -171,14 +172,18 @@ public class SessionSpec implements UserScopedSpec {
 		return false;
 	} else if (!workspace.equals(other.workspace))
 	    return false;
+	if (sessionSecret == null) {
+	    if (other.sessionSecret != null)
+		return false;
+	} else if (!sessionSecret.equals(other.sessionSecret))
+	    return false;
 	return true;
     }
 
     @Override
     public String toString() {
 	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
-		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity
-		+ ", sessionSecret=" + sessionSecret + "]";
+		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity + "]";
     }
 
     public static boolean isEphemeral(String workspace) {

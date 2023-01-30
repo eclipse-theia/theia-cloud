@@ -131,10 +131,14 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_USER, session.map(s -> s.getSpec().getUser()).orElse(""));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_SECRET,
 		session.map(s -> s.getSpec().getSessionSecret()).orElse(""));
-	environmentVariables.put(PLACEHOLDER_ENABLE_ACTIVITY_TRACKER,
-		arguments.isEnableActivityTracker() ? "true" : "false");
-	environmentVariables.put(PLACEHOLDER_MONITOR_PORT,
-		String.valueOf(appDefinition.getSpec().getMonitor().getPort()));
+	if (arguments.isEnableMonitor()) {
+	    if (appDefinition.getSpec().getMonitor() != null && appDefinition.getSpec().getMonitor().getPort() != 0) {
+		environmentVariables.put(PLACEHOLDER_MONITOR_PORT,
+			String.valueOf(appDefinition.getSpec().getMonitor().getPort()));
+	    }
+	    environmentVariables.put(PLACEHOLDER_ENABLE_ACTIVITY_TRACKER,
+		    arguments.isEnableActivityTracker() ? "true" : "false");
+	}
 	return environmentVariables;
     }
 

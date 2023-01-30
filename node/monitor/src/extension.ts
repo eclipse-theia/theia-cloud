@@ -40,7 +40,7 @@ export function startServer(port: number): void {
         console.debug(`http://${host}:${addressPort}`);
       }
     } else {
-      console.debug('Server not started');
+      console.warn('Server not started');
     }
   });
 }
