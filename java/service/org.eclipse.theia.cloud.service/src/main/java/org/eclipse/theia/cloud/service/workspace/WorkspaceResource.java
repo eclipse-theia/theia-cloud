@@ -30,6 +30,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
+import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.TheiaCloudUser;
@@ -46,6 +47,11 @@ public class WorkspaceResource extends BaseResource {
 
     @Inject
     private TheiaCloudUser theiaCloudUser;
+
+    @Inject
+    public WorkspaceResource(ApplicationProperties applicationProperties) {
+	super(applicationProperties);
+    }
 
     @Operation(summary = "List workspaces", description = "Lists the workspaces of a user.")
     @GET

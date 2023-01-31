@@ -22,13 +22,12 @@ import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.jboss.logging.Logger;
 
 public class BaseResource {
-    private static final String THEIA_CLOUD_APP_ID = "theia.cloud.app.id";
 
     protected final Logger logger;
     protected final String appId;
 
-    public BaseResource() {
-	appId = System.getProperty(THEIA_CLOUD_APP_ID, "asdfghjkl");
+    public BaseResource(ApplicationProperties applicationProperties) {
+	appId = applicationProperties.getAppId();
 	logger = Logger.getLogger(getClass().getSuperclass());
     }
 

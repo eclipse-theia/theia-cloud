@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 STMicroelectronics and others.
+ * Copyright (C) 2022-2023 EclipseSource, STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,8 +16,7 @@
 package org.eclipse.theia.cloud.service;
 
 import javax.enterprise.context.ApplicationScoped;
-
-import org.jboss.logging.Logger;
+import javax.inject.Inject;
 
 import io.quarkus.security.identity.AuthenticationRequestContext;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -37,18 +36,8 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class ConfigurableAnonymousIdentityProvider extends AnonymousIdentityProvider {
 
-    private static final String THEIA_CLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
-
-    private final Logger logger;
-    private final boolean useKeycloak;
-
-    public ConfigurableAnonymousIdentityProvider() {
-	logger = Logger.getLogger(getClass());
-	useKeycloak = Boolean.valueOf(System.getProperty(THEIA_CLOUD_USE_KEYCLOAK, "true"));
-	if (!useKeycloak) {
-	    logger.warn("Keycloak integration was disabled. Anonymous requests are allowed!");
-	}
-    }
+    @Inject
+    private ApplicationProperties applicationProperties;
 
     @Override
     public Class<AnonymousAuthenticationRequest> getRequestType() {
@@ -58,7 +47,7 @@ public class ConfigurableAnonymousIdentityProvider extends AnonymousIdentityProv
     @Override
     public Uni<SecurityIdentity> authenticate(AnonymousAuthenticationRequest request,
 	    AuthenticationRequestContext context) {
-	if (useKeycloak) {
+	if (applicationProperties.isUseKeycloak()) {
 	    // If keycloak is used, anonymous requests are handled with their default
 	    // behavior. That is, the user will not be authenticated and won't be able to
 	    // access any resources requiring authentication.
