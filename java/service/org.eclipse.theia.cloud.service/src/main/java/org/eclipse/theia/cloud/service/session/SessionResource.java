@@ -32,6 +32,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
+import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.TheiaCloudUser;
@@ -49,6 +50,11 @@ public class SessionResource extends BaseResource {
 
     @Inject
     private TheiaCloudUser theiaCloudUser;
+
+    @Inject
+    public SessionResource(ApplicationProperties applicationProperties) {
+	super(applicationProperties);
+    }
 
     @Operation(summary = "List sessions", description = "List sessions of a user.")
     @GET
@@ -101,7 +107,8 @@ public class SessionResource extends BaseResource {
 	    return true;
 	}
 	if (!isOwner(theiaCloudUser, existingSession)) {
-	    info(correlationId, "User " + theiaCloudUser.getIdentifier() + " does not own session " + request.sessionName);
+	    info(correlationId,
+		    "User " + theiaCloudUser.getIdentifier() + " does not own session " + request.sessionName);
 	    trace(correlationId, "Session: " + existingSession);
 	    throw new TheiaCloudWebException(Status.FORBIDDEN);
 	}

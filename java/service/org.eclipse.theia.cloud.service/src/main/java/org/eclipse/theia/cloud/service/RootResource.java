@@ -38,6 +38,11 @@ import io.quarkus.security.Authenticated;
 public class RootResource extends BaseResource {
 
     @Inject
+    public RootResource(ApplicationProperties applicationProperties) {
+	super(applicationProperties);
+    }
+
+    @Inject
     private K8sUtil k8sUtil;
 
     @Operation(summary = "Ping", description = "Replies if the service is available.")
