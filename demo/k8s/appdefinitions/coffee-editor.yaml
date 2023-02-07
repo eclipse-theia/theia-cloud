@@ -9,21 +9,22 @@ spec:
   pullSecret: ""
   uid: 1000
   port: 3000
-  {{- if .Values.hosts.usePaths }}
-  host: {{ tpl (.Values.hosts.paths.baseHost | toString) . }}
-  {{- else }}
-  host: {{ tpl (.Values.hosts.instance | toString) . }}
-  {{- end }}
-  ingressname: {{ tpl (.Values.ingress.instanceName | toString) . }}
+  host: ws.theia-cloud.io
+  ingressname: theia-cloud-demo-ws-ingress
   minInstances: 0
-  maxInstances: 10
+  maxInstances: 1
+  # maxInstances: 10
   timeout:
     limit: 30
     strategy: FIXEDTIME
   requestsMemory: 1000M
-  limitsMemory: 1200M
+  limitsMemory: 2400M
   requestsCpu: "100m"
-  limitsCpu: "2"
-  downlinkLimit: 30000
-  uplinkLimit: 30000
+  limitsCpu: "0.1"
+  # limitsCpu: "2"
+  downlinkLimit: 300
+  uplinkLimit: 300
+  # downlinkLimit: 30000
+  # uplinkLimit: 30000
   mountPath: "/home/project/persisted"
+  imagePullPolicy: IfNotPresent

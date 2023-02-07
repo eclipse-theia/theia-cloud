@@ -12,15 +12,17 @@ image:
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
+  imagePullPolicy: IfNotPresent
 
 hosts:
+  usePaths: false
   service: service.theia-cloud.io
   serviceProtocol: https
   landing: try.theia-cloud.io
   instance: ws.theia-cloud.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS7
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS8
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
   additionalApps: 
@@ -38,15 +40,10 @@ keycloak:
   cookieSecret: ""
 
 operator:
-  image: theiacloud/theia-cloud-operator:0.8.0.MS7
   eagerStart: false
   cloudProvider: "GKE"
   bandwidthLimiter: "WONDERSHAPER"
-  wondershaperImage: theiacloud/theia-cloud-wondershaper:0.8.0.MS7
   sessionsPerUser: "1"
-
-service:
-  image: theiacloud/theia-cloud-service:0.8.0.MS7
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
