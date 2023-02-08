@@ -70,6 +70,7 @@ If you want to run the Minikube-Demo path on an actual cluster, please see https
 If Theia Cloud is used with paths instead of subdomains, the global HTTPS certificate should exist and be configured as the NginX Ingress Controller's default certificate.
 
 In [global-certificate.yaml](./platforms/global-certificate.yaml), replace `example.com` with `$(minikube ip).nip.io`  and `letsencrypt-prod` with `theia-cloud-selfsigned-issuer`.
+Make sure the annotation `cert-manager.io/common-name` is **not** commented out.
 Apply the configuration with `kubectl apply -f  ./doc/docs/platforms/global-certificate.yaml`.
 
 Configure the nginx controllers deployment to use the certificate `default-tls` in the default namespace as its default certificate.
