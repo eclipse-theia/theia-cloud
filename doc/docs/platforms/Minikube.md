@@ -137,7 +137,7 @@ helm repo update
 # --devel flag allows to see pre release versions of helm charts
 
 # Install the cluster wide Theia Cloud resources
-helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --devel
+helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --devel --namespace theiacloud --create-namespace --set issuer.email=your-mail@example.com
 
 
 # for other platforms determine the external nginx ingress controller ip with

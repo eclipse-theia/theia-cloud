@@ -71,7 +71,7 @@ kubectl config set-context --current --namespace=theiacloud
 helm repo add theia-cloud-remote https://github.eclipsesource.com/theia-cloud-helm
 helm repo update
 
-helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --devel
+helm install theia-cloud-base theia-cloud-remote/theia-cloud-base  --set issuer.email=your-mail@example.com --devel
 
 helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --create-namespace --devel 
 
