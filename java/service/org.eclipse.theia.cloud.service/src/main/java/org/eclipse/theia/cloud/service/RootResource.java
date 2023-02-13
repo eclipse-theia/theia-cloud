@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 import java.util.Optional;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -31,10 +32,8 @@ import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
-import io.quarkus.security.Authenticated;
-
 @Path("/service")
-@Authenticated
+@RolesAllowed(AccessRoles.USER)
 public class RootResource extends BaseResource {
 
     @Inject

@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,7 +27,58 @@ import org.junit.jupiter.api.Test;
  */
 class ApplicationPropertiesTests {
 
+    private static final String THEIA_CLOUD_AUTHENTICATION_ONLY = "theia.cloud.authentication.only";
+    private static final String THEIA_CLOUD_GROUPS_USER = "theia.cloud.groups.user";
     private static final String THEIA_CLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
+
+    @Test
+    void getUserGroup_propertySet_returnConfiguredValue() {
+	System.setProperty(THEIA_CLOUD_GROUPS_USER, "test_role_321");
+	ApplicationProperties fixture = new ApplicationProperties();
+	assertEquals("test_role_321", fixture.getUserGroup());
+    }
+
+    @Test
+    void getUserGroup_propertySetToWhitespace_returnUserRole() {
+	System.setProperty(THEIA_CLOUD_GROUPS_USER, " \t\n  ");
+	ApplicationProperties fixture = new ApplicationProperties();
+	assertEquals(AccessRoles.USER, fixture.getUserGroup());
+    }
+
+    @Test
+    void getUserGroup_propertyNotSet_returnUserRole() {
+	System.clearProperty(THEIA_CLOUD_GROUPS_USER);
+	ApplicationProperties fixture = new ApplicationProperties();
+	assertEquals(AccessRoles.USER, fixture.getUserGroup());
+    }
+
+    @Test
+    void isAuthenticationOnly_propertyTrue_returnTrue() {
+	System.setProperty(THEIA_CLOUD_AUTHENTICATION_ONLY, "true");
+	ApplicationProperties fixture = new ApplicationProperties();
+	assertTrue(fixture.isAuthenticationOnly());
+    }
+
+    @Test
+    void isAuthenticationOnly_propertyNotSet_returnFalse() {
+	System.clearProperty(THEIA_CLOUD_AUTHENTICATION_ONLY);
+	ApplicationProperties fixture = new ApplicationProperties();
+	assertFalse(fixture.isAuthenticationOnly());
+    }
+
+    @Test
+    void isAuthenticationOnly_propertySetToSomeValue_returnFalse() {
+	System.setProperty(THEIA_CLOUD_AUTHENTICATION_ONLY, "abc");
+	ApplicationProperties fixture = new ApplicationProperties();
+	assertFalse(fixture.isAuthenticationOnly());
+    }
+
+    @Test
+    void isAuthenticationOnly_propertySetToFalse_returnFalse() {
+	System.setProperty(THEIA_CLOUD_AUTHENTICATION_ONLY, "false");
+	ApplicationProperties fixture = new ApplicationProperties();
+	assertFalse(fixture.isAuthenticationOnly());
+    }
 
     @Test
     void isUseKeycloak_propertyTrue_returnTrue() {
