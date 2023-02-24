@@ -41,7 +41,6 @@ keycloak:
 
 operator:
   eagerStart: false
-  cloudProvider: "GKE"
   bandwidthLimiter: "WONDERSHAPER"
   sessionsPerUser: "1"
 

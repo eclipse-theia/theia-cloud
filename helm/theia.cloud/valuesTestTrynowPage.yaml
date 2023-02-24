@@ -28,6 +28,7 @@ keycloak:
   enable: false
 
 operator:
+  cloudProvider: MINIKUBE
   imagePullPolicy: Always
 
 service:

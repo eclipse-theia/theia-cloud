@@ -8,8 +8,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: ""
-  volumeName: placeholder-pv  
+  storageClassName: placeholder-storage-class-name
   resources:
     requests:
-      storage: 250Mi
+      storage: placeholder-requested-storage

@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource, STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -27,7 +27,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
-import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudPersistentVolumeUtil;
+import org.eclipse.theia.cloud.operator.handler.PersistentVolumeTemplateReplacements;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import com.google.inject.Inject;
@@ -35,38 +35,36 @@ import com.google.inject.Inject;
 import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 
+/**
+ * Creates persistent volume claims using a storage class. Kubernetes creates
+ * the persistent volume based on the storage class's configuration on the
+ * cluster. Thus, explicit creation of a persistent volume is not required.
+ */
 public class DefaultPersistentVolumeCreator implements PersistentVolumeCreator {
 
     private static final Logger LOGGER = LogManager.getLogger(DefaultPersistentVolumeCreator.class);
 
-    protected static final String TEMPLATE_PERSISTENTVOLUME_YAML = "/templatePersistentVolume.yaml";
+    protected static final int THEIA_CONTAINER_INDEX = 1;
+
     protected static final String TEMPLATE_PERSISTENTVOLUMECLAIM_YAML = "/templatePersistentVolumeClaim.yaml";
 
     @Inject
     protected TheiaCloudClient client;
 
+    @Inject
+    protected PersistentVolumeTemplateReplacements replacementsProvider;
+
     @Override
     public Optional<PersistentVolume> createAndApplyPersistentVolume(String correlationId, Workspace workspace) {
-	Map<String, String> replacements = TheiaCloudPersistentVolumeUtil
-		.getPersistentVolumeReplacements(client.namespace(), workspace);
-	String persistentVolumeYaml;
-	try {
-	    persistentVolumeYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(TEMPLATE_PERSISTENTVOLUME_YAML,
-		    replacements, correlationId);
-	} catch (IOException | URISyntaxException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for workspace " + workspace),
-		    e);
-	    return Optional.empty();
-	}
-	return client.persistentVolumes().loadAndCreate(correlationId, persistentVolumeYaml,
-		volume -> volume.addOwnerReference(workspace));
+	return Optional.empty();
     }
 
     @Override
     public Optional<PersistentVolumeClaim> createAndApplyPersistentVolumeClaim(String correlationId,
 	    Workspace workspace) {
-	Map<String, String> replacements = TheiaCloudPersistentVolumeUtil
-		.getPersistentVolumeClaimReplacements(client.namespace(), workspace);
+
+	Map<String, String> replacements = replacementsProvider.getPersistentVolumeClaimReplacements(client.namespace(),
+		workspace);
 	String persistentVolumeClaimYaml;
 	try {
 	    persistentVolumeClaimYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(

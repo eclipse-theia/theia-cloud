@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2023 EclipseSource, STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,11 +17,11 @@ package org.eclipse.theia.cloud.operator.handler;
 
 import java.util.Map;
 
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 
-public interface DeploymentTemplateReplacements extends TemplateReplacements {
-    Map<String, String> getReplacements(String namespace, AppDefinition appDefinition, int instance);
+public interface PersistentVolumeTemplateReplacements extends TemplateReplacements {
 
-    Map<String, String> getReplacements(String namespace, AppDefinition appDefinition, Session session);
+    Map<String, String> getPersistentVolumeReplacements(String namespace, Workspace workspace);
+
+    Map<String, String> getPersistentVolumeClaimReplacements(String namespace, Workspace workspace);
 }

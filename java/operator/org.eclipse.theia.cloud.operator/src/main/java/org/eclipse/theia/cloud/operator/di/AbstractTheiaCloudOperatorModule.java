@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -31,12 +31,14 @@ import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.DeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
+import org.eclipse.theia.cloud.operator.handler.PersistentVolumeTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.SessionHandler;
 import org.eclipse.theia.cloud.operator.handler.TimeoutStrategy;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.BandwidthLimiterImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultDeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultPersistentVolumeCreator;
+import org.eclipse.theia.cloud.operator.handler.impl.DefaultPersistentVolumeTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.impl.IngressPathProviderImpl;
 import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTracker;
 import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTrackerImpl;
@@ -58,6 +60,8 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 	bind(PersistentVolumeCreator.class).to(bindPersistentVolumeHandler()).in(Singleton.class);
 	bind(IngressPathProvider.class).to(bindIngressPathProvider()).in(Singleton.class);
 	bind(DeploymentTemplateReplacements.class).to(bindDeploymentTemplateReplacements()).in(Singleton.class);
+	bind(PersistentVolumeTemplateReplacements.class).to(bindPersistentVolumeTemplateReplacements())
+		.in(Singleton.class);
 
 	bind(AppDefinitionHandler.class).to(bindAppDefinitionHandler()).in(Singleton.class);
 	bind(SessionHandler.class).to(bindSessionHandler()).in(Singleton.class);
@@ -100,6 +104,10 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
     protected Class<? extends MonitorMessagingService> bindMonitorMessagingService() {
 	return MonitorMessagingServiceImpl.class;
+    }
+
+    protected Class<? extends PersistentVolumeTemplateReplacements> bindPersistentVolumeTemplateReplacements() {
+	return DefaultPersistentVolumeTemplateReplacements.class;
     }
 
     protected abstract Class<? extends WorkspaceHandler> bindWorkspaceHandler();
