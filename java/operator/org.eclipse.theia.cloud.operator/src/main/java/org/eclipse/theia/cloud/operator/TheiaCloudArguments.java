@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -21,7 +21,7 @@ import picocli.CommandLine.Option;
 public class TheiaCloudArguments {
 
     public enum CloudProvider {
-	K8S, GKE
+	K8S, MINIKUBE
     }
 
     public enum BandwidthLimiter {
@@ -73,6 +73,14 @@ public class TheiaCloudArguments {
 
     @Option(names = { "--instancesPath" }, description = "Subpath instances are hosted at", required = false)
     private String instancesPath;
+
+    @Option(names = {
+	    "--storageClassName" }, description = "K8s storage class to use for persistent workspace volume claims.", required = false)
+    private String storageClassName;
+
+    @Option(names = {
+	    "--requestedStorage" }, description = "Amount of storage requested for persistent workspace volume claims.", required = false)
+    private String requestedStorage;
 
     public boolean isUseKeycloak() {
 	return useKeycloak;
@@ -126,6 +134,14 @@ public class TheiaCloudArguments {
 	return instancesPath;
     }
 
+    public String getStorageClassName() {
+	return storageClassName;
+    }
+
+    public String getRequestedStorage() {
+	return requestedStorage;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -134,12 +150,14 @@ public class TheiaCloudArguments {
 	result = prime * result + ((bandwidthLimiter == null) ? 0 : bandwidthLimiter.hashCode());
 	result = prime * result + ((cloudProvider == null) ? 0 : cloudProvider.hashCode());
 	result = prime * result + (eagerStart ? 1231 : 1237);
-	result = prime * result + ((instancesPath == null) ? 0 : instancesPath.hashCode());
-	result = prime * result + (enableMonitor ? 1231 : 1237);
 	result = prime * result + (enableActivityTracker ? 1231 : 1237);
+	result = prime * result + (enableMonitor ? 1231 : 1237);
+	result = prime * result + ((instancesPath == null) ? 0 : instancesPath.hashCode());
+	result = prime * result + ((monitorInterval == null) ? 0 : monitorInterval.hashCode());
+	result = prime * result + ((requestedStorage == null) ? 0 : requestedStorage.hashCode());
 	result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
 	result = prime * result + ((sessionsPerUser == null) ? 0 : sessionsPerUser.hashCode());
-	result = prime * result + ((monitorInterval == null) ? 0 : monitorInterval.hashCode());
+	result = prime * result + ((storageClassName == null) ? 0 : storageClassName.hashCode());
 	result = prime * result + (useKeycloak ? 1231 : 1237);
 	result = prime * result + (usePaths ? 1231 : 1237);
 	result = prime * result + ((wondershaperImage == null) ? 0 : wondershaperImage.hashCode());
@@ -166,13 +184,24 @@ public class TheiaCloudArguments {
 	    return false;
 	if (eagerStart != other.eagerStart)
 	    return false;
+	if (enableActivityTracker != other.enableActivityTracker)
+	    return false;
+	if (enableMonitor != other.enableMonitor)
+	    return false;
 	if (instancesPath == null) {
 	    if (other.instancesPath != null)
 		return false;
 	} else if (!instancesPath.equals(other.instancesPath))
-	if (enableMonitor != other.enableMonitor)
 	    return false;
-	if (enableActivityTracker != other.enableActivityTracker)
+	if (monitorInterval == null) {
+	    if (other.monitorInterval != null)
+		return false;
+	} else if (!monitorInterval.equals(other.monitorInterval))
+	    return false;
+	if (requestedStorage == null) {
+	    if (other.requestedStorage != null)
+		return false;
+	} else if (!requestedStorage.equals(other.requestedStorage))
 	    return false;
 	if (serviceUrl == null) {
 	    if (other.serviceUrl != null)
@@ -184,10 +213,10 @@ public class TheiaCloudArguments {
 		return false;
 	} else if (!sessionsPerUser.equals(other.sessionsPerUser))
 	    return false;
-	if (monitorInterval == null) {
-	    if (other.monitorInterval != null)
+	if (storageClassName == null) {
+	    if (other.storageClassName != null)
 		return false;
-	} else if (!monitorInterval.equals(other.monitorInterval))
+	} else if (!storageClassName.equals(other.storageClassName))
 	    return false;
 	if (useKeycloak != other.useKeycloak)
 	    return false;
@@ -203,11 +232,12 @@ public class TheiaCloudArguments {
 
     @Override
     public String toString() {
-	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", cloudProvider="
-		+ cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter + ", wondershaperImage=" + wondershaperImage
-		+ ", serviceUrl=" + serviceUrl + ", sessionsPerUser=" + sessionsPerUser + ", appId=" + appId
-		+ ", usePaths=" + usePaths + ", instancesPath=" + instancesPath + ", enableMonitor=" + enableMonitor
-		+ ", enableActivityTracker=" + enableActivityTracker + ", monitorInterval=" + monitorInterval + "]";
+	return "TheiaCloudArguments [useKeycloak=" + useKeycloak + ", eagerStart=" + eagerStart + ", enableMonitor="
+		+ enableMonitor + ", enableActivityTracker=" + enableActivityTracker + ", monitorInterval="
+		+ monitorInterval + ", cloudProvider=" + cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter
+		+ ", wondershaperImage=" + wondershaperImage + ", serviceUrl=" + serviceUrl + ", sessionsPerUser="
+		+ sessionsPerUser + ", appId=" + appId + ", usePaths=" + usePaths + ", instancesPath=" + instancesPath
+		+ ", storageClassName=" + storageClassName + ", requestedStorage=" + requestedStorage + "]";
     }
 
 }

@@ -34,6 +34,7 @@ keycloak:
   cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
 
 operator:
+  cloudProvider: MINIKUBE
   imagePullPolicy: Always
 
 service:

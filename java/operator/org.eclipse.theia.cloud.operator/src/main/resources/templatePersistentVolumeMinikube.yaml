@@ -7,6 +7,6 @@ spec:
   accessModes:
     - ReadWriteOnce
   capacity:
-    storage: 250Mi
+    storage: placeholder-requested-storage
   hostPath:
     path: /tmp/hostpath-provisioner/theia-cloud/placeholder-pv/

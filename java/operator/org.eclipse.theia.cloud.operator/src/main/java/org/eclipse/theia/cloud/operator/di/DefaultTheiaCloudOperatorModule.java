@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -23,10 +23,10 @@ import org.eclipse.theia.cloud.operator.handler.SessionHandler;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.EagerStartAppDefinitionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.EagerStartSessionHandler;
-import org.eclipse.theia.cloud.operator.handler.impl.GKEPersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.impl.LazySessionHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyStartAppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.LazyWorkspaceHandler;
+import org.eclipse.theia.cloud.operator.handler.impl.MinikubePersistentVolumeCreator;
 
 public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorModule {
 
@@ -45,8 +45,8 @@ public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorM
     @Override
     protected Class<? extends PersistentVolumeCreator> bindPersistentVolumeHandler() {
 	switch (arguments.getCloudProvider()) {
-	case GKE:
-	    return GKEPersistentVolumeCreator.class;
+	case MINIKUBE:
+	    return MinikubePersistentVolumeCreator.class;
 	case K8S:
 	default:
 	    return super.bindPersistentVolumeHandler();
