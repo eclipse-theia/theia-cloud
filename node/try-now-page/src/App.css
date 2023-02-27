@@ -1,18 +1,22 @@
 .App {
-  height: 100vh;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   background-image: url('./resources/background-image.png');
   background-size: cover;
   background-repeat: no-repeat;
   font-family: 'Anonymous Pro', monospace;
 }
 
+.body {
+  height: 100vh;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: -10vh;
+}
+
 .App__logo {
-  height: 40vmin;
+  height: 50vmin;
   pointer-events: none;
 }
 
@@ -23,7 +27,7 @@
   text-decoration: none;
   border: 2px solid;
   border-radius: 10rem;
-  transition: all .3s;
+  transition: all 0.3s;
   font-weight: 500;
   outline: none;
   color: #fff;
@@ -37,7 +41,7 @@
 .App__try-now-button:focus {
   text-decoration: none;
   transform: translateY(-3px);
-  box-shadow: 0 .8rem 1.6rem rgba(0, 0, 0, .2);
+  box-shadow: 0 0.8rem 1.6rem rgba(0, 0, 0, 0.2);
 }
 
 .App__try-now-button:disabled {
@@ -51,6 +55,12 @@
 }
 
 .App__error-message {
+  width: 60vw;
+  line-height: 1.5em;
+  padding-top: 2em;
+}
+
+.App__info-message {
   width: 60vw;
   line-height: 1.5em;
   padding-top: 2em;
