@@ -42,3 +42,9 @@ service:
 ingress:
   clusterIssuer: theia-cloud-selfsigned-issuer
   theiaCloudCommonName: true
+
+monitor:
+  enable: false
+  activityTracker:
+    enable: true
+    interval: 1

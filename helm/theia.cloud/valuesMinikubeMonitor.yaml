@@ -1,13 +1,13 @@
 app:
   id: asdfghjkl
   name: Theia Blueprint
-  logo: theiablueprint.png
 
 issuer:
   email: mmorlock@example.com
 
 image:
-  name: theiacloud/theia-cloud-demo:0.8.0.MS7
+  name: theia-cloud-demo:local
+  imagePullPolicy: Never
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "60"
@@ -19,9 +19,10 @@ hosts:
   instance: ws.192.168.39.3.nip.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS7
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS8
+  imagePullPolicy: Always
   appDefinition: "theia-cloud-demo"
-  ephemeralStorage: false
+  ephemeralStorage: true
 
 keycloak:
   enable: false
@@ -32,17 +33,18 @@ keycloak:
   cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
 
 operator:
-  image: theiacloud/theia-cloud-operator:0.8.0.MS7
+  image: theia-cloud-operator:local
+  imagePullPolicy: Never
   eagerStart: false
   cloudProvider: "K8S"
   bandwidthLimiter: "K8SANNOTATION"
   sessionsPerUser: "1"
 
 service:
-  image: theiacloud/theia-cloud-service:0.8.0.MS7
+  image: theia-cloud-service:local
+  imagePullPolicy: Never
 
 ingress:
-  instanceName: "theia-cloud-demo-ws-ingress"
   clusterIssuer: theia-cloud-selfsigned-issuer
   theiaCloudCommonName: true
 
