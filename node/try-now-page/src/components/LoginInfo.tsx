@@ -13,7 +13,7 @@ export const LoginInfo: React.FC<LoginInfoProps> = ({ showLoginInformation }: Lo
       </pre>
       <pre>We will not contact you via your e-mail or use it for any other marketing purposes.</pre>{' '}
       <pre>
-        You can login using your Github account and do so on the top right of the page (You will be forwarded to out
+        You can login using your Github account and do so on the top right of the page (You will be forwarded to our
         keycloak instance).
       </pre>
     </div>
