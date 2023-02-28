@@ -4,7 +4,7 @@ export const Footer = (
   setSelectedAppDefinition: (value: React.SetStateAction<string>) => void
 ): JSX.Element => (
   <div className='App__footer'>
-    {config.additionalApps && config.additionalApps.length > 0 && (
+    {Array.isArray(config.additionalApps) && config.additionalApps.length > 0 && (
       <p>
         <label htmlFor='selectapp'>Select app to launch </label>
         <select
@@ -27,7 +27,7 @@ export const Footer = (
     <p>
       Powered by{' '}
       <a href='http://theia-cloud.io' target='_blank' rel='noreferrer'>
-        Theia.Cloud
+        Theia Cloud
       </a>
     </p>
     <p>
