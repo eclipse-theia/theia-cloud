@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v4beta
+apiVersion: theia.cloud/v5beta
 kind: AppDefinition
 metadata:
   name: cdt-cloud-demo
@@ -23,3 +23,7 @@ spec:
   downlinkLimit: 30000
   uplinkLimit: 30000
   mountPath: "/home/project/persisted"
+  monitor:
+    timeoutAfter: 30
+    notifyAfter: 25
+    port: 8081

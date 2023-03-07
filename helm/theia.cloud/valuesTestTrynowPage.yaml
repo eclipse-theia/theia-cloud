@@ -16,7 +16,7 @@ hosts:
     instance: instances
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS8
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS9
   imagePullPolicy: Always
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true

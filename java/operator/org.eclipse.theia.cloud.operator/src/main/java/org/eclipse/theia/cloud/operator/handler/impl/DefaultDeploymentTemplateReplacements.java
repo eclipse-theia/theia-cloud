@@ -138,6 +138,9 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	    }
 	    environmentVariables.put(PLACEHOLDER_ENABLE_ACTIVITY_TRACKER,
 		    arguments.isEnableActivityTracker() ? "true" : "false");
+	} else {
+	    environmentVariables.put(PLACEHOLDER_MONITOR_PORT, String.valueOf(8081));
+	    environmentVariables.put(PLACEHOLDER_ENABLE_ACTIVITY_TRACKER, "false");
 	}
 	return environmentVariables;
     }
