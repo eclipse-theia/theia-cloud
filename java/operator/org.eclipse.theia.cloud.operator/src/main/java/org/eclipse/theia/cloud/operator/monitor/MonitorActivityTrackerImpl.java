@@ -87,6 +87,8 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 
 		    pingSession(session, sessionIP.get(), port, timeoutAfter, notifyAfter);
 		}
+	    } else {
+		LOGGER.error("No ClusterIP found for session " + session.getSpec().getName());
 	    }
 	}
     }
