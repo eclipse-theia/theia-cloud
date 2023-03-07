@@ -15,11 +15,11 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.client;
 
-import java.util.Map;
 import java.util.Optional;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
+import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimList;
@@ -80,9 +80,10 @@ public interface TheiaCloudClient {
 	try (final KubernetesClient client = new DefaultKubernetesClient()) {
 	    ServiceList svcList = client.services().inNamespace(namespace()).list();
 	    for (Service svc : svcList.getItems()) {
-		Map<String, String> labels = svc.getMetadata().getLabels();
-		if (labels != null && sessionName.equals(labels.get("app"))) {
-		    return Optional.of(svc.getSpec().getClusterIP());
+		for (OwnerReference ownerReference : svc.getMetadata().getOwnerReferences()) {
+		    if (sessionName.equals(ownerReference.getName()) && "Session".equals(ownerReference.getKind())) {
+			return Optional.of(svc.getSpec().getClusterIP());
+		    }
 		}
 	    }
 	}

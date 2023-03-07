@@ -8,15 +8,14 @@ image:
   imagePullPolicy: IfNotPresent
 
 hosts:
-  usePaths: true
-  paths:
-    baseHost: 192.168.39.3.nip.io
-    service: servicex
-    landing: trynow
-    instance: instances
+  usePaths: false
+  service: service.192.168.39.3.nip.io
+  serviceProtocol: https
+  landing: theia.cloud.192.168.39.3.nip.io
+  instance: ws.192.168.39.3.nip.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS8
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS9
   imagePullPolicy: Always
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
@@ -40,3 +39,4 @@ ingress:
 
 monitor:
   enable: false
+  

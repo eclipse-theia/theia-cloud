@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v4beta
+apiVersion: theia.cloud/v5beta
 kind: AppDefinition
 metadata:
   name: cdt-cloud-demo
@@ -24,3 +24,7 @@ spec:
   uplinkLimit: 30000
   mountPath: "/home/project/persisted"
   imagePullPolicy: IfNotPresent
+  monitor:
+    timeoutAfter: 30
+    notifyAfter: 25
+    port: 8081
