@@ -44,7 +44,6 @@ public class DefaultPersistentVolumeCreator implements PersistentVolumeCreator {
 
     private static final Logger LOGGER = LogManager.getLogger(DefaultPersistentVolumeCreator.class);
 
-    protected static final int THEIA_CONTAINER_INDEX = 1;
 
     protected static final String TEMPLATE_PERSISTENTVOLUMECLAIM_YAML = "/templatePersistentVolumeClaim.yaml";
 
