@@ -11,4 +11,4 @@ export const ErrorComponent: React.FC<ErrorComponentProps> = ({ message }: Error
       <pre>ERROR: {message}</pre>
     </div>
   ) : // eslint-disable-next-line no-null/no-null
-  null;
+    null;
