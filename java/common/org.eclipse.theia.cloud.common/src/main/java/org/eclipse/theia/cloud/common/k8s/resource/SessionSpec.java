@@ -170,6 +170,13 @@ public class SessionSpec implements UserScopedSpec {
         return envVars;
     }
 
+    public List<String> getEnvVarsFromConfigMaps() {
+        return envVarsFromConfigMaps;
+    }
+    public List<String> getEnvVarsFromSecrets() {
+        return envVarsFromSecrets;
+    }
+
     @JsonIgnore
     public boolean isEphemeral() {
 	return isEphemeral(workspace);
@@ -215,6 +222,21 @@ public class SessionSpec implements UserScopedSpec {
 		return false;
 	} else if (!sessionSecret.equals(other.sessionSecret))
 	    return false;
+    if (envVars == null) {
+        if (other.envVars != null)
+        return false;
+    } else if (!envVars.equals(other.envVars))
+        return false;
+    if (envVarsFromConfigMaps == null) {
+        if (other.envVarsFromConfigMaps != null)
+        return false;
+    } else if (!envVarsFromConfigMaps.equals(other.envVarsFromConfigMaps))
+        return false;
+    if (envVarsFromSecrets == null) {
+        if (other.envVarsFromSecrets != null)
+        return false;
+    } else if (!envVarsFromSecrets.equals(other.envVarsFromSecrets))
+        return false;        
 	return true;
     }
 
