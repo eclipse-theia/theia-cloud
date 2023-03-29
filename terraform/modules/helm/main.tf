@@ -15,6 +15,12 @@ variable "cert_manager_cluster_issuer" {
   }
 }
 
+
+variable "cert_manager_common_name" {
+  description = "The common name for the certificate"
+  default     = ""
+}
+
 variable "hostname" {
   description = "The hostname for all installed services"
 }
@@ -55,6 +61,11 @@ variable "postgres_password" {
   sensitive   = true
 }
 
+variable "loadBalancerIP" {
+  description = "External IP for the nginx ingress controller"
+  default     = ""
+}
+
 # variable "backend_bucket_name" {
 #   description = "The bucket name for the remote state storage"
 # }
@@ -79,12 +90,17 @@ resource "helm_release" "nginx-ingress-controller" {
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
   version          = "4.5.2"
-  namespace        = "nginx-ingress-controller"
+  namespace        = "ingress-nginx"
   create_namespace = true
 
   set {
     name  = "fullnameOverride"
-    value = "ingress-nginx-controller"
+    value = "ingress-nginx"
+  }
+
+  set {
+    name  = "controller.service.loadBalancerIP"
+    value = var.loadBalancerIP
   }
 }
 
@@ -113,7 +129,7 @@ resource "helm_release" "keycloak" {
   create_namespace = true
 
   values = [
-    "${templatefile("${path.module}/keycloak.yaml", { cluster-issuer = var.cert_manager_cluster_issuer })}"
+    "${templatefile("${path.module}/keycloak.yaml", { cluster-issuer = var.cert_manager_cluster_issuer, common-name = var.cert_manager_common_name })}"
   ]
 
   set {
@@ -154,7 +170,7 @@ resource "helm_release" "keycloak" {
   # Below command connects to the cluster in the local environment and patches the ingress-controller accordingly. 
   # Theia Cloud is then installed with path based hosts reusing the same certificate. 
   provisioner "local-exec" {
-    command = "kubectl patch deploy ingress-nginx-controller --type='json' -n ingress-nginx -p '[{ \"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/args/-\", \"value\": \"--default-ssl-certificate=keycloak/${var.hostname}-tls\" }]' && kubectl wait pods -n ingress-nginx -l app.kubernetes.io/component=controller --for condition=Ready --timeout=90s"
+    command = "kubectl patch deploy ingress-nginx-controller --type='json' -n ingress-nginx -p '[{ \"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/args/-\", \"value\": \"--default-ssl-certificate=keycloak/${var.hostname}-tls\" }]' && kubectl wait pods -n ingress-nginx -l app.kubernetes.io/component=controller --for condition=Ready --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s"
   }
 }
 

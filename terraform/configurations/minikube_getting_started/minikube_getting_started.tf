@@ -80,6 +80,7 @@ module "helm" {
   install_ingress_controller   = false
   cert_manager_issuer_email    = var.cert_manager_issuer_email
   cert_manager_cluster_issuer  = "theia-cloud-selfsigned-issuer"
+  cert_manager_common_name     = "${module.host.host}.nip.io"
   hostname                     = "${module.host.host}.nip.io"
   keycloak_admin_password      = var.keycloak_admin_password
   postgresql_enabled           = true
