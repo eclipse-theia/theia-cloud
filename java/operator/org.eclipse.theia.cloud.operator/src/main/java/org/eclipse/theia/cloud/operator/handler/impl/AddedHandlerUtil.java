@@ -31,9 +31,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -44,11 +46,13 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
@@ -218,5 +222,25 @@ public final class AddedHandlerUtil {
 	}
 	imagePullSecrets.add(new LocalObjectReference(secret));
     }
+
+	public static void removeMonitorPort(Deployment deployment, AppDefinition appDefinition) {
+		String containerName = appDefinition.getSpec().getName();
+
+		Container container = deployment.getSpec()
+			.getTemplate()
+			.getSpec()
+			.getContainers()
+			.stream()
+			.filter((c) -> c.getName() == containerName)
+			.findFirst()
+			.get();
+
+		List<ContainerPort> newContainerPorts = container.getPorts()
+			.stream()
+			.filter((p) -> !(p.getName() == "monitor"))
+			.collect(Collectors.toList());
+			
+		container.setPorts(newContainerPorts);
+	}
 
 }
