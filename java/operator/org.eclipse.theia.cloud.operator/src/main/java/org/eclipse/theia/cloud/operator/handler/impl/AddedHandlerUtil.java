@@ -29,9 +29,10 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,11 +52,15 @@ import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapEnvSource;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
+import io.fabric8.kubernetes.api.model.EnvFromSource;
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.SecretEnvSource;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
@@ -226,21 +231,70 @@ public final class AddedHandlerUtil {
 	public static void removeMonitorPort(Deployment deployment, AppDefinition appDefinition) {
 		String containerName = appDefinition.getSpec().getName();
 
-		Container container = deployment.getSpec()
+		Container container = findContainerInDeployment(deployment, containerName);
+		List<ContainerPort> newContainerPorts = container.getPorts()
+			.stream()
+			.filter((p) -> !(p.getName() == "monitor"))
+			.collect(Collectors.toList());
+		
+		container.setPorts(newContainerPorts);
+	}
+
+	/* ------------------- Addition of env vars to Deployments ------------------ */
+	public static void addCustomEnvVarsToDeploymentFromSession(
+		Deployment deployment, Session session, AppDefinition appDefinition
+	) {
+		String containerName = appDefinition.getSpec().getName();
+		Container container = findContainerInDeployment(deployment, containerName);
+		
+		addDirectEnvVarsToContainer(container, session.getSpec().getEnvVars());
+		addEnvVarsFromRefsToContainer(container, session.getSpec().getEnvVarsFromConfigMaps(), false);
+		addEnvVarsFromRefsToContainer(container, session.getSpec().getEnvVarsFromSecrets(), true);
+	}
+
+	private static void addEnvVarsFromRefsToContainer(Container container, List<String> refs, boolean isFromSecret) {
+		if (refs.size() == 0) return;
+
+		List<EnvFromSource> newEnvFromSources = refs
+			.stream()
+			.map((ref) -> isFromSecret? 
+				new EnvFromSource(null, null, new SecretEnvSource(ref, null))
+				:
+				new EnvFromSource(new ConfigMapEnvSource(ref, null), null, null)
+			)
+			.collect(Collectors.toList());
+		
+		List <EnvFromSource> combinedEnvVarFromSources = new LinkedList<>();
+		combinedEnvVarFromSources.addAll(container.getEnvFrom());
+		combinedEnvVarFromSources.addAll(newEnvFromSources);
+
+		container.setEnvFrom(combinedEnvVarFromSources);
+	}
+	private static void addDirectEnvVarsToContainer(Container container, Map<String, String> mapEnvVars) {
+		if (mapEnvVars.size() == 0) return;
+
+		List<EnvVar> newEnvVars = mapEnvVars.entrySet()
+			.stream()
+			.map((kv) -> new EnvVar(kv.getKey(), kv.getValue(), null))
+			.collect(Collectors.toList());
+		
+		List<EnvVar> combinedEnvVars = new LinkedList<>();
+		combinedEnvVars.addAll(container.getEnv());
+		combinedEnvVars.addAll(newEnvVars);
+
+		container.setEnv(combinedEnvVars);
+	}
+
+	private static Container findContainerInDeployment(Deployment deployment, String containerName) 
+	throws NoSuchElementException {
+		return deployment.getSpec()
 			.getTemplate()
 			.getSpec()
 			.getContainers()
 			.stream()
 			.filter((c) -> c.getName() == containerName)
 			.findFirst()
-			.get();
-
-		List<ContainerPort> newContainerPorts = container.getPorts()
-			.stream()
-			.filter((p) -> !(p.getName() == "monitor"))
-			.collect(Collectors.toList());
-			
-		container.setPorts(newContainerPorts);
+			.orElseThrow();
 	}
 
 }
