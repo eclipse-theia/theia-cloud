@@ -59,7 +59,11 @@ helm uninstall theia-cloud -n theiacloud
 
 ### Getting started with
 
+[...Terraform](terraform/terraform.md)
+
 [...Minikube](doc/docs/platforms/Minikube.md)
+
+[...GKE](terraform/terraform.md#google-kubernetes-engine)
 
 [...configuring the Keycloak Realm](doc/docs/Keycloak.md)
 
