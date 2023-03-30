@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -54,7 +54,7 @@ public class AppDefinitionSpec {
     private int minInstances;
 
     @JsonProperty("maxInstances")
-    private int maxInstances;
+    private Integer maxInstances;
 
     @JsonProperty("timeout")
     private Timeout timeout;
@@ -119,7 +119,7 @@ public class AppDefinitionSpec {
 	return minInstances;
     }
 
-    public int getMaxInstances() {
+    public Integer getMaxInstances() {
 	return maxInstances;
     }
 
