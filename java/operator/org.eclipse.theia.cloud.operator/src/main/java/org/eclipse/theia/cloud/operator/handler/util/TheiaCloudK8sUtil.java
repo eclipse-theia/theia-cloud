@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -38,7 +38,7 @@ public final class TheiaCloudK8sUtil {
     public static boolean checkIfMaxInstancesReached(NamespacedKubernetesClient client, String namespace,
 	    SessionSpec sessionSpec, AppDefinitionSpec appDefinitionSpec, String correlationId) {
 
-	if (appDefinitionSpec.getMaxInstances() < 1) {
+	if (appDefinitionSpec.getMaxInstances() == null || appDefinitionSpec.getMaxInstances() < 0) {
 	    LOGGER.info(formatLogMessage(correlationId,
 		    "App Definition " + appDefinitionSpec.getName() + " allows indefinite sessions."));
 	    return false;
