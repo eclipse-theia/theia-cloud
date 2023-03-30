@@ -3,11 +3,11 @@ WORKDIR /operator
 COPY java/common ./common
 COPY java/operator ./operator
 RUN cd /operator/common/maven-conf && \
-    mvn clean install && \
+    mvn clean install --no-transfer-progress && \
     cd /operator/common/org.eclipse.theia.cloud.common && \
-    mvn clean install && \
+    mvn clean install --no-transfer-progress && \
     cd /operator/operator/org.eclipse.theia.cloud.operator && \
-    mvn clean verify
+    mvn clean verify --no-transfer-progress
 
 FROM openjdk:11-jre-slim-buster
 RUN mkdir /templates
