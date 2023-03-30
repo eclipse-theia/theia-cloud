@@ -33,6 +33,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -231,13 +232,21 @@ public final class AddedHandlerUtil {
 	public static void removeMonitorPort(Deployment deployment, AppDefinition appDefinition) {
 		String containerName = appDefinition.getSpec().getName();
 
-		Container container = findContainerInDeployment(deployment, containerName);
+		Optional<Integer> maybeContainerIdx = findContainerIdxInDeployment(deployment, containerName);
+		if (maybeContainerIdx.isEmpty()) {
+			LOGGER.error("Trying to remove monitor port in Deployment." +
+			 "Could not find the container "+ containerName +" in Deployment named" + deployment.getMetadata().getName());
+			return;
+		}
+		int containerIdx = maybeContainerIdx.get();
+		Container container = deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx);
 		List<ContainerPort> newContainerPorts = container.getPorts()
 			.stream()
 			.filter((p) -> !(p.getName() == "monitor"))
 			.collect(Collectors.toList());
 		
-		container.setPorts(newContainerPorts);
+		// must do it like this to keep reference to original deployment
+		deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx).setPorts(newContainerPorts);
 	}
 
 	/* ------------------- Addition of env vars to Deployments ------------------ */
@@ -245,15 +254,24 @@ public final class AddedHandlerUtil {
 		Deployment deployment, Session session, AppDefinition appDefinition
 	) {
 		String containerName = appDefinition.getSpec().getName();
-		Container container = findContainerInDeployment(deployment, containerName);
+		Optional<Integer> maybeContainerIdx = findContainerIdxInDeployment(deployment, containerName);
+		if (maybeContainerIdx.isEmpty()) {
+			LOGGER.error("Trying to add custom env vars to Deployment from Session." +
+			"Could not find the container "+ containerName +" in Deployment named" + deployment.getMetadata().getName());
+			return;
+		}
+		int containerIdx = maybeContainerIdx.get();
+		Container container = deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx);
+
+		container = withDirectEnvVarsToContainer(container, session.getSpec().getEnvVars());
+		container = withEnvVarsFromRefsToContainer(container, session.getSpec().getEnvVarsFromConfigMaps(), false);
+		container = withEnvVarsFromRefsToContainer(container, session.getSpec().getEnvVarsFromSecrets(), true);
 		
-		addDirectEnvVarsToContainer(container, session.getSpec().getEnvVars());
-		addEnvVarsFromRefsToContainer(container, session.getSpec().getEnvVarsFromConfigMaps(), false);
-		addEnvVarsFromRefsToContainer(container, session.getSpec().getEnvVarsFromSecrets(), true);
+		deployment.getSpec().getTemplate().getSpec().getContainers().set(containerIdx, container);
 	}
 
-	private static void addEnvVarsFromRefsToContainer(Container container, List<String> refs, boolean isFromSecret) {
-		if (refs.size() == 0) return;
+	private static Container withEnvVarsFromRefsToContainer(Container container, List<String> refs, boolean isFromSecret) {
+		if (refs == null || refs.size() == 0) return container;
 
 		List<EnvFromSource> newEnvFromSources = refs
 			.stream()
@@ -269,9 +287,12 @@ public final class AddedHandlerUtil {
 		combinedEnvVarFromSources.addAll(newEnvFromSources);
 
 		container.setEnvFrom(combinedEnvVarFromSources);
+
+		return container;
 	}
-	private static void addDirectEnvVarsToContainer(Container container, Map<String, String> mapEnvVars) {
-		if (mapEnvVars.size() == 0) return;
+
+	private static Container withDirectEnvVarsToContainer(Container container, Map<String, String> mapEnvVars) {
+		if (mapEnvVars == null || mapEnvVars.size() == 0) return container;
 
 		List<EnvVar> newEnvVars = mapEnvVars.entrySet()
 			.stream()
@@ -283,18 +304,19 @@ public final class AddedHandlerUtil {
 		combinedEnvVars.addAll(newEnvVars);
 
 		container.setEnv(combinedEnvVars);
+
+		return container;
 	}
 
-	private static Container findContainerInDeployment(Deployment deployment, String containerName) 
-	throws NoSuchElementException {
-		return deployment.getSpec()
-			.getTemplate()
-			.getSpec()
-			.getContainers()
-			.stream()
-			.filter((c) -> c.getName() == containerName)
-			.findFirst()
-			.orElseThrow();
+	private static Optional<Integer> findContainerIdxInDeployment(Deployment deployment, String containerName) {
+		List<Container> containers = deployment.getSpec().getTemplate().getSpec().getContainers();
+		for (int i=0; i < containers.size(); i++){
+			if (containers.get(i).getName().equals(containerName)) {
+				return Optional.of(i);
+			}
+		}
+
+		return Optional.empty();
 	}
 
 }
