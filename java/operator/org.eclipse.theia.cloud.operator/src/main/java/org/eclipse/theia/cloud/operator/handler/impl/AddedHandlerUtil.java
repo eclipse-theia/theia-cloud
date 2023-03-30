@@ -242,7 +242,7 @@ public final class AddedHandlerUtil {
 		Container container = deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx);
 		List<ContainerPort> newContainerPorts = container.getPorts()
 			.stream()
-			.filter((p) -> !(p.getName() == "monitor"))
+			.filter((p) -> !(p.getName().equals("monitor")))
 			.collect(Collectors.toList());
 		
 		// must do it like this to keep reference to original deployment
