@@ -138,6 +138,11 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	    }
 	    environmentVariables.put(PLACEHOLDER_ENABLE_ACTIVITY_TRACKER,
 		    arguments.isEnableActivityTracker() ? "true" : "false");
+	} else {
+		// dummy variables so that parsing won't fail
+		// port removed later on after dpeloyment yaml is parsed into a fabric8 model
+		environmentVariables.put(PLACEHOLDER_MONITOR_PORT, "12345");
+		environmentVariables.put(PLACEHOLDER_ENABLE_ACTIVITY_TRACKER, "false");
 	}
 	return environmentVariables;
     }
