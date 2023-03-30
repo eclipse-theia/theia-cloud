@@ -39,7 +39,7 @@ public final class TheiaCloudK8sUtil {
 	    SessionSpec sessionSpec, AppDefinitionSpec appDefinitionSpec, String correlationId) {
 
 	if (appDefinitionSpec.getMaxInstances() == null || appDefinitionSpec.getMaxInstances() < 0) {
-	    LOGGER.info(formatLogMessage(correlationId,
+	    LOGGER.debug(formatLogMessage(correlationId,
 		    "App Definition " + appDefinitionSpec.getName() + " allows indefinite sessions."));
 	    return false;
 	}
