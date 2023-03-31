@@ -18,12 +18,19 @@ variable "driver" {
   description = "Minikube driver"
 }
 
+variable "container_runtime" {
+  description = "The container runtime"
+  default     = "docker"
+}
+
 resource "minikube_cluster" "cluster" {
-  driver       = var.driver
-  cluster_name = var.cluster_name
-  cpus         = var.cpus
-  disk_size    = var.disk_size
-  memory       = var.memory
+  driver            = var.driver
+  cluster_name      = var.cluster_name
+  cpus              = var.cpus
+  disk_size         = var.disk_size
+  memory            = var.memory
+  container_runtime = var.container_runtime
+
   addons = [
     "dashboard",
     "default-storageclass",
