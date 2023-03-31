@@ -4,7 +4,7 @@ output "cluster_host" {
 }
 
 output "cluster_token" {
-  description = "Token to authenticate an service account"
+  description = "Token to authenticate the default service account"
   value       = data.google_client_config.default.access_token
   sensitive   = true
 }
