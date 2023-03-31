@@ -19,6 +19,7 @@
   "workspaces": [
     "common",
     "monitor",
+    "monitor-theia",
     "theia-activity-tracker",
     "try-now-page"
   ]

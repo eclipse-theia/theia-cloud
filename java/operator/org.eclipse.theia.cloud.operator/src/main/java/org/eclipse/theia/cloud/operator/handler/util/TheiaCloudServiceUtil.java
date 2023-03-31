@@ -26,13 +26,10 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
-
-import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
@@ -44,9 +41,6 @@ public final class TheiaCloudServiceUtil {
     public static final String SERVICE_NAME = "service";
 
     public static final String PLACEHOLDER_SERVICENAME = "placeholder-servicename";
-
-    @Inject
-    private TheiaCloudClient resourceClient;
 
     private TheiaCloudServiceUtil() {
     }
@@ -95,8 +89,20 @@ public final class TheiaCloudServiceUtil {
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinitionSpec.getPort()));
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT,
-		String.valueOf(appDefinitionSpec.getMonitor().getPort()));
+	if (appDefinitionSpec.getMonitor() != null && appDefinitionSpec.getMonitor().getPort() > 0) {
+	    String port = String.valueOf(appDefinitionSpec.getMonitor().getPort());
+	    String replacement = "- name: monitor-express\n" + "      port: " + port + "\n" + "      targetPort: "
+		    + port + "\n" + "      protocol: TCP";
+	    if (appDefinitionSpec.getMonitor().getPort() == appDefinitionSpec.getPort()) {
+		// Just remove the placeholder, otherwise the port would be duplicate
+		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
+	    } else {
+		// Replace the placeholder with the port information
+		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, replacement);
+	    }
+	} else {
+	    replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
+	}
 	return replacements;
     }
 

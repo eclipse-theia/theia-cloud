@@ -3,6 +3,12 @@
   "compilerOptions": {
     "baseUrl": "."
   },
-  "include": ["common/src", "monitor/src", "theia-activity-tracker/src", "try-now-page/src"],
+  "include": [
+    "common/src",
+    "monitor/src",
+    "monitor-theia/src",
+    "theia-activity-tracker/src",
+    "try-now-page/src"
+  ],
   "exclude": ["node_modules"]
 }

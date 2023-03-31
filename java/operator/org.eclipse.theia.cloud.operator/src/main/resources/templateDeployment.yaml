@@ -45,8 +45,7 @@ spec:
           ports:
             - containerPort: placeholder-port
               name: application
-            - containerPort: placeholder-monitor-port
-              name: monitor
+            placeholder-monitor-port
           resources:
             limits:
               cpu: placeholder-cpu-limits
@@ -72,7 +71,7 @@ spec:
           - name: THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER
             value: placeholder-enable-activity-tracker
           - name: THEIACLOUD_MONITOR_PORT
-            value: placeholder-monitor-port
+            value: placeholder-monitor-env-port
           securityContext:
             runAsUser: placeholder-uid
             runAsGroup: placeholder-uid
