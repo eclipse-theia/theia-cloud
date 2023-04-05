@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an idea for this project
+labels: enhancement
+body:
+- type: textarea
+  validations:
+    required: true
+  attributes:
+    label: Is your feature request related to a problem? Please describe.
+    description: A clear and concise description of what the problem is. E.g. I'm always frustrated when [...]
+- type: textarea
+  validations:
+    required: true
+  attributes:
+    label: Describe the solution you'd like
+    description: A clear and concise description of what you want to happen.
+- type: textarea
+  validations:
+    required: true
+  attributes:
+    label: Describe alternatives you've considered
+    description: A clear and concise description of any alternative solutions or features you've considered.
+- type: input
+  attributes:
+    label: Cluster provider
+    description: The cluster provider (e.g. Minikube, AWS, GKE, Azure, Docker Desktop) the feature is for. Leave out if the feature is not related to (a) specific provider(s).
+- type: textarea
+  attributes:
+    label: Additional information
+    description: Any additional information to describe the feature such as screenshots, diagrams, etc.
