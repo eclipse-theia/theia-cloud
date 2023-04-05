@@ -22,7 +22,7 @@ body:
 - type: input
   attributes:
     label: Cluster provider
-    description: The cluster provider (e.g. Minikube, AWS, GKE, Azure, Docker Desktop). Please include your OS when using a local cluster.
+    description: The cluster provider (e.g. Minikube, AWS, GKE, Azure, Docker Desktop). Please include your OS when using a local cluster. If you are using Terraform, please include the configuration files if possible.  
 - type: input
   attributes:
     label: Version

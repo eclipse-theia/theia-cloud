@@ -23,7 +23,7 @@ body:
 - type: input
   attributes:
     label: Cluster provider
-    description: The cluster provider (e.g. Minikube, AWS, GKE, Azure, Docker Desktop) the feature is
+    description: The cluster provider (e.g. Minikube, AWS, GKE, Azure, Docker Desktop) the feature is for. Leave out if the feature is not related to (a) specific provider(s).
 - type: textarea
   attributes:
     label: Additional information
