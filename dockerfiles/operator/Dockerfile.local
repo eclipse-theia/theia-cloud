@@ -1,16 +1,22 @@
-FROM theia-cloud-local-maven-deps AS localDependencies
+FROM maven:3.8.4-openjdk-11 AS localDependencies
+WORKDIR /deps
+# Make sure to keep relative hierarchy same
+COPY java/common /deps/common/
+COPY java/operator/org.eclipse.theia.cloud.operator/pom.xml /deps/operator/org.eclipse.theia.cloud.operator/pom.xml
+RUN cd /deps/common/maven-conf                         && mvn dependency:go-offline && mvn clean install && \
+    cd /deps/common/org.eclipse.theia.cloud.common     && mvn dependency:go-offline && mvn clean install && \
+    cd /deps/operator/org.eclipse.theia.cloud.operator && mvn dependency:go-offline
 
 
 FROM maven:3.8.4-openjdk-11 AS builder
-WORKDIR /root/.m2
-COPY --from=localDependencies /root/.m2 ./
+COPY --from=localDependencies /usr/share/maven/ref /root/.m2
 WORKDIR /operator
-COPY java/common ./common
+COPY --from=localDependencies /deps/common ./common
 COPY java/operator ./operator
 RUN cd /operator/common/maven-conf && \
-    mvn clean install && \
+    mvn install && \
     cd /operator/common/org.eclipse.theia.cloud.common && \
-    mvn clean install && \
+    mvn install && \
     cd /operator/operator/org.eclipse.theia.cloud.operator && \
     mvn clean verify
 
