@@ -207,7 +207,7 @@ function App(): JSX.Element {
                     />
                 }
               </p>
-              <TermsAndConditions accepted={acceptedTerms} onTermsAccepted={setAcceptedTerms} />
+              { !needsLogin && <TermsAndConditions accepted={acceptedTerms} onTermsAccepted={setAcceptedTerms} /> }
             </div>
           </div>
         )}
