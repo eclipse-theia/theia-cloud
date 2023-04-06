@@ -15,6 +15,9 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(name = "LaunchRequest", description = "A request to launch a new session.")
@@ -39,6 +42,15 @@ public class LaunchRequest extends ServiceRequest {
     @Schema(description = "Number of minutes to wait for session launch. Default is 3 Minutes.", required = false)
     public int timeout = 3;
 
+    @Schema(description = "Map of environment variables to be passed to Deployment. Empty by default.", required = false)
+    public Map<String, String> envVars = Map.of();
+
+    @Schema(description = "List of ConfigMaps (by their name) containing environment variables to pass to Deployment. Empty by default",  required = false)
+    public List<String> envVarsFromConfigMaps = List.of();
+    
+    @Schema(description = "List of Secrets (by their name) containing environment variables to pass to Deployment. Empty by default",  required = false)
+    public List<String> envVarsFromSecrets = List.of();
+    
     public LaunchRequest() {
 	super(KIND);
     }
@@ -62,7 +74,8 @@ public class LaunchRequest extends ServiceRequest {
     public String toString() {
 	return "LaunchRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName=" + workspaceName
 		+ ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + ", timeout="
-		+ timeout + "]";
+		+ timeout + ", envVars=" + envVars.toString() + ", envVarsFromConfigMaps=" + envVarsFromConfigMaps.toString()
+        + ", envVarsFromSecrets=" + envVarsFromSecrets.toString() + "]";
     }
 
 }
