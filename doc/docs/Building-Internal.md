@@ -19,13 +19,6 @@ docker build -t theiacloud/theia-cloud-demo:latest -f demo/dockerfiles/demo-thei
 docker push theiacloud/theia-cloud-demo:latest
 ```
 
-Build and push the Theia Activity Tracker Demo application with:
-
-```bash
-docker build -t theiacloud/theia-cloud-activity-demo:latest -f demo/dockerfiles/demo-theia-activity-tracker/Dockerfile demo/dockerfiles/demo-theia-activity-tracker/.
-docker push theiacloud/theia-cloud-activity-demo:latest
-```
-
 Build and push the Landing page with:
 
 ```bash

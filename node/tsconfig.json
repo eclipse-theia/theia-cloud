@@ -7,7 +7,6 @@
     "common/src",
     "monitor/src",
     "monitor-theia/src",
-    "theia-activity-tracker/src",
     "try-now-page/src"
   ],
   "exclude": ["node_modules"]
