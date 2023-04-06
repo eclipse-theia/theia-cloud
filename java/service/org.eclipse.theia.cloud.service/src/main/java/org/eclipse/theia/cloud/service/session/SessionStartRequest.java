@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.service.session;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.theia.cloud.service.EnvironmentVars;
 import org.eclipse.theia.cloud.service.ServiceRequest;
 
 @Schema(name = "SessionStartRequest", description = "A request to start a session")
@@ -34,6 +35,9 @@ public class SessionStartRequest extends ServiceRequest {
 
     @Schema(description = "Number of minutes to wait for session launch. Default is 3 Minutes.", required = false)
     public int timeout = 3;
+
+    @Schema(description = "Environment variables", required = false)
+    public EnvironmentVars env = new EnvironmentVars();
 
     public SessionStartRequest() {
 	super(KIND);
@@ -68,7 +72,7 @@ public class SessionStartRequest extends ServiceRequest {
     @Override
     public String toString() {
 	return "SessionStartRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName="
-		+ workspaceName + ", appId=" + appId + ", kind=" + kind + "]";
+		+ workspaceName + ", timeout=" + timeout + ", env=" + env + "]";
     }
 
 }

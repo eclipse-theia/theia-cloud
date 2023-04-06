@@ -15,9 +15,6 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(name = "LaunchRequest", description = "A request to launch a new session.")
@@ -43,8 +40,8 @@ public class LaunchRequest extends ServiceRequest {
     public int timeout = 3;
 
     @Schema(description = "Environment variables", required = false)
-    public Env env = new Env();
-    
+    public EnvironmentVars env = new EnvironmentVars();
+
     public LaunchRequest() {
 	super(KIND);
     }
@@ -64,40 +61,11 @@ public class LaunchRequest extends ServiceRequest {
 	return !isExistingWorkspace() && !isEphemeral();
     }
 
-    @Schema(name = "LaunchRequest.Env")
-    public class Env {
-        public Env() {
-
-        }
-
-        @Schema(description = "Map of environment variables to be passed to Deployment. "
-                + " Ignored if Theia applications are started eagerly.  Empty by default.", 
-                required = false)
-        public Map<String, String> fromMap = Map.of();
-
-        @Schema(description = "List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef. "
-                + " Ignored if Theia applications are started eagerly.  Empty by default.", 
-                required = false)
-        public List<String> fromConfigMaps = List.of();
-            
-
-        @Schema(description = "List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef. "
-                + " Ignored if Theia applications are started eagerly.  Empty by default.", 
-                required = false)
-        public List<String> fromSecrets = List.of();
-        
-        @Override
-        public String toString() {
-            return "LaunchRequest.Env[fromMap=" + fromMap.toString() + ", fromConfigMaps=" + fromConfigMaps.toString()
-            + ", fromSecrets=" + fromSecrets.toString() + "]";
-        }
-    }
-
     @Override
     public String toString() {
 	return "LaunchRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName=" + workspaceName
 		+ ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + ", timeout="
-		+ timeout + ", " + env.toString() + "]";
+		+ timeout + ", " + env + "]";
     }
 
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="demo/dockerfiles/demo-theia-docker/project/java/src/main/java"/>
+	<classpathentry kind="src" path="demo/dockerfiles/demo-theia-docker/project/java/src/test/java"/>
+	<classpathentry kind="src" path="demo/dockerfiles/demo-theia-monitor-vscode/project/java/src/main/java"/>
+	<classpathentry kind="src" path="demo/dockerfiles/demo-theia-monitor-vscode/project/java/src/test/java"/>
+	<classpathentry kind="src" path="java/common/org.eclipse.theia.cloud.common/src/main/java"/>
+	<classpathentry kind="src" path="java/operator/org.eclipse.theia.cloud.operator/src/main/java"/>
+	<classpathentry kind="src" path="java/service/org.eclipse.theia.cloud.service/.mvn/wrapper"/>
+	<classpathentry kind="src" path="java/service/org.eclipse.theia.cloud.service/src/main/java"/>
+	<classpathentry kind="src" path="java/service/org.eclipse.theia.cloud.service/src/test/java"/>
+	<classpathentry kind="lib" path="java/common/org.eclipse.theia.cloud.common/target/common-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="java/operator/org.eclipse.theia.cloud.operator/target/operator-0.8.0-SNAPSHOT-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="java/operator/org.eclipse.theia.cloud.operator/target/operator-0.8.0-SNAPSHOT.jar"/>
+	<classpathentry kind="output" path="java/common/org.eclipse.theia.cloud.common/target/classes"/>
+</classpath>
