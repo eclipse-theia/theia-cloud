@@ -70,14 +70,20 @@ public final class K8sUtil {
 	return CLIENT.sessions().get(sessionName).map(Session::getSpec);
     }
 
-    public String launchEphemeralSession(String correlationId, String appDefinition, String user, int timeout) {
+    public String launchEphemeralSession(
+		String correlationId, String appDefinition, String user, int timeout, LaunchRequest.Env env
+	) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition), appDefinition, user);
+	sessionSpec = sessionSpecWithEnv(sessionSpec, env);
+	
 	return launchSession(correlationId, sessionSpec, timeout);
     }
 
-    public String launchWorkspaceSession(String correlationId, UserWorkspace workspace, int timeout) {
+    public String launchWorkspaceSession(String correlationId, UserWorkspace workspace, int timeout, LaunchRequest.Env env) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(workspace.name), workspace.appDefinition,
 		workspace.user, workspace.name);
+	sessionSpec = sessionSpecWithEnv(sessionSpec, env);
+	
 	return launchSession(correlationId, sessionSpec, timeout);
     }
 
@@ -86,6 +92,16 @@ public final class K8sUtil {
 	TheiaCloudWebException.throwIfErroneous(spec);
 	return spec.getUrl();
     }
+
+	private SessionSpec sessionSpecWithEnv(SessionSpec spec, LaunchRequest.Env env) {
+		if (env == null)
+			return spec;
+		
+		return new SessionSpec(
+			spec.getName(), spec.getAppDefinition(), spec.getUser(), spec.getWorkspace(),
+			env.fromMap, env.fromConfigMaps, env.fromSecrets
+		);
+	}
 
     public boolean reportSessionActivity(String correlationId, String sessionName) {
 	return CLIENT.sessions().reportActivity(correlationId, sessionName);
