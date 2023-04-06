@@ -1,8 +1,10 @@
 {
-    "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
-    "editor.guides.bracketPairs": "active",
-    "editor.guides.bracketPairsHorizontal": "active",
-    "editor.guides.highlightActiveBracketPair": true,
-    "terminal.explorerKind": "integrated",
-    "terminal.integrated.fontFamily": "\"MesloLGS NF\""
+    "[terraform]": {
+      "editor.defaultFormatter": "hashicorp.terraform",
+      "editor.formatOnSave": true,
+    },
+    "[terraform-vars]": {
+      "editor.defaultFormatter": "hashicorp.terraform",
+      "editor.formatOnSave": true,
+    }
 }

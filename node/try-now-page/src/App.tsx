@@ -5,12 +5,15 @@ import { AppDefinition, getTheiaCloudConfig, LaunchRequest, PingRequest, TheiaCl
 import Keycloak, { KeycloakConfig } from 'keycloak-js';
 import { useEffect, useState } from 'react';
 
+import { AppLogo } from './components/AppLogo';
 import { ErrorComponent } from './components/ErrorComponent';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { LaunchApp } from './components/LaunchApp';
 import { Loading } from './components/Loading';
+import { LoginButton } from './components/LoginButton';
 import { LoginInfo } from './components/LoginInfo';
+import { TermsAndConditions } from './components/TermsAndConditions';
 
 // global state to be kept between render calls
 let initialized = false;
@@ -36,13 +39,13 @@ function App(): JSX.Element {
     initialAppDefinition = config.appDefinition;
   }
 
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [selectedAppName, setSelectedAppName] = useState(initialAppName);
   const [selectedAppDefinition, setSelectedAppDefinition] = useState(initialAppDefinition);
 
   const [email, setEmail] = useState<string>();
   const [token, setToken] = useState<string>();
   const [logoutUrl, setLogoutUrl] = useState<string>();
-  const [showLoginInformation, setShowLoginInformation] = useState<boolean>(false);
 
   useEffect(() => {
     if (!initialized) {
@@ -105,10 +108,6 @@ function App(): JSX.Element {
       }
     }
   }, []);
-
-  useEffect(() => {
-    token ? setShowLoginInformation(false) : setShowLoginInformation(true);
-  }, [token]);
 
   document.title = `${selectedAppName} - Try Now`;
 
@@ -180,6 +179,8 @@ function App(): JSX.Element {
       });
   };
 
+  const needsLogin = config.useKeycloak && !token;
+
   return (
     <div className='App'>
       {config.useKeycloak ? (
@@ -192,19 +193,27 @@ function App(): JSX.Element {
           <Loading />
         ) : (
           <div>
-            <LaunchApp
-              appName={selectedAppName}
-              appDefinition={selectedAppDefinition}
-              onStartSession={handleStartSession}
-              token={token}
-              config={config}
-            />
+            <div>
+              <AppLogo />
+              <p>
+                {
+                  needsLogin
+                    ? <LoginButton login={authenticate} />
+                    : <LaunchApp
+                      acceptedTerms={acceptedTerms}
+                      appName={selectedAppName}
+                      appDefinition={selectedAppDefinition}
+                      onStartSession={handleStartSession}
+                    />
+                }
+              </p>
+              { !needsLogin && <TermsAndConditions accepted={acceptedTerms} onTermsAccepted={setAcceptedTerms} /> }
+            </div>
           </div>
         )}
         <ErrorComponent message={error} />
         {
-          // eslint-disable-next-line no-null/no-null
-          config.useKeycloak ? <LoginInfo showLoginInformation={showLoginInformation} /> : null
+          needsLogin && <LoginInfo />
         }
         <Footer
           config={config}

@@ -3,11 +3,11 @@ WORKDIR /service
 COPY java/common ./common
 COPY java/service ./service
 RUN cd /service/common/maven-conf && \
-    mvn clean install && \
+    mvn clean install --no-transfer-progress && \
     cd /service/common/org.eclipse.theia.cloud.common && \
-    mvn clean install && \
+    mvn clean install --no-transfer-progress&& \
     cd /service/service/org.eclipse.theia.cloud.service && \
-    mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=uber-jar
+    mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=uber-jar --no-transfer-progress
 
 FROM openjdk:11-jre-slim-buster
 WORKDIR /service
