@@ -42,13 +42,20 @@ public class LaunchRequest extends ServiceRequest {
     @Schema(description = "Number of minutes to wait for session launch. Default is 3 Minutes.", required = false)
     public int timeout = 3;
 
-    @Schema(description = "Map of environment variables to be passed to Deployment. Empty by default.", required = false)
+    @Schema(description = "Map of environment variables to be passed to Deployment. "
+                           + " Ignored if Theia applications are started eagerly.  Empty by default.", 
+                           required = false)
     public Map<String, String> envVars = Map.of();
 
-    @Schema(description = "List of ConfigMaps (by their name) containing environment variables to pass to Deployment. Empty by default",  required = false)
+    @Schema(description = "List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef. "
+                           + " Ignored if Theia applications are started eagerly.  Empty by default.", 
+                           required = false)
     public List<String> envVarsFromConfigMaps = List.of();
+                        
     
-    @Schema(description = "List of Secrets (by their name) containing environment variables to pass to Deployment. Empty by default",  required = false)
+    @Schema(description = "List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef. "
+                           + " Ignored if Theia applications are started eagerly.  Empty by default.", 
+                           required = false)
     public List<String> envVarsFromSecrets = List.of();
     
     public LaunchRequest() {
