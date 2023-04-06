@@ -67,19 +67,16 @@ public class RootResource extends BaseResource {
 
 	if (request.isEphemeral()) {
 	    info(correlationId, "Launching ephemeral session " + request);
-	    return k8sUtil.launchEphemeralSession(
-			correlationId, request.appDefinition, request.user, request.timeout, request.env
-		);
+	    return k8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout,
+		    request.env);
 	}
 
 	if (request.isExistingWorkspace()) {
 	    Optional<Workspace> workspace = k8sUtil.getWorkspace(request.user, asValidName(request.workspaceName));
 	    if (workspace.isPresent()) {
 		info(correlationId, "Launching existing workspace session " + request);
-		return k8sUtil.launchWorkspaceSession(
-			correlationId, new UserWorkspace(workspace.get().getSpec()), request.timeout,
-			request.env
-		);
+		return k8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
+			request.timeout, request.env);
 	    }
 	}
 
