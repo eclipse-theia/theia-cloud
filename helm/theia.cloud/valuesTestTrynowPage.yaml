@@ -40,6 +40,3 @@ ingress:
 
 monitor:
   enable: false
-  activityTracker:
-    enable: true
-    interval: 1

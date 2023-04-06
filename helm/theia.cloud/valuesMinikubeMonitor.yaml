@@ -50,6 +50,9 @@ ingress:
 
 monitor:
   enable: true
+  port: 3000
   activityTracker:
     enable: true
     interval: 1
+    timeoutAfter: 30
+    notifyAfter: 25
