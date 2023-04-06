@@ -42,21 +42,8 @@ public class LaunchRequest extends ServiceRequest {
     @Schema(description = "Number of minutes to wait for session launch. Default is 3 Minutes.", required = false)
     public int timeout = 3;
 
-    @Schema(description = "Map of environment variables to be passed to Deployment. "
-                           + " Ignored if Theia applications are started eagerly.  Empty by default.", 
-                           required = false)
-    public Map<String, String> envVars = Map.of();
-
-    @Schema(description = "List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef. "
-                           + " Ignored if Theia applications are started eagerly.  Empty by default.", 
-                           required = false)
-    public List<String> envVarsFromConfigMaps = List.of();
-                        
-    
-    @Schema(description = "List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef. "
-                           + " Ignored if Theia applications are started eagerly.  Empty by default.", 
-                           required = false)
-    public List<String> envVarsFromSecrets = List.of();
+    @Schema(description = "Environment variables", required = false)
+    public Env env = new Env();
     
     public LaunchRequest() {
 	super(KIND);
@@ -77,12 +64,40 @@ public class LaunchRequest extends ServiceRequest {
 	return !isExistingWorkspace() && !isEphemeral();
     }
 
+    @Schema(name = "LaunchRequest.Env")
+    public class Env {
+        public Env() {
+
+        }
+
+        @Schema(description = "Map of environment variables to be passed to Deployment. "
+                + " Ignored if Theia applications are started eagerly.  Empty by default.", 
+                required = false)
+        public Map<String, String> fromMap = Map.of();
+
+        @Schema(description = "List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef. "
+                + " Ignored if Theia applications are started eagerly.  Empty by default.", 
+                required = false)
+        public List<String> fromConfigMaps = List.of();
+            
+
+        @Schema(description = "List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef. "
+                + " Ignored if Theia applications are started eagerly.  Empty by default.", 
+                required = false)
+        public List<String> fromSecrets = List.of();
+        
+        @Override
+        public String toString() {
+            return "LaunchRequest.Env[fromMap=" + fromMap.toString() + ", fromConfigMaps=" + fromConfigMaps.toString()
+            + ", fromSecrets=" + fromSecrets.toString() + "]";
+        }
+    }
+
     @Override
     public String toString() {
 	return "LaunchRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName=" + workspaceName
 		+ ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + ", timeout="
-		+ timeout + ", envVars=" + envVars.toString() + ", envVarsFromConfigMaps=" + envVarsFromConfigMaps.toString()
-        + ", envVarsFromSecrets=" + envVarsFromSecrets.toString() + "]";
+		+ timeout + ", " + env.toString() + "]";
     }
 
 }
