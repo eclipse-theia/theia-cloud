@@ -341,13 +341,13 @@ public class LazySessionHandler implements SessionHandler {
 			    appDefinition.getSpec().getUplinkLimit(), correlationId);
 		    AddedHandlerUtil.removeEmptyResources(deployment);
 
-			if (!arguments.isEnableMonitor()) {
-				AddedHandlerUtil.removeMonitorPort(deployment, appDefinition);
-			}
+		    if (!arguments.isEnableMonitor()) {
+			AddedHandlerUtil.removeMonitorPort(deployment, appDefinition);
+		    }
 
-			AddedHandlerUtil.addCustomEnvVarsToDeploymentFromSession(deployment, session, appDefinition);
-		    
-			if (appDefinition.getSpec().getPullSecret() != null
+		    AddedHandlerUtil.addCustomEnvVarsToDeploymentFromSession(deployment, session, appDefinition);
+
+		    if (appDefinition.getSpec().getPullSecret() != null
 			    && !appDefinition.getSpec().getPullSecret().isEmpty()) {
 			AddedHandlerUtil.addImagePullSecret(deployment, appDefinition.getSpec().getPullSecret());
 		    }
