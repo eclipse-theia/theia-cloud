@@ -245,7 +245,6 @@ public final class AddedHandlerUtil {
 			.filter((p) -> !(p.getName().equals("monitor")))
 			.collect(Collectors.toList());
 		
-		// must do it like this to keep reference to original deployment
 		deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx).setPorts(newContainerPorts);
 	}
 
