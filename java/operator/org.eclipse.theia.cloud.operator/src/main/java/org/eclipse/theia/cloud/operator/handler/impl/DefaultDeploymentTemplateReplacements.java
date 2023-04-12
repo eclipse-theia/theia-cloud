@@ -138,7 +138,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 		} else {
 		    // Replace the placeholder with the port information
 		    environmentVariables.put(PLACEHOLDER_MONITOR_PORT,
-			    "- containerPort:" + port + "\n" + "              name: monitor");
+			    "- containerPort: " + port + "\n" + "              name: monitor");
 		}
 	    } else {
 		environmentVariables.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
