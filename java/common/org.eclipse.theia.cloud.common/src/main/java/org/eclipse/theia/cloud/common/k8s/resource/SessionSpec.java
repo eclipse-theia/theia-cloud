@@ -58,7 +58,7 @@ public class SessionSpec implements UserScopedSpec {
 
     @JsonProperty("envVars")
     private Map<String, String> envVars;
-        
+
     @JsonProperty("envVarsFromConfigMaps")
     private List<String> envVarsFromConfigMaps;
 
@@ -73,32 +73,27 @@ public class SessionSpec implements UserScopedSpec {
     }
 
     public SessionSpec(String name, String appDefinition, String user, String workspace) {
-        this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
-    }
-    public SessionSpec(
-        String name, String appDefinition, String user, String workspace, Map<String, String> envVars
-    )  {
-        this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
+	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
     }
 
-    public SessionSpec(
-        String name, String appDefinition, String user, String workspace, 
-        Map<String, String> envVars, List<String> envVarsFromConfigMaps
-    ) { 
-        this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars) {
+	this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
     }
 
-    public SessionSpec(
-        String name, String appDefinition, String user, String workspace, 
-        Map<String, String> envVars, List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets
-    ) {
-        this.name = name;
-        this.appDefinition = appDefinition;
-        this.user = user;
-        this.workspace = workspace;
-        this.envVars = envVars;
-        this.envVarsFromConfigMaps = envVarsFromConfigMaps;
-        this.envVarsFromSecrets = envVarsFromSecrets;
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps) {
+	this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
+    }
+
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
+	this.name = name;
+	this.appDefinition = appDefinition;
+	this.user = user;
+	this.workspace = workspace;
+	this.envVars = envVars;
+	this.envVarsFromConfigMaps = envVarsFromConfigMaps;
+	this.envVarsFromSecrets = envVarsFromSecrets;
     }
 
     public String getName() {
@@ -167,14 +162,15 @@ public class SessionSpec implements UserScopedSpec {
     }
 
     public Map<String, String> getEnvVars() {
-        return envVars;
+	return envVars;
     }
 
     public List<String> getEnvVarsFromConfigMaps() {
-        return envVarsFromConfigMaps;
+	return envVarsFromConfigMaps;
     }
+
     public List<String> getEnvVarsFromSecrets() {
-        return envVarsFromSecrets;
+	return envVarsFromSecrets;
     }
 
     @JsonIgnore
@@ -222,21 +218,21 @@ public class SessionSpec implements UserScopedSpec {
 		return false;
 	} else if (!sessionSecret.equals(other.sessionSecret))
 	    return false;
-    if (envVars == null) {
-        if (other.envVars != null)
-        return false;
-    } else if (!envVars.equals(other.envVars))
-        return false;
-    if (envVarsFromConfigMaps == null) {
-        if (other.envVarsFromConfigMaps != null)
-        return false;
-    } else if (!envVarsFromConfigMaps.equals(other.envVarsFromConfigMaps))
-        return false;
-    if (envVarsFromSecrets == null) {
-        if (other.envVarsFromSecrets != null)
-        return false;
-    } else if (!envVarsFromSecrets.equals(other.envVarsFromSecrets))
-        return false;        
+	if (envVars == null) {
+	    if (other.envVars != null)
+		return false;
+	} else if (!envVars.equals(other.envVars))
+	    return false;
+	if (envVarsFromConfigMaps == null) {
+	    if (other.envVarsFromConfigMaps != null)
+		return false;
+	} else if (!envVarsFromConfigMaps.equals(other.envVarsFromConfigMaps))
+	    return false;
+	if (envVarsFromSecrets == null) {
+	    if (other.envVarsFromSecrets != null)
+		return false;
+	} else if (!envVarsFromSecrets.equals(other.envVarsFromSecrets))
+	    return false;
 	return true;
     }
 
