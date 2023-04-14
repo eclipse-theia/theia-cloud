@@ -13,13 +13,15 @@
  */
 
 
-import { Configuration } from './configuration';
-import globalAxios, { AxiosPromise, AxiosInstance, AxiosRequestConfig } from 'axios';
+import type { Configuration } from './configuration';
+import type { AxiosPromise, AxiosInstance, AxiosRequestConfig } from 'axios';
+import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
 import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
+import type { RequestArgs } from './base';
 // @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } from './base';
+import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 
 /**
  * A request to launch a new session.
@@ -69,6 +71,37 @@ export interface LaunchRequest {
      * @memberof LaunchRequest
      */
     'timeout'?: number;
+    /**
+     * 
+     * @type {LaunchRequestEnv}
+     * @memberof LaunchRequest
+     */
+    'env'?: LaunchRequestEnv;
+}
+/**
+ * 
+ * @export
+ * @interface LaunchRequestEnv
+ */
+export interface LaunchRequestEnv {
+    /**
+     * Map of environment variables to be passed to Deployment.  Ignored if Theia applications are started eagerly.  Empty by default.
+     * @type {{ [key: string]: string; }}
+     * @memberof LaunchRequestEnv
+     */
+    'fromMap'?: { [key: string]: string; };
+    /**
+     * List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef.  Ignored if Theia applications are started eagerly.  Empty by default.
+     * @type {Array<string>}
+     * @memberof LaunchRequestEnv
+     */
+    'fromConfigMaps'?: Array<string>;
+    /**
+     * List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef.  Ignored if Theia applications are started eagerly.  Empty by default.
+     * @type {Array<string>}
+     * @memberof LaunchRequestEnv
+     */
+    'fromSecrets'?: Array<string>;
 }
 /**
  * Request to ping the availability of the service.
@@ -215,16 +248,34 @@ export interface SessionSpec {
     'workspace'?: string;
     /**
      * 
+     * @type {number}
+     * @memberof SessionSpec
+     */
+    'lastActivity'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof SessionSpec
      */
     'sessionSecret'?: string;
     /**
      * 
-     * @type {number}
+     * @type {{ [key: string]: string; }}
      * @memberof SessionSpec
      */
-    'lastActivity'?: number;
+    'envVars'?: { [key: string]: string; };
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SessionSpec
+     */
+    'envVarsFromConfigMaps'?: Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SessionSpec
+     */
+    'envVarsFromSecrets'?: Array<string>;
 }
 /**
  * A request to start a session
