@@ -345,7 +345,8 @@ public class LazySessionHandler implements SessionHandler {
 			AddedHandlerUtil.removeMonitorPort(deployment, appDefinition);
 		    }
 
-		    AddedHandlerUtil.addCustomEnvVarsToDeploymentFromSession(deployment, session, appDefinition);
+		    AddedHandlerUtil.addCustomEnvVarsToDeploymentFromSession(correlationId, deployment, session,
+			    appDefinition);
 
 		    if (appDefinition.getSpec().getPullSecret() != null
 			    && !appDefinition.getSpec().getPullSecret().isEmpty()) {
