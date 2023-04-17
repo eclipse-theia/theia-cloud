@@ -32,7 +32,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -51,6 +50,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapEnvSource;
@@ -247,13 +247,15 @@ public final class AddedHandlerUtil {
     }
 
     /* ------------------- Addition of env vars to Deployments ------------------ */
-    public static void addCustomEnvVarsToDeploymentFromSession(Deployment deployment, Session session,
-	    AppDefinition appDefinition) {
+    public static void addCustomEnvVarsToDeploymentFromSession(String correlationId, Deployment deployment,
+	    Session session, AppDefinition appDefinition) {
 	String containerName = appDefinition.getSpec().getName();
 	Optional<Integer> maybeContainerIdx = findContainerIdxInDeployment(deployment, containerName);
+
 	if (maybeContainerIdx.isEmpty()) {
-	    LOGGER.error("Trying to add custom env vars to Deployment from Session." + "Could not find the container "
-		    + containerName + " in Deployment named" + deployment.getMetadata().getName());
+	    LOGGER.error(LogMessageUtil.formatLogMessage(correlationId,
+		    "Trying to add custom env vars to Deployment from Session. Could not find the container "
+			    + containerName + " in Deployment named" + deployment.getMetadata().getName()));
 	    return;
 	}
 	int containerIdx = maybeContainerIdx.get();
