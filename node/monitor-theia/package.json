@@ -9,12 +9,12 @@
     "src"
   ],
   "dependencies": {
-    "@theia/core": "latest",
-    "@theia/plugin-ext": "latest"
+    "@theia/core": "^1.34.0",
+    "@theia/plugin-ext": "^1.34.0"
   },
   "devDependencies": {
-    "rimraf": "latest",
-    "typescript": "latest"
+    "rimraf": "^3.0.2",
+    "typescript": "^4.6.3"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
