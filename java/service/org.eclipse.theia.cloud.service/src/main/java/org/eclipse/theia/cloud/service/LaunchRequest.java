@@ -15,6 +15,9 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(name = "LaunchRequest", description = "A request to launch a new session.")
