@@ -43,7 +43,7 @@ public class LaunchRequest extends ServiceRequest {
     public int timeout = 3;
 
     @Schema(description = "Environment variables", required = false)
-    public Env env = new Env();
+    public EnvironmentVars env = new EnvironmentVars();
 
     public LaunchRequest() {
 	super(KIND);
@@ -62,31 +62,6 @@ public class LaunchRequest extends ServiceRequest {
     @Schema(hidden = true)
     public boolean isCreateWorkspace() {
 	return !isExistingWorkspace() && !isEphemeral();
-    }
-
-    @Schema(name = "LaunchRequest.Env")
-    public class Env {
-	public Env() {
-
-	}
-
-	@Schema(description = "Map of environment variables to be passed to Deployment. "
-		+ " Ignored if Theia applications are started eagerly.  Empty by default.", required = false)
-	public Map<String, String> fromMap = Map.of();
-
-	@Schema(description = "List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef. "
-		+ " Ignored if Theia applications are started eagerly.  Empty by default.", required = false)
-	public List<String> fromConfigMaps = List.of();
-
-	@Schema(description = "List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef. "
-		+ " Ignored if Theia applications are started eagerly.  Empty by default.", required = false)
-	public List<String> fromSecrets = List.of();
-
-	@Override
-	public String toString() {
-	    return "LaunchRequest.Env[fromMap=" + fromMap.toString() + ", fromConfigMaps=" + fromConfigMaps.toString()
-		    + ", fromSecrets=" + fromSecrets.toString() + "]";
-	}
     }
 
     @Override

@@ -71,7 +71,7 @@ public final class K8sUtil {
     }
 
     public String launchEphemeralSession(String correlationId, String appDefinition, String user, int timeout,
-	    LaunchRequest.Env env) {
+	    EnvironmentVars env) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition), appDefinition, user);
 	sessionSpec = sessionSpecWithEnv(sessionSpec, env);
 
@@ -79,7 +79,7 @@ public final class K8sUtil {
     }
 
     public String launchWorkspaceSession(String correlationId, UserWorkspace workspace, int timeout,
-	    LaunchRequest.Env env) {
+	    EnvironmentVars env) {
 	SessionSpec sessionSpec = new SessionSpec(getSessionName(workspace.name), workspace.appDefinition,
 		workspace.user, workspace.name);
 	sessionSpec = sessionSpecWithEnv(sessionSpec, env);
@@ -93,7 +93,7 @@ public final class K8sUtil {
 	return spec.getUrl();
     }
 
-    private SessionSpec sessionSpecWithEnv(SessionSpec spec, LaunchRequest.Env env) {
+    private SessionSpec sessionSpecWithEnv(SessionSpec spec, EnvironmentVars env) {
 	if (env == null)
 	    return spec;
 
