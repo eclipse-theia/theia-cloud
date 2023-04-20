@@ -66,9 +66,10 @@ variable "loadBalancerIP" {
   default     = ""
 }
 
-# variable "backend_bucket_name" {
-#   description = "The bucket name for the remote state storage"
-# }
+variable "cloudProvider" {
+  description = "The cloud provider to use"
+  default     = "K8S"
+}
 
 resource "helm_release" "cert-manager" {
   name             = "cert-manager"
@@ -195,5 +196,10 @@ resource "helm_release" "theia-cloud" {
   set {
     name  = "keycloak.authUrl"
     value = "https://${var.hostname}/keycloak/"
+  }
+
+  set {
+    name  = "operator.cloudProvider"
+    value = var.cloudProvider
   }
 }

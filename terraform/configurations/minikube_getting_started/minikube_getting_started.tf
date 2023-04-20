@@ -89,6 +89,7 @@ module "helm" {
   postgresql_storageClass      = "manual"
   postgresql_volumePermissions = true
   service_type                 = "ClusterIP"
+  cloudProvider                = "MINIKUBE"
 }
 
 provider "keycloak" {
