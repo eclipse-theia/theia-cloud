@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
@@ -60,12 +59,10 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     public static final String PLACEHOLDER_ENV_SESSION_SECRET = "placeholder-env-session-secret";
 
     public static final String PLACEHOLDER_MONITOR_PORT = "placeholder-monitor-port";
+    public static final String PLACEHOLDER_MONITOR_PORT_ENV = "placeholder-monitor-env-port";
     public static final String PLACEHOLDER_ENABLE_ACTIVITY_TRACKER = "placeholder-enable-activity-tracker";
 
     protected static final String DEFAULT_UID = "1000";
-
-    @Inject
-    private TheiaCloudClient resourceClient;
 
     @Inject
     protected TheiaCloudArguments arguments;
@@ -133,11 +130,23 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 		session.map(s -> s.getSpec().getSessionSecret()).orElse(""));
 	if (arguments.isEnableMonitor()) {
 	    if (appDefinition.getSpec().getMonitor() != null && appDefinition.getSpec().getMonitor().getPort() > 0) {
-		environmentVariables.put(PLACEHOLDER_MONITOR_PORT,
-			String.valueOf(appDefinition.getSpec().getMonitor().getPort()));
+		String port = String.valueOf(appDefinition.getSpec().getMonitor().getPort());
+		environmentVariables.put(PLACEHOLDER_MONITOR_PORT_ENV, port);
+		if (appDefinition.getSpec().getMonitor().getPort() == appDefinition.getSpec().getPort()) {
+		    // Just remove the placeholder, otherwise the port would be duplicate
+		    environmentVariables.put(PLACEHOLDER_MONITOR_PORT, "");
+		} else {
+		    // Replace the placeholder with the port information
+		    environmentVariables.put(PLACEHOLDER_MONITOR_PORT,
+			    "- containerPort: " + port + "\n" + "              name: monitor");
+		}
+	    } else {
+		environmentVariables.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
 	    }
 	    environmentVariables.put(PLACEHOLDER_ENABLE_ACTIVITY_TRACKER,
 		    arguments.isEnableActivityTracker() ? "true" : "false");
+	} else {
+	    environmentVariables.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
 	}
 	return environmentVariables;
     }

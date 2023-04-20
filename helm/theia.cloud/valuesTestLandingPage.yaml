@@ -4,8 +4,8 @@ app:
 
 image:
   name: theiacloud/theia-cloud-activity-demo:0.8.0.MS8
-  timeoutStrategy: "INACTIVITY"
-  timeoutLimit: "3"
+  timeoutStrategy: "FIXEDTIME"
+  timeoutLimit: "10"
   imagePullPolicy: IfNotPresent
 
 hosts:
@@ -42,6 +42,3 @@ ingress:
 
 monitor:
   enable: false
-  activityTracker:
-    enable: true
-    interval: 1
