@@ -72,6 +72,12 @@ spec:
             value: placeholder-enable-activity-tracker
           - name: THEIACLOUD_MONITOR_PORT
             value: placeholder-monitor-env-port
+          - name: THEIACLOUD_KEYCLOAK_URL
+            value: placeholder-keycloak-env-url
+          - name: THEIACLOUD_KEYCLOAK_REALM
+            value: placeholder-keycloak-env-realm
+          - name: THEIACLOUD_KEYCLOAK_CLIENT_ID
+            value: placeholder-keycloak-env-clientid
           securityContext:
             runAsUser: placeholder-uid
             runAsGroup: placeholder-uid

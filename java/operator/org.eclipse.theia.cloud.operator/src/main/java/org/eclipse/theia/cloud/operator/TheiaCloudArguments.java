@@ -82,6 +82,18 @@ public class TheiaCloudArguments {
 	    "--requestedStorage" }, description = "Amount of storage requested for persistent workspace volume claims.", required = false)
     private String requestedStorage;
 
+    @Option(names = {
+	    "--keycloakURL" }, description = "The URL of the keycloak instance, if keycloak is enabled.", required = false)
+    private String keycloakURL;
+
+    @Option(names = {
+	    "--keycloakRealm" }, description = "The authentication realm, if keycloak is enabled.", required = false)
+    private String keycloakRealm;
+
+    @Option(names = {
+	    "--keycloakClientId" }, description = "The client id of the auth application, if keycloak is enabled", required = false)
+    private String keycloakClientId;
+
     public boolean isUseKeycloak() {
 	return useKeycloak;
     }
@@ -142,6 +154,18 @@ public class TheiaCloudArguments {
 	return requestedStorage;
     }
 
+    public String getKeycloakURL() {
+	return keycloakURL;
+    }
+
+    public String getKeycloakRealm() {
+	return keycloakRealm;
+    }
+
+    public String getKeycloakClientId() {
+	return keycloakClientId;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -153,6 +177,9 @@ public class TheiaCloudArguments {
 	result = prime * result + (enableActivityTracker ? 1231 : 1237);
 	result = prime * result + (enableMonitor ? 1231 : 1237);
 	result = prime * result + ((instancesPath == null) ? 0 : instancesPath.hashCode());
+	result = prime * result + ((keycloakClientId == null) ? 0 : keycloakClientId.hashCode());
+	result = prime * result + ((keycloakRealm == null) ? 0 : keycloakRealm.hashCode());
+	result = prime * result + ((keycloakURL == null) ? 0 : keycloakURL.hashCode());
 	result = prime * result + ((monitorInterval == null) ? 0 : monitorInterval.hashCode());
 	result = prime * result + ((requestedStorage == null) ? 0 : requestedStorage.hashCode());
 	result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
@@ -192,6 +219,21 @@ public class TheiaCloudArguments {
 	    if (other.instancesPath != null)
 		return false;
 	} else if (!instancesPath.equals(other.instancesPath))
+	    return false;
+	if (keycloakClientId == null) {
+	    if (other.keycloakClientId != null)
+		return false;
+	} else if (!keycloakClientId.equals(other.keycloakClientId))
+	    return false;
+	if (keycloakRealm == null) {
+	    if (other.keycloakRealm != null)
+		return false;
+	} else if (!keycloakRealm.equals(other.keycloakRealm))
+	    return false;
+	if (keycloakURL == null) {
+	    if (other.keycloakURL != null)
+		return false;
+	} else if (!keycloakURL.equals(other.keycloakURL))
 	    return false;
 	if (monitorInterval == null) {
 	    if (other.monitorInterval != null)
@@ -237,7 +279,8 @@ public class TheiaCloudArguments {
 		+ monitorInterval + ", cloudProvider=" + cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter
 		+ ", wondershaperImage=" + wondershaperImage + ", serviceUrl=" + serviceUrl + ", sessionsPerUser="
 		+ sessionsPerUser + ", appId=" + appId + ", usePaths=" + usePaths + ", instancesPath=" + instancesPath
-		+ ", storageClassName=" + storageClassName + ", requestedStorage=" + requestedStorage + "]";
+		+ ", storageClassName=" + storageClassName + ", requestedStorage=" + requestedStorage + ", keycloakURL="
+		+ keycloakURL + ", keycloakRealm=" + keycloakRealm + ", keycloakClientId=" + keycloakClientId + "]";
     }
 
 }
