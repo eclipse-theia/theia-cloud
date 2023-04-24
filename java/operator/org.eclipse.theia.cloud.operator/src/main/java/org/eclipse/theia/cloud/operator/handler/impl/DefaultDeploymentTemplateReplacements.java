@@ -57,6 +57,9 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     public static final String PLACEHOLDER_ENV_SESSION_USER = "placeholder-env-session-user";
     public static final String PLACEHOLDER_ENV_SESSION_URL = "placeholder-env-session-url";
     public static final String PLACEHOLDER_ENV_SESSION_SECRET = "placeholder-env-session-secret";
+    public static final String PLACEHOLDER_ENV_SESSION_KEYCLOAK_URL = "placeholder-keycloak-env-url";
+    public static final String PLACEHOLDER_ENV_SESSION_KEYCLOAK_REALM = "placeholder-keycloak-env-realm";
+    public static final String PLACEHOLDER_ENV_SESSION_KEYCLOAK_CLIENT_ID = "placeholder-keycloak-env-clientid";
 
     public static final String PLACEHOLDER_MONITOR_PORT = "placeholder-monitor-port";
     public static final String PLACEHOLDER_MONITOR_PORT_ENV = "placeholder-monitor-env-port";
@@ -128,6 +131,18 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_USER, session.map(s -> s.getSpec().getUser()).orElse(""));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_SECRET,
 		session.map(s -> s.getSpec().getSessionSecret()).orElse(""));
+
+	if (arguments.isUseKeycloak()) {
+	    environmentVariables.put(PLACEHOLDER_ENV_SESSION_KEYCLOAK_URL, orEmpty(arguments.getKeycloakURL()));
+	    environmentVariables.put(PLACEHOLDER_ENV_SESSION_KEYCLOAK_REALM, orEmpty(arguments.getKeycloakRealm()));
+	    environmentVariables.put(PLACEHOLDER_ENV_SESSION_KEYCLOAK_CLIENT_ID,
+		    orEmpty(arguments.getKeycloakClientId()));
+	} else {
+	    environmentVariables.put(PLACEHOLDER_ENV_SESSION_KEYCLOAK_URL, "");
+	    environmentVariables.put(PLACEHOLDER_ENV_SESSION_KEYCLOAK_REALM, "");
+	    environmentVariables.put(PLACEHOLDER_ENV_SESSION_KEYCLOAK_CLIENT_ID, "");
+	}
+
 	if (arguments.isEnableMonitor()) {
 	    if (appDefinition.getSpec().getMonitor() != null && appDefinition.getSpec().getMonitor().getPort() > 0) {
 		String port = String.valueOf(appDefinition.getSpec().getMonitor().getPort());
