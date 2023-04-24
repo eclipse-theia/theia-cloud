@@ -118,7 +118,6 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
     protected void configureTimeoutStrategies(final MultiBinding<TimeoutStrategy> binding) {
 	binding.add(TimeoutStrategy.FixedTime.class);
-	binding.add(TimeoutStrategy.Inactivity.class);
     }
 
     @Provides

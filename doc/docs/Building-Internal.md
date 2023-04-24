@@ -22,7 +22,8 @@ docker push theiacloud/theia-cloud-demo:latest
 Build and push the Theia Activity Tracker Demo application with:
 
 ```bash
-docker build -t theiacloud/theia-cloud-activity-demo:latest -f demo/dockerfiles/demo-theia-activity-tracker/Dockerfile demo/dockerfiles/demo-theia-activity-tracker/.
+docker tag theiacloud/theia-cloud-demo:latest theiacloud/theia-cloud-demo
+docker build -t theiacloud/theia-cloud-activity-demo:latest -f demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile demo/dockerfiles/demo-theia-monitor-vscode/.
 docker push theiacloud/theia-cloud-activity-demo:latest
 ```
 

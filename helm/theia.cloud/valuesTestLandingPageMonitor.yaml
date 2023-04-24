@@ -3,20 +3,22 @@ app:
   # logo: test.svg use full path; not working yet after helm-repository switch
 
 image:
-  name: theiacloud/theia-cloud-activity-demo:0.8.0.MS8
-  timeoutStrategy: "INACTIVITY"
-  timeoutLimit: "3"
+  # name: theiacloud/theia-cloud-activity-demo:0.8.0.MS9-theia
+  name: theiacloud/theia-cloud-activity-demo:0.8.0.MS9
   imagePullPolicy: IfNotPresent
+  timeoutStrategy: "FIXEDTIME"
+  timeoutLimit: "0"
 
 hosts:
-  usePaths: false
-  service: service.192.168.39.3.nip.io
-  serviceProtocol: https
-  landing: theia.cloud.192.168.39.3.nip.io
-  instance: ws.192.168.39.3.nip.io
+  usePaths: true
+  paths:
+    baseHost: 192.168.39.3.nip.io
+    service: servicex
+    landing: trynow
+    instance: instances
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.8.0.MS8
+  image: theiacloud/theia-cloud-landing-page:0.8.0.MS9
   imagePullPolicy: Always
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: false
@@ -41,7 +43,10 @@ ingress:
   theiaCloudCommonName: true
 
 monitor:
-  enable: false
+  enable: true
+  port: 8081
   activityTracker:
     enable: true
-    interval: 1
+    interval: 1    
+    timeoutAfter: 4
+    notifyAfter: 2

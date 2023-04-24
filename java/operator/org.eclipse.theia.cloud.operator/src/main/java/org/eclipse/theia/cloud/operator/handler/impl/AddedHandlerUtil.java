@@ -132,6 +132,7 @@ public final class AddedHandlerUtil {
     public static void updateSessionURLAsync(NamespacedKubernetesClient client, Session session, String namespace,
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {
+	    boolean updateURL = false;
 	    for (int i = 1; i <= 60; i++) {
 		try {
 		    Thread.sleep(i * 1000);
@@ -168,6 +169,17 @@ public final class AddedHandlerUtil {
 		LOGGER.trace(formatLogMessage(correlationId, url + " has response code " + code));
 
 		if (code == 200) {
+		    updateURL = true;
+		} else if (code != 404 && code != 503 && !updateURL) {
+		    /*
+		     * we don't get a 404 or 503, so something is available. Try accessing the URL
+		     * once more then update URL anyway
+		     */
+		    updateURL = true;
+		    continue;
+		}
+
+		if (updateURL) {
 		    LOGGER.info(formatLogMessage(correlationId, url + " is available."));
 		    client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
 			    .withName(session.getMetadata().getName())//

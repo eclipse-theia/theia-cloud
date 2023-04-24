@@ -30,29 +30,6 @@ public interface TimeoutStrategy {
 
     boolean evaluate(String correlationId, Session session, Instant now, Integer limit);
 
-    static class Inactivity implements TimeoutStrategy {
-
-	private static final String INACTIVITY = "INACTIVITY";
-	private static final Logger LOGGER = LogManager.getLogger(Inactivity.class);
-
-	@Override
-	public String getName() {
-	    return INACTIVITY;
-	}
-
-	@Override
-	public boolean evaluate(String correlationId, Session session, Instant now, Integer limit) {
-	    long lastActivity = session.getSpec().getLastActivity();
-	    Instant parse = Instant.ofEpochMilli(lastActivity);
-	    long minutesSinceLastActivity = ChronoUnit.MINUTES.between(parse, now);
-	    LOGGER.trace(formatLogMessage(INACTIVITY, correlationId,
-		    "Checking " + session.getSpec().getName() + ". lastActivity: " + lastActivity
-			    + ". minutesSinceLastActivity: " + minutesSinceLastActivity + ". limit: " + limit));
-	    return minutesSinceLastActivity > limit;
-	}
-
-    }
-
     static class FixedTime implements TimeoutStrategy {
 
 	private static final String FIXEDTIME = "FIXEDTIME";

@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class AppDefinitionSpec {
 
-    public static final String API = "theia.cloud/v4beta";
+    public static final String API = "theia.cloud/v5beta";
     public static final String KIND = "AppDefinition";
     public static final String CRD_NAME = "appdefinitions.theia.cloud";
 
@@ -199,39 +199,61 @@ public class AppDefinitionSpec {
     }
 
     public static class Monitor {
-	@JsonProperty("timeoutAfter")
-	private int timeoutAfter;
-
-	@JsonProperty("notifyAfter")
-	private int notifyAfter;
-
 	@JsonProperty("port")
 	private int port;
+
+	@JsonProperty("activityTracker")
+	private ActivityTracker activityTracker;
 
 	public Monitor() {
 	}
 
-	public Monitor(int timeoutAfter, int notifyAfter, int port) {
-	    this.timeoutAfter = timeoutAfter;
-	    this.notifyAfter = notifyAfter;
+	public Monitor(ActivityTracker activityTracker, int port) {
+	    this.activityTracker = activityTracker;
 	    this.port = port;
-	}
-
-	public int getTimeoutAfter() {
-	    return timeoutAfter;
-	}
-
-	public int getNotifyAfter() {
-	    return notifyAfter;
 	}
 
 	public int getPort() {
 	    return port;
 	}
 
+	public ActivityTracker getActivityTrackerModule() {
+	    return activityTracker;
+	}
+
 	@Override
 	public String toString() {
-	    return "Monitor [timeoutAfter=" + timeoutAfter + ", notifyAfter=" + notifyAfter + ", port=" + port + "]";
+	    return "Monitor [activityTracker=" + activityTracker + ", port=" + port + "]";
+	}
+
+	public static class ActivityTracker {
+	    @JsonProperty("timeoutAfter")
+	    private int timeoutAfter;
+
+	    @JsonProperty("notifyAfter")
+	    private int notifyAfter;
+
+	    public ActivityTracker() {
+	    }
+
+	    public ActivityTracker(int timeoutAfter, int notifyAfter) {
+		this.timeoutAfter = timeoutAfter;
+		this.notifyAfter = notifyAfter;
+	    }
+
+	    public int getTimeoutAfter() {
+		return timeoutAfter;
+	    }
+
+	    public int getNotifyAfter() {
+		return notifyAfter;
+	    }
+
+	    @Override
+	    public String toString() {
+		return "ActivityTracker [timeoutAfter=" + timeoutAfter + ", notifyAfter=" + notifyAfter + "]";
+	    }
+
 	}
     }
 }

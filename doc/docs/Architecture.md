@@ -18,7 +18,7 @@ The following diagram sketches the basic idea.
 |Option|Type|Used for|
 |---|---|---|
 |--keycloak|boolean|Whether sessions will be created with a reverse proxy authenticating against keycloak|
-|--cloudProvider|null, GKE|Cloud Provider specific configs|
+|--cloudProvider|null, K8S, MINIKUBE|Cloud Provider specific configs|
 |--bandwidthLimiter|null, K8SANNOTATION, WONDERSHAPER, K8SANNOTATIONANDWONDERSHAPER|How to limit ingress/egress bandwidth|
 |--wondershaperImage|string|The image of the wondershaper init container|
 |--sessionsPerUser|number|The number of active sessions a user is allowed to have|

@@ -80,12 +80,15 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 		Optional<AppDefinition> appDefinitionOptional = resourceClient.appDefinitions().get(appDefinitionName);
 		if (appDefinitionOptional.isPresent()) {
 		    AppDefinition appDefinition = appDefinitionOptional.get();
-		    int timeoutAfter = appDefinition.getSpec().getMonitor().getTimeoutAfter();
-		    int notifyAfter = appDefinition.getSpec().getMonitor().getNotifyAfter();
+		    int timeoutAfter = appDefinition.getSpec().getMonitor().getActivityTrackerModule()
+			    .getTimeoutAfter();
+		    int notifyAfter = appDefinition.getSpec().getMonitor().getActivityTrackerModule().getNotifyAfter();
 		    int port = appDefinition.getSpec().getMonitor().getPort();
 
 		    pingSession(session, sessionIP.get(), port, timeoutAfter, notifyAfter);
 		}
+	    } else {
+		LOGGER.error("No ClusterIP found for session " + session.getSpec().getName());
 	    }
 	}
     }
@@ -103,7 +106,6 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	Response getActivityResponse;
 	try {
 	    getActivityResponse = client.newCall(getActivityRequest).execute();
-
 	    if (getActivityResponse.code() == 200) {
 		long lastReportedMilliseconds = Long.valueOf(getActivityResponse.body().string());
 
@@ -112,10 +114,10 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 		logInfo(sessionName,
 			"REQUEST FAILED (Returned " + getActivityResponse.code() + ": " + "GET " + getActivityURL);
 	    }
-	} catch (IOException e1) {
-	    logInfo(sessionName, "REQUEST FAILED: " + "GET " + getActivityURL);
-	}
+	} catch (IOException e) {
+	    logInfo(sessionName, "REQUEST FAILED: " + "GET " + getActivityURL + ". Error: " + e);
 
+	}
 	Date lastActivityDate = new Date(session.getSpec().getLastActivity());
 	Date currentDate = new Date(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
 

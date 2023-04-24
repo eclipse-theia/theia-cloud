@@ -6,7 +6,7 @@ metadata:
     app: placeholder-app
   namespace: placeholder-namespace
   ownerReferences:
-    - apiVersion: theia.cloud/v4beta
+    - apiVersion: theia.cloud/v5beta
       kind: AppDefinition
       name: placeholder
       uid: placeholder
@@ -16,10 +16,7 @@ spec:
       port: placeholder-port 
       protocol: TCP
       targetPort: web
-    - name: monitor-express
-      port: placeholder-monitor-port
-      targetPort: placeholder-monitor-port
-      protocol: TCP
+    placeholder-monitor-port
 
   selector:
     app: placeholder-app

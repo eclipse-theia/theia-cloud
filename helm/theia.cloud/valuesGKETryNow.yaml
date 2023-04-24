@@ -8,7 +8,7 @@ issuer:
   email: jfaltermeier@eclipsesource.com
 
 image:
-  name: theiacloud/theia-cloud-demo:0.8.0.MS8
+  name: theiacloud/theia-cloud-demo:0.8.0.MS9
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
@@ -22,7 +22,7 @@ hosts:
   instance: ws.theia-cloud.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS8
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS9
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
   additionalApps:
@@ -51,6 +51,3 @@ ingress:
 
 monitor:
   enable: false
-  activityTracker:
-    enable: true
-    interval: 1

@@ -66,9 +66,10 @@ variable "loadBalancerIP" {
   default     = ""
 }
 
-# variable "backend_bucket_name" {
-#   description = "The bucket name for the remote state storage"
-# }
+variable "cloudProvider" {
+  description = "The cloud provider to use"
+  default     = "K8S"
+}
 
 resource "helm_release" "cert-manager" {
   name             = "cert-manager"
@@ -109,7 +110,7 @@ resource "helm_release" "theia-cloud-base" {
   name             = "theia-cloud-base"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud-base"
-  version          = "0.8.0-MS8v2"
+  version          = "0.8.0-MS9v1"
   namespace        = "theiacloud"
   create_namespace = true
 
@@ -179,7 +180,7 @@ resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud"
-  version          = "0.8.0-MS8v2"
+  version          = "0.8.0-MS9v1"
   namespace        = "theiacloud"
   create_namespace = true
 
@@ -195,5 +196,10 @@ resource "helm_release" "theia-cloud" {
   set {
     name  = "keycloak.authUrl"
     value = "https://${var.hostname}/keycloak/"
+  }
+
+  set {
+    name  = "operator.cloudProvider"
+    value = var.cloudProvider
   }
 }
