@@ -29,11 +29,14 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -44,14 +47,21 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapEnvSource;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ContainerPort;
+import io.fabric8.kubernetes.api.model.EnvFromSource;
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.SecretEnvSource;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
@@ -229,6 +239,91 @@ public final class AddedHandlerUtil {
 	    deployment.getSpec().getTemplate().getSpec().setImagePullSecrets(imagePullSecrets);
 	}
 	imagePullSecrets.add(new LocalObjectReference(secret));
+    }
+
+    public static void removeMonitorPort(Deployment deployment, AppDefinition appDefinition) {
+	String containerName = appDefinition.getSpec().getName();
+
+	Optional<Integer> maybeContainerIdx = findContainerIdxInDeployment(deployment, containerName);
+	if (maybeContainerIdx.isEmpty()) {
+	    LOGGER.error("Trying to remove monitor port in Deployment." + "Could not find the container "
+		    + containerName + " in Deployment named" + deployment.getMetadata().getName());
+	    return;
+	}
+	int containerIdx = maybeContainerIdx.get();
+	Container container = deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx);
+	List<ContainerPort> newContainerPorts = container.getPorts().stream()
+		.filter((p) -> !(p.getName().equals("monitor"))).collect(Collectors.toList());
+
+	deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx).setPorts(newContainerPorts);
+    }
+
+    /* ------------------- Addition of env vars to Deployments ------------------ */
+    public static void addCustomEnvVarsToDeploymentFromSession(String correlationId, Deployment deployment,
+	    Session session, AppDefinition appDefinition) {
+	String containerName = appDefinition.getSpec().getName();
+	Optional<Integer> maybeContainerIdx = findContainerIdxInDeployment(deployment, containerName);
+
+	if (maybeContainerIdx.isEmpty()) {
+	    LOGGER.error(LogMessageUtil.formatLogMessage(correlationId,
+		    "Trying to add custom env vars to Deployment from Session. Could not find the container "
+			    + containerName + " in Deployment named" + deployment.getMetadata().getName()));
+	    return;
+	}
+	int containerIdx = maybeContainerIdx.get();
+	Container container = deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx);
+
+	container = withDirectEnvVarsToContainer(container, session.getSpec().getEnvVars());
+	container = withEnvVarsFromRefsToContainer(container, session.getSpec().getEnvVarsFromConfigMaps(), false);
+	container = withEnvVarsFromRefsToContainer(container, session.getSpec().getEnvVarsFromSecrets(), true);
+
+	deployment.getSpec().getTemplate().getSpec().getContainers().set(containerIdx, container);
+    }
+
+    private static Container withEnvVarsFromRefsToContainer(Container container, List<String> refs,
+	    boolean isFromSecret) {
+	if (refs == null || refs.size() == 0)
+	    return container;
+
+	List<EnvFromSource> newEnvFromSources = refs.stream()
+		.map((ref) -> isFromSecret ? new EnvFromSource(null, null, new SecretEnvSource(ref, null))
+			: new EnvFromSource(new ConfigMapEnvSource(ref, null), null, null))
+		.collect(Collectors.toList());
+
+	List<EnvFromSource> combinedEnvVarFromSources = new LinkedList<>();
+	combinedEnvVarFromSources.addAll(container.getEnvFrom());
+	combinedEnvVarFromSources.addAll(newEnvFromSources);
+
+	container.setEnvFrom(combinedEnvVarFromSources);
+
+	return container;
+    }
+
+    private static Container withDirectEnvVarsToContainer(Container container, Map<String, String> mapEnvVars) {
+	if (mapEnvVars == null || mapEnvVars.size() == 0)
+	    return container;
+
+	List<EnvVar> newEnvVars = mapEnvVars.entrySet().stream()
+		.map((kv) -> new EnvVar(kv.getKey(), kv.getValue(), null)).collect(Collectors.toList());
+
+	List<EnvVar> combinedEnvVars = new LinkedList<>();
+	combinedEnvVars.addAll(container.getEnv());
+	combinedEnvVars.addAll(newEnvVars);
+
+	container.setEnv(combinedEnvVars);
+
+	return container;
+    }
+
+    private static Optional<Integer> findContainerIdxInDeployment(Deployment deployment, String containerName) {
+	List<Container> containers = deployment.getSpec().getTemplate().getSpec().getContainers();
+	for (int i = 0; i < containers.size(); i++) {
+	    if (containers.get(i).getName().equals(containerName)) {
+		return Optional.of(i);
+	    }
+	}
+
+	return Optional.empty();
     }
 
 }

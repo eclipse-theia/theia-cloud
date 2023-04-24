@@ -428,6 +428,39 @@
             "format" : "int32",
             "description" : "Number of minutes to wait for session launch. Default is 3 Minutes.",
             "type" : "integer"
+          },
+          "env" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/LaunchRequest.Env"
+            }, {
+              "description" : "Environment variables"
+            } ]
+          }
+        }
+      },
+      "LaunchRequest.Env" : {
+        "type" : "object",
+        "properties" : {
+          "fromMap" : {
+            "description" : "Map of environment variables to be passed to Deployment.  Ignored if Theia applications are started eagerly.  Empty by default.",
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "fromConfigMaps" : {
+            "description" : "List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef.  Ignored if Theia applications are started eagerly.  Empty by default.",
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "fromSecrets" : {
+            "description" : "List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef.  Ignored if Theia applications are started eagerly.  Empty by default.",
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
@@ -531,12 +564,30 @@
           "workspace" : {
             "type" : "string"
           },
-          "sessionSecret" : {
-            "type" : "string"
-          },
           "lastActivity" : {
             "format" : "int64",
             "type" : "integer"
+          },
+          "sessionSecret" : {
+            "type" : "string"
+          },
+          "envVars" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "envVarsFromConfigMaps" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "envVarsFromSecrets" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
