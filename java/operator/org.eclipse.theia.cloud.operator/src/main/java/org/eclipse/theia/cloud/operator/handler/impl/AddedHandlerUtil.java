@@ -55,7 +55,6 @@ import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapEnvSource;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.EnvFromSource;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
@@ -239,23 +238,6 @@ public final class AddedHandlerUtil {
 	    deployment.getSpec().getTemplate().getSpec().setImagePullSecrets(imagePullSecrets);
 	}
 	imagePullSecrets.add(new LocalObjectReference(secret));
-    }
-
-    public static void removeMonitorPort(Deployment deployment, AppDefinition appDefinition) {
-	String containerName = appDefinition.getSpec().getName();
-
-	Optional<Integer> maybeContainerIdx = findContainerIdxInDeployment(deployment, containerName);
-	if (maybeContainerIdx.isEmpty()) {
-	    LOGGER.error("Trying to remove monitor port in Deployment." + "Could not find the container "
-		    + containerName + " in Deployment named" + deployment.getMetadata().getName());
-	    return;
-	}
-	int containerIdx = maybeContainerIdx.get();
-	Container container = deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx);
-	List<ContainerPort> newContainerPorts = container.getPorts().stream()
-		.filter((p) -> !(p.getName().equals("monitor"))).collect(Collectors.toList());
-
-	deployment.getSpec().getTemplate().getSpec().getContainers().get(containerIdx).setPorts(newContainerPorts);
     }
 
     /* ------------------- Addition of env vars to Deployments ------------------ */
