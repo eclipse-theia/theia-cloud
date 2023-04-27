@@ -2,6 +2,21 @@ variable "install_ingress_controller" {
   description = "Whether to install the nginx ingress controller"
 }
 
+variable "install_theia_cloud_base" {
+  description = "Whether to install theia cloud base"
+  default     = true
+}
+
+variable "install_theia_cloud" {
+  description = "Whether to install theia cloud"
+  default     = true
+}
+
+variable "install_selfsigned_issuer" {
+  description = "Whether to install an additional self signed issuer"
+  default     = false
+}
+
 variable "cert_manager_issuer_email" {
   description = "EMail address used to create certificates."
 }
@@ -10,11 +25,10 @@ variable "cert_manager_cluster_issuer" {
   type = string
 
   validation {
-    condition     = length(regexall("^(letsencrypt-prod|theia-cloud-selfsigned-issuer)$", var.cert_manager_cluster_issuer)) > 0
-    error_message = "ERROR: Valid types are \"letsencrypt-prod\" and \"theia-cloud-selfsigned-issuer\"!"
+    condition     = length(regexall("^(letsencrypt-prod|theia-cloud-selfsigned-issuer|keycloak-selfsigned-issuer)$", var.cert_manager_cluster_issuer)) > 0
+    error_message = "ERROR: Valid values are \"letsencrypt-prod\", \"theia-cloud-selfsigned-issuer\", and \"keycloak-selfsigned-issuer\"!"
   }
 }
-
 
 variable "cert_manager_common_name" {
   description = "The common name for the certificate"
@@ -106,6 +120,7 @@ resource "helm_release" "nginx-ingress-controller" {
 }
 
 resource "helm_release" "theia-cloud-base" {
+  count            = var.install_theia_cloud_base ? 1 : 0
   depends_on       = [helm_release.cert-manager, helm_release.nginx-ingress-controller] # we need to install cert issuers
   name             = "theia-cloud-base"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
@@ -120,8 +135,14 @@ resource "helm_release" "theia-cloud-base" {
   }
 }
 
+resource "kubectl_manifest" "selfsigned_issuer" {
+  count      = var.install_selfsigned_issuer ? 1 : 0
+  depends_on = [helm_release.cert-manager, helm_release.nginx-ingress-controller] # we need to install cert issuers
+  yaml_body  = file("${path.module}/clusterissuer-selfsigned.yaml")
+}
+
 resource "helm_release" "keycloak" {
-  depends_on       = [helm_release.theia-cloud-base] # we use the cert issuer from theia cloud base
+  depends_on       = [helm_release.theia-cloud-base, kubectl_manifest.selfsigned_issuer] # we need an existing issuer
   name             = "keycloak"
   repository       = "https://charts.bitnami.com/bitnami"
   chart            = "keycloak"
@@ -176,6 +197,7 @@ resource "helm_release" "keycloak" {
 }
 
 resource "helm_release" "theia-cloud" {
+  count            = var.install_theia_cloud ? 1 : 0
   depends_on       = [helm_release.keycloak] # wait for keycloak to make the default cert available
   name             = "theia-cloud"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"

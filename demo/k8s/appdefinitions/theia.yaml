@@ -22,6 +22,7 @@ spec:
     strategy: FIXEDTIME
   uid: 101
   uplinkLimit: 30000
+  mountPath: /home/project/persisted
   monitor:
     port: 8081
     activityTracker:
