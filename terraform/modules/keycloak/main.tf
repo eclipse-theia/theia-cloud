@@ -12,6 +12,10 @@ variable "keycloak_test_user_bar_password" {
   sensitive   = true
 }
 
+variable "valid_redirect_uri" {
+  description = "URI for redirects."
+}
+
 resource "keycloak_realm" "theia-cloud" {
   realm   = "TheiaCloud"
   enabled = true
@@ -31,13 +35,13 @@ resource "keycloak_openid_client" "theia-cloud" {
   use_refresh_tokens                        = true
   use_refresh_tokens_client_credentials     = false
   valid_post_logout_redirect_uris = [
-    "+"
+    "${var.valid_redirect_uri}"
   ]
   valid_redirect_uris = [
-    "https://${var.hostname}/*"
+    "${var.valid_redirect_uri}"
   ]
   web_origins = [
-    "+"
+    "${var.valid_redirect_uri}"
   ]
 }
 

@@ -52,6 +52,13 @@ provider "helm" {
   }
 }
 
+provider "kubectl" {
+  load_config_file       = false
+  host                   = module.cluster.cluster_host
+  token                  = module.cluster.cluster_token
+  cluster_ca_certificate = module.cluster.cluster_ca_certificate
+}
+
 module "helm" {
   source = "../../modules/helm"
 
@@ -83,4 +90,5 @@ module "keycloak" {
   hostname                        = "${google_compute_address.host_ip.address}.sslip.io"
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
+  valid_redirect_uri              = "https://${google_compute_address.host_ip.address}.sslip.io/*"
 }

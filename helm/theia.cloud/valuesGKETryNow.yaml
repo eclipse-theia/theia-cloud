@@ -32,7 +32,7 @@ landingPage:
       label: "CDT.cloud Blueprint"
 
 keycloak:
-  enable: false
+  enable: true
   authUrl: "https://keycloak.34.141.62.32.nip.io/"
   keycloakRealm: "TheiaCloud"
   keycloakClientId: "theia-cloud"

@@ -20,8 +20,9 @@ spec:
   timeout:
     limit: 30
     strategy: FIXEDTIME
-  uid: 1000
+  uid: 1001
   uplinkLimit: 30000
+  mountPath: /home/project/persisted
   monitor:
     port: 8081
     activityTracker:

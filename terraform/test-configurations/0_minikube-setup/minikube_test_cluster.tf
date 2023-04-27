@@ -5,6 +5,7 @@ variable "kubernetes_version" {
 
 variable "cert_manager_issuer_email" {
   description = "EMail address used to create certificates."
+  default     = "tester@theia-cloud.io"
 }
 
 variable "keycloak_admin_password" {
@@ -29,14 +30,6 @@ module "cluster" {
 }
 
 provider "kubernetes" {
-  host                   = module.cluster.cluster_host
-  client_certificate     = module.cluster.cluster_client_certificate
-  client_key             = module.cluster.cluster_client_key
-  cluster_ca_certificate = module.cluster.cluster_ca_certificate
-}
-
-provider "kubectl" {
-  load_config_file       = false
   host                   = module.cluster.cluster_host
   client_certificate     = module.cluster.cluster_client_certificate
   client_key             = module.cluster.cluster_client_key
@@ -73,6 +66,14 @@ provider "helm" {
   }
 }
 
+provider "kubectl" {
+  load_config_file       = false
+  host                   = module.cluster.cluster_host
+  client_certificate     = module.cluster.cluster_client_certificate
+  client_key             = module.cluster.cluster_client_key
+  cluster_ca_certificate = module.cluster.cluster_ca_certificate
+}
+
 module "host" {
   depends_on = [module.cluster]
 
@@ -87,7 +88,7 @@ module "helm" {
 
   install_ingress_controller   = false
   cert_manager_issuer_email    = var.cert_manager_issuer_email
-  cert_manager_cluster_issuer  = "theia-cloud-selfsigned-issuer"
+  cert_manager_cluster_issuer  = "keycloak-selfsigned-issuer"
   cert_manager_common_name     = "${module.host.host}.nip.io"
   hostname                     = "${module.host.host}.nip.io"
   keycloak_admin_password      = var.keycloak_admin_password
@@ -98,6 +99,9 @@ module "helm" {
   postgresql_volumePermissions = true
   service_type                 = "ClusterIP"
   cloudProvider                = "MINIKUBE"
+  install_selfsigned_issuer    = true
+  install_theia_cloud_base     = false
+  install_theia_cloud          = false
 }
 
 provider "keycloak" {
@@ -117,5 +121,5 @@ module "keycloak" {
   hostname                        = "${module.host.host}.nip.io"
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
-  valid_redirect_uri              = "https://${module.host.host}.nip.io/*"
+  valid_redirect_uri              = "*"
 }
