@@ -60,7 +60,7 @@ A workspace is a cross-section for a specific application definition, user, and 
 |label|string|A human-readable identifier for the workspace|
 |appDefinition|string|The app definition name on which this workspace is based|
 |user|string|The user ID that created that workspace|
-|storange|string|The name of the persistent storage that is used for this workspace|
+|storage|string|The name of the persistent storage that is used for this workspace|
 
 ### Session
 
