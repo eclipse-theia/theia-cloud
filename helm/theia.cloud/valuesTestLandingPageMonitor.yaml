@@ -3,8 +3,8 @@ app:
   # logo: test.svg use full path; not working yet after helm-repository switch
 
 image:
-  # name: theiacloud/theia-cloud-activity-demo:0.8.0.MS9-theia
-  name: theiacloud/theia-cloud-activity-demo:0.8.0.MS9
+  # name: theiacloud/theia-cloud-activity-demo:0.8.0.MS10-theia
+  name: theiacloud/theia-cloud-activity-demo:0.8.0.MS10
   imagePullPolicy: IfNotPresent
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "0"
@@ -18,7 +18,7 @@ hosts:
     instance: instances
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.8.0.MS9
+  image: theiacloud/theia-cloud-landing-page:0.8.0.MS10
   imagePullPolicy: Always
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: false

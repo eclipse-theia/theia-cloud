@@ -5,7 +5,7 @@ app:
   name: Theia Cloud
 
 image:
-  name: theiacloud/theia-cloud-demo:0.8.0.MS9
+  name: theiacloud/theia-cloud-demo:0.8.0.MS10
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
@@ -19,7 +19,7 @@ hosts:
     instance: instances
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.8.0.MS9
+  image: theiacloud/theia-cloud-landing-page:0.8.0.MS10
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: false
 
@@ -34,6 +34,7 @@ operator:
   eagerStart: false
   bandwidthLimiter: "WONDERSHAPER"
   sessionsPerUser: "1"
+  storageClassName: ""
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
