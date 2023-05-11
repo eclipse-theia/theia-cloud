@@ -31,17 +31,24 @@ public final class WorkspaceUtil {
 	// util
     }
 
-    public static String generateWorkspaceName(String user, String appDefinitionName) {
+    public static String generateUniqueWorkspaceName(String user, String appDefinitionName) {
 	return asValidName((WORKSPACE_PREFIX + Instant.now().toEpochMilli() + getWorkspaceDescription(appDefinitionName)
 		+ "-" + user).toLowerCase(), WORKSPACE_NAME_LIMIT);
+    }
+
+    public static String generateNonUniqueWorkspaceName(String user, String appDefinitionName) {
+	return asValidName((WORKSPACE_PREFIX + getWorkspaceDescription(appDefinitionName) + "-" + user).toLowerCase(),
+		WORKSPACE_NAME_LIMIT);
     }
 
     public static String getSessionName(String workspaceName) {
 	return workspaceName + SESSION_SUFFIX;
     }
 
-    public static String getSessionName(String user, String appDefinitionName) {
-	return getSessionName(generateWorkspaceName(user, getWorkspaceDescription(appDefinitionName)));
+    public static String getSessionName(String user, String appDefinitionName, boolean unique) {
+	String workspaceName = unique ? generateUniqueWorkspaceName(user, getWorkspaceDescription(appDefinitionName))
+		: generateNonUniqueWorkspaceName(user, getWorkspaceDescription(appDefinitionName));
+	return getSessionName(workspaceName);
     }
 
     public static String getStorageName(Workspace workspace) {
