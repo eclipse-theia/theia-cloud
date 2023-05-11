@@ -19,8 +19,14 @@ The main difference is that our client is not confidential but public, since we 
     * Name: groups
     * Mapper Type: "Group Membership"
     * Token Claim Name: groups
+    * Open the "Add to ID token"
+    * Open the "Add to access token"
+    * Open the "Add to userinfo"
+    * Open the "Full group path"
   * Client Audience Mapper
     * Name: audience
     * Mapper Type: Audience
     * Included Client Audience: theia-cloud
     * Included Custom Audience: theia-cloud
+    * Open the "Add to ID token"
+    * Open the "Add to access token"
