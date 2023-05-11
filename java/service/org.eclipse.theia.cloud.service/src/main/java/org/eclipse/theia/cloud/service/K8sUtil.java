@@ -72,7 +72,7 @@ public final class K8sUtil {
 
     public String launchEphemeralSession(String correlationId, String appDefinition, String user, int timeout,
 	    EnvironmentVars env) {
-	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition), appDefinition, user);
+	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition, false), appDefinition, user);
 	sessionSpec = sessionSpecWithEnv(sessionSpec, env);
 
 	return launchSession(correlationId, sessionSpec, timeout);
