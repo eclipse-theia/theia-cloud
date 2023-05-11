@@ -66,3 +66,8 @@ spec:
             value: placeholder-keycloak-env-realm
           - name: THEIACLOUD_KEYCLOAK_CLIENT_ID
             value: placeholder-keycloak-env-clientid
+          securityContext:
+            runAsUser: placeholder-uid
+            runAsGroup: placeholder-uid
+      securityContext:
+        fsGroup: placeholder-uid
