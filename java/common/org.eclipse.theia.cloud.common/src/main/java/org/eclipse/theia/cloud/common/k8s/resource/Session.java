@@ -25,14 +25,14 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v6beta")
+@Version("v7beta")
 @Group("theia.cloud")
 @Singular("session")
 @Plural("sessions")
 public class Session extends CustomResource<SessionSpec, SessionStatus> implements Namespaced {
 
     private static final long serialVersionUID = 4518092300237069237L;
-    public static final String API = "theia.cloud/v6beta";
+    public static final String API = "theia.cloud/v7beta";
     public static final String KIND = "Session";
     public static final String CRD_NAME = "sessions.theia.cloud";
 

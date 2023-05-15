@@ -25,7 +25,7 @@ docker build -t theiacloud/theia-cloud-git-init:local -f dockerfiles/git-init/Do
 ssh-keygen -t ed25519 -C "Test TC Git Init SSH Keypair"
 ```
 
-### Test Checkout
+### Test Checkout with container
 
 ```bash
 # Adjust URLs and Password/PATs below
@@ -54,4 +54,45 @@ docker run --rm theiacloud/theia-cloud-git-init:local "$HTTP_PRIVATE_WITH_USERNA
 
 # SSH
 docker run --env GIT_PROMPT1=$SSH_PASSWORD -v ~/tmp/ssh/:/etc/theia-cloud-ssh --rm theiacloud/theia-cloud-git-init:local "$SSH_REPO" "/tmp/my-repo" "$BRANCH"
+```
+
+### Create Kubernetes Resources
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: foo-theiacloud-io-basic-auth
+  namespace: theiacloud
+  labels:
+    theiaCloudInit: git
+  annotations:
+    theiaCloudUser: foo@theia-cloud.io
+type: kubernetes.io/basic-auth
+stringData:
+  username: username
+  password: pat
+```
+
+```yaml
+apiVersion: theia.cloud/v5beta
+kind: Session
+metadata:
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io-session
+  namespace: theiacloud
+spec:
+  appDefinition: theia-cloud-demo
+  envVars: {}
+  envVarsFromConfigMaps: []
+  envVarsFromSecrets: []
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io-session
+  user: foo@theia-cloud.io
+  workspace: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io
+  sessionSecret: 3e68605f-0c6d-4ae5-9816-738f15d34fc9
+  initOperations:
+    - id: git
+      arguments:
+        - https://gitlab.eclipse.org/username/my.repository.git
+        - maintenance_1_1_x
+        - foo-theiacloud-io-basic-auth
 ```

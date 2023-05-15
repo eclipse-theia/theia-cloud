@@ -30,6 +30,7 @@ import org.eclipse.theia.cloud.operator.handler.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.DeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
+import org.eclipse.theia.cloud.operator.handler.InitOperationHandler;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.SessionHandler;
@@ -39,6 +40,7 @@ import org.eclipse.theia.cloud.operator.handler.impl.BandwidthLimiterImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultDeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultPersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultPersistentVolumeTemplateReplacements;
+import org.eclipse.theia.cloud.operator.handler.impl.GitInitOperationHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.IngressPathProviderImpl;
 import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTracker;
 import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTrackerImpl;
@@ -71,6 +73,7 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 	bind(MonitorMessagingService.class).to(bindMonitorMessagingService()).in(Singleton.class);
 
 	configure(MultiBinding.create(TimeoutStrategy.class), this::configureTimeoutStrategies);
+	configure(MultiBinding.create(InitOperationHandler.class), this::configureInitOperationHandlers);
     }
 
     protected <T> void configure(final MultiBinding<T> binding, final Consumer<MultiBinding<T>> configurator) {
@@ -118,6 +121,10 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
     protected void configureTimeoutStrategies(final MultiBinding<TimeoutStrategy> binding) {
 	binding.add(TimeoutStrategy.FixedTime.class);
+    }
+
+    protected void configureInitOperationHandlers(final MultiBinding<InitOperationHandler> binding) {
+	binding.add(GitInitOperationHandler.class);
     }
 
     @Provides
