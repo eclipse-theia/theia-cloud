@@ -58,6 +58,7 @@ def getHostname(repository):
 parser = argparse.ArgumentParser()
 parser.add_argument("repository", help="The repository URL", type=str)
 parser.add_argument("directory", help="The directory to clone into", type=str)
+parser.add_argument("checkout", help="The branch/commit id/tag to checkout", type=str)
 args = parser.parse_args()
 
 # Set up git credential helper
@@ -83,3 +84,11 @@ if code != 0:
 
 if debugLogging:
     runProcess(["ls", "-al", args.directory])
+
+# Checkout
+code = runProcess(["git", "-C", args.directory, "checkout", args.checkout])
+if code != 0:
+    exit(code)
+
+if debugLogging:
+    runProcess(["git", "-C", args.directory, "status"])
