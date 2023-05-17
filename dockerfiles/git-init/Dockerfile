@@ -2,7 +2,10 @@ FROM debian:11-slim
 
 RUN apt update && \
     apt install python git -y && \
-    apt clean
+    apt clean && \
+    mkdir /user && \
+    chmod 777 /user && \
+    chmod 777 /etc/passwd
 
 WORKDIR /tmp
 COPY python/git-init/entrypoint.sh .

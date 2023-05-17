@@ -35,18 +35,26 @@ import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudPersistentVolumeU
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarSource;
+import io.fabric8.kubernetes.api.model.KeyToPath;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretKeySelector;
+import io.fabric8.kubernetes.api.model.SecretVolumeSource;
 import io.fabric8.kubernetes.api.model.SecurityContext;
+import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 
 public class GitInitOperationHandler implements InitOperationHandler {
 
+    protected static final String ETC_THEIA_CLOUD_SSH = "/etc/theia-cloud-ssh";
+    protected static final String ID_THEIACLOUD = "id_theiacloud";
+    protected static final String SSH_PRIVATEKEY = "ssh-privatekey";
+    protected static final String SSH_KEY = "ssh-key";
     protected static final String PASSWORD = "password";
     protected static final String USERNAME = "username";
     protected static final String GIT_PROMPT1 = "GIT_PROMPT1";
     protected static final String GIT_PROMPT2 = "GIT_PROMPT2";
+    protected static final String KUBERNETES_IO_SSH_AUTH = "kubernetes.io/ssh-auth";
     protected static final String KUBERNETES_IO_BASIC_AUTH = "kubernetes.io/basic-auth";
     protected static final String HTTPS = "https://";
     protected static final String HTTP = "http://";
@@ -80,6 +88,7 @@ public class GitInitOperationHandler implements InitOperationHandler {
 	}
 
 	List<Container> initContainers = deployment.getSpec().getTemplate().getSpec().getInitContainers();
+	List<Volume> volumes = deployment.getSpec().getTemplate().getSpec().getVolumes();
 
 	Container gitInitContainer = new Container();
 	initContainers.add(gitInitContainer);
@@ -100,7 +109,7 @@ public class GitInitOperationHandler implements InitOperationHandler {
 	securityContext.setRunAsUser(Long.valueOf(appDefinition.getSpec().getUid()));
 	securityContext.setRunAsGroup(Long.valueOf(appDefinition.getSpec().getUid()));
 
-	VolumeMount volumeMount = AddedHandlerUtil.createVolumeMount(appDefinition.getSpec());
+	VolumeMount volumeMount = AddedHandlerUtil.createUserDataVolumeMount(appDefinition.getSpec());
 	gitInitContainer.getVolumeMounts().add(volumeMount);
 
 	String secretName = args.get(2);
@@ -131,8 +140,9 @@ public class GitInitOperationHandler implements InitOperationHandler {
 		return;
 	    }
 	} else {
-	    /* get SSH Key and password from secret */
-	    // TODO JF
+	    if (!injectSSHRepoCredentials(correlationId, secret, secretName, repository, gitInitContainer, volumes)) {
+		return;
+	    }
 	}
 
     }
@@ -191,6 +201,45 @@ public class GitInitOperationHandler implements InitOperationHandler {
 	    envVar.setValueFrom(envVarSource);
 	    envVarSource.setSecretKeyRef(new SecretKeySelector(PASSWORD, secretName, false));
 	}
+
+	return true;
+    }
+
+    protected boolean injectSSHRepoCredentials(String correlationId, Secret secret, String secretName,
+	    String repository, Container gitInitContainer, List<Volume> volumes) {
+
+	if (!KUBERNETES_IO_SSH_AUTH.equals(secret.getType())) {
+	    LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, MessageFormat
+		    .format("Secret with name {0} is not of type {1}.", secretName, KUBERNETES_IO_SSH_AUTH)));
+	    return false;
+	}
+
+	/* inject password */
+	EnvVar envVar = new EnvVar();
+	gitInitContainer.getEnv().add(envVar);
+	envVar.setName(GIT_PROMPT1);
+
+	EnvVarSource envVarSource = new EnvVarSource();
+	envVar.setValueFrom(envVarSource);
+	envVarSource.setSecretKeyRef(new SecretKeySelector(PASSWORD, secretName, false));
+
+	/* inject ssh key */
+	Volume volume = new Volume();
+	volumes.add(volume);
+	volume.setName(SSH_KEY);
+	SecretVolumeSource secretVolumeSource = new SecretVolumeSource();
+	volume.setSecret(secretVolumeSource);
+	secretVolumeSource.setSecretName(secretName);
+	KeyToPath keyToPath = new KeyToPath();
+	secretVolumeSource.getItems().add(keyToPath);
+	keyToPath.setKey(SSH_PRIVATEKEY);
+	keyToPath.setPath(ID_THEIACLOUD);
+
+	VolumeMount volumeMount = new VolumeMount();
+	gitInitContainer.getVolumeMounts().add(volumeMount);
+	volumeMount.setName(SSH_KEY);
+	volumeMount.setMountPath(ETC_THEIA_CLOUD_SSH);
+	volumeMount.setReadOnly(true);
 
 	return true;
     }

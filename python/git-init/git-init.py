@@ -75,7 +75,7 @@ if os.path.isfile(sshKey):
 
     if debugLogging:
         runProcess(["ssh-add", "-l"])
-        runProcess(["cat", "/root/.ssh/known_hosts"])
+        runProcess(["cat", os.environ.get('HOME') + "/.ssh/known_hosts"])
 
 # Clone repository
 code = runProcess(["git", "clone", args.repository, args.directory])

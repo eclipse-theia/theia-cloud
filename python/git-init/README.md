@@ -58,6 +58,8 @@ docker run --env GIT_PROMPT1=$SSH_PASSWORD -v ~/tmp/ssh/:/etc/theia-cloud-ssh --
 
 ### Create Kubernetes Resources
 
+#### Secret for HTTP(S) auth
+
 ```yaml
 apiVersion: v1
 kind: Secret
@@ -73,6 +75,8 @@ stringData:
   username: username
   password: pat
 ```
+
+#### Example Session for HTTP(S) auth
 
 ```yaml
 apiVersion: theia.cloud/v5beta
@@ -95,4 +99,49 @@ spec:
         - https://gitlab.eclipse.org/username/my.repository.git
         - maintenance_1_1_x
         - foo-theiacloud-io-basic-auth
+```
+
+#### Secrets for SSH auth
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: foo-theiacloud-io-ssh-auth
+  namespace: theiacloud
+  labels:
+    theiaCloudInit: git
+  annotations:
+    theiaCloudUser: foo@theia-cloud.io
+type: kubernetes.io/ssh-auth
+stringData:
+  ssh-privatekey: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    b3B...
+  password: sshpw
+```
+
+#### Example Session for SSH auth
+
+```yaml
+apiVersion: theia.cloud/v5beta
+kind: Session
+metadata:
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io-session
+  namespace: theiacloud
+spec:
+  appDefinition: theia-cloud-demo
+  envVars: {}
+  envVarsFromConfigMaps: []
+  envVarsFromSecrets: []
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io-session
+  user: foo@theia-cloud.io
+  workspace: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io
+  sessionSecret: 3e68605f-0c6d-4ae5-9816-738f15d34fc9
+  initOperations:
+    - id: git
+      arguments:
+        - git@gitlab.eclipse.org:username/my.repository.git
+        - maintenance_1_1_x
+        - foo-theiacloud-io-ssh-auth
 ```

@@ -1,2 +1,2 @@
 #!/bin/bash
-ssh-keyscan -H $@ >> /root/.ssh/known_hosts
+ssh-keyscan -H $@ >> $HOME/.ssh/known_hosts

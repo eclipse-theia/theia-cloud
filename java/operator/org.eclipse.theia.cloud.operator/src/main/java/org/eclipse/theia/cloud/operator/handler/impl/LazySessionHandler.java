@@ -427,10 +427,10 @@ public class LazySessionHandler implements SessionHandler {
 
     protected void addVolumeClaim(Deployment deployment, String pvcName, AppDefinitionSpec appDefinition) {
 	PodSpec podSpec = deployment.getSpec().getTemplate().getSpec();
-	Volume volume = AddedHandlerUtil.createVolume(pvcName);
+	Volume volume = AddedHandlerUtil.createUserDataVolume(pvcName);
 	podSpec.getVolumes().add(volume);
 	Container container = TheiaCloudPersistentVolumeUtil.getTheiaContainer(podSpec, appDefinition);
-	VolumeMount volumeMount = AddedHandlerUtil.createVolumeMount(appDefinition);
+	VolumeMount volumeMount = AddedHandlerUtil.createUserDataVolumeMount(appDefinition);
 	container.getVolumeMounts().add(volumeMount);
     }
 

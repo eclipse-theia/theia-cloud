@@ -363,7 +363,7 @@ public final class AddedHandlerUtil {
 	}
     }
 
-    public static Volume createVolume(String pvcName) {
+    public static Volume createUserDataVolume(String pvcName) {
 	Volume volume = new Volume();
 	volume.setName(USER_DATA);
 	PersistentVolumeClaimVolumeSource persistentVolumeClaim = new PersistentVolumeClaimVolumeSource();
@@ -372,7 +372,7 @@ public final class AddedHandlerUtil {
 	return volume;
     }
 
-    public static VolumeMount createVolumeMount(AppDefinitionSpec appDefinition) {
+    public static VolumeMount createUserDataVolumeMount(AppDefinitionSpec appDefinition) {
 	VolumeMount volumeMount = new VolumeMount();
 	volumeMount.setName(AddedHandlerUtil.USER_DATA);
 	volumeMount.setMountPath(TheiaCloudPersistentVolumeUtil.getMountPath(appDefinition));
