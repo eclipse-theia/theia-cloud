@@ -71,21 +71,27 @@ public class SessionSpec implements UserScopedSpec {
 	this(name, appDefinition, user, null);
     }
 
+    public SessionSpec(String name, String appDefinition, String user, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
+	this(name, appDefinition, user, null, Map.of(), List.of(), List.of(), List.of());
+    }
+
     public SessionSpec(String name, String appDefinition, String user, String workspace) {
-	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
-    }
-
-    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars) {
-	this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
-    }
-
-    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
-	    List<String> envVarsFromConfigMaps) {
-	this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
+	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of(), List.of());
     }
 
     public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
 	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
+	this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, envVarsFromSecrets, List.of());
+    }
+
+    public SessionSpec(String name, String appDefinition, String user, String workspace,
+	    List<InitOperation> initOperations) {
+	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of(), initOperations);
+    }
+
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets, List<InitOperation> initOperations) {
 	this.name = name;
 	this.appDefinition = appDefinition;
 	this.user = user;
@@ -93,6 +99,7 @@ public class SessionSpec implements UserScopedSpec {
 	this.envVars = envVars;
 	this.envVarsFromConfigMaps = envVarsFromConfigMaps;
 	this.envVarsFromSecrets = envVarsFromSecrets;
+	this.initOperations = initOperations;
     }
 
     public String getName() {

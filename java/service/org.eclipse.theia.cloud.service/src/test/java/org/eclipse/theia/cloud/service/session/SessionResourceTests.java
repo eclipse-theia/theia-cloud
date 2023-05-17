@@ -402,7 +402,7 @@ class SessionResourceTests {
 
 	// Assert
 	Mockito.verify(k8sUtil, never()).getWorkspace(anyString(), anyString());
-	Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any());
+	Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any(), any());
 	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
@@ -425,7 +425,7 @@ class SessionResourceTests {
 
 	// Assert
 	Mockito.verify(k8sUtil, never()).getWorkspace(anyString(), anyString());
-	Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any());
+	Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any(), any());
 	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 

@@ -73,9 +73,9 @@ public class GitInitOperationHandler implements InitOperationHandler {
     public void addInitContainer(String correlationId, TheiaCloudClient client, Deployment deployment,
 	    AppDefinition appDefinition, Session session, List<String> args) {
 
-	if (args.size() != 3) {
+	if (args.size() < 2 || args.size() > 3) {
 	    LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, MessageFormat.format(
-		    "Git init expects three arguments (repository path, branch, secret-name). Passed arguments are: {0}",
+		    "Git init expects 2-3 arguments (repository path, branch, (secret-name)). Passed arguments are: {0}",
 		    args.stream().collect(Collectors.joining(",")))));
 	    return;
 	}
@@ -112,27 +112,33 @@ public class GitInitOperationHandler implements InitOperationHandler {
 	VolumeMount volumeMount = AddedHandlerUtil.createUserDataVolumeMount(appDefinition.getSpec());
 	gitInitContainer.getVolumeMounts().add(volumeMount);
 
-	String secretName = args.get(2);
-	Secret secret = client.kubernetes().secrets().withName(secretName).get();
-	if (secret == null) {
-	    LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId,
-		    MessageFormat.format("No secret with name {0} found.", secretName)));
-	    return;
-	}
+	Optional<String> secretName = args.size() == 3 ? Optional.of(args.get(2)) : Optional.empty();
+	Optional<Secret> secret;
+	if (secretName.isPresent()) {
+	    Secret k8sSecret = client.kubernetes().secrets().withName(secretName.get()).get();
+	    if (k8sSecret == null) {
+		LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId,
+			MessageFormat.format("No secret with name {0} found.", secretName)));
+		return;
+	    }
 
-	String theiaCloudInit = secret.getMetadata().getLabels().get(THEIA_CLOUD_INIT_LABEL);
-	if (theiaCloudInit == null || !ID.equals(theiaCloudInit)) {
-	    LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, MessageFormat
-		    .format("Secret with name {0} is not configured to be used with Git init.", secretName)));
-	    return;
-	}
+	    String theiaCloudInit = k8sSecret.getMetadata().getLabels().get(THEIA_CLOUD_INIT_LABEL);
+	    if (theiaCloudInit == null || !ID.equals(theiaCloudInit)) {
+		LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, MessageFormat
+			.format("Secret with name {0} is not configured to be used with Git init.", secretName)));
+		return;
+	    }
 
-	String theiaCloudUser = secret.getMetadata().getAnnotations().get("theiaCloudUser");
-	if (theiaCloudUser == null || !session.getSpec().getUser().equals(theiaCloudUser)) {
-	    LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId,
-		    MessageFormat.format("Secret with name {0} is not configured to be used by user {1}.", secretName,
-			    session.getSpec().getUser())));
-	    return;
+	    String theiaCloudUser = k8sSecret.getMetadata().getAnnotations().get("theiaCloudUser");
+	    if (theiaCloudUser == null || !session.getSpec().getUser().equals(theiaCloudUser)) {
+		LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId,
+			MessageFormat.format("Secret with name {0} is not configured to be used by user {1}.",
+				secretName, session.getSpec().getUser())));
+		return;
+	    }
+	    secret = Optional.of(k8sSecret);
+	} else {
+	    secret = Optional.empty();
 	}
 
 	if (isHTTP(repository)) {
@@ -147,99 +153,105 @@ public class GitInitOperationHandler implements InitOperationHandler {
 
     }
 
-    protected boolean injectHTTPRepoCredentials(String correlationId, Secret secret, String secretName,
-	    String repository, Container gitInitContainer) {
+    protected boolean injectHTTPRepoCredentials(String correlationId, Optional<Secret> secret,
+	    Optional<String> secretName, String repository, Container gitInitContainer) {
 	/* get username/password from secret */
 	boolean injectUsername = false;
 	boolean injectPassword = false;
 
-	if (!KUBERNETES_IO_BASIC_AUTH.equals(secret.getType())) {
-	    LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, MessageFormat
-		    .format("Secret with name {0} is not of type {1}.", secretName, KUBERNETES_IO_BASIC_AUTH)));
-	    return false;
-	}
+	if (secret.isPresent() && secretName.isPresent()) {
+	    if (!KUBERNETES_IO_BASIC_AUTH.equals(secret.get().getType())) {
+		LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, MessageFormat.format(
+			"Secret with name {0} is not of type {1}.", secretName.get(), KUBERNETES_IO_BASIC_AUTH)));
+		return false;
+	    }
 
-	String[] split = repository.toLowerCase().split(Pattern.quote("://"), 2);
-	if (split.length != 2) {
-	    LOGGER.error(LogMessageUtil.formatLogMessage(correlationId, MessageFormat
-		    .format("Failed to check whether repository {0} contains any user information. ", repository)));
-	    return false;
-	}
-	String repositoryWithoutProtocol = split[1];
-	if (repositoryWithoutProtocol.contains("@")) {
-	    if (repositoryWithoutProtocol.split(Pattern.quote("@"))[0].contains(":")) {
-		/* username and password part of URL */
+	    String[] split = repository.toLowerCase().split(Pattern.quote("://"), 2);
+	    if (split.length != 2) {
+		LOGGER.error(LogMessageUtil.formatLogMessage(correlationId, MessageFormat
+			.format("Failed to check whether repository {0} contains any user information. ", repository)));
+		return false;
+	    }
+	    String repositoryWithoutProtocol = split[1];
+	    if (repositoryWithoutProtocol.contains("@")) {
+		if (repositoryWithoutProtocol.split(Pattern.quote("@"))[0].contains(":")) {
+		    /* username and password part of URL */
+		} else {
+		    /* username part of url */
+		    injectPassword = true;
+		}
 	    } else {
-		/* username part of url */
+		injectUsername = true;
 		injectPassword = true;
 	    }
-	} else {
-	    injectUsername = true;
-	    injectPassword = true;
 	}
 
 	LOGGER.info(LogMessageUtil.formatLogMessage(correlationId,
 		MessageFormat.format("Inject username: {0}; Inject password: {1}", injectUsername, injectPassword)));
 
-	String nextEnv = GIT_PROMPT1;
-	if (injectUsername) {
-	    EnvVar envVar = new EnvVar();
-	    gitInitContainer.getEnv().add(envVar);
-	    envVar.setName(nextEnv);
-	    nextEnv = GIT_PROMPT2;
+	if (secretName.isPresent()) {
+	    String nextEnv = GIT_PROMPT1;
+	    if (injectUsername) {
+		EnvVar envVar = new EnvVar();
+		gitInitContainer.getEnv().add(envVar);
+		envVar.setName(nextEnv);
+		nextEnv = GIT_PROMPT2;
 
-	    EnvVarSource envVarSource = new EnvVarSource();
-	    envVar.setValueFrom(envVarSource);
-	    envVarSource.setSecretKeyRef(new SecretKeySelector(USERNAME, secretName, false));
-	}
-	if (injectPassword) {
-	    EnvVar envVar = new EnvVar();
-	    gitInitContainer.getEnv().add(envVar);
-	    envVar.setName(nextEnv);
+		EnvVarSource envVarSource = new EnvVarSource();
+		envVar.setValueFrom(envVarSource);
+		envVarSource.setSecretKeyRef(new SecretKeySelector(USERNAME, secretName.get(), false));
+	    }
+	    if (injectPassword) {
+		EnvVar envVar = new EnvVar();
+		gitInitContainer.getEnv().add(envVar);
+		envVar.setName(nextEnv);
 
-	    EnvVarSource envVarSource = new EnvVarSource();
-	    envVar.setValueFrom(envVarSource);
-	    envVarSource.setSecretKeyRef(new SecretKeySelector(PASSWORD, secretName, false));
+		EnvVarSource envVarSource = new EnvVarSource();
+		envVar.setValueFrom(envVarSource);
+		envVarSource.setSecretKeyRef(new SecretKeySelector(PASSWORD, secretName.get(), false));
+	    }
 	}
 
 	return true;
     }
 
-    protected boolean injectSSHRepoCredentials(String correlationId, Secret secret, String secretName,
-	    String repository, Container gitInitContainer, List<Volume> volumes) {
+    protected boolean injectSSHRepoCredentials(String correlationId, Optional<Secret> secret,
+	    Optional<String> secretName, String repository, Container gitInitContainer, List<Volume> volumes) {
 
-	if (!KUBERNETES_IO_SSH_AUTH.equals(secret.getType())) {
-	    LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, MessageFormat
-		    .format("Secret with name {0} is not of type {1}.", secretName, KUBERNETES_IO_SSH_AUTH)));
-	    return false;
+	if (secret.isPresent() && secretName.isPresent()) {
+	    if (!KUBERNETES_IO_SSH_AUTH.equals(secret.get().getType())) {
+		LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, MessageFormat
+			.format("Secret with name {0} is not of type {1}.", secretName.get(), KUBERNETES_IO_SSH_AUTH)));
+		return false;
+	    }
+
+	    /* inject password */
+	    EnvVar envVar = new EnvVar();
+	    gitInitContainer.getEnv().add(envVar);
+	    envVar.setName(GIT_PROMPT1);
+
+	    EnvVarSource envVarSource = new EnvVarSource();
+	    envVar.setValueFrom(envVarSource);
+	    envVarSource.setSecretKeyRef(new SecretKeySelector(PASSWORD, secretName.get(), false));
+
+	    /* inject ssh key */
+	    Volume volume = new Volume();
+	    volumes.add(volume);
+	    volume.setName(SSH_KEY);
+	    SecretVolumeSource secretVolumeSource = new SecretVolumeSource();
+	    volume.setSecret(secretVolumeSource);
+	    secretVolumeSource.setSecretName(secretName.get());
+	    KeyToPath keyToPath = new KeyToPath();
+	    secretVolumeSource.getItems().add(keyToPath);
+	    keyToPath.setKey(SSH_PRIVATEKEY);
+	    keyToPath.setPath(ID_THEIACLOUD);
+
+	    VolumeMount volumeMount = new VolumeMount();
+	    gitInitContainer.getVolumeMounts().add(volumeMount);
+	    volumeMount.setName(SSH_KEY);
+	    volumeMount.setMountPath(ETC_THEIA_CLOUD_SSH);
+	    volumeMount.setReadOnly(true);
 	}
-
-	/* inject password */
-	EnvVar envVar = new EnvVar();
-	gitInitContainer.getEnv().add(envVar);
-	envVar.setName(GIT_PROMPT1);
-
-	EnvVarSource envVarSource = new EnvVarSource();
-	envVar.setValueFrom(envVarSource);
-	envVarSource.setSecretKeyRef(new SecretKeySelector(PASSWORD, secretName, false));
-
-	/* inject ssh key */
-	Volume volume = new Volume();
-	volumes.add(volume);
-	volume.setName(SSH_KEY);
-	SecretVolumeSource secretVolumeSource = new SecretVolumeSource();
-	volume.setSecret(secretVolumeSource);
-	secretVolumeSource.setSecretName(secretName);
-	KeyToPath keyToPath = new KeyToPath();
-	secretVolumeSource.getItems().add(keyToPath);
-	keyToPath.setKey(SSH_PRIVATEKEY);
-	keyToPath.setPath(ID_THEIACLOUD);
-
-	VolumeMount volumeMount = new VolumeMount();
-	gitInitContainer.getVolumeMounts().add(volumeMount);
-	volumeMount.setName(SSH_KEY);
-	volumeMount.setMountPath(ETC_THEIA_CLOUD_SSH);
-	volumeMount.setReadOnly(true);
 
 	return true;
     }

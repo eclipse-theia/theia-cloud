@@ -23,6 +23,8 @@ public class TheiaCloudError {
     // client errors: 47x
     public static final TheiaCloudError INVALID_APP_ID = new TheiaCloudError(470, "Invalid application id.");
     public static final TheiaCloudError INVALID_WORKSPACE_NAME = new TheiaCloudError(471, "Invalid workspace name.");
+    public static final TheiaCloudError INVALID_GIT_INIT_CONFIGURATION = new TheiaCloudError(472,
+	    "Invalid git init configuration");
     public static final TheiaCloudError INVALID_APP_DEFINITION_NAME = new TheiaCloudError(473,
 	    "Invalid app definition name.");
     public static final TheiaCloudError INVALID_SESSION_NAME = new TheiaCloudError(474, "Invalid session name.");
