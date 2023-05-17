@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -17,14 +17,11 @@
 package org.eclipse.theia.cloud.service.workspace;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.service.ServiceRequest;
+import org.eclipse.theia.cloud.service.UserScopedServiceRequest;
 
 @Schema(name = "WorkspaceCreationRequest", description = "Request to create a new workspace.")
-public class WorkspaceCreationRequest extends ServiceRequest {
+public class WorkspaceCreationRequest extends UserScopedServiceRequest {
     public static final String KIND = "workspaceCreationRequest";
-
-    @Schema(description = "The user identification, usually the email address.", required = true)
-    public String user;
 
     @Schema(description = "The app this workspace will be used with.", required = false)
     public String appDefinition;

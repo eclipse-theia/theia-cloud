@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,17 +15,11 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(name = "LaunchRequest", description = "A request to launch a new session.")
-public class LaunchRequest extends ServiceRequest {
+public class LaunchRequest extends UserScopedServiceRequest {
     public static final String KIND = "launchRequest";
-
-    @Schema(description = "The user identification, usually the email address.", required = true)
-    public String user;
 
     @Schema(description = "The app to launch. Needs to be set if a new or ephemeral session should be launched. For an existing workspace the last app definition will be used if none is given.", required = false)
     public String appDefinition;

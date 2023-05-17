@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,14 +16,11 @@
 package org.eclipse.theia.cloud.service.session;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.service.ServiceRequest;
+import org.eclipse.theia.cloud.service.UserScopedServiceRequest;
 
 @Schema(name = "SessionStopRequest", description = "A request to stop a session")
-public class SessionStopRequest extends ServiceRequest {
+public class SessionStopRequest extends UserScopedServiceRequest {
     public static final String KIND = "sessionStopRequest";
-
-    @Schema(description = "The user identification, usually the email address.", required = true)
-    public String user;
 
     @Schema(description = "The name of the session to stop.", required = true)
     public String sessionName;

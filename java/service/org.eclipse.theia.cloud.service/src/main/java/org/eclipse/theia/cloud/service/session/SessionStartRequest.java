@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -18,14 +18,11 @@ package org.eclipse.theia.cloud.service.session;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.theia.cloud.service.EnvironmentVars;
-import org.eclipse.theia.cloud.service.ServiceRequest;
+import org.eclipse.theia.cloud.service.UserScopedServiceRequest;
 
 @Schema(name = "SessionStartRequest", description = "A request to start a session")
-public class SessionStartRequest extends ServiceRequest {
+public class SessionStartRequest extends UserScopedServiceRequest {
     public static final String KIND = "sessionStartRequest";
-
-    @Schema(description = "The user identification, usually the email address.", required = true)
-    public String user;
 
     @Schema(description = "The app to launch.", required = true)
     public String appDefinition;

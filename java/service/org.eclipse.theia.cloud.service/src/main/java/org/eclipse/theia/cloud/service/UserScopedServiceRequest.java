@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022-2023 EclipseSource and others.
+ * Copyright (C) 2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,27 +13,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.service.workspace;
+package org.eclipse.theia.cloud.service;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.service.UserScopedServiceRequest;
 
-@Schema(name = "WorkspaceListRequest", description = "Request to list workspaces of a user.")
-public class WorkspaceListRequest extends UserScopedServiceRequest {
-    public static final String KIND = "workspaceListRequest";
+/**
+ * Service request specifying a user.
+ */
+public class UserScopedServiceRequest extends ServiceRequest {
 
-    public WorkspaceListRequest() {
-	super(KIND);
+    @Schema(description = "The user identification, usually the email address.", required = true)
+    public String user;
+
+    public UserScopedServiceRequest(String kind) {
+	super(kind);
     }
 
-    public WorkspaceListRequest(String appId, String user) {
-	super(KIND, appId);
-	this.user = user;
+    public UserScopedServiceRequest(String kind, String appId) {
+	super(kind, appId);
     }
-
-    @Override
-    public String toString() {
-	return "WorkspaceListRequest [user=" + user + ", appId=" + appId + ", kind=" + kind + "]";
-    }
-
 }
