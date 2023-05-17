@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -17,14 +17,11 @@
 package org.eclipse.theia.cloud.service.session;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.service.ServiceRequest;
+import org.eclipse.theia.cloud.service.UserScopedServiceRequest;
 
 @Schema(name = "SessionListRequest", description = "A request to list the sessions of a user.")
-public class SessionListRequest extends ServiceRequest {
+public class SessionListRequest extends UserScopedServiceRequest {
     public static final String KIND = "sessionListRequest";
-
-    @Schema(description = "The user identification, usually the email address.", required = true)
-    public String user;
 
     public SessionListRequest() {
 	super(KIND);
