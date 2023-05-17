@@ -61,6 +61,12 @@ parser.add_argument("directory", help="The directory to clone into", type=str)
 parser.add_argument("checkout", help="The branch/commit id/tag to checkout", type=str)
 args = parser.parse_args()
 
+# Check if directory is empty, don't clone if it isn't
+if os.path.isdir(args.directory):
+    if len(os.listdir(args.directory)) > 0:
+        sys.stdout.write("Clone directory is not empty. Continue without cloning." + NL)
+        exit(0)
+
 # Set up git credential helper
 code = runProcess(["git", "config", "--global", "credential.helper", "store"])
 if code != 0:
