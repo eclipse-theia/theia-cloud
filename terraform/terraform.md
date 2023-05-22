@@ -66,8 +66,8 @@ You might have to configure the firewall for mounting.
 
 ```bash
 # This mounts the ~/tmp/minikube on the machine running minikube into minkube. 
-# Check the persisted volume to find the exact /tmp/hostpath-provisioner/theia-cloud/id path
-minikube mount ~/tmp/minikube:/tmp/hostpath-provisioner/theia-cloud/a36c30cee-4d97-4097-826a-31ba72734fd0-pvc-ws-asdfghjkl-theia-c/
+# Check the persisted volume to find the exact /tmp/hostpath-provisioner/theia-cloud/ path
+minikube mount --uid 101 --gid 101 ~/tmp/minikube:/tmp/hostpath-provisioner/theia-cloud
 ```
 
 #### Destroy Minikube Cluster

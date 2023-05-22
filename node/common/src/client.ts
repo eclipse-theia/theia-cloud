@@ -2,7 +2,7 @@ import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  LaunchRequest as ClientLaunchRequest,
+  GitInit as ClientGitInit,  LaunchRequest as ClientLaunchRequest,
   PingRequest as ClientPingRequest, RootResourceApi, SessionActivityRequest as ClientSessionActivityRequest, SessionListRequest as ClientSessionListRequest,
   SessionPerformance, SessionPerformanceRequest as ClientSessionPerformanceRequest,
   SessionResourceApi, SessionSpec, SessionStartRequest as ClientSessionStartRequest, SessionStopRequest as ClientSessionStopRequest,
@@ -49,13 +49,13 @@ export namespace LaunchRequest {
   }
 
   export function createWorkspace(serviceUrl: string, appId: string, appDefinition: string, timeout?: number, user: string = createUser(),
-    workspaceName?: string, label?: string): LaunchRequest {
-    return { serviceUrl, appId, appDefinition, user, label, workspaceName, ephemeral: false, timeout };
+    workspaceName?: string, label?: string, gitInit?: GitInit): LaunchRequest {
+    return { serviceUrl, appId, appDefinition, user, label, workspaceName, ephemeral: false, timeout, gitInit };
   }
 
   // eslint-disable-next-line max-len
-  export function existingWorkspace(serviceUrl: string, appId: string, workspaceName: string, timeout?: number, appDefinition?: string, user: string = createUser()): LaunchRequest {
-    return { serviceUrl, appId, workspaceName, appDefinition, user, timeout };
+  export function existingWorkspace(serviceUrl: string, appId: string, workspaceName: string, timeout?: number, appDefinition?: string, user: string = createUser(), gitInit?: GitInit): LaunchRequest {
+    return { serviceUrl, appId, workspaceName, appDefinition, user, timeout, gitInit };
   }
 }
 
@@ -98,6 +98,8 @@ export type WorkspaceDeletionRequest = ClientWorkspaceDeletionRequest & ServiceR
 export namespace WorkspaceDeletionRequest {
   export const KIND = 'workspaceDeletionRequest';
 }
+
+export type GitInit = ClientGitInit;
 
 export namespace TheiaCloud {
   function rootApi(serviceUrl: string, accessToken: string | undefined): RootResourceApi {
