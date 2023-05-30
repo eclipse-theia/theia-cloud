@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -57,7 +57,9 @@ public class RootResource extends BaseResource {
     @Operation(summary = "Launch Session", description = "Launches a session and creates a workspace if required. Responds with the URL of the launched session.")
     @POST
     public String launch(LaunchRequest request) {
-	String correlationId = evaluateRequest(request);
+	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+	final String correlationId = evaluatedRequest.getCorrelationId();
+	final String user = evaluatedRequest.getUser();
 
 	if (!k8sUtil.hasAppDefinition(request.appDefinition)) {
 	    error(correlationId,
@@ -67,12 +69,12 @@ public class RootResource extends BaseResource {
 
 	if (request.isEphemeral()) {
 	    info(correlationId, "Launching ephemeral session " + request);
-	    return k8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout,
+	    return k8sUtil.launchEphemeralSession(correlationId, request.appDefinition, user, request.timeout,
 		    request.env);
 	}
 
 	if (request.isExistingWorkspace()) {
-	    Optional<Workspace> workspace = k8sUtil.getWorkspace(request.user, asValidName(request.workspaceName));
+	    Optional<Workspace> workspace = k8sUtil.getWorkspace(user, asValidName(request.workspaceName));
 	    if (workspace.isPresent()) {
 		info(correlationId, "Launching existing workspace session " + request);
 		return k8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
@@ -82,7 +84,7 @@ public class RootResource extends BaseResource {
 
 	info(correlationId, "Create workspace " + request);
 	Workspace workspace = k8sUtil.createWorkspace(correlationId,
-		new UserWorkspace(request.appDefinition, request.user, request.workspaceName, request.label));
+		new UserWorkspace(request.appDefinition, user, request.workspaceName, request.label));
 	TheiaCloudWebException.throwIfErroneous(workspace);
 
 	info(correlationId, "Launch workspace session " + request);

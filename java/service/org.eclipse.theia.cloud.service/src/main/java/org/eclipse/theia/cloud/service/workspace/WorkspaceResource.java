@@ -32,6 +32,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.BaseResource;
+import org.eclipse.theia.cloud.service.EvaluatedRequest;
 import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.TheiaCloudUser;
 import org.eclipse.theia.cloud.service.TheiaCloudWebException;
@@ -46,9 +47,6 @@ public class WorkspaceResource extends BaseResource {
     private K8sUtil k8sUtil;
 
     @Inject
-    private TheiaCloudUser theiaCloudUser;
-
-    @Inject
     public WorkspaceResource(ApplicationProperties applicationProperties) {
 	super(applicationProperties);
     }
@@ -58,18 +56,22 @@ public class WorkspaceResource extends BaseResource {
     @Path("/{appId}/{user}")
     public List<UserWorkspace> list(@PathParam("appId") String appId, @PathParam("user") String user) {
 	WorkspaceListRequest request = new WorkspaceListRequest(appId, user);
-	String correlationId = evaluateRequest(request);
+	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+	final String correlationId = evaluatedRequest.getCorrelationId();
+
 	info(correlationId, "Listing workspaces " + request);
-	return k8sUtil.listWorkspaces(request.user);
+	return k8sUtil.listWorkspaces(evaluatedRequest.getUser());
     }
 
     @Operation(summary = "Create workspace", description = "Creates a new workspace for a user.")
     @POST
     public UserWorkspace create(WorkspaceCreationRequest request) {
-	String correlationId = evaluateRequest(request);
+	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+	final String correlationId = evaluatedRequest.getCorrelationId();
+
 	info(correlationId, "Creating workspace " + request);
 	Workspace workspace = k8sUtil.createWorkspace(correlationId,
-		new UserWorkspace(request.appDefinition, request.user, request.label));
+		new UserWorkspace(request.appDefinition, evaluatedRequest.getUser(), request.label));
 	TheiaCloudWebException.throwIfErroneous(workspace);
 	return new UserWorkspace(workspace.getSpec());
     }
@@ -77,7 +79,9 @@ public class WorkspaceResource extends BaseResource {
     @Operation(summary = "Delete workspace", description = "Deletes a workspace.")
     @DELETE
     public boolean delete(WorkspaceDeletionRequest request) {
-	String correlationId = evaluateRequest(request);
+	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+	final String correlationId = evaluatedRequest.getCorrelationId();
+
 	if (request.workspaceName == null) {
 	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_WORKSPACE_NAME);
 	}
@@ -90,9 +94,9 @@ public class WorkspaceResource extends BaseResource {
 	    // Note: Another solution is returning a 404
 	    return true;
 	}
-	if (!isOwner(theiaCloudUser, existingWorkspace)) {
+	if (!isOwner(evaluatedRequest.getUser(), existingWorkspace)) {
 	    info(correlationId,
-		    "User " + theiaCloudUser.getIdentifier() + " does not own workspace " + request.workspaceName);
+		    "User " + evaluatedRequest.getUser() + " does not own workspace " + request.workspaceName);
 	    trace(correlationId, "Workspace: " + existingWorkspace);
 	    throw new TheiaCloudWebException(Status.FORBIDDEN);
 	}
@@ -101,17 +105,12 @@ public class WorkspaceResource extends BaseResource {
 	return k8sUtil.deleteWorkspace(correlationId, request.workspaceName);
     }
 
-    protected boolean isOwner(TheiaCloudUser user, WorkspaceSpec workspace) {
-	if (user.isAnonymous()) {
-	    logger.debugv("User is anonymous and cannot own workspace {0}", workspace);
-	    return false;
-	}
-
+    protected boolean isOwner(String user, WorkspaceSpec workspace) {
 	if (workspace.getUser() == null || workspace.getUser().isBlank()) {
 	    logger.warnv("Workspace does not have a user. {0}", workspace);
 	    return false;
 	}
 
-	return workspace.getUser().equals(user.getIdentifier());
+	return workspace.getUser().equals(user);
     }
 }
