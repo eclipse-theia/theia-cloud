@@ -34,6 +34,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.BaseResource;
+import org.eclipse.theia.cloud.service.EvaluatedRequest;
 import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.TheiaCloudUser;
 import org.eclipse.theia.cloud.service.TheiaCloudWebException;
@@ -49,9 +50,6 @@ public class SessionResource extends BaseResource {
     private K8sUtil k8sUtil;
 
     @Inject
-    private TheiaCloudUser theiaCloudUser;
-
-    @Inject
     public SessionResource(ApplicationProperties applicationProperties) {
 	super(applicationProperties);
     }
@@ -61,22 +59,26 @@ public class SessionResource extends BaseResource {
     @Path("/{appId}/{user}")
     public List<SessionSpec> list(@PathParam("appId") String appId, @PathParam("user") String user) {
 	SessionListRequest request = new SessionListRequest(appId, user);
-	String correlationId = evaluateRequest(request);
-	info(correlationId, "Listing sessions " + request);
-	return k8sUtil.listSessions(request.user);
+	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+	info(evaluatedRequest.getCorrelationId(), "Listing sessions " + request);
+	return k8sUtil.listSessions(evaluatedRequest.getUser());
     }
 
     @Operation(summary = "Start a new session", description = "Starts a new session for an existing workspace and responds with the URL of the started session.")
     @POST
     public String start(SessionStartRequest request) {
-	String correlationId = evaluateRequest(request);
+	// XXX ensure user only launches their own session necessary?
+	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+	final String correlationId = evaluatedRequest.getCorrelationId();
+	final String user = evaluatedRequest.getUser();
+
 	info(correlationId, "Launching session " + request);
 	if (request.isEphemeral()) {
-	    return k8sUtil.launchEphemeralSession(correlationId, request.appDefinition, request.user, request.timeout,
+	    return k8sUtil.launchEphemeralSession(correlationId, request.appDefinition, user, request.timeout,
 		    request.env);
 	}
 
-	Optional<Workspace> workspace = k8sUtil.getWorkspace(request.user,
+	Optional<Workspace> workspace = k8sUtil.getWorkspace(user,
 		org.eclipse.theia.cloud.common.util.NamingUtil.asValidName(request.workspaceName));
 	if (workspace.isEmpty()) {
 	    info(correlationId, "No workspace for given workspace name: " + request);
@@ -95,7 +97,9 @@ public class SessionResource extends BaseResource {
     @Operation(summary = "Stop session", description = "Stops a session.")
     @DELETE
     public boolean stop(SessionStopRequest request) {
-	String correlationId = evaluateRequest(request);
+	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+	String correlationId = evaluatedRequest.getCorrelationId();
+
 	if (request.sessionName == null) {
 	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_SESSION_NAME);
 	}
@@ -107,15 +111,14 @@ public class SessionResource extends BaseResource {
 	    // given name is reached
 	    return true;
 	}
-	if (!isOwner(theiaCloudUser, existingSession)) {
-	    info(correlationId,
-		    "User " + theiaCloudUser.getIdentifier() + " does not own session " + request.sessionName);
+	if (!isOwner(evaluatedRequest.getUser(), existingSession)) {
+	    info(correlationId, "User " + evaluatedRequest.getUser() + " does not own session " + request.sessionName);
 	    trace(correlationId, "Session: " + existingSession);
 	    throw new TheiaCloudWebException(Status.FORBIDDEN);
 	}
 
 	info(correlationId, "Stop session: " + request);
-	return k8sUtil.stopSession(correlationId, request.sessionName, request.user);
+	return k8sUtil.stopSession(correlationId, request.sessionName, evaluatedRequest.getUser());
     }
 
     @Operation(summary = "Report session activity", description = "Updates the last activity timestamp for a session to monitor activity.")
@@ -154,17 +157,12 @@ public class SessionResource extends BaseResource {
 	return performance;
     }
 
-    protected boolean isOwner(TheiaCloudUser user, SessionSpec session) {
-	if (user.isAnonymous()) {
-	    logger.debugv("User is anonymous and cannot own session {0}", session);
-	    return false;
-	}
-
+    protected boolean isOwner(String user, SessionSpec session) {
 	if (session.getUser() == null || session.getUser().isBlank()) {
 	    logger.warnv("Session does not have a user. {0}", session);
 	    return false;
 	}
 
-	return session.getUser().equals(user.getIdentifier());
+	return session.getUser().equals(user);
     }
 }

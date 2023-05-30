@@ -28,9 +28,11 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
+import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.TheiaCloudUser;
 import org.eclipse.theia.cloud.service.TheiaCloudWebException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -55,6 +57,9 @@ public class WorkspaceResourceTests {
     private static final String TEST_WORKSPACE = "TestWorkspace";
 
     @InjectMock
+    ApplicationProperties applicationProperties;
+
+    @InjectMock
     K8sUtil k8sUtil;
 
     @InjectMock
@@ -62,6 +67,11 @@ public class WorkspaceResourceTests {
 
     @Inject
     WorkspaceResource fixture;
+
+    @BeforeEach
+    void mockApplicationProperties() {
+	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
+    }
 
     /**
      * Test method for

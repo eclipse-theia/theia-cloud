@@ -35,7 +35,9 @@ public class TheiaCloudUser {
      * display name because it can be any unique identifier such as a user name,
      * email address or UUID.
      * 
-     * @return the unique identifier
+     * @return the unique identifier, never null or
+     *         {@link java.lang.String#isBlank() blank} if {@link #isAnonymous()}
+     *         returns false
      */
     public String getIdentifier() {
 	return identifier;

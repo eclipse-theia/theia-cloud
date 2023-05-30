@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -34,6 +34,10 @@ public class TheiaCloudWebException extends WebApplicationException {
 
     public TheiaCloudWebException(Response.Status status) {
 	super(status);
+    }
+
+    public TheiaCloudWebException(Response.Status status, String message) {
+	super(message, status);
     }
 
     public TheiaCloudWebException(TheiaCloudError status) {
