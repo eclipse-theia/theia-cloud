@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -36,7 +36,7 @@ import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.EvaluatedRequest;
 import org.eclipse.theia.cloud.service.K8sUtil;
-import org.eclipse.theia.cloud.service.TheiaCloudUser;
+import org.eclipse.theia.cloud.service.NoAnonymousAccess;
 import org.eclipse.theia.cloud.service.TheiaCloudWebException;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
@@ -57,6 +57,7 @@ public class SessionResource extends BaseResource {
     @Operation(summary = "List sessions", description = "List sessions of a user.")
     @GET
     @Path("/{appId}/{user}")
+    @NoAnonymousAccess
     public List<SessionSpec> list(@PathParam("appId") String appId, @PathParam("user") String user) {
 	SessionListRequest request = new SessionListRequest(appId, user);
 	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
@@ -66,8 +67,8 @@ public class SessionResource extends BaseResource {
 
     @Operation(summary = "Start a new session", description = "Starts a new session for an existing workspace and responds with the URL of the started session.")
     @POST
+    @NoAnonymousAccess
     public String start(SessionStartRequest request) {
-	// XXX ensure user only launches their own session necessary?
 	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
 	final String correlationId = evaluatedRequest.getCorrelationId();
 	final String user = evaluatedRequest.getUser();
@@ -96,6 +97,7 @@ public class SessionResource extends BaseResource {
 
     @Operation(summary = "Stop session", description = "Stops a session.")
     @DELETE
+    @NoAnonymousAccess
     public boolean stop(SessionStopRequest request) {
 	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
 	String correlationId = evaluatedRequest.getCorrelationId();
@@ -140,10 +142,23 @@ public class SessionResource extends BaseResource {
     @Operation(summary = "Get performance metrics", description = "Returns the current CPU and memory usage of the session's pod.")
     @GET
     @Path("/performance/{appId}/{sessionName}")
+    @NoAnonymousAccess
     public SessionPerformance performance(@PathParam("appId") String appId,
 	    @PathParam("sessionName") String sessionName) {
 	SessionPerformanceRequest request = new SessionPerformanceRequest(appId, sessionName);
 	String correlationId = evaluateRequest(request);
+	final String user = theiaCloudUser.getIdentifier();
+
+	// Ensure session belongs to the requesting user.
+	SessionSpec existingSession = k8sUtil.findSession(request.sessionName).orElse(null);
+	if (existingSession == null) {
+	    info(correlationId, "Session " + request.sessionName + " does not exist.");
+	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_SESSION_NAME);
+	} else if (!isOwner(theiaCloudUser.getIdentifier(), existingSession)) {
+	    info(correlationId, "User " + user + " does not own session " + request.sessionName);
+	    throw new TheiaCloudWebException(Status.FORBIDDEN);
+	}
+
 	SessionPerformance performance;
 	try {
 	    performance = k8sUtil.reportPerformance(sessionName);

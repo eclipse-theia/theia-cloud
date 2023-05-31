@@ -16,24 +16,34 @@
 package org.eclipse.theia.cloud.service.workspace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.K8sUtil;
 import org.eclipse.theia.cloud.service.TheiaCloudUser;
 import org.eclipse.theia.cloud.service.TheiaCloudWebException;
+import org.eclipse.theia.cloud.service.test.TestUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -53,7 +63,9 @@ import io.quarkus.test.security.TestSecurity;
 public class WorkspaceResourceTests {
 
     private static final String APP_ID = "asdfghjkl";
+    private static final String APP_DEFINITION = "test-app-definition";
     private static final String TEST_USER = "TestUser";
+    private static final String OTHER_TEST_USER = "OtherTestUser";
     private static final String TEST_WORKSPACE = "TestWorkspace";
 
     @InjectMock
@@ -103,7 +115,7 @@ public class WorkspaceResourceTests {
     @Test()
     void delete_otherUser_throwForbidden() {
 	// Prepare
-	mockUser(false, "OtherTestUser");
+	mockUser(false, OTHER_TEST_USER);
 	WorkspaceSpec workspace = mockDefaultWorkspace();
 	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
 
@@ -212,6 +224,178 @@ public class WorkspaceResourceTests {
 	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
+    /**
+     * Test method for
+     * {@link org.eclipse.theia.cloud.service.workspace.WorkspaceResource#delete(org.eclipse.theia.cloud.service.workspace.WorkspaceDeletionRequest)}.
+     */
+    @Test()
+    void delete_noKeycloak_throwForbidden() {
+	// Prepare
+	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+	mockUser(true, null);
+	WorkspaceSpec workspace = mockDefaultWorkspace();
+	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
+	// We leave the matching user in the request to verify that the deletion is
+	// denied even if the correct user is specified in the request.
+	// After all, an attacker could know this.
+	WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
+
+	// Execute
+	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+	    fixture.delete(request);
+	});
+
+	// Assert
+	Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
+	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+    }
+
+    @Test
+    void delete_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
+	Method method = WorkspaceResource.class.getMethod("delete", WorkspaceDeletionRequest.class);
+	TestUtil.assertNoAnonymousAccessAnnotations(method);
+    }
+
+    @Test
+    void create_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
+	Method method = WorkspaceResource.class.getMethod("create", WorkspaceCreationRequest.class);
+	TestUtil.assertNoAnonymousAccessAnnotations(method);
+    }
+
+    @Test
+    void create_matchingUser_UserWorkspace() {
+	// Prepare
+	mockUser(false, TEST_USER);
+	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
+		TEST_WORKSPACE);
+	Workspace workspace = Mockito.mock(Workspace.class);
+	WorkspaceSpec workspaceSpec = new WorkspaceSpec("abc", "def", APP_DEFINITION, TEST_USER);
+	Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
+	Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
+		.thenReturn(workspace);
+
+	// Execute
+	UserWorkspace result = fixture.create(request);
+
+	// Assert
+	assertNotNull(result);
+	assertEquals(TEST_USER, result.user);
+    }
+
+    @Test
+    void create_erroneousWorkspace_throwTheiaCloudWebException() {
+	// Prepare
+	mockUser(false, TEST_USER);
+	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
+		TEST_WORKSPACE);
+	Workspace workspace = Mockito.mock(Workspace.class);
+	WorkspaceSpec workspaceSpec = new WorkspaceSpec("abc", "def", APP_DEFINITION, TEST_USER);
+	workspaceSpec.setError("TestError");
+	Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
+	Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
+		.thenReturn(workspace);
+
+	// Execute
+	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+	    fixture.create(request);
+	});
+
+	// Assert
+	assertTrue(exception.getMessage().contains("TestError"));
+    }
+
+    @Test
+    void create_otherUser_throwForbidden() {
+	// Prepare
+	mockUser(false, TEST_USER);
+	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, OTHER_TEST_USER,
+		TEST_WORKSPACE);
+
+	// Execute
+	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+	    fixture.create(request);
+
+	});
+
+	// Assert
+	Mockito.verify(k8sUtil, never()).createWorkspace(anyString(), any());
+	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+    }
+
+    @Test
+    void create_noKeycloak_throwForbidden() {
+	// Prepare
+	mockUser(true, null);
+	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
+		TEST_WORKSPACE);
+
+	// Execute
+	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+	    fixture.create(request);
+
+	});
+
+	// Assert
+	Mockito.verify(k8sUtil, never()).createWorkspace(anyString(), any());
+	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+    }
+
+    @Test
+    void list_matchingUser_workspaces() {
+	// Prepare
+	mockUser(false, TEST_USER);
+	List<UserWorkspace> resultList = List.of();
+	Mockito.when(k8sUtil.listWorkspaces(TEST_USER)).thenReturn(resultList);
+
+	List<UserWorkspace> result = fixture.list(APP_ID, TEST_USER);
+
+	assertSame(resultList, result);
+    }
+
+    @Test
+    void list_otherUser_throwForbidden() {
+	// Prepare
+	mockUser(false, TEST_USER);
+	List<UserWorkspace> resultList = List.of();
+	Mockito.when(k8sUtil.listWorkspaces(TEST_USER)).thenReturn(resultList);
+
+	// Execute
+	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+	    fixture.list(APP_ID, OTHER_TEST_USER);
+
+	});
+
+	// Assert
+	Mockito.verify(k8sUtil, never()).listWorkspaces(anyString());
+	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+    }
+
+    @Test
+    void list_noKeycloak_throwForbidden() {
+	// Prepare
+	mockUser(true, null);
+	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+	List<UserWorkspace> resultList = List.of();
+	Mockito.when(k8sUtil.listWorkspaces(TEST_USER)).thenReturn(resultList);
+
+	// Execute
+	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+	    fixture.list(APP_ID, TEST_USER);
+
+	});
+
+	// Assert
+	Mockito.verify(k8sUtil, never()).listWorkspaces(anyString());
+	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+    }
+
+    @Test
+    void list_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
+	Method method = WorkspaceResource.class.getMethod("list", String.class, String.class);
+	TestUtil.assertNoAnonymousAccessAnnotations(method);
+    }
+
     // ---
     // Utility methods
     // ---
@@ -226,5 +410,19 @@ public class WorkspaceResourceTests {
 	Mockito.when(workspace.getName()).thenReturn(TEST_WORKSPACE);
 	Mockito.when(workspace.getUser()).thenReturn(TEST_USER);
 	return workspace;
+    }
+
+    class WorkspaceWithUser implements ArgumentMatcher<UserWorkspace> {
+
+	private String user;
+
+	WorkspaceWithUser(String user) {
+	    this.user = user;
+	}
+
+	@Override
+	public boolean matches(UserWorkspace argument) {
+	    return user.equals(argument.user);
+	}
     }
 }
