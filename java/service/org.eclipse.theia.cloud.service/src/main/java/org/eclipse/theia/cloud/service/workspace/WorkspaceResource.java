@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -34,7 +34,7 @@ import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.BaseResource;
 import org.eclipse.theia.cloud.service.EvaluatedRequest;
 import org.eclipse.theia.cloud.service.K8sUtil;
-import org.eclipse.theia.cloud.service.TheiaCloudUser;
+import org.eclipse.theia.cloud.service.NoAnonymousAccess;
 import org.eclipse.theia.cloud.service.TheiaCloudWebException;
 
 import io.quarkus.security.Authenticated;
@@ -54,6 +54,7 @@ public class WorkspaceResource extends BaseResource {
     @Operation(summary = "List workspaces", description = "Lists the workspaces of a user.")
     @GET
     @Path("/{appId}/{user}")
+    @NoAnonymousAccess
     public List<UserWorkspace> list(@PathParam("appId") String appId, @PathParam("user") String user) {
 	WorkspaceListRequest request = new WorkspaceListRequest(appId, user);
 	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
@@ -65,6 +66,7 @@ public class WorkspaceResource extends BaseResource {
 
     @Operation(summary = "Create workspace", description = "Creates a new workspace for a user.")
     @POST
+    @NoAnonymousAccess
     public UserWorkspace create(WorkspaceCreationRequest request) {
 	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
 	final String correlationId = evaluatedRequest.getCorrelationId();
@@ -78,6 +80,7 @@ public class WorkspaceResource extends BaseResource {
 
     @Operation(summary = "Delete workspace", description = "Deletes a workspace.")
     @DELETE
+    @NoAnonymousAccess
     public boolean delete(WorkspaceDeletionRequest request) {
 	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
 	final String correlationId = evaluatedRequest.getCorrelationId();

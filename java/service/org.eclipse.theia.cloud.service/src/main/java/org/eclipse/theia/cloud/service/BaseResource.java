@@ -31,7 +31,7 @@ public class BaseResource {
     private ApplicationProperties applicationProperties;
 
     @Inject
-    TheiaCloudUser theiaCloudUser;
+    protected TheiaCloudUser theiaCloudUser;
 
     public BaseResource(ApplicationProperties applicationProperties) {
 	this.applicationProperties = applicationProperties;
