@@ -1,10 +1,16 @@
-export const Footer = (
-  config: any,
+import { AppDefinition } from '@eclipse-theiacloud/common';
+
+interface FooterProps {
+  appDefinition: string,
+  appName: string,
+  additionalApps: AppDefinition[],
   setSelectedAppName: (value: React.SetStateAction<string>) => void,
   setSelectedAppDefinition: (value: React.SetStateAction<string>) => void
-): JSX.Element => (
+}
+
+export const Footer = ({appDefinition, appName, additionalApps, setSelectedAppName, setSelectedAppDefinition}: FooterProps): JSX.Element => (
   <div className='App__footer'>
-    {Array.isArray(config.additionalApps) && config.additionalApps.length > 0 && (
+    {additionalApps.length > 0 && (
       <p>
         <label htmlFor='selectapp'>Select app to launch </label>
         <select
@@ -15,8 +21,8 @@ export const Footer = (
             setSelectedAppDefinition(event.target.value);
           }}
         >
-          <option value={config.appDefinition}>{config.appName}</option>
-          {config.additionalApps.map((app: any, index: number) => (
+          <option value={appDefinition}>{appName}</option>
+          {additionalApps.map((app: any, index: number) => (
             <option key={index + 1} value={app.appId}>
               {app.appName}
             </option>

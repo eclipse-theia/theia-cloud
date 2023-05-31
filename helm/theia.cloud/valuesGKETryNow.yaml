@@ -22,7 +22,7 @@ hosts:
   instance: ws.theia-cloud.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS10
+  image: theiacloud/theia-cloud-try-now-page:0.8.0.MS10v2
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
   additionalApps:
@@ -33,16 +33,16 @@ landingPage:
 
 keycloak:
   enable: false
-  authUrl: ""
-  realm: ""
-  clientId: ""
-  clientSecret: ""
-  cookieSecret: ""
+  authUrl: "https://keycloak.34.141.62.32.nip.io/"
+  keycloakRealm: "TheiaCloud"
+  keycloakClientId: "theia-cloud"
+  clientSecret: "publicbutoauth2proxywantsasecret"
+  cookieSecret: "s-p4GxfRlPa_BI1XsLuvE2ihNOqYD1vmewWcXcpYjr0="
 
 operator:
   eagerStart: false
   bandwidthLimiter: "WONDERSHAPER"
-  sessionsPerUser: "1"
+  sessionsPerUser: "3"
 
 ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
@@ -51,3 +51,5 @@ ingress:
 
 monitor:
   enable: false
+  activityTracker:
+    enable: false

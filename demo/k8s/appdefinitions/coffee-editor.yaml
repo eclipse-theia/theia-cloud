@@ -4,31 +4,26 @@ metadata:
   name: coffee-editor
   namespace: theiacloud
 spec:
-  name: coffee-editor
-  image: eu.gcr.io/kubernetes-238012/coffee-editor:v0.7.14
-  pullSecret: ""
-  uid: 1000
-  port: 3000
+  downlinkLimit: 30000
   host: ws.theia-cloud.io
+  image: eu.gcr.io/kubernetes-238012/coffee-editor:v0.7.17
+  imagePullPolicy: IfNotPresent
   ingressname: theia-cloud-demo-ws-ingress
+  limitsCpu: "2"
+  limitsMemory: 2400M
+  maxInstances: 4
   minInstances: 0
-  maxInstances: 1
-  # maxInstances: 10
+  name: coffee-editor
+  port: 3000
+  requestsCpu: 100m
+  requestsMemory: 1000M
   timeout:
     limit: 30
     strategy: FIXEDTIME
-  requestsMemory: 1000M
-  limitsMemory: 2400M
-  requestsCpu: "100m"
-  limitsCpu: "0.1"
-  # limitsCpu: "2"
-  downlinkLimit: 300
-  uplinkLimit: 300
-  # downlinkLimit: 30000
-  # uplinkLimit: 30000
-  mountPath: "/home/project/persisted"
-  imagePullPolicy: IfNotPresent
+  uid: 1000
+  uplinkLimit: 30000
   monitor:
-    timeoutAfter: 30
-    notifyAfter: 25
     port: 8081
+    activityTracker:
+      timeoutAfter: 30
+      notifyAfter: 25

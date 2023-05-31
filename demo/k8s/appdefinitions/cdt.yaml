@@ -4,27 +4,26 @@ metadata:
   name: cdt-cloud-demo
   namespace: theiacloud
 spec:
-  name: cdt-cloud-demo
-  image: theiacloud/cdt-blueprint
-  pullSecret: ""
-  uid: 101
-  port: 3000
+  downlinkLimit: 30000
   host: ws.theia-cloud.io
+  image: theiacloud/cdt-cloud:v1.34.4
+  imagePullPolicy: IfNotPresent
   ingressname: theia-cloud-demo-ws-ingress
-  minInstances: 0
+  limitsCpu: "2"
+  limitsMemory: 1200M
   maxInstances: 10
+  minInstances: 0
+  name: cdt-cloud-demo
+  port: 3000
+  requestsCpu: 100m
+  requestsMemory: 1000M
   timeout:
     limit: 30
     strategy: FIXEDTIME
-  requestsMemory: 500M
-  limitsMemory: 1200M
-  requestsCpu: "100m"
-  limitsCpu: "2"
-  downlinkLimit: 30000
+  uid: 1000
   uplinkLimit: 30000
-  mountPath: "/home/project/persisted"
-  imagePullPolicy: IfNotPresent
   monitor:
-    timeoutAfter: 30
-    notifyAfter: 25
     port: 8081
+    activityTracker:
+      timeoutAfter: 30
+      notifyAfter: 25

@@ -216,7 +216,9 @@ function App(): JSX.Element {
           needsLogin && <LoginInfo />
         }
         <Footer
-          config={config}
+          appDefinition={config.appDefinition}
+          appName={config.appName}
+          additionalApps={config.additionalApps !== undefined ? config.additionalApps : []}
           setSelectedAppName={setSelectedAppName}
           setSelectedAppDefinition={setSelectedAppDefinition}
         />
