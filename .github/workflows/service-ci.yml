@@ -19,10 +19,10 @@ jobs:
         distribution: 'temurin'
     - name: Build TheiaCloud common
       run: |
-        mvn clean install -f java/common/maven-conf
-        mvn clean install -f java/common/org.eclipse.theia.cloud.common
+        mvn clean install -f java/common/maven-conf --no-transfer-progress
+        mvn clean install -f java/common/org.eclipse.theia.cloud.common --no-transfer-progress
     - name: Run TheiaCloud service tests
-      run: mvn clean verify -fae -f java/service/org.eclipse.theia.cloud.service
+      run: mvn clean verify -fae -f java/service/org.eclipse.theia.cloud.service --no-transfer-progress
 
   docker:
     needs: tests
