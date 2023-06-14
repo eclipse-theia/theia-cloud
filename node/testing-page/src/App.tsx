@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import { KeycloakConfig } from 'keycloak-js';
 import Keycloak from 'keycloak-js';
-import { TheiaCloud, RequestOptions, SessionListRequest, SessionStartRequest, SessionStopRequest, WorkspaceCreationRequest, WorkspaceDeletionRequest, WorkspaceListRequest } from '@eclipse-theiacloud/common';
+import { TheiaCloud, RequestOptions, SessionListRequest, SessionStartRequest, SessionStopRequest, WorkspaceCreationRequest, WorkspaceDeletionRequest, WorkspaceListRequest, PingRequest, LaunchRequest } from '@eclipse-theiacloud/common';
 
 const KEYCLOAK_CONFIG: KeycloakConfig = {
   url: 'https://keycloak.localdemo.io/auth/',
@@ -70,6 +70,25 @@ function App() {
     }).catch(err => {
       console.error('Request failed:', err);
     })
+  }
+
+  // Root requests
+  const ping = (_user: string, accessToken?: string) => {
+    const request: PingRequest = {
+      appId: APP_ID,
+      serviceUrl: SERVICE_URL,
+    };
+    return TheiaCloud.ping(request, generateRequestOptions(accessToken))
+  }
+  const launch = (user: string, accessToken?: string) => {
+    const request: LaunchRequest = {
+      appId: APP_ID,
+      appDefinition: APP_DEFINITION,
+      user,
+      serviceUrl: SERVICE_URL,
+      timeout: 3
+    }
+    return TheiaCloud.launch(request, generateRequestOptions(accessToken));
   }
 
   // Workspace requests
@@ -145,6 +164,10 @@ function App() {
       <p>
         <span>Session/Workspace:</span>
         <input type='text' value={resourceName} onChange={ev => setResourceName(ev.target.value)} />
+      </p>
+      <p>
+        <button onClick={() => executeRequest(ping)}>Ping</button>
+        <button onClick={() => executeRequest(launch)}>Launch</button>
       </p>
       <p>
         <button onClick={() => executeRequest(listSessions)}>List Sessions</button>
