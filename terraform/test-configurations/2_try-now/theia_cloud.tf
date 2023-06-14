@@ -67,6 +67,12 @@ resource "helm_release" "theia-cloud" {
     name  = "ingress.theiaCloudCommonName"
     value = true
   }
+
+  # Comment in to only pull missing images. This is needed to use images built locally in Minikube
+  # set {
+  #   name  = "imagePullPolicy"
+  #   value = "IfNotPresent"
+  # }
 }
 
 resource "kubectl_manifest" "cdt-cloud-demo" {
