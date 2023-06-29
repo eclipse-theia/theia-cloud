@@ -32,3 +32,26 @@ With this, the `docker` command in this terminal runs inside Minikube.
 Build the docker image as usual.
 
 - Adapt the AppDefinition `image` value to match your built image.
+
+## Troubleshooting
+
+### Operator cannot set the workspace URL to the Session
+
+This usually happens when using custom host names that are mapped in a hosts definition file (e.g. `/etc/hosts` on Linux) to the local IP of Minikube.
+One [known case](https://github.com/eclipsesource/theia-cloud/issues/150) occurred on MacOS with Docker Desktop:
+The VM running Kubernetes does not know the hosts settings of the host operating system.
+Thus, the custom hostname could not be resolved in the cluster and, thus, the operator could not resolve the session pods' addresses.
+
+**Symptoms:**
+
+- Service times out after launching a session
+- Operator log contains messages stating the session pod is not available. Log messages can look like this:
+```
+ERROR org.eclipse.theia.cloud.operator.handler.impl.AddedHandlerUtil - [16695cf8-1e88-4ca9-93b2-483ebb89e5e4] ws.myhostname.io/e91be8be-0ed3-4c81-8a7b-b3d03bad6fd2/ is NOT available yet.
+```
+- Session URL is never set to the Session custom resource
+
+**Potential solutions:**
+
+- Do not use custom hostnames but use wildcard dns services like [nip.io](https://nip.io/) to get a hostname pointing to your local cluster.
+- Alternatively, configure the Kubernetes VM (e.g. Minikube, Docker Desktop) to be able to resolve your custom hostname. Potentially, this can be achieved by editing the `/etc/hosts` file inside the VM.
