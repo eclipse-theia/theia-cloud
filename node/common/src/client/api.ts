@@ -24,6 +24,31 @@ import type { RequestArgs } from './base';
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 
 /**
+ * An object to hold all the ways environment variables can be passed. Not to be used by itself.
+ * @export
+ * @interface EnvironmentVars
+ */
+export interface EnvironmentVars {
+    /**
+     * Map of environment variables to be passed to Deployment.  Ignored if Theia applications are started eagerly.  Empty by default.
+     * @type {{ [key: string]: string; }}
+     * @memberof EnvironmentVars
+     */
+    'fromMap'?: { [key: string]: string; };
+    /**
+     * List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef.  Ignored if Theia applications are started eagerly.  Empty by default.
+     * @type {Array<string>}
+     * @memberof EnvironmentVars
+     */
+    'fromConfigMaps'?: Array<string>;
+    /**
+     * List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef.  Ignored if Theia applications are started eagerly.  Empty by default.
+     * @type {Array<string>}
+     * @memberof EnvironmentVars
+     */
+    'fromSecrets'?: Array<string>;
+}
+/**
  * A request to launch a new session.
  * @export
  * @interface LaunchRequest
@@ -313,6 +338,12 @@ export interface SessionStartRequest {
      * @memberof SessionStartRequest
      */
     'timeout'?: number;
+    /**
+     * 
+     * @type {LaunchRequestEnv}
+     * @memberof SessionStartRequest
+     */
+    'env'?: LaunchRequestEnv;
 }
 /**
  * A request to stop a session

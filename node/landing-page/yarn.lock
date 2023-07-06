@@ -1108,10 +1108,10 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
-"@eclipse-theiacloud/common@0.8.0-alpha.23":
-  version "0.8.0-alpha.23"
-  resolved "https://registry.yarnpkg.com/@eclipse-theiacloud/common/-/common-0.8.0-alpha.23.tgz#1d109b63012f6728fb45dcdb9e7ec06c57255ef7"
-  integrity sha512-Th8C1M6XPRPRb4Bw+fdQcQ0SyXo1smO4NyGrs0ol2PAt62LmvuGhGReYMF40JcWaojU6zNkwEqMizhOQHOp7/Q==
+"@eclipse-theiacloud/common@0.8.0-alpha.25":
+  version "0.8.0-alpha.25"
+  resolved "https://registry.yarnpkg.com/@eclipse-theiacloud/common/-/common-0.8.0-alpha.25.tgz#da422ca00e63fa8f226252746ec9557b8b742f18"
+  integrity sha512-RYm8Yf/uBh9l6ktj+Pn8ae5+VVNOxHrcvSgrLPL0ile4OsVTjWQ34tUGp94Bbe+GHUSDURg5R0GUTI6DvVGKOA==
   dependencies:
     "@types/uuid" "^8.3.4"
     axios "^0.27.2"

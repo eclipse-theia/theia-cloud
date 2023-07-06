@@ -1,0 +1,51 @@
+imagePullPolicy: Always
+
+app:
+  id: asdfghjkl
+  name: Theia Blueprint
+
+image:
+  name: theiacloud/theia-cloud-activity-demo:0.8.0
+  pullSecret: ""
+  timeoutStrategy: "FIXEDTIME"
+  timeoutLimit: "0"
+  imagePullPolicy: IfNotPresent
+
+hosts:
+  usePaths: true
+  paths:
+    baseHost: my-ip.nip.io
+    service: servicex
+    landing: theiacloud
+    instance: instances
+
+landingPage:
+  image: theiacloud/theia-cloud-landing-page:0.8.0
+  ephemeralStorage: true
+
+keycloak:
+  enable: false
+  keycloakRealm: "TheiaCloud"
+  keycloakClientId: "theia-cloud"
+  clientSecret: "publicbutoauth2proxywantsasecret"
+  cookieSecret: "s-p4GxfRlPa_BI1XsLuvE2ihNOqYD1vmewWcXcpYjr0="
+
+operator:
+  cloudProvider: MINIKUBE
+  imagePullPolicy: Always
+
+service:
+  imagePullPolicy: Always
+
+ingress:
+  clusterIssuer: theia-cloud-selfsigned-issuer
+  theiaCloudCommonName: true
+
+monitor:
+  enable: true
+  port: 8081
+  activityTracker:
+    enable: true
+    interval: 1    
+    timeoutAfter: 4
+    notifyAfter: 2
