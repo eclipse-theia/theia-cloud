@@ -1,6 +1,6 @@
 {
   "name": "@eclipse-theiacloud/common",
-  "version": "0.8.0-alpha.23",
+  "version": "0.8.0-alpha.25",
   "description": "Common functionality for Theia.cloud",
   "license": "EPL-2.0",
   "keywords": [

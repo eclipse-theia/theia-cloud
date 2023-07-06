@@ -6,7 +6,7 @@ metadata:
 spec:
   downlinkLimit: 30000
   host: ws.theia-cloud.io
-  image: theiacloud/theia-cloud-demo:0.8.0.MS10
+  image: theiacloud/theia-cloud-demo:0.8.0
   imagePullPolicy: IfNotPresent
   ingressname: theia-cloud-demo-ws-ingress
   limitsCpu: "2"
