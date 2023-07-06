@@ -26,11 +26,11 @@ See [Architecture.md](doc/docs/Architecture.md) for more information on the arch
 This REST Service acts as the API for creating and stopping Theia-based products for an authenticated user as well as providing additional information.\
 The Theia Cloud service creates, modifies, and deletes the custom resources the operator listens to.
 
-### Sample Dashboard and resusable JS/UI components
+### Sample Dashboard and reusable JS/UI components
 
 Theia Cloud comes with a basic landing page/dashboard which allows to launch sessions.
 
-We offer a common ts library for the API of the Theia Cloud service, which may be resued by clients to write their own custom dashboards.
+We offer a common ts library for the API of the Theia Cloud service, which may be reused by clients to write their own custom dashboards.
 
 We plan to offer reusable ui components in the future as well.
 
