@@ -14,6 +14,6 @@ RUN mkdir /templates
 WORKDIR /log-config
 COPY java/operator/org.eclipse.theia.cloud.operator/log4j2.xml .
 WORKDIR /operator
-COPY --from=builder /operator/operator/org.eclipse.theia.cloud.operator/target/operator-0.8.0-SNAPSHOT-jar-with-dependencies.jar .
-ENTRYPOINT [ "java", "-Dlog4j2.configurationFile=/log-config/log4j2.xml", "-jar", "./operator-0.8.0-SNAPSHOT-jar-with-dependencies.jar" ]
+COPY --from=builder /operator/operator/org.eclipse.theia.cloud.operator/target/operator-0.8.1-SNAPSHOT-jar-with-dependencies.jar .
+ENTRYPOINT [ "java", "-Dlog4j2.configurationFile=/log-config/log4j2.xml", "-jar", "./operator-0.8.1-SNAPSHOT-jar-with-dependencies.jar" ]
 CMD [ "" ]
