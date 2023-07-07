@@ -20,6 +20,7 @@
     "common",
     "monitor",
     "monitor-theia",
-    "try-now-page"
+    "try-now-page",
+    "testing-page"
   ]
 }
