@@ -1,9 +1,9 @@
 output "service" {
-  value = "https://service.${data.terraform_remote_state.minikube.outputs.hostname}"
+  value = "https://${data.terraform_remote_state.minikube.outputs.hostname}/servicex/"
 }
 
 output "instance" {
-  value = "https://ws.${data.terraform_remote_state.minikube.outputs.hostname}"
+  value = "https://${data.terraform_remote_state.minikube.outputs.hostname}/instances/"
 }
 
 output "keycloak" {
@@ -11,5 +11,5 @@ output "keycloak" {
 }
 
 output "landing" {
-  value = "https://try.${data.terraform_remote_state.minikube.outputs.hostname}"
+  value = "https://${data.terraform_remote_state.minikube.outputs.hostname}/theiacloud/"
 }

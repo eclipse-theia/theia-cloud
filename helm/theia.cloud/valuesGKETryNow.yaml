@@ -1,7 +1,7 @@
 imagePullPolicy: Always
 
 app:
-  id: asdfghjkl
+  id: asdfghjkl123
   name: Theia Blueprint
 
 issuer:
@@ -15,11 +15,12 @@ image:
   imagePullPolicy: IfNotPresent
 
 hosts:
-  usePaths: false
-  service: service.theia-cloud.io
-  serviceProtocol: https
-  landing: try.theia-cloud.io
-  instance: ws.theia-cloud.io
+  usePaths: true
+  paths:
+    baseHost: my-ip.nip.io
+    service: servicex
+    landing: theiacloud
+    instance: instances
 
 landingPage:
   image: theiacloud/theia-cloud-try-now-page:0.8.1.MS1
@@ -27,9 +28,9 @@ landingPage:
   ephemeralStorage: true
   additionalApps:
     coffee-editor:
-      label: "Coffee Editor"
+      label: "Renamed Coffee Editor"
     cdt-cloud-demo:
-      label: "CDT.cloud Blueprint"
+      label: "Renamed CDT.cloud Blueprint"
 
 keycloak:
   enable: true

@@ -34,18 +34,8 @@ resource "helm_release" "theia-cloud" {
   ]
 
   set {
-    name  = "hosts.service"
-    value = "service.${data.terraform_remote_state.minikube.outputs.hostname}"
-  }
-
-  set {
-    name  = "hosts.landing"
-    value = "try.${data.terraform_remote_state.minikube.outputs.hostname}"
-  }
-
-  set {
-    name  = "hosts.instance"
-    value = "ws.${data.terraform_remote_state.minikube.outputs.hostname}"
+    name  = "hosts.paths.baseHost"
+    value = data.terraform_remote_state.minikube.outputs.hostname
   }
 
   set {
