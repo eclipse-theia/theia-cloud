@@ -40,6 +40,7 @@ keycloak:
   cookieSecret: "s-p4GxfRlPa_BI1XsLuvE2ihNOqYD1vmewWcXcpYjr0="
 
 operator:
+  image: theiacloud/theia-cloud-operator:0.8.1-osweek-1
   eagerStart: false
   bandwidthLimiter: "WONDERSHAPER"
   sessionsPerUser: "3"
