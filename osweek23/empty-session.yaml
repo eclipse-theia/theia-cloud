@@ -1,0 +1,13 @@
+apiVersion: theia.cloud/v4beta
+kind: Session
+metadata:
+  name: empty-session
+  namespace: theiacloud
+spec:
+  # appDefinition: theia-cloud-demo
+  # envVars: {}
+  # envVarsFromConfigMaps: []
+  # envVarsFromSecrets: []
+  # lastActivity: 1689681535648
+  # name: empty-session
+  # user: foo@theia-cloud.io

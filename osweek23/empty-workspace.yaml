@@ -1,0 +1,11 @@
+apiVersion: theia.cloud/v1beta
+kind: Workspace
+metadata:
+  name: empty-workspace
+  namespace: theiacloud
+spec:
+  # name:
+  # label: 
+  # appDefinition: 
+  # user: 
+  # storage: 

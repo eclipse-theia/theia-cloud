@@ -1,0 +1,12 @@
+apiVersion: theia.cloud/v4beta
+kind: Session
+metadata:
+  name: coffee-sessions
+  namespace: theiacloud
+spec:
+  appDefinition: coffee-editor
+  envVars: {}
+  envVarsFromConfigMaps: []
+  envVarsFromSecrets: []
+  name: coffee-sessions
+  user: foo@theia-cloud.io
