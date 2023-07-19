@@ -78,7 +78,7 @@ resource "helm_release" "theia-cloud" {
 resource "kubectl_manifest" "cdt-cloud-demo" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
-  apiVersion: theia.cloud/v6beta
+  apiVersion: theia.cloud/v7beta
   kind: AppDefinition
   metadata:
     name: cdt-cloud-demo
@@ -92,7 +92,7 @@ resource "kubectl_manifest" "cdt-cloud-demo" {
     limitsMemory: 1200M
     maxInstances: 10
     minInstances: 0
-    name: cdt-cloud-demo
+    id: cdt-cloud-demo
     port: 3000
     requestsCpu: 100m
     requestsMemory: 1000M
@@ -114,7 +114,7 @@ resource "kubectl_manifest" "cdt-cloud-demo" {
 resource "kubectl_manifest" "coffee-editor" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
-  apiVersion: theia.cloud/v6beta
+  apiVersion: theia.cloud/v7beta
   kind: AppDefinition
   metadata:
     name: coffee-editor
@@ -128,7 +128,7 @@ resource "kubectl_manifest" "coffee-editor" {
     limitsMemory: 2400M
     maxInstances: 4
     minInstances: 0
-    name: coffee-editor
+    id: coffee-editor
     port: 3000
     requestsCpu: 100m
     requestsMemory: 1000M

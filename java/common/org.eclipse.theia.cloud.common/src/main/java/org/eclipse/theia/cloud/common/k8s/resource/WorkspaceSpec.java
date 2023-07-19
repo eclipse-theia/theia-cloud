@@ -24,12 +24,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class WorkspaceSpec implements UserScopedSpec {
 
-    public static final String API = "theia.cloud/v1beta";
+    public static final String API = "theia.cloud/v2beta";
     public static final String KIND = "Workspace";
     public static final String CRD_NAME = "workspaces.theia.cloud";
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("id")
+    private String id;
 
     @JsonProperty("label")
     private String label;
@@ -50,14 +50,14 @@ public class WorkspaceSpec implements UserScopedSpec {
     }
 
     public WorkspaceSpec(String name, String label, String appDefinition, String user) {
-	this.name = name;
+	this.id = name;
 	this.appDefinition = appDefinition;
 	this.user = user;
 	this.label = label;
     }
 
     public String getName() {
-	return name;
+	return id;
     }
 
     public String getLabel() {
@@ -115,8 +115,8 @@ public class WorkspaceSpec implements UserScopedSpec {
 
     @Override
     public String toString() {
-	return "WorkspaceSpec [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
-		+ user + ", storage=" + storage + ", error=" + error + "]";
+	return "WorkspaceSpec [name=" + id + ", label=" + label + ", appDefinition=" + appDefinition + ", user=" + user
+		+ ", storage=" + storage + ", error=" + error + "]";
     }
 
 }

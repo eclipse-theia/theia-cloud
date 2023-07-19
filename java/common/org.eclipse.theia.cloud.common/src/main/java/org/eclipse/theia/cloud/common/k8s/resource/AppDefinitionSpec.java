@@ -22,12 +22,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class AppDefinitionSpec {
 
-    public static final String API = "theia.cloud/v6beta";
+    public static final String API = "theia.cloud/v7beta";
     public static final String KIND = "AppDefinition";
     public static final String CRD_NAME = "appdefinitions.theia.cloud";
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("id")
+    private String id;
 
     @JsonProperty("image")
     private String image;
@@ -81,7 +81,7 @@ public class AppDefinitionSpec {
     private Monitor monitor;
 
     public String getName() {
-	return name;
+	return id;
     }
 
     public String getImage() {
@@ -154,7 +154,7 @@ public class AppDefinitionSpec {
 
     @Override
     public String toString() {
-	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
+	return "AppDefinitionSpec [name=" + id + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
 		+ ", pullSecret=" + pullSecret + ", uid=" + uid + ", port=" + port + ", ingressname=" + ingressname
 		+ ", minInstances=" + minInstances + ", maxInstances=" + maxInstances + ", timeout=" + timeout
 		+ ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="

@@ -1,10 +1,10 @@
-apiVersion: theia.cloud/v1beta
+apiVersion: theia.cloud/v2beta
 kind: Workspace
 metadata:
   name: empty-workspace
   namespace: theiacloud
 spec:
-  # name:
+  # id:
   # label: 
   # appDefinition: 
   # user: 

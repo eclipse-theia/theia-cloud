@@ -1,18 +1,18 @@
-apiVersion: theia.cloud/v6beta
+apiVersion: theia.cloud/v7beta
 kind: AppDefinition
 metadata:
   name: theia-cloud-demo
   namespace: theiacloud
 spec:
   downlinkLimit: 30000
-  image: theiacloud/theia-cloud-demo:0.8.1.MS1
+  image: theiacloud/theia-cloud-demo:osweek23-1
   imagePullPolicy: IfNotPresent
   ingressname: theia-cloud-demo-ws-ingress
   limitsCpu: "2"
   limitsMemory: 1200M
   maxInstances: 10
   minInstances: 0
-  name: theia-cloud-demo
+  id: theia-cloud-demo
   port: 3000
   requestsCpu: 100m
   requestsMemory: 1000M

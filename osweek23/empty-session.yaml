@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v4beta
+apiVersion: theia.cloud/v5beta
 kind: Session
 metadata:
   name: empty-session
@@ -9,5 +9,5 @@ spec:
   # envVarsFromConfigMaps: []
   # envVarsFromSecrets: []
   # lastActivity: 1689681535648
-  # name: empty-session
+  # id: empty-session
   # user: foo@theia-cloud.io

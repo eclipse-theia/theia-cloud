@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v6beta
+apiVersion: theia.cloud/v7beta
 kind: AppDefinition
 metadata:
   name: coffee-editor
@@ -12,7 +12,7 @@ spec:
   limitsMemory: 2400M
   maxInstances: 4
   minInstances: 0
-  name: coffee-editor
+  id: coffee-editor
   port: 3000
   requestsCpu: 100m
   requestsMemory: 1000M

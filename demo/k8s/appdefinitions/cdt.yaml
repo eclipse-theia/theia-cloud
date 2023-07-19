@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v6beta
+apiVersion: theia.cloud/v7beta
 kind: AppDefinition
 metadata:
   name: cdt-cloud-demo
@@ -12,7 +12,7 @@ spec:
   limitsMemory: 1200M
   maxInstances: 10
   minInstances: 0
-  name: cdt-cloud-demo
+  id: cdt-cloud-demo
   port: 3000
   requestsCpu: 100m
   requestsMemory: 1000M

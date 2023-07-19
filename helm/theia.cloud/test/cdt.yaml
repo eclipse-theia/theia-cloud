@@ -1,10 +1,10 @@
-apiVersion: theia.cloud/v6beta
+apiVersion: theia.cloud/v7beta
 kind: AppDefinition
 metadata:
   name: cdt-cloud-demo
   namespace: theiacloud
 spec:
-  name: cdt-cloud-demo
+  id: cdt-cloud-demo
   image: theiacloud/cdt-blueprint
   pullSecret: ""
   uid: 101

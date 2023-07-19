@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v4beta
+apiVersion: theia.cloud/v5beta
 kind: Session
 metadata:
   name: coffee-sessions
@@ -8,5 +8,5 @@ spec:
   envVars: {}
   envVarsFromConfigMaps: []
   envVarsFromSecrets: []
-  name: coffee-sessions
+  id: coffee-sessions
   user: foo@theia-cloud.io
