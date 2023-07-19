@@ -11,7 +11,7 @@ image:
   name: theiacloud/theia-cloud-demo:0.8.1.MS1
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
-  timeoutLimit: "30"
+  timeoutLimit: "1800"
   imagePullPolicy: IfNotPresent
 
 hosts:

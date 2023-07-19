@@ -1,0 +1,10 @@
+apiVersion: theia.cloud/v1beta
+kind: Workspace
+metadata:
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io
+  namespace: theiacloud
+spec:
+  appDefinition: theia-cloud-demo
+  label: theia-cloud-demo of foo@theia-cloud.io
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io
+  user: foo@theia-cloud.io

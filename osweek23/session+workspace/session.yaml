@@ -1,0 +1,13 @@
+apiVersion: theia.cloud/v4beta
+kind: Session
+metadata:
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io-session
+  namespace: theiacloud
+spec:
+  appDefinition: theia-cloud-demo
+  envVars: {}
+  envVarsFromConfigMaps: []
+  envVarsFromSecrets: []
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io-session
+  user: foo@theia-cloud.io
+  workspace: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io
