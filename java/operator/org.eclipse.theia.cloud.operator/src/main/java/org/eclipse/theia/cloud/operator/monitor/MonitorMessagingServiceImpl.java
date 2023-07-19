@@ -85,7 +85,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 	    try {
 		client.newCall(postRequest).execute();
 	    } catch (IOException e) {
-		LOGGER.info("[" + session.getSpec().getName() + "] Could not send message to extension:" + e);
+		LOGGER.info("[" + session.getSpec().getId() + "] Could not send message to extension:" + e);
 	    }
 	}
     }
@@ -100,7 +100,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
     }
 
     protected Optional<String> getIP(Session session) {
-	Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getName());
+	Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getId());
 	return sessionIP;
     }
 

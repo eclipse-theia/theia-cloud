@@ -40,11 +40,11 @@ public final class TheiaCloudK8sUtil {
 
 	if (appDefinitionSpec.getMaxInstances() == null || appDefinitionSpec.getMaxInstances() < 0) {
 	    LOGGER.debug(formatLogMessage(correlationId,
-		    "App Definition " + appDefinitionSpec.getName() + " allows indefinite sessions."));
+		    "App Definition " + appDefinitionSpec.getId() + " allows indefinite sessions."));
 	    return false;
 	}
 
-	final String appDefinitionName = appDefinitionSpec.getName();
+	final String appDefinitionName = appDefinitionSpec.getId();
 	if (appDefinitionName == null || appDefinitionName.isBlank()) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "The App Definition does not have a name: " + appDefinitionSpec));
@@ -57,7 +57,7 @@ public final class TheiaCloudK8sUtil {
 		    String sessionAppDefinition = w.getSpec().getAppDefinition();
 		    boolean result = appDefinitionName.equals(sessionAppDefinition);
 		    LOGGER.trace(formatLogMessage(correlationId, "Counting instances of app definition "
-			    + appDefinitionSpec.getName() + ": Is " + w.getSpec() + " of app definition? " + result));
+			    + appDefinitionSpec.getId() + ": Is " + w.getSpec() + " of app definition? " + result));
 		    return result;
 		})//
 		.count();

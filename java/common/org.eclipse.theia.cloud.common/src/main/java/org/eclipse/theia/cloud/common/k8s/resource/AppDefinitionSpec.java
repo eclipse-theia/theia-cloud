@@ -80,7 +80,7 @@ public class AppDefinitionSpec {
     @JsonProperty("monitor")
     private Monitor monitor;
 
-    public String getName() {
+    public String getId() {
 	return id;
     }
 

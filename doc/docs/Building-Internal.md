@@ -46,13 +46,13 @@ docker push theiacloud/theia-cloud-try-now-page:osweek23-1
 Build and push the Theia.cloud REST service with:
 
 ```bash
-docker build -t theiacloud/theia-cloud-service:osweek23-1 -f dockerfiles/service/Dockerfile .
+docker build --no-cache -t theiacloud/theia-cloud-service:osweek23-1 -f dockerfiles/service/Dockerfile .
 docker push theiacloud/theia-cloud-service:osweek23-1
 ```
 
 Build and push the operator with:
 
 ```bash
-docker build -t theiacloud/theia-cloud-operator:osweek23-1 -f dockerfiles/operator/Dockerfile .
+docker build --no-cache -t theiacloud/theia-cloud-operator:osweek23-1 -f dockerfiles/operator/Dockerfile .
 docker push theiacloud/theia-cloud-operator:osweek23-1
 ```

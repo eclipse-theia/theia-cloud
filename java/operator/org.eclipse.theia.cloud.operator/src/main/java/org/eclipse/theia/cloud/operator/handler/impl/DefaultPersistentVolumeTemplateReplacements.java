@@ -43,7 +43,7 @@ public class DefaultPersistentVolumeTemplateReplacements implements PersistentVo
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	replacements.put(PLACEHOLDER_LABEL_WORKSPACE_NAME, workspace.getSpec().getName());
+	replacements.put(PLACEHOLDER_LABEL_WORKSPACE_NAME, workspace.getSpec().getId());
 	replacements.put(PLACEHOLDER_REQUESTED_STORAGE,
 		orDefault(arguments.getRequestedStorage(), DEFAULT_REQUESTED_STORAGE));
 	return replacements;
@@ -54,7 +54,7 @@ public class DefaultPersistentVolumeTemplateReplacements implements PersistentVo
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	replacements.put(PLACEHOLDER_LABEL_WORKSPACE_NAME, workspace.getSpec().getName());
+	replacements.put(PLACEHOLDER_LABEL_WORKSPACE_NAME, workspace.getSpec().getId());
 	replacements.put(PLACEHOLDER_STORAGE_CLASS_NAME, orEmpty(arguments.getStorageClassName()));
 	replacements.put(PLACEHOLDER_REQUESTED_STORAGE,
 		orDefault(arguments.getRequestedStorage(), DEFAULT_REQUESTED_STORAGE));

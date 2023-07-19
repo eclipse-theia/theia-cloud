@@ -93,7 +93,7 @@ public class RootResource extends BaseResource {
 		    request.timeout, request.env);
 	} catch (Exception exception) {
 	    info(correlationId, "Delete workspace due to launch error " + request);
-	    k8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());
+	    k8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getId());
 	    throw exception;
 	}
     }

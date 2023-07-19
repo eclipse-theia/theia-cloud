@@ -243,7 +243,7 @@ public final class AddedHandlerUtil {
     /* ------------------- Addition of env vars to Deployments ------------------ */
     public static void addCustomEnvVarsToDeploymentFromSession(String correlationId, Deployment deployment,
 	    Session session, AppDefinition appDefinition) {
-	String containerName = appDefinition.getSpec().getName();
+	String containerName = appDefinition.getSpec().getId();
 	Optional<Integer> maybeContainerIdx = findContainerIdxInDeployment(deployment, containerName);
 
 	if (maybeContainerIdx.isEmpty()) {

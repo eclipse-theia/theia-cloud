@@ -52,7 +52,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	}
 
 	LOGGER.trace(formatLogMessage(correlationId, "Set workspace storage " + storageName));
-	client.workspaces().edit(correlationId, workspace.getSpec().getName(),
+	client.workspaces().edit(correlationId, workspace.getSpec().getId(),
 		toEdit -> toEdit.getSpec().setStorage(storageName));
 
 	return true;
@@ -60,7 +60,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 
     @Override
     public boolean workspaceDeleted(Workspace workspace, String correlationId) {
-	String sessionName = WorkspaceUtil.getSessionName(workspace.getSpec().getName());
+	String sessionName = WorkspaceUtil.getSessionName(workspace.getSpec().getId());
 	client.sessions().delete(correlationId, sessionName);
 
 	String storageName = WorkspaceUtil.getStorageName(workspace);

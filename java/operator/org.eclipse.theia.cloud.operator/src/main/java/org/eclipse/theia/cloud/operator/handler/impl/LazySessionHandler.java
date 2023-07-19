@@ -195,7 +195,7 @@ public class LazySessionHandler implements SessionHandler {
     protected boolean hasMaxInstancesReached(AppDefinition appDefinition, Session session, String correlationId) {
 	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), session.getSpec(),
 		appDefinition.getSpec(), correlationId)) {
-	    LOGGER.info(formatMetric(correlationId, "Max instances reached for " + appDefinition.getSpec().getName()));
+	    LOGGER.info(formatMetric(correlationId, "Max instances reached for " + appDefinition.getSpec().getId()));
 	    client.sessions().edit(correlationId, session.getMetadata().getName(),
 		    toEdit -> toEdit.getSpec().setError(TheiaCloudError.SESSION_SERVER_LIMIT_REACHED));
 	    return true;
@@ -233,7 +233,7 @@ public class LazySessionHandler implements SessionHandler {
 		appDefinitionResourceName, appDefinitionResourceUID);
 	if (ingress.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId,
-		    "No Ingress for app definition " + appDefinition.getSpec().getName() + " found."));
+		    "No Ingress for app definition " + appDefinition.getSpec().getId() + " found."));
 	}
 	return ingress;
     }
@@ -245,7 +245,7 @@ public class LazySessionHandler implements SessionHandler {
 	Optional<Workspace> workspace = client.workspaces().get(session.getSpec().getWorkspace());
 	if (!workspace.isPresent()) {
 	    LOGGER.info(formatLogMessage(correlationId, "No workspace with name " + session.getSpec().getWorkspace()
-		    + " found for session " + session.getSpec().getName(), correlationId));
+		    + " found for session " + session.getSpec().getId(), correlationId));
 	    return Optional.empty();
 
 	}

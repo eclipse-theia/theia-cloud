@@ -61,7 +61,7 @@ public class UserWorkspace {
     }
 
     public UserWorkspace(WorkspaceSpec data) {
-	this(data.getAppDefinition(), data.getUser(), data.getName(), data.getLabel());
+	this(data.getAppDefinition(), data.getUser(), data.getId(), data.getLabel());
     }
 
     @Schema(hidden = true)

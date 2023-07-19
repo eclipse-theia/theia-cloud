@@ -56,7 +56,7 @@ public class WorkspaceSpec implements UserScopedSpec {
 	this.label = label;
     }
 
-    public String getName() {
+    public String getId() {
 	return id;
     }
 

@@ -96,7 +96,7 @@ public class SessionSpec implements UserScopedSpec {
 	this.envVarsFromSecrets = envVarsFromSecrets;
     }
 
-    public String getName() {
+    public String getId() {
 	return id;
     }
 

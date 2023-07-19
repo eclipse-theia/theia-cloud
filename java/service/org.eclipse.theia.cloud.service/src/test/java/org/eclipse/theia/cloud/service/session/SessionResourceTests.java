@@ -446,7 +446,7 @@ class SessionResourceTests {
 
     private SessionSpec mockDefaultSession() {
 	SessionSpec session = Mockito.mock(SessionSpec.class);
-	Mockito.when(session.getName()).thenReturn(TEST_SESSION);
+	Mockito.when(session.getId()).thenReturn(TEST_SESSION);
 	Mockito.when(session.getUser()).thenReturn(TEST_USER);
 	return session;
     }

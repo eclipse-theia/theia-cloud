@@ -407,7 +407,7 @@ public class WorkspaceResourceTests {
 
     private WorkspaceSpec mockDefaultWorkspace() {
 	WorkspaceSpec workspace = Mockito.mock(WorkspaceSpec.class);
-	Mockito.when(workspace.getName()).thenReturn(TEST_WORKSPACE);
+	Mockito.when(workspace.getId()).thenReturn(TEST_WORKSPACE);
 	Mockito.when(workspace.getUser()).thenReturn(TEST_USER);
 	return workspace;
     }

@@ -97,7 +97,7 @@ public final class K8sUtil {
 	if (env == null)
 	    return spec;
 
-	return new SessionSpec(spec.getName(), spec.getAppDefinition(), spec.getUser(), spec.getWorkspace(),
+	return new SessionSpec(spec.getId(), spec.getAppDefinition(), spec.getUser(), spec.getWorkspace(),
 		env.fromMap, env.fromConfigMaps, env.fromSecrets);
     }
 
@@ -172,7 +172,7 @@ public final class K8sUtil {
 	    return false;
 	}
 	EnvVar env = optionalEnv.get();
-	return env.getValue().equals(session.getSpec().getName()) ? true : false;
+	return env.getValue().equals(session.getSpec().getId()) ? true : false;
     }
 
     public boolean hasAppDefinition(String appDefinition) {

@@ -45,7 +45,7 @@ public interface TimeoutStrategy {
 	    String creationTimestamp = session.getMetadata().getCreationTimestamp();
 	    Instant parse = Instant.parse(creationTimestamp);
 	    long minutesSinceCreation = ChronoUnit.MINUTES.between(parse, now);
-	    LOGGER.trace(formatLogMessage(FIXEDTIME, correlationId, "Checking " + session.getSpec().getName()
+	    LOGGER.trace(formatLogMessage(FIXEDTIME, correlationId, "Checking " + session.getSpec().getId()
 		    + ". minutesSinceLastActivity: " + minutesSinceCreation + ". limit: " + limit));
 	    return minutesSinceCreation > limit;
 	}

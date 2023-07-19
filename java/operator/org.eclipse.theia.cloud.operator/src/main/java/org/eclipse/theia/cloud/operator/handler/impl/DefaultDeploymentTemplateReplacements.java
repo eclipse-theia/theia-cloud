@@ -95,7 +95,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 
     protected Map<String, String> getAppDefinitionData(AppDefinition appDefinition) {
 	Map<String, String> appDefinitionData = new LinkedHashMap<String, String>();
-	appDefinitionData.put(PLACEHOLDER_APPDEFINITIONNAME, appDefinition.getSpec().getName());
+	appDefinitionData.put(PLACEHOLDER_APPDEFINITIONNAME, appDefinition.getSpec().getId());
 	appDefinitionData.put(PLACEHOLDER_IMAGE, appDefinition.getSpec().getImage());
 	appDefinitionData.put(PLACEHOLDER_IMAGE_PULL_POLICY,
 		orDefault(appDefinition.getSpec().getImagePullPolicy(), DEFAULT_IMAGE_PULL_POLICY));
@@ -127,7 +127,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	environmentVariables.put(PLACEHOLDER_ENV_APP_ID, arguments.getAppId());
 	environmentVariables.put(PLACEHOLDER_ENV_SERVICE_URL, arguments.getServiceUrl());
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_UID, session.map(s -> s.getMetadata().getUid()).orElse(""));
-	environmentVariables.put(PLACEHOLDER_ENV_SESSION_NAME, session.map(s -> s.getSpec().getName()).orElse(""));
+	environmentVariables.put(PLACEHOLDER_ENV_SESSION_NAME, session.map(s -> s.getSpec().getId()).orElse(""));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_USER, session.map(s -> s.getSpec().getUser()).orElse(""));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_SECRET,
 		session.map(s -> s.getSpec().getSessionSecret()).orElse(""));

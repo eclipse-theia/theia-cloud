@@ -74,7 +74,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	LOGGER.debug("Pinging sessions: " + sessions);
 
 	for (Session session : sessions) {
-	    Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getName());
+	    Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getId());
 	    if (sessionIP.isPresent()) {
 		String appDefinitionName = session.getSpec().getAppDefinition();
 		Optional<AppDefinition> appDefinitionOptional = resourceClient.appDefinitions().get(appDefinitionName);
@@ -88,13 +88,13 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 		    pingSession(session, sessionIP.get(), port, timeoutAfter, notifyAfter);
 		}
 	    } else {
-		LOGGER.error("No ClusterIP found for session " + session.getSpec().getName());
+		LOGGER.error("No ClusterIP found for session " + session.getSpec().getId());
 	    }
 	}
     }
 
     protected void pingSession(Session session, String sessionURL, int port, int shutdownAfter, int notifyAfter) {
-	String sessionName = session.getSpec().getName();
+	String sessionName = session.getSpec().getId();
 	logInfo(sessionName, "Pinging session at " + sessionURL);
 	OkHttpClient client = new OkHttpClient().newBuilder().build();
 
@@ -152,7 +152,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
     protected void updateLastActivity(Session session, long reportedTimestamp) {
 	long currentTimestamp = session.getSpec().getLastActivity();
 	if (currentTimestamp < reportedTimestamp) {
-	    logInfo(session.getSpec().getName(), "Update lastActivity in CR");
+	    logInfo(session.getSpec().getId(), "Update lastActivity in CR");
 	    session.getSpec().setLastActivity(reportedTimestamp);
 	}
     }
@@ -163,7 +163,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
     }
 
     protected void stopNonActiveSession(Session session, int shutdownAfter) {
-	String sessionName = session.getSpec().getName();
+	String sessionName = session.getSpec().getId();
 	String correlationId = generateCorrelationId();
 	try {
 	    this.messagingService.sendTimeoutMessage(session,

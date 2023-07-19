@@ -38,7 +38,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	workspace.setSpec(spec);
 
 	ObjectMeta metadata = new ObjectMeta();
-	metadata.setName(spec.getName());
+	metadata.setName(spec.getId());
 	workspace.setMetadata(metadata);
 
 	info(correlationId, "Create Workspace " + workspace.getSpec());
@@ -47,7 +47,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 
     @Override
     public Workspace launch(String correlationId, WorkspaceSpec spec, long timeout, TimeUnit unit) {
-	Workspace workspace = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
+	Workspace workspace = get(spec.getId()).orElseGet(() -> create(correlationId, spec));
 	WorkspaceSpec workspaceSpec = workspace.getSpec();
 
 	if (workspaceSpec.hasStorage()) {
@@ -55,7 +55,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	}
 
 	if (workspaceSpec.hasError()) {
-	    delete(correlationId, spec.getName());
+	    delete(correlationId, spec.getId());
 	    return workspace;
 	}
 
@@ -64,7 +64,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 		    (action, changedWorkspace) -> isWorkspaceComplete(correlationId, workspaceSpec, changedWorkspace),
 		    timeout, unit);
 	} catch (InterruptedException exception) {
-	    error(correlationId, "Timeout while waiting for workspace storage " + workspaceSpec.getName()
+	    error(correlationId, "Timeout while waiting for workspace storage " + workspaceSpec.getId()
 		    + ". Deleting workspace again.", exception);
 	    workspaceSpec.setError(TheiaCloudError.WORKSPACE_LAUNCH_TIMEOUT);
 	}
@@ -73,7 +73,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 
     protected boolean isWorkspaceComplete(String correlationId, WorkspaceSpec createdWorkspace,
 	    Workspace changedWorkspace) {
-	if (createdWorkspace.getName().equals(changedWorkspace.getSpec().getName())) {
+	if (createdWorkspace.getId().equals(changedWorkspace.getSpec().getId())) {
 	    if (changedWorkspace.getSpec().hasStorage()) {
 		info(correlationId, "Received URL for " + createdWorkspace);
 		createdWorkspace.setStorage(changedWorkspace.getSpec().getStorage());
@@ -81,7 +81,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	    }
 	    if (changedWorkspace.getSpec().hasError()) {
 		info(correlationId, "Received Error for " + changedWorkspace + ". Deleting workspace again.");
-		delete(correlationId, createdWorkspace.getName());
+		delete(correlationId, createdWorkspace.getId());
 		createdWorkspace.setError(changedWorkspace.getSpec().getError());
 		return true;
 	    }

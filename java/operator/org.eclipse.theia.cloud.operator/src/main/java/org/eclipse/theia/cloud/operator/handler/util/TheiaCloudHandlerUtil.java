@@ -59,11 +59,11 @@ public final class TheiaCloudHandlerUtil {
     }
 
     public static String getAppSelector(AppDefinition appDefinition, int instance) {
-	return asValidName(appDefinition.getSpec().getName() + "-" + instance);
+	return asValidName(appDefinition.getSpec().getId() + "-" + instance);
     }
 
     public static String getAppSelector(Session session) {
-	return asValidName(session.getSpec().getName() + "-" + session.getMetadata().getUid());
+	return asValidName(session.getSpec().getId() + "-" + session.getMetadata().getUid());
     }
 
     public static <T extends HasMetadata> T addOwnerReferenceToItem(String correlationId, String sessionResourceName,

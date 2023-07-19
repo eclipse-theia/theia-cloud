@@ -152,7 +152,7 @@ public final class NamingUtil {
     }
 
     private static String getAdditionalInformation(AppDefinition appDefinition) {
-	return appDefinition.getSpec().getName();
+	return appDefinition.getSpec().getId();
     }
 
     private static String getAdditionalInformation(Session session) {
@@ -163,7 +163,7 @@ public final class NamingUtil {
     }
 
     private static String getAdditionalInformation(Workspace workspace) {
-	return workspace.getSpec().getName();
+	return workspace.getSpec().getId();
     }
 
     /**

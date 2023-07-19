@@ -35,7 +35,7 @@ public class DefaultAppDefinitionResourceClient extends BaseResourceClient<AppDe
 	appDefinition.setSpec(spec);
 
 	ObjectMeta metadata = new ObjectMeta();
-	metadata.setName(spec.getName());
+	metadata.setName(spec.getId());
 	appDefinition.setMetadata(metadata);
 
 	info(correlationId, "Create AppDefinition " + appDefinition.getSpec());

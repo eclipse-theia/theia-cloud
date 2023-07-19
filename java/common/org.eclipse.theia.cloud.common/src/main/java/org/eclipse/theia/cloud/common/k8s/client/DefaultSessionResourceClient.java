@@ -44,7 +44,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	spec.setSessionSecret(UUID.randomUUID().toString());
 
 	ObjectMeta metadata = new ObjectMeta();
-	metadata.setName(spec.getName());
+	metadata.setName(spec.getId());
 	session.setMetadata(metadata);
 
 	info(correlationId, "Create Session " + session.getSpec());
@@ -54,7 +54,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
     @Override
     public Session launch(String correlationId, SessionSpec spec, long timeout, TimeUnit unit) {
 	// get or create session
-	Session session = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
+	Session session = get(spec.getId()).orElseGet(() -> create(correlationId, spec));
 	SessionSpec sessionSpec = session.getSpec();
 
 	// if session is available and has already an url or error, return that session
@@ -62,7 +62,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	    return session;
 	}
 	if (sessionSpec.hasError()) {
-	    delete(correlationId, spec.getName());
+	    delete(correlationId, spec.getId());
 	    return session;
 	}
 
@@ -71,14 +71,14 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	    watchUntil((action, changedSession) -> isSessionComplete(correlationId, sessionSpec, changedSession),
 		    timeout, unit);
 	} catch (InterruptedException exception) {
-	    error(correlationId, "Timeout while waiting for URL for " + spec.getName(), exception);
+	    error(correlationId, "Timeout while waiting for URL for " + spec.getId(), exception);
 	    sessionSpec.setError(TheiaCloudError.SESSION_LAUNCH_TIMEOUT);
 	}
 	return session;
     }
 
     protected boolean isSessionComplete(String correlationId, SessionSpec sessionSpec, Session changedSession) {
-	if (sessionSpec.getName().equals(changedSession.getSpec().getName())) {
+	if (sessionSpec.getId().equals(changedSession.getSpec().getId())) {
 	    if (changedSession.getSpec().hasUrl()) {
 		info(correlationId, "Received URL for " + changedSession);
 		sessionSpec.setUrl(changedSession.getSpec().getUrl());
@@ -86,7 +86,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	    }
 	    if (changedSession.getSpec().hasError()) {
 		info(correlationId, "Received Error for " + changedSession + ". Deleting session again.");
-		delete(correlationId, sessionSpec.getName());
+		delete(correlationId, sessionSpec.getId());
 		sessionSpec.setError(changedSession.getSpec().getError());
 		return true;
 	    }

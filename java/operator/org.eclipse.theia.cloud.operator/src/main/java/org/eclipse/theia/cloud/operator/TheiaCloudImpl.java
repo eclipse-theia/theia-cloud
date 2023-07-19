@@ -217,7 +217,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 	    Instant now = Instant.now();
 	    for (Session session : resourceClient.sessions().list()) {
 		if (isSessionTimedOut(correlationId, now, session)) {
-		    timedOutSessions.add(session.getSpec().getName());
+		    timedOutSessions.add(session.getSpec().getId());
 		}
 	    }
 
@@ -234,7 +234,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 		.map(appDef -> appDef.getSpec().getTimeout());
 	if (timeout.isEmpty() || timeout.get().getLimit() <= 0) {
 	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId,
-		    "Session " + session.getSpec().getName() + " will not be stopped automatically [NoTimout]."));
+		    "Session " + session.getSpec().getId() + " will not be stopped automatically [NoTimout]."));
 	    return false;
 	}
 	String strategyName = timeout.get().getStrategy();
@@ -245,11 +245,11 @@ public class TheiaCloudImpl implements TheiaCloud {
 	    LOGGER.warn(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "No strategy configured."));
 	}
 	if (strategy.isPresent() && strategy.get().evaluate(COR_ID_TIMEOUTPREFIX, session, now, limit)) {
-	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Session " + session.getSpec().getName()
+	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Session " + session.getSpec().getId()
 		    + " was stopped after " + limit + " minutes [" + strategyName + "]."));
 	    return true;
 	} else {
-	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Session " + session.getSpec().getName()
+	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Session " + session.getSpec().getId()
 		    + " will keep running until the limit of " + limit + " is hit [" + strategyName + "]."));
 	}
 	return false;
