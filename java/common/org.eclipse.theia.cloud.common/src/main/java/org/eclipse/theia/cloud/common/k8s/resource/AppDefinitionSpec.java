@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class AppDefinitionSpec {
 
-    public static final String API = "theia.cloud/v5beta";
+    public static final String API = "theia.cloud/v6beta";
     public static final String KIND = "AppDefinition";
     public static final String CRD_NAME = "appdefinitions.theia.cloud";
 
@@ -43,9 +43,6 @@ public class AppDefinitionSpec {
 
     @JsonProperty("port")
     private int port;
-
-    @JsonProperty("host")
-    private String host;
 
     @JsonProperty("ingressname")
     private String ingressname;
@@ -107,10 +104,6 @@ public class AppDefinitionSpec {
 	return port;
     }
 
-    public String getHost() {
-	return host;
-    }
-
     public String getIngressname() {
 	return ingressname;
     }
@@ -162,9 +155,9 @@ public class AppDefinitionSpec {
     @Override
     public String toString() {
 	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
-		+ ", pullSecret=" + pullSecret + ", uid=" + uid + ", port=" + port + ", host=" + host + ", ingressname="
-		+ ingressname + ", minInstances=" + minInstances + ", maxInstances=" + maxInstances + ", timeout="
-		+ timeout + ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="
+		+ ", pullSecret=" + pullSecret + ", uid=" + uid + ", port=" + port + ", ingressname=" + ingressname
+		+ ", minInstances=" + minInstances + ", maxInstances=" + maxInstances + ", timeout=" + timeout
+		+ ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="
 		+ limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit="
 		+ uplinkLimit + ", mountPath=" + mountPath + "]";
     }

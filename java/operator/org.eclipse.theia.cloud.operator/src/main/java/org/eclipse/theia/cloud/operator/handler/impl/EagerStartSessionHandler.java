@@ -210,7 +210,7 @@ public class EagerStartSessionHandler implements SessionHandler {
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
 	    String appDefinitionID, int instance, int port, AppDefinition appDefinition, String correlationId) {
-	String host = appDefinition.getSpec().getHost();
+	final String host = arguments.getInstancesHost();
 	String path = ingressPathProvider.getPath(appDefinition, instance);
 	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(),
 		ingressToUpdate -> addIngressRule(ingressToUpdate, serviceToUse.get(), host, port, path));

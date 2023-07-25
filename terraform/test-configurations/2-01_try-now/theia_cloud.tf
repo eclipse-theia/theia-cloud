@@ -78,14 +78,13 @@ resource "helm_release" "theia-cloud" {
 resource "kubectl_manifest" "cdt-cloud-demo" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
-  apiVersion: theia.cloud/v5beta
+  apiVersion: theia.cloud/v6beta
   kind: AppDefinition
   metadata:
     name: cdt-cloud-demo
     namespace: theiacloud
   spec:
     downlinkLimit: 30000
-    host: ws.${data.terraform_remote_state.minikube.outputs.hostname}
     image: theiacloud/cdt-cloud:v1.34.4
     imagePullPolicy: IfNotPresent
     ingressname: theia-cloud-demo-ws-ingress
@@ -115,14 +114,13 @@ resource "kubectl_manifest" "cdt-cloud-demo" {
 resource "kubectl_manifest" "coffee-editor" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
-  apiVersion: theia.cloud/v5beta
+  apiVersion: theia.cloud/v6beta
   kind: AppDefinition
   metadata:
     name: coffee-editor
     namespace: theiacloud
   spec:
     downlinkLimit: 30000
-    host: ws.${data.terraform_remote_state.minikube.outputs.hostname}
     image: eu.gcr.io/kubernetes-238012/coffee-editor:v0.7.17
     imagePullPolicy: IfNotPresent
     ingressname: theia-cloud-demo-ws-ingress
