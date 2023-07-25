@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -25,7 +25,7 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v5beta")
+@Version("v6beta")
 @Group("theia.cloud")
 @Singular("appdefinition")
 @Plural("appdefinitions")

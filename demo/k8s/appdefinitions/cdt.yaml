@@ -1,11 +1,10 @@
-apiVersion: theia.cloud/v5beta
+apiVersion: theia.cloud/v6beta
 kind: AppDefinition
 metadata:
   name: cdt-cloud-demo
   namespace: theiacloud
 spec:
   downlinkLimit: 30000
-  host: ws.theia-cloud.io
   image: theiacloud/cdt-cloud:v1.34.4
   imagePullPolicy: IfNotPresent
   ingressname: theia-cloud-demo-ws-ingress

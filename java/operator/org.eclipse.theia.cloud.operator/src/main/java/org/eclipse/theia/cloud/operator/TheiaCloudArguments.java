@@ -68,6 +68,10 @@ public class TheiaCloudArguments {
     private String appId;
 
     @Option(names = {
+	    "--instancesHost" }, description = "Hostname instances are hosted at. Does not include subpaths.", required = true)
+    private String instancesHost;
+
+    @Option(names = {
 	    "--usePaths" }, description = "Whether paths instead of subdomains are used for the various components", required = false)
     private boolean usePaths;
 
@@ -138,6 +142,10 @@ public class TheiaCloudArguments {
 	return appId;
     }
 
+    public String getInstancesHost() {
+	return instancesHost;
+    }
+
     public boolean isUsePaths() {
 	return usePaths;
     }
@@ -176,6 +184,7 @@ public class TheiaCloudArguments {
 	result = prime * result + (eagerStart ? 1231 : 1237);
 	result = prime * result + (enableActivityTracker ? 1231 : 1237);
 	result = prime * result + (enableMonitor ? 1231 : 1237);
+	result = prime * result + ((instancesHost == null) ? 0 : instancesHost.hashCode());
 	result = prime * result + ((instancesPath == null) ? 0 : instancesPath.hashCode());
 	result = prime * result + ((keycloakClientId == null) ? 0 : keycloakClientId.hashCode());
 	result = prime * result + ((keycloakRealm == null) ? 0 : keycloakRealm.hashCode());
@@ -214,6 +223,11 @@ public class TheiaCloudArguments {
 	if (enableActivityTracker != other.enableActivityTracker)
 	    return false;
 	if (enableMonitor != other.enableMonitor)
+	    return false;
+	if (instancesHost == null) {
+	    if (other.instancesHost != null)
+		return false;
+	} else if (!instancesHost.equals(other.instancesHost))
 	    return false;
 	if (instancesPath == null) {
 	    if (other.instancesPath != null)
@@ -278,9 +292,10 @@ public class TheiaCloudArguments {
 		+ enableMonitor + ", enableActivityTracker=" + enableActivityTracker + ", monitorInterval="
 		+ monitorInterval + ", cloudProvider=" + cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter
 		+ ", wondershaperImage=" + wondershaperImage + ", serviceUrl=" + serviceUrl + ", sessionsPerUser="
-		+ sessionsPerUser + ", appId=" + appId + ", usePaths=" + usePaths + ", instancesPath=" + instancesPath
-		+ ", storageClassName=" + storageClassName + ", requestedStorage=" + requestedStorage + ", keycloakURL="
-		+ keycloakURL + ", keycloakRealm=" + keycloakRealm + ", keycloakClientId=" + keycloakClientId + "]";
+		+ sessionsPerUser + ", appId=" + appId + ", instancesHost=" + instancesHost + ", usePaths=" + usePaths
+		+ ", instancesPath=" + instancesPath + ", storageClassName=" + storageClassName + ", requestedStorage="
+		+ requestedStorage + ", keycloakURL=" + keycloakURL + ", keycloakRealm=" + keycloakRealm
+		+ ", keycloakClientId=" + keycloakClientId + "]";
     }
 
 }

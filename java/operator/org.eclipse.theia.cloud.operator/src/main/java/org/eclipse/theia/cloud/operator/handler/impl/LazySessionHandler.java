@@ -311,8 +311,7 @@ public class LazySessionHandler implements SessionHandler {
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
 		configMapYaml, SessionSpec.API, SessionSpec.KIND, sessionResourceName, sessionResourceUID, 0,
 		configMap -> {
-		    String host = appDefinition.getSpec().getHost()
-			    + ingressPathProvider.getPath(appDefinition, session);
+		    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, session);
 		    int port = appDefinition.getSpec().getPort();
 		    AddedHandlerUtil.updateProxyConfigMap(client.kubernetes(), client.namespace(), configMap, host,
 			    port);
@@ -371,7 +370,7 @@ public class LazySessionHandler implements SessionHandler {
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
 	    Session session, AppDefinition appDefinition, String correlationId) {
-	String host = appDefinition.getSpec().getHost();
+	final String host = arguments.getInstancesHost();
 	String path = ingressPathProvider.getPath(appDefinition, session);
 	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(), ingressToUpdate -> {
 	    IngressRule ingressRule = new IngressRule();

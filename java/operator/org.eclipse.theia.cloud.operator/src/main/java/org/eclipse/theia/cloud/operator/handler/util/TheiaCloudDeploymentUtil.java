@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -40,14 +40,14 @@ public final class TheiaCloudDeploymentUtil {
     private TheiaCloudDeploymentUtil() {
     }
 
-    public static String getSessionURL(IngressPathProvider ingressPathProvider, AppDefinition appDefinition,
-	    Session session) {
-	return getSessionURL(appDefinition.getSpec().getHost(), ingressPathProvider.getPath(appDefinition, session));
+    public static String getSessionURL(String host, IngressPathProvider ingressPathProvider,
+	    AppDefinition appDefinition, Session session) {
+	return getSessionURL(host, ingressPathProvider.getPath(appDefinition, session));
     }
 
-    public static String getSessionURL(IngressPathProvider ingressPathProvider, AppDefinition appDefinition,
-	    int instance) {
-	return getSessionURL(appDefinition.getSpec().getHost(), ingressPathProvider.getPath(appDefinition, instance));
+    public static String getSessionURL(String host, IngressPathProvider ingressPathProvider,
+	    AppDefinition appDefinition, int instance) {
+	return getSessionURL(host, ingressPathProvider.getPath(appDefinition, instance));
     }
 
     private static String getSessionURL(String host, String path) {

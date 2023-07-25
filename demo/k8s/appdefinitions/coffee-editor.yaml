@@ -1,11 +1,10 @@
-apiVersion: theia.cloud/v5beta
+apiVersion: theia.cloud/v6beta
 kind: AppDefinition
 metadata:
   name: coffee-editor
   namespace: theiacloud
 spec:
   downlinkLimit: 30000
-  host: ws.theia-cloud.io
   image: eu.gcr.io/kubernetes-238012/coffee-editor:v0.7.17
   imagePullPolicy: IfNotPresent
   ingressname: theia-cloud-demo-ws-ingress

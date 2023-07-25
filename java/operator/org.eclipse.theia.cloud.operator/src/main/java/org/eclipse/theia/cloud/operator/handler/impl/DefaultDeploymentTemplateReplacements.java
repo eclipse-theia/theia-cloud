@@ -110,15 +110,15 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 
     protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, Session session) {
 	Map<String, String> environmentVariables = getEnvironmentVariables(appDefinition, Optional.of(session));
-	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL,
-		TheiaCloudDeploymentUtil.getSessionURL(ingressPathProvider, appDefinition, session));
+	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL, TheiaCloudDeploymentUtil
+		.getSessionURL(arguments.getInstancesHost(), ingressPathProvider, appDefinition, session));
 	return environmentVariables;
     }
 
     protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, int instance) {
 	Map<String, String> environmentVariables = getEnvironmentVariables(appDefinition, Optional.empty());
-	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL,
-		TheiaCloudDeploymentUtil.getSessionURL(ingressPathProvider, appDefinition, instance));
+	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL, TheiaCloudDeploymentUtil
+		.getSessionURL(arguments.getInstancesHost(), ingressPathProvider, appDefinition, instance));
 	return environmentVariables;
     }
 
