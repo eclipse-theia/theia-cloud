@@ -39,8 +39,11 @@ final class SpecWatch<S extends CustomResource<?, ?>> implements Watcher<S> {
     private final String resourceName;
     private final String correlationIdPrefix;
 
+    private long lastActive;
+
     SpecWatch(Map<String, S> cache, TriConsumer<Action, String, String> eventHandler, String resourceName,
 	    String correlationIdPrefix) {
+	this.lastActive = System.currentTimeMillis();
 	this.cache = cache;
 	this.eventHandler = eventHandler;
 	this.resourceName = resourceName;
@@ -49,23 +52,24 @@ final class SpecWatch<S extends CustomResource<?, ?>> implements Watcher<S> {
 
     @Override
     public void eventReceived(Action action, S resource) {
+	lastActive = System.currentTimeMillis();
 	String correlationId = generateCorrelationId();
 	String uid = resource.getMetadata().getUid();
 	try {
 	    LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
-		    resourceName + " " + uid + " : received an event: " + action));
+		    getResourceName() + " " + uid + " : received an event: " + action));
 	    if (cache.containsKey(uid)) {
 		LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
-			resourceName + " " + uid + " : already known. Check if outdated event"));
+			getResourceName() + " " + uid + " : already known. Check if outdated event"));
 		BigInteger knownResourceVersion = new BigInteger(cache.get(uid).getMetadata().getResourceVersion());
 		BigInteger receivedResourceVersion = new BigInteger(resource.getMetadata().getResourceVersion());
 		if (knownResourceVersion.compareTo(receivedResourceVersion) >= 1) {
 		    LOGGER.info(formatLogMessage(correlationIdPrefix, correlationId,
-			    resourceName + " " + uid + " : event is outdated"));
+			    getResourceName() + " " + uid + " : event is outdated"));
 		    return;
 		} else {
 		    LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
-			    resourceName + " " + uid + " : event is NOT outdated. Handle event"));
+			    getResourceName() + " " + uid + " : event is NOT outdated. Handle event"));
 		}
 	    }
 
@@ -77,29 +81,43 @@ final class SpecWatch<S extends CustomResource<?, ?>> implements Watcher<S> {
 		cache.remove(uid);
 	    }
 	} catch (Exception e) {
-	    LOGGER.error(
-		    formatLogMessage(correlationIdPrefix, resourceName + " " + uid + " : error while handling event"),
-		    e);
+	    LOGGER.error(formatLogMessage(correlationIdPrefix,
+		    getResourceName() + " " + uid + " : error while handling event"), e);
 	    System.exit(-1);
 	}
     }
 
     @Override
     public void onClose(WatcherException cause) {
-	LOGGER.error(formatLogMessage(correlationIdPrefix, resourceName + " watch closed because of an exception"),
+	lastActive = System.currentTimeMillis();
+	LOGGER.error(formatLogMessage(correlationIdPrefix, getResourceName() + " watch closed because of an exception"),
 		cause);
 	System.exit(-1);
     }
 
     @Override
     public void onClose() {
-	LOGGER.info(formatLogMessage(correlationIdPrefix, resourceName + " watch closed"));
+	lastActive = System.currentTimeMillis();
+	LOGGER.info(formatLogMessage(correlationIdPrefix, getResourceName() + " watch closed"));
 	Watcher.super.onClose();
     }
 
     @Override
     public boolean reconnecting() {
-	LOGGER.info(formatLogMessage(correlationIdPrefix, resourceName + " reconnecting"));
+	lastActive = System.currentTimeMillis();
+	LOGGER.info(formatLogMessage(correlationIdPrefix, getResourceName() + " reconnecting"));
 	return Watcher.super.reconnecting();
+    }
+
+    public String getResourceName() {
+	return resourceName;
+    }
+
+    /**
+     * @return the last timestamp when one of the {@link Watcher} actions was
+     *         invoked
+     */
+    public long getLastActive() {
+	return lastActive;
     }
 }
