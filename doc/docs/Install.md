@@ -73,6 +73,8 @@ helm repo update
 
 helm install theia-cloud-base theia-cloud-remote/theia-cloud-base  --set issuer.email=your-mail@example.com
 
+helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theiacloud --create-namespace
+
 helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --create-namespace
 
 # Uninstall
