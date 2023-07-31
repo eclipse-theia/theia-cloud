@@ -110,6 +110,10 @@ public class TheiaCloudArguments {
 	    "--leaderRetryPeriod" }, description = "The retry period for the leader election in seconds.", required = false)
     private int leaderRetryPeriod = 2;
 
+    @Option(names = {
+	    "--maxWatchIdleTime" }, description = "When a kubernetes watcher is idle for more than this time (in milliseconds) we assume that there is a problem and restart.", required = false)
+    private long maxWatchIdleTime = 1000 * 60 * 60; // 1 Hour
+
     public boolean isUseKeycloak() {
 	return useKeycloak;
     }
@@ -198,6 +202,10 @@ public class TheiaCloudArguments {
 	return leaderRetryPeriod;
     }
 
+    public long getMaxWatchIdleTime() {
+	return maxWatchIdleTime;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -216,6 +224,7 @@ public class TheiaCloudArguments {
 	result = prime * result + leaderLeaseDuration;
 	result = prime * result + leaderRenewDeadline;
 	result = prime * result + leaderRetryPeriod;
+	result = prime * result + (int) (maxWatchIdleTime ^ (maxWatchIdleTime >>> 32));
 	result = prime * result + ((monitorInterval == null) ? 0 : monitorInterval.hashCode());
 	result = prime * result + ((requestedStorage == null) ? 0 : requestedStorage.hashCode());
 	result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
@@ -282,6 +291,8 @@ public class TheiaCloudArguments {
 	    return false;
 	if (leaderRetryPeriod != other.leaderRetryPeriod)
 	    return false;
+	if (maxWatchIdleTime != other.maxWatchIdleTime)
+	    return false;
 	if (monitorInterval == null) {
 	    if (other.monitorInterval != null)
 		return false;
@@ -329,7 +340,8 @@ public class TheiaCloudArguments {
 		+ ", instancesPath=" + instancesPath + ", storageClassName=" + storageClassName + ", requestedStorage="
 		+ requestedStorage + ", keycloakURL=" + keycloakURL + ", keycloakRealm=" + keycloakRealm
 		+ ", keycloakClientId=" + keycloakClientId + ", leaderLeaseDuration=" + leaderLeaseDuration
-		+ ", leaderRenewDeadline=" + leaderRenewDeadline + ", leaderRetryPeriod=" + leaderRetryPeriod + "]";
+		+ ", leaderRenewDeadline=" + leaderRenewDeadline + ", leaderRetryPeriod=" + leaderRetryPeriod
+		+ ", maxWatchIdleTime=" + maxWatchIdleTime + "]";
     }
 
 }
