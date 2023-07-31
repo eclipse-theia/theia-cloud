@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022-2023 EclipseSource and others.
+ * Copyright (C) 2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,13 +13,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.client;
+package org.eclipse.theia.cloud.common.k8s.resource;
 
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionStatus;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public interface AppDefinitionResourceClient extends
-	CustomResourceClient<AppDefinitionSpec, AppDefinitionStatus, AppDefinition, AppDefinitionSpecResourceList> {
+@JsonDeserialize
+public class SessionStatus extends ResourceStatus {
+
 }

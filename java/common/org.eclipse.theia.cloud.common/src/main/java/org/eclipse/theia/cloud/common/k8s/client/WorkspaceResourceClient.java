@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,14 +20,14 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceStatus;
 
 public interface WorkspaceResourceClient
-	extends CustomResourceClient<WorkspaceSpec, Workspace, WorkspaceSpecResourceList> {
+	extends CustomResourceClient<WorkspaceSpec, WorkspaceStatus, Workspace, WorkspaceSpecResourceList> {
 
     Workspace launch(String correlationId, WorkspaceSpec spec, long timeout, TimeUnit unit);
 
     default Workspace launch(String correlationId, WorkspaceSpec spec) {
 	return launch(correlationId, spec, 1, TimeUnit.MINUTES);
     }
-
 }

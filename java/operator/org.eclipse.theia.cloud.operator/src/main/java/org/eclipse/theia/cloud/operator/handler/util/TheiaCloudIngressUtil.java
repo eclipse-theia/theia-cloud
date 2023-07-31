@@ -23,7 +23,6 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.util.JavaUtil;
 import org.eclipse.theia.cloud.operator.handler.impl.AddedHandlerUtil;
 
@@ -54,7 +53,7 @@ public final class TheiaCloudIngressUtil {
 	if (ingress.isPresent()) {
 	    OwnerReference ownerReference = new OwnerReference();
 	    ownerReference.setApiVersion(HasMetadata.getApiVersion(AppDefinition.class));
-	    ownerReference.setKind(AppDefinitionSpec.KIND);
+	    ownerReference.setKind(AppDefinition.KIND);
 	    ownerReference.setName(appDefinition.getMetadata().getName());
 	    ownerReference.setUid(appDefinition.getMetadata().getUid());
 	    addOwnerReferenceToIngress(client, namespace, ingress.get(), ownerReference);

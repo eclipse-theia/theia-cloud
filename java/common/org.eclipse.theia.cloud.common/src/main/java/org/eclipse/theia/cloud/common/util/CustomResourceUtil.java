@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -21,11 +21,8 @@ import java.util.Objects;
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
@@ -61,15 +58,15 @@ public final class CustomResourceUtil {
     }
 
     public static void registerSessionResource(NamespacedKubernetesClient client) {
-	registerCustomResource(client, Session.class, SessionSpec.KIND, SessionSpec.CRD_NAME);
+	registerCustomResource(client, Session.class, Session.KIND, Session.CRD_NAME);
     }
 
     public static void registerWorkspaceResource(NamespacedKubernetesClient client) {
-	registerCustomResource(client, Workspace.class, WorkspaceSpec.KIND, WorkspaceSpec.CRD_NAME);
+	registerCustomResource(client, Workspace.class, Workspace.KIND, Workspace.CRD_NAME);
     }
 
     public static void registerAppDefinitionResource(NamespacedKubernetesClient client) {
-	registerCustomResource(client, AppDefinition.class, AppDefinitionSpec.KIND, AppDefinitionSpec.CRD_NAME);
+	registerCustomResource(client, AppDefinition.class, AppDefinition.KIND, AppDefinition.CRD_NAME);
     }
 
     public static void registerCustomResource(NamespacedKubernetesClient client,

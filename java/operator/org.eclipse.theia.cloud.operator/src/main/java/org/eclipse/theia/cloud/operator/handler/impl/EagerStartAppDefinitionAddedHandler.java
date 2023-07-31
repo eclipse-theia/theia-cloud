@@ -172,7 +172,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 	    return;
 	}
 	K8sUtil.loadAndCreateServiceWithOwnerReference(client, namespace, correlationId, serviceYaml,
-		AppDefinitionSpec.API, AppDefinitionSpec.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0);
+		AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0);
     }
 
     protected void createAndApplyDeployment(NamespacedKubernetesClient client, String namespace, String correlationId,
@@ -192,7 +192,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 	    return;
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
-		AppDefinitionSpec.API, AppDefinitionSpec.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
+		AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
 		deployment -> {
 		    bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
 			    appDefinition.getSpec().getUplinkLimit(), correlationId);
@@ -220,7 +220,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
-		AppDefinitionSpec.API, AppDefinitionSpec.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
+		AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
 		configMap -> {
 		    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, instance);
 		    int port = appDefinition.getSpec().getPort();
@@ -244,7 +244,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
-		AppDefinitionSpec.API, AppDefinitionSpec.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0);
+		AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0);
     }
 
 }

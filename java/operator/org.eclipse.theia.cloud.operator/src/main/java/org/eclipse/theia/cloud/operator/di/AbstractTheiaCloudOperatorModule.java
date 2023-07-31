@@ -20,9 +20,9 @@ import java.util.function.Consumer;
 
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloud;
 import org.eclipse.theia.cloud.operator.TheiaCloudImpl;
@@ -124,9 +124,9 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
     @Singleton
     protected NamespacedKubernetesClient provideKubernetesClient() {
 	NamespacedKubernetesClient client = CustomResourceUtil.createClient();
-	CustomResourceUtil.validateCustomResource(client, SessionSpec.CRD_NAME);
-	CustomResourceUtil.validateCustomResource(client, WorkspaceSpec.CRD_NAME);
-	CustomResourceUtil.validateCustomResource(client, AppDefinitionSpec.CRD_NAME);
+	CustomResourceUtil.validateCustomResource(client, Session.CRD_NAME);
+	CustomResourceUtil.validateCustomResource(client, Workspace.CRD_NAME);
+	CustomResourceUtil.validateCustomResource(client, AppDefinition.CRD_NAME);
 	return client;
     }
 

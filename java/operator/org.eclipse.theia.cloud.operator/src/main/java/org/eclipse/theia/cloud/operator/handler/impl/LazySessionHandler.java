@@ -31,8 +31,11 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.OperatorStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
@@ -87,9 +90,26 @@ public class LazySessionHandler implements SessionHandler {
 
     @Override
     public boolean sessionAdded(Session session, String correlationId) {
+
 	/* session information */
 	String sessionResourceName = session.getMetadata().getName();
 	String sessionResourceUID = session.getMetadata().getUid();
+
+	// Check current session status and ignore if handling failed before
+	Optional<SessionStatus> status = Optional.ofNullable(session.getStatus());
+	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
+	if (OperatorStatus.ERROR.equals(operatorStatus) || OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    LOGGER.warn(formatLogMessage(correlationId,
+		    "Session could not be handled before and is skipped now. Current status: " + operatorStatus
+			    + ". Session: " + session));
+	    return false;
+	}
+
+	// Set session status to being handled
+	client.sessions().updateStatus(correlationId, session, s -> {
+	    s.setOperatorStatus(OperatorStatus.HANDLING);
+	});
+
 	SessionSpec sessionSpec = session.getSpec();
 
 	/* find app definition for session */
@@ -97,20 +117,36 @@ public class LazySessionHandler implements SessionHandler {
 	Optional<AppDefinition> optionalAppDefinition = client.appDefinitions().get(appDefinitionID);
 	if (optionalAppDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("App Definition not found.");
+	    });
 	    return false;
 	}
 	AppDefinition appDefinition = optionalAppDefinition.get();
 
 	if (hasMaxInstancesReached(appDefinition, session, correlationId)) {
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Max instances reached.");
+	    });
 	    return false;
 	}
 
 	if (hasMaxSessionsReached(session, correlationId)) {
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Max sessions reached.");
+	    });
 	    return false;
 	}
 
 	Optional<Ingress> ingress = getIngress(appDefinition, correlationId);
 	if (ingress.isEmpty()) {
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Ingress not available.");
+	    });
 	    return false;
 	}
 
@@ -122,6 +158,10 @@ public class LazySessionHandler implements SessionHandler {
 	if (!existingServices.isEmpty()) {
 	    LOGGER.warn(formatLogMessage(correlationId,
 		    "Existing service for " + sessionSpec + ". Session already running?"));
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.HANDLED);
+		s.setOperatorMessage("Service already exists.");
+	    });
 	    return true;
 	}
 
@@ -129,6 +169,10 @@ public class LazySessionHandler implements SessionHandler {
 		session, appDefinition.getSpec(), arguments.isUseKeycloak());
 	if (serviceToUse.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "Unable to create service for session " + sessionSpec));
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Failed to create service.");
+	    });
 	    return false;
 	}
 
@@ -139,6 +183,10 @@ public class LazySessionHandler implements SessionHandler {
 	    if (!existingConfigMaps.isEmpty()) {
 		LOGGER.warn(formatLogMessage(correlationId,
 			"Existing configmaps for " + sessionSpec + ". Session already running?"));
+		client.sessions().updateStatus(correlationId, session, s -> {
+		    s.setOperatorStatus(OperatorStatus.HANDLED);
+		    s.setOperatorMessage("Configmaps already exist.");
+		});
 		return true;
 	    }
 	    createAndApplyEmailConfigMap(correlationId, sessionResourceName, sessionResourceUID, session);
@@ -152,6 +200,10 @@ public class LazySessionHandler implements SessionHandler {
 	if (!existingDeployments.isEmpty()) {
 	    LOGGER.warn(formatLogMessage(correlationId,
 		    "Existing deployments for " + sessionSpec + ". Session already running?"));
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.HANDLED);
+		s.setOperatorMessage("Deployment already exists.");
+	    });
 	    return true;
 	}
 
@@ -166,6 +218,10 @@ public class LazySessionHandler implements SessionHandler {
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Failed to edit ingress");
+	    });
 	    return false;
 	}
 
@@ -177,9 +233,16 @@ public class LazySessionHandler implements SessionHandler {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),
 		    e);
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Failed to set session URL.");
+	    });
 	    return false;
 	}
 
+	client.sessions().updateStatus(correlationId, session, s -> {
+	    s.setOperatorStatus(OperatorStatus.HANDLED);
+	});
 	return true;
     }
 
@@ -273,7 +336,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return Optional.empty();
 	}
 	return K8sUtil.loadAndCreateServiceWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		serviceYaml, SessionSpec.API, SessionSpec.KIND, sessionResourceName, sessionResourceUID, 0);
+		serviceYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0);
     }
 
     protected void createAndApplyEmailConfigMap(String correlationId, String sessionResourceName,
@@ -289,7 +352,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, SessionSpec.API, SessionSpec.KIND, sessionResourceName, sessionResourceUID, 0,
+		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
 		configmap -> {
 		    configmap.setData(Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST,
 			    session.getSpec().getUser()));
@@ -309,7 +372,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, SessionSpec.API, SessionSpec.KIND, sessionResourceName, sessionResourceUID, 0,
+		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
 		configMap -> {
 		    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, session);
 		    int port = appDefinition.getSpec().getPort();
@@ -333,7 +396,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		deploymentYaml, SessionSpec.API, SessionSpec.KIND, sessionResourceName, sessionResourceUID, 0,
+		deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
 		deployment -> {
 		    pvName.ifPresent(name -> addVolumeClaim(deployment, name, appDefinition.getSpec()));
 		    bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),

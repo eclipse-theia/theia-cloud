@@ -62,6 +62,15 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
 	return resource.edit(JavaUtil.toUnary(consumer));
     }
 
+    default T editStatus(String correlationId, String name, Consumer<T> consumer) {
+	trace(correlationId, "Edit status of" + name);
+	Resource<T> resource = resource(name);
+	if (resource.get() == null) {
+	    return null;
+	}
+	return resource.editStatus(JavaUtil.toUnary(consumer));
+    }
+
     Optional<T> loadAndCreate(String correlationId, String yaml, Consumer<T> customization);
 
     default Optional<T> loadAndCreate(String correlationId, String yaml) {
