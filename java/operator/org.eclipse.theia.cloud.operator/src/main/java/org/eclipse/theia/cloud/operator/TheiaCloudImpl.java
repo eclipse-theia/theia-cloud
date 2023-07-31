@@ -48,7 +48,8 @@ import io.fabric8.kubernetes.client.Watcher;
 
 public class TheiaCloudImpl implements TheiaCloud {
 
-    private static final ScheduledExecutorService EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService STOP_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService WATCH_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudImpl.class);
 
@@ -81,50 +82,60 @@ public class TheiaCloudImpl implements TheiaCloud {
     private final Map<String, AppDefinition> appDefinitionCache = new ConcurrentHashMap<>();
     private final Map<String, Workspace> workspaceCache = new ConcurrentHashMap<>();
     private final Map<String, Session> sessionCache = new ConcurrentHashMap<>();
+    private final Set<SpecWatch<?>> watches = new LinkedHashSet<>();
 
     @Override
     public void start() {
 	if (arguments.isEnableMonitor() && arguments.isEnableActivityTracker()) {
 	    monitorActivityTracker.start(arguments.getMonitorInterval());
 	}
-	initAppDefinitionsAndWatchForChanges();
-	initWorkspacesAndWatchForChanges();
-	initSessionsAndWatchForChanges();
+	watches.add(initAppDefinitionsAndWatchForChanges());
+	watches.add(initWorkspacesAndWatchForChanges());
+	watches.add(initSessionsAndWatchForChanges());
 
-	EXECUTOR.scheduleWithFixedDelay(this::stopTimedOutSessions, 1, 1, TimeUnit.MINUTES);
+	STOP_EXECUTOR.scheduleWithFixedDelay(this::stopTimedOutSessions, 1, 1, TimeUnit.MINUTES);
+	WATCH_EXECUTOR.scheduleWithFixedDelay(this::lookForIdleWatches, 1, 1, TimeUnit.MINUTES);
     }
 
-    protected void initAppDefinitionsAndWatchForChanges() {
+    protected SpecWatch<AppDefinition> initAppDefinitionsAndWatchForChanges() {
 	try {
 	    resourceClient.appDefinitions().list().forEach(this::initAppDefinition);
-	    resourceClient.appDefinitions().operation().watch(new SpecWatch<>(appDefinitionCache,
-		    this::handleAppDefnitionEvent, "App Definition", COR_ID_APPDEFINITIONPREFIX));
+	    SpecWatch<AppDefinition> watcher = new SpecWatch<>(appDefinitionCache, this::handleAppDefnitionEvent,
+		    "App Definition", COR_ID_APPDEFINITIONPREFIX);
+	    resourceClient.appDefinitions().operation().watch(watcher);
+	    return watcher;
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing app definitions watch"), e);
 	    System.exit(-1);
+	    throw new IllegalStateException();
 	}
     }
 
-    protected void initWorkspacesAndWatchForChanges() {
+    protected SpecWatch<Workspace> initWorkspacesAndWatchForChanges() {
 	try {
 	    resourceClient.workspaces().list().forEach(this::initWorkspace);
-	    resourceClient.workspaces().operation().watch(
-		    new SpecWatch<>(workspaceCache, this::handleWorkspaceEvent, "Workspace", COR_ID_WORKSPACEPREFIX));
+	    SpecWatch<Workspace> watcher = new SpecWatch<>(workspaceCache, this::handleWorkspaceEvent, "Workspace",
+		    COR_ID_WORKSPACEPREFIX);
+	    resourceClient.workspaces().operation().watch(watcher);
+	    return watcher;
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing workspace watch"), e);
 	    System.exit(-1);
+	    throw new IllegalStateException();
 	}
     }
 
-    protected void initSessionsAndWatchForChanges() {
+    protected SpecWatch<Session> initSessionsAndWatchForChanges() {
 	try {
 	    resourceClient.sessions().list().forEach(this::initSession);
-
-	    resourceClient.sessions().operation()
-		    .watch(new SpecWatch<>(sessionCache, this::handleSessionEvent, "Session", COR_ID_SESSIONPREFIX));
+	    SpecWatch<Session> watcher = new SpecWatch<>(sessionCache, this::handleSessionEvent, "Session",
+		    COR_ID_SESSIONPREFIX);
+	    resourceClient.sessions().operation().watch(watcher);
+	    return watcher;
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(Main.COR_ID_INIT, "Error while initializing session watch"), e);
 	    System.exit(-1);
+	    throw new IllegalStateException();
 	}
     }
 
@@ -226,6 +237,27 @@ public class TheiaCloudImpl implements TheiaCloud {
 	    }
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Exception in kill after runnable"), e);
+	}
+    }
+
+    /**
+     * If watches have not been called at all (neither reconnecting calls or actual
+     * actions), this might mean that the watch can't communicate with the kube API
+     * anymore. In this case we want to hand over to a different operator which will
+     * start up fresh watches.
+     */
+    protected void lookForIdleWatches() {
+	String correlationId = generateCorrelationId();
+	long now = System.currentTimeMillis();
+	for (SpecWatch<?> watch : watches) {
+	    long idleForMs = now - watch.getLastActive();
+	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId,
+		    watch.getResourceName() + " watch was idle for " + idleForMs + " ms"));
+	    if (idleForMs > arguments.getMaxWatchIdleTime()) {
+		LOGGER.error(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, watch.getResourceName()
+			+ " was idle for too long and is assumed to be disconnected. Exit operator.."));
+		System.exit(-1);
+	    }
 	}
     }
 
