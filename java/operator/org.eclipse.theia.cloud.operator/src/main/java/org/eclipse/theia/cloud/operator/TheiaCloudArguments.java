@@ -98,6 +98,18 @@ public class TheiaCloudArguments {
 	    "--keycloakClientId" }, description = "The client id of the auth application, if keycloak is enabled", required = false)
     private String keycloakClientId;
 
+    @Option(names = {
+	    "--leaderLeaseDuration" }, description = "The lease duration for leader election in seconds.", required = false)
+    private int leaderLeaseDuration = 10;
+
+    @Option(names = {
+	    "--leaderRenewDeadline" }, description = "The renew deadline of the leader election in seconds.", required = false)
+    private int leaderRenewDeadline = 5;
+
+    @Option(names = {
+	    "--leaderRetryPeriod" }, description = "The retry period for the leader election in seconds.", required = false)
+    private int leaderRetryPeriod = 2;
+
     public boolean isUseKeycloak() {
 	return useKeycloak;
     }
@@ -174,6 +186,18 @@ public class TheiaCloudArguments {
 	return keycloakClientId;
     }
 
+    public int getLeaderLeaseDuration() {
+	return leaderLeaseDuration;
+    }
+
+    public int getLeaderRenewDeadline() {
+	return leaderRenewDeadline;
+    }
+
+    public int getLeaderRetryPeriod() {
+	return leaderRetryPeriod;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -189,6 +213,9 @@ public class TheiaCloudArguments {
 	result = prime * result + ((keycloakClientId == null) ? 0 : keycloakClientId.hashCode());
 	result = prime * result + ((keycloakRealm == null) ? 0 : keycloakRealm.hashCode());
 	result = prime * result + ((keycloakURL == null) ? 0 : keycloakURL.hashCode());
+	result = prime * result + leaderLeaseDuration;
+	result = prime * result + leaderRenewDeadline;
+	result = prime * result + leaderRetryPeriod;
 	result = prime * result + ((monitorInterval == null) ? 0 : monitorInterval.hashCode());
 	result = prime * result + ((requestedStorage == null) ? 0 : requestedStorage.hashCode());
 	result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
@@ -249,6 +276,12 @@ public class TheiaCloudArguments {
 		return false;
 	} else if (!keycloakURL.equals(other.keycloakURL))
 	    return false;
+	if (leaderLeaseDuration != other.leaderLeaseDuration)
+	    return false;
+	if (leaderRenewDeadline != other.leaderRenewDeadline)
+	    return false;
+	if (leaderRetryPeriod != other.leaderRetryPeriod)
+	    return false;
 	if (monitorInterval == null) {
 	    if (other.monitorInterval != null)
 		return false;
@@ -295,7 +328,8 @@ public class TheiaCloudArguments {
 		+ sessionsPerUser + ", appId=" + appId + ", instancesHost=" + instancesHost + ", usePaths=" + usePaths
 		+ ", instancesPath=" + instancesPath + ", storageClassName=" + storageClassName + ", requestedStorage="
 		+ requestedStorage + ", keycloakURL=" + keycloakURL + ", keycloakRealm=" + keycloakRealm
-		+ ", keycloakClientId=" + keycloakClientId + "]";
+		+ ", keycloakClientId=" + keycloakClientId + ", leaderLeaseDuration=" + leaderLeaseDuration
+		+ ", leaderRenewDeadline=" + leaderRenewDeadline + ", leaderRetryPeriod=" + leaderRetryPeriod + "]";
     }
 
 }
