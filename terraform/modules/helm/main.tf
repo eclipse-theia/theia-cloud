@@ -7,6 +7,11 @@ variable "install_theia_cloud_base" {
   default     = true
 }
 
+variable "install_theia_cloud_crds" {
+  description = "Whether to install theia cloud crds"
+  default     = true
+}
+
 variable "install_theia_cloud" {
   description = "Whether to install theia cloud"
   default     = true
@@ -135,6 +140,16 @@ resource "helm_release" "theia-cloud-base" {
   }
 }
 
+resource "helm_release" "theia-cloud-crds" {
+  count            = var.install_theia_cloud_crds ? 1 : 0
+  name             = "theia-cloud-crds"
+  repository       = "https://github.eclipsesource.com/theia-cloud-helm"
+  chart            = "theia-cloud-crds"
+  version          = "0.8.1-v001"
+  namespace        = "theiacloud"
+  create_namespace = true
+}
+
 resource "kubectl_manifest" "selfsigned_issuer" {
   count      = var.install_selfsigned_issuer ? 1 : 0
   depends_on = [helm_release.cert-manager, helm_release.nginx-ingress-controller] # we need to install cert issuers
@@ -198,7 +213,7 @@ resource "helm_release" "keycloak" {
 
 resource "helm_release" "theia-cloud" {
   count            = var.install_theia_cloud ? 1 : 0
-  depends_on       = [helm_release.keycloak] # wait for keycloak to make the default cert available
+  depends_on       = [helm_release.keycloak, helm_release.theia-cloud-crds] # wait for keycloak to make the default cert available
   name             = "theia-cloud"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud"
