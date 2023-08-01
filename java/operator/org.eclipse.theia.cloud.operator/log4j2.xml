@@ -15,6 +15,10 @@
 			additivity="false">
 			<AppenderRef ref="Console" />
 		</Logger>
+		<Logger name="org.eclipse.theia.cloud.operator.TheiaCloudImpl" level="info"
+			additivity="false">
+			<AppenderRef ref="Console" />
+		</Logger>
 		<Logger name="org.eclipse.theia.cloud.operator" level="trace"
 			additivity="false">
 			<AppenderRef ref="Console" />
