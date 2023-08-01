@@ -101,6 +101,7 @@ module "helm" {
   cloudProvider                = "MINIKUBE"
   install_selfsigned_issuer    = true
   install_theia_cloud_base     = false
+  install_theia_cloud_crds     = false
   install_theia_cloud          = false
 }
 
