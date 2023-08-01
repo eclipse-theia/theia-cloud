@@ -132,9 +132,30 @@ public final class AddedHandlerUtil {
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {
 	    boolean updateURL = false;
-	    for (int i = 1; i <= 60; i++) {
+	    for (int i = 1; i <= 100; i++) {
 		try {
-		    Thread.sleep(i * 1000);
+		    /*
+		     * On the first 15 loops we will check every 2.5s whether URL is available. This
+		     * will take at least 37.5s.
+		     * 
+		     * On the second 15 loops we will check every 5s. This will take at least 75s.
+		     * 
+		     * On the next 15 loops we will check every 10s. This will take at least further
+		     * 150s.
+		     * 
+		     * If the pod has not started within the first 4-5 minutes, we will continue to
+		     * check every minute. We give up after an hour.
+		     * 
+		     */
+		    if (i <= 15) {
+			Thread.sleep(2500);
+		    } else if (i <= 30) {
+			Thread.sleep(5000);
+		    } else if (i <= 45) {
+			Thread.sleep(10000);
+		    } else {
+			Thread.sleep(60000);
+		    }
 		} catch (InterruptedException e) {
 		    /* silent */
 		}
