@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -24,11 +24,15 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v1beta")
+@Version("v2beta")
 @Group("theia.cloud")
 @Singular("workspace")
 @Plural("workspaces")
-public class Workspace extends CustomResource<WorkspaceSpec, Void> implements Namespaced {
+public class Workspace extends CustomResource<WorkspaceSpec, WorkspaceStatus> implements Namespaced {
+
+    public static final String API = "theia.cloud/v2beta";
+    public static final String CRD_NAME = "workspaces.theia.cloud";
+    public static final String KIND = "Workspace";
 
     private static final long serialVersionUID = 6437279756051357397L;
 

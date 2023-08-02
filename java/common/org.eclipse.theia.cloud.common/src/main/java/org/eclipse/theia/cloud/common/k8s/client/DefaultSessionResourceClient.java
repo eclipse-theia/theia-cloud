@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionStatus;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -100,6 +101,11 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	    trace(correlationId, "Updating activity for session {" + name + "}");
 	    session.getSpec().setLastActivity(Instant.now().toEpochMilli());
 	}) != null;
+    }
+
+    @Override
+    public SessionStatus createDefaultStatus() {
+	return new SessionStatus();
     }
 
 }

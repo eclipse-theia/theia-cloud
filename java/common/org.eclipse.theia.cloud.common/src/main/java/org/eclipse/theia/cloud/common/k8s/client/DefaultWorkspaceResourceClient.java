@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceStatus;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -87,5 +88,10 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	    }
 	}
 	return false;
+    }
+
+    @Override
+    public WorkspaceStatus createDefaultStatus() {
+	return new WorkspaceStatus();
     }
 }
