@@ -26,6 +26,8 @@ public class TheiaCloudError {
     public static final TheiaCloudError INVALID_APP_DEFINITION_NAME = new TheiaCloudError(473,
 	    "Invalid app definition name.");
     public static final TheiaCloudError INVALID_SESSION_NAME = new TheiaCloudError(474, "Invalid session name.");
+    public static final TheiaCloudError APP_DEFINITION_NAME_MISMATCH = new TheiaCloudError(475,
+	    "Mismatch between app definition names.");
     public static final TheiaCloudError MISSING_WORKSPACE_NAME = new TheiaCloudError(480, "Missing workspace name.");
     public static final TheiaCloudError MISSING_SESSION_NAME = new TheiaCloudError(481, "Missing session name.");
 
