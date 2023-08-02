@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -90,15 +90,36 @@ public class LazySessionHandler implements SessionHandler {
 
     @Override
     public boolean sessionAdded(Session session, String correlationId) {
+	try {
+	    return doSessionAdded(session, correlationId);
+	} catch (Throwable ex) {
+	    LOGGER.error(formatLogMessage(correlationId,
+		    "An unexpected exception occurred while adding Session: " + session), ex);
+	    client.sessions().updateStatus(correlationId, session, status -> {
+		status.setOperatorStatus(OperatorStatus.ERROR);
+		status.setOperatorMessage(
+			"Unexpected error. Please check the logs for correlationId: " + correlationId);
+	    });
+	    return false;
+	}
+    }
 
+    protected boolean doSessionAdded(Session session, String correlationId) {
 	/* session information */
 	String sessionResourceName = session.getMetadata().getName();
 	String sessionResourceUID = session.getMetadata().getUid();
 
-	// Check current session status and ignore if handling failed before
+	// Check current session status and ignore if handling failed or finished before
 	Optional<SessionStatus> status = Optional.ofNullable(session.getStatus());
 	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
+	if (OperatorStatus.HANDLED.equals(operatorStatus)) {
+	    LOGGER.trace(formatLogMessage(correlationId,
+		    "Session was successfully handled before and is skipped now. Session: " + session));
+	    return true;
+	}
 	if (OperatorStatus.ERROR.equals(operatorStatus) || OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    // TODO In the HANDLING case we should not return but continue where we left
+	    // off.
 	    LOGGER.warn(formatLogMessage(correlationId,
 		    "Session could not be handled before and is skipped now. Current status: " + operatorStatus
 			    + ". Session: " + session));
@@ -162,6 +183,8 @@ public class LazySessionHandler implements SessionHandler {
 		s.setOperatorStatus(OperatorStatus.HANDLED);
 		s.setOperatorMessage("Service already exists.");
 	    });
+	    // TODO do not return true if the sessions was in handling state at the start of
+	    // this handler
 	    return true;
 	}
 
@@ -187,6 +210,8 @@ public class LazySessionHandler implements SessionHandler {
 		    s.setOperatorStatus(OperatorStatus.HANDLED);
 		    s.setOperatorMessage("Configmaps already exist.");
 		});
+		// TODO do not return true if the sessions was in handling state at the start of
+		// this handler
 		return true;
 	    }
 	    createAndApplyEmailConfigMap(correlationId, sessionResourceName, sessionResourceUID, session);
@@ -352,8 +377,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
-		configmap -> {
+		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, configmap -> {
 		    configmap.setData(Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST,
 			    session.getSpec().getUser()));
 		});
@@ -372,8 +396,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
-		configMap -> {
+		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, configMap -> {
 		    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, session);
 		    int port = appDefinition.getSpec().getPort();
 		    AddedHandlerUtil.updateProxyConfigMap(client.kubernetes(), client.namespace(), configMap, host,
@@ -396,8 +419,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
-		deployment -> {
+		deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, deployment -> {
 		    pvName.ifPresent(name -> addVolumeClaim(deployment, name, appDefinition.getSpec()));
 		    bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
 			    appDefinition.getSpec().getUplinkLimit(), correlationId);

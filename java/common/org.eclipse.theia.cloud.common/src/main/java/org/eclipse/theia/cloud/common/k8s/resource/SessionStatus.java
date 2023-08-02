@@ -19,5 +19,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize
 public class SessionStatus extends ResourceStatus {
-
+    // This class is empty as only the common properties of the super class are
+    // used. Already define a specific class to allow easier extension, properly
+    // type the resources and resource clients.
+    // It is planned to extend this later with Session specific status steps.
 }

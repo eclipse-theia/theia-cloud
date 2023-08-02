@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -44,12 +44,34 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 
     @Override
     public boolean workspaceAdded(Workspace workspace, String correlationId) {
+	try {
+	    return doWorkspaceAdded(workspace, correlationId);
+	} catch (Throwable ex) {
+	    LOGGER.error(formatLogMessage(correlationId,
+		    "An unexpected exception occurred while adding Workspace: " + workspace), ex);
+	    client.workspaces().updateStatus(correlationId, workspace, status -> {
+		status.setOperatorStatus(OperatorStatus.ERROR);
+		status.setOperatorMessage(
+			"Unexpected error. Please check the logs for correlationId: " + correlationId);
+	    });
+	    return false;
+	}
+    }
+
+    protected boolean doWorkspaceAdded(Workspace workspace, String correlationId) {
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + workspace));
 
 	// Check current session status and ignore if handling failed before
 	Optional<WorkspaceStatus> status = Optional.ofNullable(workspace.getStatus());
 	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
+	if (OperatorStatus.HANDLED.equals(operatorStatus)) {
+	    LOGGER.trace(formatLogMessage(correlationId,
+		    "Workspace was successfully handled before and is skipped now. Workspace: " + workspace));
+	    return true;
+	}
 	if (OperatorStatus.ERROR.equals(operatorStatus) || OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    // TODO In the HANDLING case we should not return but continue where we left
+	    // off.
 	    LOGGER.warn(formatLogMessage(correlationId,
 		    "Workspace could not be handled before and is skipped now. Current status: " + operatorStatus
 			    + ". Workspace: " + workspace));
@@ -62,8 +84,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	});
 
 	String storageName = WorkspaceUtil.getStorageName(workspace);
-	client.workspaces().updateStatus(correlationId, workspace,
-		s -> s.setVolumeClaim(new StatusStep("started", null)));
+	client.workspaces().updateStatus(correlationId, workspace, s -> s.setVolumeClaim(new StatusStep("started")));
 
 	if (!client.persistentVolumes().has(storageName)) {
 	    LOGGER.trace(formatLogMessage(correlationId, "Creating new persistent volume named " + storageName));
@@ -71,8 +92,8 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	}
 
 	client.workspaces().updateStatus(correlationId, workspace, s -> {
-	    s.setVolumeClaim(new StatusStep("finished", null));
-	    s.setVolumeAttach(new StatusStep("started", null));
+	    s.setVolumeClaim(new StatusStep("finished"));
+	    s.setVolumeAttach(new StatusStep("started"));
 	});
 
 	if (!client.persistentVolumeClaims().has(storageName)) {
@@ -81,7 +102,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	}
 
 	client.workspaces().updateStatus(correlationId, workspace, s -> {
-	    s.setVolumeAttach(new StatusStep("claimed", null));
+	    s.setVolumeAttach(new StatusStep("claimed"));
 	});
 
 	LOGGER.trace(formatLogMessage(correlationId, "Set workspace storage " + storageName));
@@ -89,7 +110,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 		toEdit -> toEdit.getSpec().setStorage(storageName));
 
 	client.workspaces().updateStatus(correlationId, workspace, s -> {
-	    s.setVolumeAttach(new StatusStep("finished", null));
+	    s.setVolumeAttach(new StatusStep("finished"));
 	});
 
 	client.workspaces().updateStatus(correlationId, workspace, s -> {

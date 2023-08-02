@@ -27,6 +27,10 @@ public class StatusStep {
     public StatusStep() {
     }
 
+    public StatusStep(String status) {
+	this(status, "");
+    }
+
     public StatusStep(String status, String message) {
 	this.status = status;
 	this.message = message;

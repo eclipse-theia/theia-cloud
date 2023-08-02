@@ -63,7 +63,7 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
     }
 
     default T editStatus(String correlationId, String name, Consumer<T> consumer) {
-	trace(correlationId, "Edit status of" + name);
+	trace(correlationId, "Edit status of " + name);
 	Resource<T> resource = resource(name);
 	if (resource.get() == null) {
 	    return null;

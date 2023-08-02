@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -41,6 +41,22 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 
     @Override
     public boolean appDefinitionAdded(AppDefinition appDefinition, String correlationId) {
+	try {
+	    return appDefinitionAdded(appDefinition, correlationId);
+	} catch (Throwable ex) {
+	    LOGGER.error(formatLogMessage(correlationId,
+		    "An unexpected exception occurred while adding AppDefinition: " + appDefinition), ex);
+	    // TODO update status
+//	    client.appDefinitions().updateStatus(correlationId, appDefinition, status ->
+//	    {
+//		status.setOperatorStatus(OperatorStatus.ERROR);
+//		status.setOperatorMessage("Unexpected error. Please check the logs for correlationId " + correlationId);
+//	    });
+	    return false;
+	}
+    }
+
+    protected boolean doAppDefinitionAdded(AppDefinition appDefinition, String correlationId) {
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + appDefinition));
 
 	// TODO Check current session status and ignore if handling failed before

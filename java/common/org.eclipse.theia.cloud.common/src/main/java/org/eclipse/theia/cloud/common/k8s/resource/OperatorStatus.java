@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,11 +20,18 @@ package org.eclipse.theia.cloud.common.k8s.resource;
  */
 public interface OperatorStatus {
 
+    /**
+     * The default status describing that the resource is new and was not handled
+     * before.
+     */
     String NEW = "NEW";
 
+    /** The operator tried to handle this resource but an error occurred. */
     String ERROR = "ERROR";
 
+    /** The operator started handling this resource. */
     String HANDLING = "HANDLING";
 
+    /** The operator successfully finished handling this resource. */
     String HANDLED = "HANDLED";
 }
