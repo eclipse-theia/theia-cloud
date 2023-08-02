@@ -114,6 +114,10 @@ public class TheiaCloudArguments {
 	    "--maxWatchIdleTime" }, description = "When a kubernetes watcher is idle for more than this time (in milliseconds) we assume that there is a problem and restart.", required = false)
     private long maxWatchIdleTime = 1000 * 60 * 60; // 1 Hour
 
+    @Option(names = {
+	    "--continueOnException" }, description = "Whether the operator will continue to run in case of unexpected exceptions.", required = false)
+    private boolean continueOnException;
+
     public boolean isUseKeycloak() {
 	return useKeycloak;
     }
@@ -206,6 +210,10 @@ public class TheiaCloudArguments {
 	return maxWatchIdleTime;
     }
 
+    public boolean isContinueOnException() {
+	return continueOnException;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -213,6 +221,7 @@ public class TheiaCloudArguments {
 	result = prime * result + ((appId == null) ? 0 : appId.hashCode());
 	result = prime * result + ((bandwidthLimiter == null) ? 0 : bandwidthLimiter.hashCode());
 	result = prime * result + ((cloudProvider == null) ? 0 : cloudProvider.hashCode());
+	result = prime * result + (continueOnException ? 1231 : 1237);
 	result = prime * result + (eagerStart ? 1231 : 1237);
 	result = prime * result + (enableActivityTracker ? 1231 : 1237);
 	result = prime * result + (enableMonitor ? 1231 : 1237);
@@ -253,6 +262,8 @@ public class TheiaCloudArguments {
 	if (bandwidthLimiter != other.bandwidthLimiter)
 	    return false;
 	if (cloudProvider != other.cloudProvider)
+	    return false;
+	if (continueOnException != other.continueOnException)
 	    return false;
 	if (eagerStart != other.eagerStart)
 	    return false;
@@ -341,7 +352,7 @@ public class TheiaCloudArguments {
 		+ requestedStorage + ", keycloakURL=" + keycloakURL + ", keycloakRealm=" + keycloakRealm
 		+ ", keycloakClientId=" + keycloakClientId + ", leaderLeaseDuration=" + leaderLeaseDuration
 		+ ", leaderRenewDeadline=" + leaderRenewDeadline + ", leaderRetryPeriod=" + leaderRetryPeriod
-		+ ", maxWatchIdleTime=" + maxWatchIdleTime + "]";
+		+ ", maxWatchIdleTime=" + maxWatchIdleTime + ", continueOnException=" + continueOnException + "]";
     }
 
 }
