@@ -158,65 +158,83 @@ public class TheiaCloudImpl implements TheiaCloud {
     }
 
     protected void handleAppDefnitionEvent(Watcher.Action action, String uid, String correlationId) {
-	AppDefinition appDefinition = appDefinitionCache.get(uid);
-	switch (action) {
-	case ADDED:
-	    appDefinitionAddedHandler.appDefinitionAdded(appDefinition, correlationId);
-	    break;
-	case DELETED:
-	    appDefinitionAddedHandler.appDefinitionDeleted(appDefinition, correlationId);
-	    break;
-	case MODIFIED:
-	    appDefinitionAddedHandler.appDefinitionModified(appDefinition, correlationId);
-	    break;
-	case ERROR:
-	    appDefinitionAddedHandler.appDefinitionErrored(appDefinition, correlationId);
-	    break;
-	case BOOKMARK:
-	    appDefinitionAddedHandler.appDefinitionBookmarked(appDefinition, correlationId);
-	    break;
+	try {
+	    AppDefinition appDefinition = appDefinitionCache.get(uid);
+	    switch (action) {
+	    case ADDED:
+		appDefinitionAddedHandler.appDefinitionAdded(appDefinition, correlationId);
+		break;
+	    case DELETED:
+		appDefinitionAddedHandler.appDefinitionDeleted(appDefinition, correlationId);
+		break;
+	    case MODIFIED:
+		appDefinitionAddedHandler.appDefinitionModified(appDefinition, correlationId);
+		break;
+	    case ERROR:
+		appDefinitionAddedHandler.appDefinitionErrored(appDefinition, correlationId);
+		break;
+	    case BOOKMARK:
+		appDefinitionAddedHandler.appDefinitionBookmarked(appDefinition, correlationId);
+		break;
+	    }
+	} catch (Exception e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error while handling app definitions"), e);
 	}
     }
 
     protected void handleSessionEvent(Watcher.Action action, String uid, String correlationId) {
-	Session session = sessionCache.get(uid);
-	switch (action) {
-	case ADDED:
-	    sessionHandler.sessionAdded(session, correlationId);
-	    break;
-	case DELETED:
-	    sessionHandler.sessionDeleted(session, correlationId);
-	    break;
-	case MODIFIED:
-	    sessionHandler.sessionModified(session, correlationId);
-	    break;
-	case ERROR:
-	    sessionHandler.sessionErrored(session, correlationId);
-	    break;
-	case BOOKMARK:
-	    sessionHandler.sessionBookmarked(session, correlationId);
-	    break;
+	try {
+	    Session session = sessionCache.get(uid);
+	    switch (action) {
+	    case ADDED:
+		sessionHandler.sessionAdded(session, correlationId);
+		break;
+	    case DELETED:
+		sessionHandler.sessionDeleted(session, correlationId);
+		break;
+	    case MODIFIED:
+		sessionHandler.sessionModified(session, correlationId);
+		break;
+	    case ERROR:
+		sessionHandler.sessionErrored(session, correlationId);
+		break;
+	    case BOOKMARK:
+		sessionHandler.sessionBookmarked(session, correlationId);
+		break;
+	    }
+	} catch (Exception e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error while handling sessions"), e);
+	    if (!arguments.isContinueOnException()) {
+		System.exit(-1);
+	    }
 	}
     }
 
     protected void handleWorkspaceEvent(Watcher.Action action, String uid, String correlationId) {
-	Workspace workspace = workspaceCache.get(uid);
-	switch (action) {
-	case ADDED:
-	    workspaceHandler.workspaceAdded(workspace, correlationId);
-	    break;
-	case DELETED:
-	    workspaceHandler.workspaceDeleted(workspace, correlationId);
-	    break;
-	case MODIFIED:
-	    workspaceHandler.workspaceModified(workspace, correlationId);
-	    break;
-	case ERROR:
-	    workspaceHandler.workspaceErrored(workspace, correlationId);
-	    break;
-	case BOOKMARK:
-	    workspaceHandler.workspaceBookmarked(workspace, correlationId);
-	    break;
+	try {
+	    Workspace workspace = workspaceCache.get(uid);
+	    switch (action) {
+	    case ADDED:
+		workspaceHandler.workspaceAdded(workspace, correlationId);
+		break;
+	    case DELETED:
+		workspaceHandler.workspaceDeleted(workspace, correlationId);
+		break;
+	    case MODIFIED:
+		workspaceHandler.workspaceModified(workspace, correlationId);
+		break;
+	    case ERROR:
+		workspaceHandler.workspaceErrored(workspace, correlationId);
+		break;
+	    case BOOKMARK:
+		workspaceHandler.workspaceBookmarked(workspace, correlationId);
+		break;
+	    }
+	} catch (Exception e) {
+	    LOGGER.error(formatLogMessage(correlationId, "Error while handling workspaces"), e);
+	    if (!arguments.isContinueOnException()) {
+		System.exit(-1);
+	    }
 	}
     }
 
@@ -237,6 +255,9 @@ public class TheiaCloudImpl implements TheiaCloud {
 	    }
 	} catch (Exception e) {
 	    LOGGER.error(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Exception in kill after runnable"), e);
+	    if (!arguments.isContinueOnException()) {
+		System.exit(-1);
+	    }
 	}
     }
 
