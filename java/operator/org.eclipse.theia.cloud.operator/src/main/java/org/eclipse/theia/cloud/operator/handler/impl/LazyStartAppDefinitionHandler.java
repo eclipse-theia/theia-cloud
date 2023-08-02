@@ -42,7 +42,7 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
     @Override
     public boolean appDefinitionAdded(AppDefinition appDefinition, String correlationId) {
 	try {
-	    return appDefinitionAdded(appDefinition, correlationId);
+	    return doAppDefinitionAdded(appDefinition, correlationId);
 	} catch (Throwable ex) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "An unexpected exception occurred while adding AppDefinition: " + appDefinition), ex);
