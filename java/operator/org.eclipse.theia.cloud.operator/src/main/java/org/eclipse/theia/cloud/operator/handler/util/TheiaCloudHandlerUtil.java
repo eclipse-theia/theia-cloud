@@ -29,7 +29,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -77,7 +76,7 @@ public final class TheiaCloudHandlerUtil {
     public static OwnerReference createOwnerReference(String sessionResourceName, String sessionResourceUID) {
 	OwnerReference ownerReference = new OwnerReference();
 	ownerReference.setApiVersion(HasMetadata.getApiVersion(Session.class));
-	ownerReference.setKind(SessionSpec.KIND);
+	ownerReference.setKind(Session.KIND);
 	ownerReference.setName(sessionResourceName);
 	ownerReference.setUid(sessionResourceUID);
 	return ownerReference;

@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,8 +20,10 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionStatus;
 
-public interface SessionResourceClient extends CustomResourceClient<SessionSpec, Session, SessionSpecResourceList> {
+public interface SessionResourceClient
+	extends CustomResourceClient<SessionSpec, SessionStatus, Session, SessionSpecResourceList> {
     Session launch(String correlationId, SessionSpec spec, long timeout, TimeUnit unit);
 
     default Session launch(String correlationId, SessionSpec spec, int timeout) {
