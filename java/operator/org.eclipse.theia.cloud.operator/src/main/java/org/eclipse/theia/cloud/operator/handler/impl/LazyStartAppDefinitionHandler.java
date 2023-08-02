@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
  * others.
  *
  * This program and the accompanying materials are made available under the
@@ -41,9 +41,40 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 
     @Override
     public boolean appDefinitionAdded(AppDefinition appDefinition, String correlationId) {
-	AppDefinitionSpec spec = appDefinition.getSpec();
-	LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));
+	try {
+	    return doAppDefinitionAdded(appDefinition, correlationId);
+	} catch (Throwable ex) {
+	    LOGGER.error(formatLogMessage(correlationId,
+		    "An unexpected exception occurred while adding AppDefinition: " + appDefinition), ex);
+	    // TODO update status
+//	    client.appDefinitions().updateStatus(correlationId, appDefinition, status ->
+//	    {
+//		status.setOperatorStatus(OperatorStatus.ERROR);
+//		status.setOperatorMessage("Unexpected error. Please check the logs for correlationId " + correlationId);
+//	    });
+	    return false;
+	}
+    }
 
+    protected boolean doAppDefinitionAdded(AppDefinition appDefinition, String correlationId) {
+	LOGGER.info(formatLogMessage(correlationId, "Handling " + appDefinition));
+
+	// TODO Check current session status and ignore if handling failed before
+//	Optional<AppDefinitionStatus> status = Optional.ofNullable(appDefinition.getStatus());
+//	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
+//	if (OperatorStatus.ERROR.equals(operatorStatus) || OperatorStatus.HANDLING.equals(operatorStatus)) {
+//	    LOGGER.warn(formatLogMessage(correlationId,
+//		    "AppDefinition could not be handled before and is skipped now. Current status: " + operatorStatus
+//			    + ". AppDefinition: " + appDefinition));
+//	    return false;
+//	}
+
+	// TODO Set app definition status to being handled
+//	client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
+//	    s.setOperatorStatus(OperatorStatus.HANDLING);
+//	});
+
+	AppDefinitionSpec spec = appDefinition.getSpec();
 	String appDefinitionResourceName = appDefinition.getMetadata().getName();
 
 	/* Create ingress if not existing */
@@ -52,10 +83,20 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Expected ingress '" + spec.getIngressname() + "' for app definition '" + appDefinitionResourceName
 			    + "' does not exist. Abort handling app definition."));
+	    // TODO update status
+	    // client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
+//		s.setOperatorStatus(OperatorStatus.ERROR);
+//		s.setOperatorMessage("Ingress does not exist.");
+//	    });
 	    return false;
 	} else {
 	    LOGGER.trace(formatLogMessage(correlationId, "Ingress available already"));
 	}
+
+	// TODO update status
+//	client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
+//	    s.setOperatorStatus(OperatorStatus.HANDLED);
+//	});
 	return true;
     }
 

@@ -28,10 +28,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class SessionSpec implements UserScopedSpec {
 
-    public static final String API = "theia.cloud/v4beta";
-    public static final String KIND = "Session";
-    public static final String CRD_NAME = "sessions.theia.cloud";
-
     @JsonProperty("name")
     private String name;
 

@@ -22,10 +22,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class AppDefinitionSpec {
 
-    public static final String API = "theia.cloud/v6beta";
-    public static final String KIND = "AppDefinition";
-    public static final String CRD_NAME = "appdefinitions.theia.cloud";
-
     @JsonProperty("name")
     private String name;
 

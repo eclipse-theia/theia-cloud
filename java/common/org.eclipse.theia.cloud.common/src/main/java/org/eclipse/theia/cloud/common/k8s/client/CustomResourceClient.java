@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.common.k8s.client;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
@@ -25,13 +26,17 @@ import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.CustomResource;
 
-public interface CustomResourceClient<S, T extends CustomResource<S, Void>, L extends KubernetesResourceList<T>>
+public interface CustomResourceClient<SPEC, STATUS, T extends CustomResource<SPEC, STATUS>, L extends KubernetesResourceList<T>>
 	extends ResourceClient<T, L> {
 
-    T create(String correlationId, S spec);
+    T create(String correlationId, SPEC spec);
 
-    default Optional<S> spec(String name) {
+    default Optional<SPEC> spec(String name) {
 	return get(name).map(T::getSpec);
+    }
+
+    default Optional<STATUS> status(String name) {
+	return get(name).map(T::getStatus);
     }
 
     default List<T> list(String user) {
@@ -39,11 +44,23 @@ public interface CustomResourceClient<S, T extends CustomResource<S, Void>, L ex
 		.collect(Collectors.toList());
     }
 
-    default List<S> specs() {
+    default List<SPEC> specs() {
 	return list().stream().map(item -> item.getSpec()).collect(Collectors.toList());
     }
 
-    default List<S> specs(String user) {
+    default List<SPEC> specs(String user) {
 	return list(user).stream().map(item -> item.getSpec()).collect(Collectors.toList());
     }
+
+    default boolean updateStatus(String correlationId, T resource, Consumer<STATUS> editOperation) {
+	trace(correlationId, "Update Status of " + resource);
+	final String name = resource.getMetadata().getName();
+	return (editStatus(correlationId, name, res -> {
+	    STATUS status = Optional.ofNullable(res.getStatus()).orElse(createDefaultStatus());
+	    res.setStatus(status);
+	    editOperation.accept(status);
+	}) != null);
+    }
+
+    STATUS createDefaultStatus();
 }

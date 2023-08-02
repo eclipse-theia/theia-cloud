@@ -24,10 +24,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class WorkspaceSpec implements UserScopedSpec {
 
-    public static final String API = "theia.cloud/v1beta";
-    public static final String KIND = "Workspace";
-    public static final String CRD_NAME = "workspaces.theia.cloud";
-
     @JsonProperty("name")
     private String name;
 
