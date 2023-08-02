@@ -76,6 +76,15 @@ public class RootResource extends BaseResource {
 	if (request.isExistingWorkspace()) {
 	    Optional<Workspace> workspace = k8sUtil.getWorkspace(user, asValidName(request.workspaceName));
 	    if (workspace.isPresent()) {
+		String workspaceAppDefinition = workspace.get().getSpec().getAppDefinition();
+		if (!workspaceAppDefinition.equals(request.appDefinition)) {
+		    error(correlationId,
+			    "Failed to lauch session. Workspace App Definition '" + workspaceAppDefinition
+				    + "' does not match Request App Definition '" + request.appDefinition
+				    + "' does not exist.");
+		    throw new TheiaCloudWebException(TheiaCloudError.APP_DEFINITION_NAME_MISMATCH);
+		}
+
 		info(correlationId, "Launching existing workspace session " + request);
 		return k8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
 			request.timeout, request.env);
