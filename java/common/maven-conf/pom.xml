@@ -13,7 +13,7 @@
 	<properties>
 		<failsafe.useModulePath>false</failsafe.useModulePath>
 		<guice.version>5.0.1</guice.version>
-		<kubernetes-client.version>5.11.2</kubernetes-client.version>
+		<kubernetes-client.version>5.12.2</kubernetes-client.version>
 		<log4j.version>2.17.1</log4j.version>
 		<slf4j.version>1.7.32</slf4j.version>
 		<maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
