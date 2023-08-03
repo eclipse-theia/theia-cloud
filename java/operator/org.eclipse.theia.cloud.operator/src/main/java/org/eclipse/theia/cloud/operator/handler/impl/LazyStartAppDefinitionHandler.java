@@ -18,11 +18,16 @@ package org.eclipse.theia.cloud.operator.handler.impl;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
+import java.util.Optional;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.OperatorStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.operator.handler.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudIngressUtil;
@@ -46,12 +51,10 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 	} catch (Throwable ex) {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "An unexpected exception occurred while adding AppDefinition: " + appDefinition), ex);
-	    // TODO update status
-//	    client.appDefinitions().updateStatus(correlationId, appDefinition, status ->
-//	    {
-//		status.setOperatorStatus(OperatorStatus.ERROR);
-//		status.setOperatorMessage("Unexpected error. Please check the logs for correlationId " + correlationId);
-//	    });
+	    client.appDefinitions().updateStatus(correlationId, appDefinition, status -> {
+		status.setOperatorStatus(OperatorStatus.ERROR);
+		status.setOperatorMessage("Unexpected error. Please check the logs for correlationId " + correlationId);
+	    });
 	    return false;
 	}
     }
@@ -59,20 +62,26 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
     protected boolean doAppDefinitionAdded(AppDefinition appDefinition, String correlationId) {
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + appDefinition));
 
-	// TODO Check current session status and ignore if handling failed before
-//	Optional<AppDefinitionStatus> status = Optional.ofNullable(appDefinition.getStatus());
-//	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
-//	if (OperatorStatus.ERROR.equals(operatorStatus) || OperatorStatus.HANDLING.equals(operatorStatus)) {
-//	    LOGGER.warn(formatLogMessage(correlationId,
-//		    "AppDefinition could not be handled before and is skipped now. Current status: " + operatorStatus
-//			    + ". AppDefinition: " + appDefinition));
-//	    return false;
-//	}
+	// Check current session status and ignore if handling failed or finished before
+	Optional<AppDefinitionStatus> status = Optional.ofNullable(appDefinition.getStatus());
+	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
+	if (OperatorStatus.HANDLED.equals(operatorStatus)) {
+	    LOGGER.trace(formatLogMessage(correlationId,
+		    "AppDefinition was successfully handled before and is skipped now. AppDefinition: "
+			    + appDefinition));
+	    return true;
+	}
+	if (OperatorStatus.ERROR.equals(operatorStatus) || OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    LOGGER.warn(formatLogMessage(correlationId,
+		    "AppDefinition could not be handled before and is skipped now. Current status: " + operatorStatus
+			    + ". AppDefinition: " + appDefinition));
+	    return false;
+	}
 
-	// TODO Set app definition status to being handled
-//	client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
-//	    s.setOperatorStatus(OperatorStatus.HANDLING);
-//	});
+	// Set app definition status to being handled
+	client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
+	    s.setOperatorStatus(OperatorStatus.HANDLING);
+	});
 
 	AppDefinitionSpec spec = appDefinition.getSpec();
 	String appDefinitionResourceName = appDefinition.getMetadata().getName();
@@ -83,20 +92,18 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 	    LOGGER.error(formatLogMessage(correlationId,
 		    "Expected ingress '" + spec.getIngressname() + "' for app definition '" + appDefinitionResourceName
 			    + "' does not exist. Abort handling app definition."));
-	    // TODO update status
-	    // client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
-//		s.setOperatorStatus(OperatorStatus.ERROR);
-//		s.setOperatorMessage("Ingress does not exist.");
-//	    });
+	    client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Ingress does not exist.");
+	    });
 	    return false;
 	} else {
 	    LOGGER.trace(formatLogMessage(correlationId, "Ingress available already"));
 	}
 
-	// TODO update status
-//	client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
-//	    s.setOperatorStatus(OperatorStatus.HANDLED);
-//	});
+	client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
+	    s.setOperatorStatus(OperatorStatus.HANDLED);
+	});
 	return true;
     }
 
