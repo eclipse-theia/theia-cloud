@@ -5,7 +5,7 @@ app:
   name: Theia Blueprint
 
 image:
-  name: theiacloud/theia-cloud-activity-demo:0.8.1.OSWeek23-v3
+  name: theiacloud/theia-cloud-activity-demo:0.8.1.OSWeek23-v4
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "0"
@@ -20,7 +20,7 @@ hosts:
     instance: instances
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.8.1.OSWeek23-v3
+  image: theiacloud/theia-cloud-landing-page:0.8.1.OSWeek23-v4
   ephemeralStorage: true
 
 keycloak:

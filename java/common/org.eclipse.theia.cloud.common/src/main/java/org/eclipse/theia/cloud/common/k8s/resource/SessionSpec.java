@@ -28,6 +28,9 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize()
 public class SessionSpec implements UserScopedSpec {
 
+    @JsonProperty("danger")
+    private int danger;
+
     @JsonProperty("name")
     private String name;
 
@@ -54,7 +57,7 @@ public class SessionSpec implements UserScopedSpec {
 
     @JsonProperty("envVars")
     private Map<String, String> envVars;
-        
+
     @JsonProperty("envVarsFromConfigMaps")
     private List<String> envVarsFromConfigMaps;
 
@@ -69,32 +72,31 @@ public class SessionSpec implements UserScopedSpec {
     }
 
     public SessionSpec(String name, String appDefinition, String user, String workspace) {
-        this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
-    }
-    public SessionSpec(
-        String name, String appDefinition, String user, String workspace, Map<String, String> envVars
-    )  {
-        this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
+	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
     }
 
-    public SessionSpec(
-        String name, String appDefinition, String user, String workspace, 
-        Map<String, String> envVars, List<String> envVarsFromConfigMaps
-    ) { 
-        this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars) {
+	this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
     }
 
-    public SessionSpec(
-        String name, String appDefinition, String user, String workspace, 
-        Map<String, String> envVars, List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets
-    ) {
-        this.name = name;
-        this.appDefinition = appDefinition;
-        this.user = user;
-        this.workspace = workspace;
-        this.envVars = envVars;
-        this.envVarsFromConfigMaps = envVarsFromConfigMaps;
-        this.envVarsFromSecrets = envVarsFromSecrets;
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps) {
+	this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
+    }
+
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
+	this.name = name;
+	this.appDefinition = appDefinition;
+	this.user = user;
+	this.workspace = workspace;
+	this.envVars = envVars;
+	this.envVarsFromConfigMaps = envVarsFromConfigMaps;
+	this.envVarsFromSecrets = envVarsFromSecrets;
+    }
+
+    public int getDanger() {
+	return danger;
     }
 
     public String getName() {
@@ -163,14 +165,15 @@ public class SessionSpec implements UserScopedSpec {
     }
 
     public Map<String, String> getEnvVars() {
-        return envVars;
+	return envVars;
     }
 
     public List<String> getEnvVarsFromConfigMaps() {
-        return envVarsFromConfigMaps;
+	return envVarsFromConfigMaps;
     }
+
     public List<String> getEnvVarsFromSecrets() {
-        return envVarsFromSecrets;
+	return envVarsFromSecrets;
     }
 
     @JsonIgnore
@@ -183,9 +186,17 @@ public class SessionSpec implements UserScopedSpec {
 	final int prime = 31;
 	int result = 1;
 	result = prime * result + ((appDefinition == null) ? 0 : appDefinition.hashCode());
+	result = prime * result + danger;
+	result = prime * result + ((envVars == null) ? 0 : envVars.hashCode());
+	result = prime * result + ((envVarsFromConfigMaps == null) ? 0 : envVarsFromConfigMaps.hashCode());
+	result = prime * result + ((envVarsFromSecrets == null) ? 0 : envVarsFromSecrets.hashCode());
+	result = prime * result + ((error == null) ? 0 : error.hashCode());
+	result = prime * result + (int) (lastActivity ^ (lastActivity >>> 32));
+	result = prime * result + ((name == null) ? 0 : name.hashCode());
+	result = prime * result + ((sessionSecret == null) ? 0 : sessionSecret.hashCode());
+	result = prime * result + ((url == null) ? 0 : url.hashCode());
 	result = prime * result + ((user == null) ? 0 : user.hashCode());
 	result = prime * result + ((workspace == null) ? 0 : workspace.hashCode());
-	result = prime * result + ((sessionSecret == null) ? 0 : sessionSecret.hashCode());
 	return result;
     }
 
@@ -203,6 +214,45 @@ public class SessionSpec implements UserScopedSpec {
 		return false;
 	} else if (!appDefinition.equals(other.appDefinition))
 	    return false;
+	if (danger != other.danger)
+	    return false;
+	if (envVars == null) {
+	    if (other.envVars != null)
+		return false;
+	} else if (!envVars.equals(other.envVars))
+	    return false;
+	if (envVarsFromConfigMaps == null) {
+	    if (other.envVarsFromConfigMaps != null)
+		return false;
+	} else if (!envVarsFromConfigMaps.equals(other.envVarsFromConfigMaps))
+	    return false;
+	if (envVarsFromSecrets == null) {
+	    if (other.envVarsFromSecrets != null)
+		return false;
+	} else if (!envVarsFromSecrets.equals(other.envVarsFromSecrets))
+	    return false;
+	if (error == null) {
+	    if (other.error != null)
+		return false;
+	} else if (!error.equals(other.error))
+	    return false;
+	if (lastActivity != other.lastActivity)
+	    return false;
+	if (name == null) {
+	    if (other.name != null)
+		return false;
+	} else if (!name.equals(other.name))
+	    return false;
+	if (sessionSecret == null) {
+	    if (other.sessionSecret != null)
+		return false;
+	} else if (!sessionSecret.equals(other.sessionSecret))
+	    return false;
+	if (url == null) {
+	    if (other.url != null)
+		return false;
+	} else if (!url.equals(other.url))
+	    return false;
 	if (user == null) {
 	    if (other.user != null)
 		return false;
@@ -213,33 +263,16 @@ public class SessionSpec implements UserScopedSpec {
 		return false;
 	} else if (!workspace.equals(other.workspace))
 	    return false;
-	if (sessionSecret == null) {
-	    if (other.sessionSecret != null)
-		return false;
-	} else if (!sessionSecret.equals(other.sessionSecret))
-	    return false;
-    if (envVars == null) {
-        if (other.envVars != null)
-        return false;
-    } else if (!envVars.equals(other.envVars))
-        return false;
-    if (envVarsFromConfigMaps == null) {
-        if (other.envVarsFromConfigMaps != null)
-        return false;
-    } else if (!envVarsFromConfigMaps.equals(other.envVarsFromConfigMaps))
-        return false;
-    if (envVarsFromSecrets == null) {
-        if (other.envVarsFromSecrets != null)
-        return false;
-    } else if (!envVarsFromSecrets.equals(other.envVarsFromSecrets))
-        return false;        
 	return true;
     }
 
     @Override
     public String toString() {
-	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
-		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity + "]";
+	return "SessionSpec [danger=" + danger + ", name=" + name + ", appDefinition=" + appDefinition + ", user="
+		+ user + ", url=" + url + ", error=" + error + ", workspace=" + workspace + ", lastActivity="
+		+ lastActivity + ", sessionSecret=" + sessionSecret + ", envVars=" + envVars
+		+ ", envVarsFromConfigMaps=" + envVarsFromConfigMaps + ", envVarsFromSecrets=" + envVarsFromSecrets
+		+ "]";
     }
 
     public static boolean isEphemeral(String workspace) {

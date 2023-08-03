@@ -5,9 +5,9 @@ metadata:
   namespace: theiacloud
 spec:
   downlinkLimit: 30000
-  image: theiacloud/theia-cloud-demo:0.8.1.OSWeek23-v3
+  image: theiacloud/theia-cloud-demo:0.8.1.OSWeek23-v4
   imagePullPolicy: IfNotPresent
-  # ingressname: i-do-not-exists
+  # ingressname: i-do-not-exist
   # ingressname: theia-cloud-demo-ws-ingress
   limitsCpu: '2'
   limitsMemory: 1200M

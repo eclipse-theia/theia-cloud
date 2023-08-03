@@ -133,6 +133,10 @@ public class LazySessionHandler implements SessionHandler {
 
 	SessionSpec sessionSpec = session.getSpec();
 
+	if (sessionSpec.getDanger() != 0) {
+	    System.exit(-1);
+	}
+
 	/* find app definition for session */
 	String appDefinitionID = sessionSpec.getAppDefinition();
 	Optional<AppDefinition> optionalAppDefinition = client.appDefinitions().get(appDefinitionID);
