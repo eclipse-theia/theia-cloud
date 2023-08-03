@@ -1,0 +1,11 @@
+apiVersion: theia.cloud/v6beta
+kind: Session
+metadata:
+  name: my-v6beta-session
+  namespace: theiacloud
+spec:
+  appDefinition: theia-cloud-demo
+  envVars: "FOO=BAR"
+  # envVars: { FOO: BAR }
+  name: my-v6beta-session
+  # user: foo@theia-cloud.io

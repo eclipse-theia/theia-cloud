@@ -1,0 +1,31 @@
+apiVersion: theia.cloud/v8beta
+kind: AppDefinition
+metadata:
+  name: my-v8-beta-app
+  namespace: theiacloud
+spec:
+  downlinkLimit: 30000
+  image: theiacloud/theia-cloud-demo:0.8.1.OSWeek23-v3
+  imagePullPolicy: IfNotPresent
+  # ingressname: i-do-not-exists
+  # ingressname: theia-cloud-demo-ws-ingress
+  limitsCpu: '2'
+  limitsMemory: 1200M
+  maxInstances: 10
+  minInstances: 0
+  mountPath: /home/project/persisted
+  name: my-v8-beta-app
+  port: 100000000000000000
+  # port: 3000
+  requestsCpu: 100m
+  requestsMemory: 1000M
+  timeout:
+    limit: 30
+    strategy: FIXEDTIME
+  uid: 101
+  uplinkLimit: 30000
+  monitor:
+    port: 8081
+    activityTracker:
+      timeoutAfter: 30
+      notifyAfter: 25
