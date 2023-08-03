@@ -206,7 +206,7 @@ public class AppDefinitionSpec {
 	    return port;
 	}
 
-	public ActivityTracker getActivityTrackerModule() {
+	public ActivityTracker getActivityTracker() {
 	    return activityTracker;
 	}
 

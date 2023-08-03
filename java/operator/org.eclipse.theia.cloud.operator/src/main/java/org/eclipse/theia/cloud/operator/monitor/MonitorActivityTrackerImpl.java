@@ -80,9 +80,9 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 		Optional<AppDefinition> appDefinitionOptional = resourceClient.appDefinitions().get(appDefinitionName);
 		if (appDefinitionOptional.isPresent()) {
 		    AppDefinition appDefinition = appDefinitionOptional.get();
-		    int timeoutAfter = appDefinition.getSpec().getMonitor().getActivityTrackerModule()
+		    int timeoutAfter = appDefinition.getSpec().getMonitor().getActivityTracker()
 			    .getTimeoutAfter();
-		    int notifyAfter = appDefinition.getSpec().getMonitor().getActivityTrackerModule().getNotifyAfter();
+		    int notifyAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getNotifyAfter();
 		    int port = appDefinition.getSpec().getMonitor().getPort();
 
 		    pingSession(session, sessionIP.get(), port, timeoutAfter, notifyAfter);
