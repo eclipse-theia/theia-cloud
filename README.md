@@ -42,6 +42,15 @@ All components are deployed as docker images and may be built with docker. See [
 
 We offer a helm chart at <https://github.com/eclipsesource/theia-cloud-helm> which may be used to install Theia Cloud. Please check our getting started guides below as well, which will explain the possible values in more detail.
 
+We offer three charts:
+
+* `theia-cloud-base` installs cluster wide resources that may be reused by multiple Theia Cloud installations in different namespaces
+* `theia-cloud-crds` (starting with version 0.8.1) installs the custom resource definitions for Theia Cloud and migration servers for older custom resources. This may be reused by multiple Theia Cloud installations in different namespaces.
+* `theia-cloud` installs the Theia Cloud operators, service, and landing-page. It depends on the two above charts.
+
+Starting with version 0.8.1 you may use helm upgrade to update to newer Theia Cloud version.\
+Older versions (before the introduction of `theia-cloud-crds`) require a manual uninstall and reinstall as well as a manual CRD upgrade step.
+
 ```bash
 helm repo add theia-cloud-remote https://github.eclipsesource.com/theia-cloud-helm
 helm repo update
