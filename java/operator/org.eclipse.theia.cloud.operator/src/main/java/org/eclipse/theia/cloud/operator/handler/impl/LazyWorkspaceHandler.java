@@ -61,7 +61,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
     protected boolean doWorkspaceAdded(Workspace workspace, String correlationId) {
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + workspace));
 
-	// Check current session status and ignore if handling failed before
+	// Check current session status and ignore if handling failed or finished before
 	Optional<WorkspaceStatus> status = Optional.ofNullable(workspace.getStatus());
 	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
 	if (OperatorStatus.HANDLED.equals(operatorStatus)) {
