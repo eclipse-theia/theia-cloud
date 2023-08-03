@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v6beta
+apiVersion: theia.cloud/v8beta
 kind: AppDefinition
 metadata:
   name: coffee-editor

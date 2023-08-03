@@ -24,13 +24,13 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v2beta")
+@Version("v3beta")
 @Group("theia.cloud")
 @Singular("workspace")
 @Plural("workspaces")
 public class Workspace extends CustomResource<WorkspaceSpec, WorkspaceStatus> implements Namespaced {
 
-    public static final String API = "theia.cloud/v2beta";
+    public static final String API = "theia.cloud/v3beta";
     public static final String CRD_NAME = "workspaces.theia.cloud";
     public static final String KIND = "Workspace";
 
