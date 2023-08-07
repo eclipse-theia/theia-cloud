@@ -69,6 +69,7 @@ public final class TheiaCloudK8sUtil {
 	String name = metadata.getName();
 	String[] split = name.split("-");
 	String instance = split.length == 0 ? "" : split[0];
+	// kubernetes names must not start with letter, remove automatically added prefix
 	instance = instance.length() == 0 ? "" : instance.charAt(0) == NamingUtil.VALID_NAME_PREFIX ? instance.substring(1) : instance; 
 	return instance;
     }
