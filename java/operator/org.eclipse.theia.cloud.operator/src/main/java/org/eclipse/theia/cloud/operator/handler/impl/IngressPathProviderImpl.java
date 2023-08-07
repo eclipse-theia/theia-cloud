@@ -34,7 +34,7 @@ public class IngressPathProviderImpl implements IngressPathProvider {
 
     @Override
     public String getPath(AppDefinition appDefinition, int instance) {
-	return getBasePath() + appDefinition.getSpec() + "-" + instance;
+	return getBasePath() + appDefinition.getSpec().getName() + "-" + instance;
     }
 
     @Override
