@@ -27,6 +27,10 @@ public final class NamingUtil {
 
     private static final int MAX_IDENTIFIER_LENGTH = 24;
 
+    public static final char VALID_NAME_PREFIX = 'a';
+
+    public static final char VALID_NAME_SUFFIX = 'z';
+
     private static final Locale US_LOCALE = new Locale("en", "US");
 
     private NamingUtil() {
@@ -193,7 +197,7 @@ public final class NamingUtil {
 
 	// ensure text starts and ends with alphabetic character
 	if (!Character.isLetter(valid.charAt(0))) {
-	    valid = "a" + valid;
+	    valid = VALID_NAME_PREFIX + valid;
 	}
 
 	// trim text to correct length
@@ -201,7 +205,7 @@ public final class NamingUtil {
 
 	// ensure text ends with alphanumeric character
 	if (!Character.isLetterOrDigit(valid.charAt(valid.length() - 1))) {
-	    valid = valid.substring(0, valid.length() - 1) + "z";
+	    valid = valid.substring(0, valid.length() - 1) + VALID_NAME_SUFFIX;
 	}
 	return valid.toLowerCase(US_LOCALE);
     }

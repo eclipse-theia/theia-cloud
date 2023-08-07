@@ -24,6 +24,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.util.NamingUtil;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
@@ -68,6 +69,8 @@ public final class TheiaCloudK8sUtil {
 	String name = metadata.getName();
 	String[] split = name.split("-");
 	String instance = split.length == 0 ? "" : split[0];
+	// kubernetes names must not start with letter, remove automatically added prefix
+	instance = instance.length() == 0 ? "" : instance.charAt(0) == NamingUtil.VALID_NAME_PREFIX ? instance.substring(1) : instance; 
 	return instance;
     }
 
