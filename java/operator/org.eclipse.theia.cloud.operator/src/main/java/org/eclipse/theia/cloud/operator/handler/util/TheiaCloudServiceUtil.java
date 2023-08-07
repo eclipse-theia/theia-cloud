@@ -77,21 +77,7 @@ public final class TheiaCloudServiceUtil {
 		TheiaCloudHandlerUtil.getAppSelector(appDefinition, instance));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinition.getSpec().getPort()));
-	AppDefinitionSpec appDefinitionSpec = appDefinition.getSpec();
-	if (appDefinitionSpec.getMonitor() != null && appDefinitionSpec.getMonitor().getPort() > 0) {
-	    String port = String.valueOf(appDefinitionSpec.getMonitor().getPort());
-	    String replacement = "- name: monitor-express\n" + "      port: " + port + "\n" + "      targetPort: "
-		    + port + "\n" + "      protocol: TCP";
-	    if (appDefinitionSpec.getMonitor().getPort() == appDefinitionSpec.getPort()) {
-		// Just remove the placeholder, otherwise the port would be duplicate
-		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
-	    } else {
-		// Replace the placeholder with the port information
-		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, replacement);
-	    }
-	} else {
-	    replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
-	}
+	putMonitorReplacements(appDefinition.getSpec(), replacements);
 	return replacements;
     }
 
@@ -102,22 +88,26 @@ public final class TheiaCloudServiceUtil {
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinitionSpec.getPort()));
-	if (appDefinitionSpec.getMonitor() != null && appDefinitionSpec.getMonitor().getPort() > 0) {
-	    String port = String.valueOf(appDefinitionSpec.getMonitor().getPort());
-	    String replacement = "- name: monitor-express\n" + "      port: " + port + "\n" + "      targetPort: "
-		    + port + "\n" + "      protocol: TCP";
-	    if (appDefinitionSpec.getMonitor().getPort() == appDefinitionSpec.getPort()) {
-		// Just remove the placeholder, otherwise the port would be duplicate
-		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
-	    } else {
-		// Replace the placeholder with the port information
-		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, replacement);
-	    }
-	} else {
-	    replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
-	}
+	putMonitorReplacements(appDefinitionSpec, replacements);
 	return replacements;
     }
+
+	private static void putMonitorReplacements(AppDefinitionSpec appDefinitionSpec, Map<String, String> replacements) {
+		if (appDefinitionSpec.getMonitor() != null && appDefinitionSpec.getMonitor().getPort() > 0) {
+		    String port = String.valueOf(appDefinitionSpec.getMonitor().getPort());
+		    String replacement = "- name: monitor-express\n" + "      port: " + port + "\n" + "      targetPort: "
+			    + port + "\n" + "      protocol: TCP";
+		    if (appDefinitionSpec.getMonitor().getPort() == appDefinitionSpec.getPort()) {
+			// Just remove the placeholder, otherwise the port would be duplicate
+			replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
+		    } else {
+			// Replace the placeholder with the port information
+			replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, replacement);
+		    }
+		} else {
+		    replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
+		}
+	}
 
     public static Optional<Service> getServiceOwnedBySession(String sessionResourceName, String sessionResourceUID,
 	    List<Service> existingServices) {
