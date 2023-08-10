@@ -30,18 +30,38 @@ resource "helm_release" "theia-cloud" {
   ]
 
   set {
-    name  = "hosts.paths.baseHost"
-    value = data.terraform_remote_state.minikube.outputs.hostname
+    name  = "hosts.service"
+    value = "service.${data.terraform_remote_state.minikube.outputs.hostname}"
   }
 
   set {
-    name  = "keycloak.enable"
-    value = var.enable_keycloak
+    name  = "hosts.landing"
+    value = "try.${data.terraform_remote_state.minikube.outputs.hostname}"
+  }
+
+  set {
+    name  = "hosts.instance"
+    value = "ws.${data.terraform_remote_state.minikube.outputs.hostname}"
   }
 
   set {
     name  = "keycloak.authUrl"
     value = "https://${data.terraform_remote_state.minikube.outputs.hostname}/keycloak/"
+  }
+
+  set {
+    name  = "operator.cloudProvider"
+    value = "MINIKUBE"
+  }
+
+  set {
+    name  = "ingress.clusterIssuer"
+    value = "theia-cloud-selfsigned-issuer"
+  }
+
+  set {
+    name  = "ingress.theiaCloudCommonName"
+    value = true
   }
 
   # Comment in to only pull missing images. This is needed to use images built locally in Minikube
