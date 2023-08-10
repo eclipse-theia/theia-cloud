@@ -15,6 +15,7 @@ export const POST_POPUP = '/popup';
 export class ActivityTrackerBackendModuleImpl implements ActivityTrackerBackendModule {
   static clients: Array<ActivityTrackerFrontendModule> = [];
   static timeInMilliseconds: number | undefined;
+  protected messageAlreadyDisplayed = false;
 
   registerEndpoints(router: Router): Router {
     const activityRouter = Router();
@@ -50,6 +51,7 @@ export class ActivityTrackerBackendModuleImpl implements ActivityTrackerBackendM
   }
 
   reportActivity(reason?: string): void {
+    this.messageAlreadyDisplayed = false;
     ActivityTrackerBackendModuleImpl.timeInMilliseconds = Date.now();
     console.debug(
       `Activity reported: ${this.formatTime(ActivityTrackerBackendModuleImpl.timeInMilliseconds)} (${
@@ -68,7 +70,10 @@ export class ActivityTrackerBackendModuleImpl implements ActivityTrackerBackendM
   }
 
   protected createPopup(): void {
-    ActivityTrackerBackendModuleImpl.clients.forEach(c => c.displayPopup());
+    if (!this.messageAlreadyDisplayed) {
+      ActivityTrackerBackendModuleImpl.clients.forEach(c => c.displayPopup());
+      this.messageAlreadyDisplayed = true;
+    }
   }
 
   setClient(client: ActivityTrackerFrontendModule | undefined): void {
