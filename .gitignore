@@ -2,3 +2,6 @@
 .openapi-generator-ignore
 openapitools.json
 .DS_Store
+
+# intelliJ
+.idea

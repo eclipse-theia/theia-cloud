@@ -4,3 +4,7 @@ terraform.tfstate
 terraform.tfstate.backup
 *.log
 *.backup
+
+# Azure
+.azure
+configurations/aks_getting_started/terraform.tfvars
