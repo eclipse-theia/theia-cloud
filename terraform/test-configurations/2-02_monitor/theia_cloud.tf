@@ -1,5 +1,11 @@
 variable "enable_keycloak" {
   description = "Whether keycloak should be enabled"
+  type        = bool
+}
+
+variable "use_vscode_extension" {
+  description = "Whether the VSCode extension should be used."
+  type        = bool
 }
 
 data "terraform_remote_state" "minikube" {
@@ -64,7 +70,22 @@ resource "helm_release" "theia-cloud" {
     value = true
   }
 
-  # Comment in to only pull missing images. This is needed to use images built locally in Minikube
+  set {
+    name  = "keycloak.enable"
+    value = var.enable_keycloak
+  }
+
+  set {
+    name  = "image.name"
+    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:0.8.1.OSWeek23-v1" : "theiacloud/theia-cloud-activity-demo-theia:0.8.1.OSWeek23-v1"
+  }
+
+  set {
+    name  = "monitor.port"
+    value = var.use_vscode_extension ? 8081 : 3000
+  }
+
+  # # Comment in to only pull missing images. This is needed to use images built locally in Minikube
   # set {
   #   name  = "imagePullPolicy"
   #   value = "IfNotPresent"

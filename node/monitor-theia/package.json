@@ -1,9 +1,9 @@
 {
-  "name": "monitor-theia",
+  "name": "@eclipse-theiacloud/monitor-theia",
+  "version": "0.8.1-alpha.1",
   "keywords": [
     "theia-extension"
   ],
-  "version": "0.8.0",
   "files": [
     "lib",
     "src"
