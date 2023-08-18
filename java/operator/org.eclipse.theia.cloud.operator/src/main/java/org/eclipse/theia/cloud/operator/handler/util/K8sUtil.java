@@ -30,8 +30,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceEdit;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -41,7 +39,7 @@ import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.kubernetes.client.internal.SerializationUtils;
+import io.fabric8.kubernetes.client.utils.Serialization;
 
 public final class K8sUtil {
 
@@ -160,19 +158,24 @@ public final class K8sUtil {
 	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
 
 	    LOGGER.trace(formatLogMessage(correlationId, "Loading new " + typeName + ":\n" + yaml));
-	    T newItem = items.load(inputStream).get();
+	    T newItem = items.load(inputStream).item();
+	    if (newItem == null) {
+		LOGGER.error(formatLogMessage(correlationId, "Loading new " + typeName + " resulted in null object"));
+		return Optional.empty();
+	    }
 
 	    ResourceEdit.<T>updateOwnerReference(ownerReferenceIndex, ownerAPIVersion, ownerKind, ownerName, ownerUid,
 		    correlationId).andThen(additionalModification).accept(newItem);
 
 	    String resultingYaml;
 	    try {
-		resultingYaml = SerializationUtils.dumpAsYaml(newItem);
-	    } catch (JsonProcessingException e) {
+		resultingYaml = Serialization.asYaml(newItem);
+	    } catch (Exception e) {
 		resultingYaml = "Serializing " + typeName + " to Yaml failed.";
 	    }
+
 	    LOGGER.trace(formatLogMessage(correlationId, "Creating new " + typeName + ":\n" + resultingYaml));
-	    items.create(newItem);
+	    items.resource(newItem).create();
 	    LOGGER.info(formatLogMessage(correlationId, "Created a new " + typeName));
 
 	    return Optional.of(newItem);

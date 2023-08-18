@@ -27,6 +27,7 @@ import org.eclipse.theia.cloud.common.util.WatcherAdapter;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
+import io.fabric8.kubernetes.api.model.StatusDetails;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher.Action;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -48,7 +49,7 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
 	return get(name).isPresent();
     }
 
-    default boolean delete(String correlationId, String name) {
+    default List<StatusDetails> delete(String correlationId, String name) {
 	info(correlationId, "Delete " + name);
 	return resource(name).delete();
     }

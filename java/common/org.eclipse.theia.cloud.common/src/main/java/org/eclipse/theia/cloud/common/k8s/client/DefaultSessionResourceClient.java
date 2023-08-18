@@ -19,10 +19,10 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -49,7 +49,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	session.setMetadata(metadata);
 
 	info(correlationId, "Create Session " + session.getSpec());
-	return operation().create(session);
+	return operation().resource(session).create();
     }
 
     @Override
@@ -78,7 +78,8 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	return session;
     }
 
-    protected boolean isSessionComplete(String correlationId, SessionSpec sessionSpec, Session changedSession) {
+    protected boolean isSessionComplete(String correlationId, SessionSpec sessionSpec,
+	    Session changedSession) {
 	if (sessionSpec.getName().equals(changedSession.getSpec().getName())) {
 	    if (changedSession.getSpec().hasUrl()) {
 		info(correlationId, "Received URL for " + changedSession);

@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 
 public interface SessionHandler {
     default boolean sessionAdded(Session session, String correlationId) {
