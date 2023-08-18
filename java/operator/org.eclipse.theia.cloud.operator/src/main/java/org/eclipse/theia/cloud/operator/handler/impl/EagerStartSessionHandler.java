@@ -26,9 +26,9 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
 import org.eclipse.theia.cloud.common.util.JavaUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
@@ -70,8 +70,8 @@ public class EagerStartSessionHandler implements SessionHandler {
     protected TheiaCloudArguments arguments;
 
     @Override
-    public boolean sessionAdded(Session session, String correlationId) {
-	SessionSpec spec = session.getSpec();
+    public boolean sessionAdded(SessionV6beta session, String correlationId) {
+	SessionV6betaSpec spec = session.getSpec();
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));
 
 	String sessionResourceName = session.getMetadata().getName();
@@ -81,7 +81,7 @@ public class EagerStartSessionHandler implements SessionHandler {
 	String userEmail = spec.getUser();
 
 	/* find app definition for session */
-	Optional<AppDefinition> appDefinition = client.appDefinitions().get(appDefinitionID);
+	Optional<AppDefinitionV8beta> appDefinition = client.appDefinitions().get(appDefinitionID);
 	if (appDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;
@@ -209,7 +209,7 @@ public class EagerStartSessionHandler implements SessionHandler {
     }
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
-	    String appDefinitionID, int instance, int port, AppDefinition appDefinition, String correlationId) {
+	    String appDefinitionID, int instance, int port, AppDefinitionV8beta appDefinition, String correlationId) {
 	final String host = arguments.getInstancesHost();
 	String path = ingressPathProvider.getPath(appDefinition, instance);
 	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(),

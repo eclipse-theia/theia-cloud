@@ -23,8 +23,8 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 
@@ -41,12 +41,12 @@ public final class TheiaCloudDeploymentUtil {
     }
 
     public static String getSessionURL(String host, IngressPathProvider ingressPathProvider,
-	    AppDefinition appDefinition, Session session) {
+	    AppDefinitionV8beta appDefinition, SessionV6beta session) {
 	return getSessionURL(host, ingressPathProvider.getPath(appDefinition, session));
     }
 
     public static String getSessionURL(String host, IngressPathProvider ingressPathProvider,
-	    AppDefinition appDefinition, int instance) {
+	    AppDefinitionV8beta appDefinition, int instance) {
 	return getSessionURL(host, ingressPathProvider.getPath(appDefinition, instance));
     }
 
@@ -54,15 +54,15 @@ public final class TheiaCloudDeploymentUtil {
 	return HOST_PROTOCOL + host + path + "/";
     }
 
-    public static String getDeploymentName(AppDefinition appDefinition, int instance) {
+    public static String getDeploymentName(AppDefinitionV8beta appDefinition, int instance) {
 	return NamingUtil.createName(appDefinition, instance, DEPLOYMENT_NAME);
     }
 
-    public static String getDeploymentName(Session session) {
+    public static String getDeploymentName(SessionV6beta session) {
 	return NamingUtil.createName(session, DEPLOYMENT_NAME);
     }
 
-    public static Integer getId(String correlationId, AppDefinition appDefinition, Deployment deployment) {
+    public static Integer getId(String correlationId, AppDefinitionV8beta appDefinition, Deployment deployment) {
 	String instance = TheiaCloudK8sUtil.extractIdFromName(deployment.getMetadata());
 	try {
 	    return Integer.valueOf(instance);
@@ -72,7 +72,7 @@ public final class TheiaCloudDeploymentUtil {
 	return null;
     }
 
-    public static Set<Integer> computeIdsOfMissingDeployments(AppDefinition appDefinition, String correlationId,
+    public static Set<Integer> computeIdsOfMissingDeployments(AppDefinitionV8beta appDefinition, String correlationId,
 	    int instances, List<Deployment> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
 		service -> getId(correlationId, appDefinition, service));

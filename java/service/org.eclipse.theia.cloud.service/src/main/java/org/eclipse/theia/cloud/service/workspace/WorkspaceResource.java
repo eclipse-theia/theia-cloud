@@ -27,8 +27,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.BaseResource;
@@ -72,7 +72,7 @@ public class WorkspaceResource extends BaseResource {
 	final String correlationId = evaluatedRequest.getCorrelationId();
 
 	info(correlationId, "Creating workspace " + request);
-	Workspace workspace = k8sUtil.createWorkspace(correlationId,
+	WorkspaceV3beta workspace = k8sUtil.createWorkspace(correlationId,
 		new UserWorkspace(request.appDefinition, evaluatedRequest.getUser(), request.label));
 	TheiaCloudWebException.throwIfErroneous(workspace);
 	return new UserWorkspace(workspace.getSpec());
@@ -89,7 +89,7 @@ public class WorkspaceResource extends BaseResource {
 	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_WORKSPACE_NAME);
 	}
 
-	WorkspaceSpec existingWorkspace = k8sUtil.findWorkspace(request.workspaceName).orElse(null);
+	WorkspaceV3betaSpec existingWorkspace = k8sUtil.findWorkspace(request.workspaceName).orElse(null);
 	if (existingWorkspace == null) {
 	    info(correlationId, "Workspace " + request.workspaceName + " does not exist.");
 	    // Return true because the goal of not having a workspace of the given name is
@@ -108,7 +108,7 @@ public class WorkspaceResource extends BaseResource {
 	return k8sUtil.deleteWorkspace(correlationId, request.workspaceName);
     }
 
-    protected boolean isOwner(String user, WorkspaceSpec workspace) {
+    protected boolean isOwner(String user, WorkspaceV3betaSpec workspace) {
 	if (workspace.getUser() == null || workspace.getUser().isBlank()) {
 	    logger.warnv("Workspace does not have a user. {0}", workspace);
 	    return false;

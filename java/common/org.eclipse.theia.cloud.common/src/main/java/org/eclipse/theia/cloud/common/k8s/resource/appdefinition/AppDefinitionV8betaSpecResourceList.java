@@ -1,5 +1,6 @@
 /********************************************************************************
- * Copyright (C) 2022 EclipseSource and others.
+ * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,12 +14,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 
 import io.fabric8.kubernetes.client.CustomResourceList;
 
-public class WorkspaceSpecResourceList extends CustomResourceList<Workspace> {
+public class AppDefinitionV8betaSpecResourceList extends CustomResourceList<AppDefinitionV8beta> {
 
-    private static final long serialVersionUID = -1041641821546201565L;
+    private static final long serialVersionUID = 722136158817065564L;
 
 }

@@ -1,0 +1,16 @@
+name: TheiaCloud Conversion Hook CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main, osweek23 ]
+
+jobs:
+  docker:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build -t theia-cloud-conversion:$(date +%s) -f dockerfiles/conversion-hook/Dockerfile .

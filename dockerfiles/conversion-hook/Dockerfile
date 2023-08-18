@@ -1,0 +1,17 @@
+FROM maven:3.8.4-openjdk-11 AS builder
+WORKDIR /conversion
+COPY java/common ./common
+COPY java/conversion ./conversion
+RUN cd /conversion/common/maven-conf && \
+    mvn clean install --no-transfer-progress && \
+    cd /conversion/common/org.eclipse.theia.cloud.common && \
+    mvn clean install --no-transfer-progress&& \
+    cd /conversion/conversion/org.eclipse.theia.cloud.conversion && \
+    mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=uber-jar --no-transfer-progress
+
+FROM openjdk:11-jre-slim-buster
+WORKDIR /conversion
+COPY --from=builder /conversion/conversion/org.eclipse.theia.cloud.conversion/target/conversion-hook-0.8.1-SNAPSHOT-runner.jar .
+
+ENTRYPOINT java -jar ./conversion-hook-0.8.1-SNAPSHOT-runner.jar
+CMD [ "" ]

@@ -33,8 +33,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.K8sUtil;
@@ -93,7 +93,7 @@ public class WorkspaceResourceTests {
     void delete_matchingUser_true() {
 	// Prepare
 	mockUser(false, TEST_USER);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
+	WorkspaceV3betaSpec workspace = mockDefaultWorkspace();
 
 	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
 	Mockito.when(k8sUtil.deleteWorkspace(anyString(), eq(TEST_WORKSPACE))).thenReturn(true);
@@ -116,7 +116,7 @@ public class WorkspaceResourceTests {
     void delete_otherUser_throwForbidden() {
 	// Prepare
 	mockUser(false, OTHER_TEST_USER);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
+	WorkspaceV3betaSpec workspace = mockDefaultWorkspace();
 	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
 
 	// We leave the matching user in the request to verify that the deletion is
@@ -142,7 +142,7 @@ public class WorkspaceResourceTests {
     void delete_otherUserWithNullName_throwForbidden() {
 	// Prepare
 	mockUser(false, null);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
+	WorkspaceV3betaSpec workspace = mockDefaultWorkspace();
 	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
 
 	// We leave the matching user in the request to verify that the deletion is
@@ -207,7 +207,7 @@ public class WorkspaceResourceTests {
     void delete_anonymousUser_throwForbidden() {
 	// Prepare
 	mockUser(true, null);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
+	WorkspaceV3betaSpec workspace = mockDefaultWorkspace();
 	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
 	// We leave the matching user in the request to verify that the deletion is
 	// denied even if the correct user is specified in the request.
@@ -233,7 +233,7 @@ public class WorkspaceResourceTests {
 	// Prepare
 	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
 	mockUser(true, null);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
+	WorkspaceV3betaSpec workspace = mockDefaultWorkspace();
 	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
 	// We leave the matching user in the request to verify that the deletion is
 	// denied even if the correct user is specified in the request.
@@ -268,8 +268,8 @@ public class WorkspaceResourceTests {
 	mockUser(false, TEST_USER);
 	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
 		TEST_WORKSPACE);
-	Workspace workspace = Mockito.mock(Workspace.class);
-	WorkspaceSpec workspaceSpec = new WorkspaceSpec("abc", "def", APP_DEFINITION, TEST_USER);
+	WorkspaceV3beta workspace = Mockito.mock(WorkspaceV3beta.class);
+	WorkspaceV3betaSpec workspaceSpec = new WorkspaceV3betaSpec("abc", "def", APP_DEFINITION, TEST_USER);
 	Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
 	Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
 		.thenReturn(workspace);
@@ -288,8 +288,8 @@ public class WorkspaceResourceTests {
 	mockUser(false, TEST_USER);
 	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
 		TEST_WORKSPACE);
-	Workspace workspace = Mockito.mock(Workspace.class);
-	WorkspaceSpec workspaceSpec = new WorkspaceSpec("abc", "def", APP_DEFINITION, TEST_USER);
+	WorkspaceV3beta workspace = Mockito.mock(WorkspaceV3beta.class);
+	WorkspaceV3betaSpec workspaceSpec = new WorkspaceV3betaSpec("abc", "def", APP_DEFINITION, TEST_USER);
 	workspaceSpec.setError("TestError");
 	Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
 	Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
@@ -405,8 +405,8 @@ public class WorkspaceResourceTests {
 	Mockito.when(user.getIdentifier()).thenReturn(name);
     }
 
-    private WorkspaceSpec mockDefaultWorkspace() {
-	WorkspaceSpec workspace = Mockito.mock(WorkspaceSpec.class);
+    private WorkspaceV3betaSpec mockDefaultWorkspace() {
+	WorkspaceV3betaSpec workspace = Mockito.mock(WorkspaceV3betaSpec.class);
 	Mockito.when(workspace.getName()).thenReturn(TEST_WORKSPACE);
 	Mockito.when(workspace.getUser()).thenReturn(TEST_USER);
 	return workspace;

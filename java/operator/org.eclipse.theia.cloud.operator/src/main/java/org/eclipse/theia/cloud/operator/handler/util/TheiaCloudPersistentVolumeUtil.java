@@ -16,7 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler.util;
 
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PodSpec;
@@ -28,7 +28,7 @@ public final class TheiaCloudPersistentVolumeUtil {
 
     }
 
-    public static String getMountPath(AppDefinitionSpec appDefinition) {
+    public static String getMountPath(AppDefinitionV8betaSpec appDefinition) {
 	String mountPath = appDefinition.getMountPath();
 	if (mountPath == null || mountPath.isEmpty()) {
 	    return MOUNT_PATH;
@@ -36,7 +36,7 @@ public final class TheiaCloudPersistentVolumeUtil {
 	return mountPath;
     }
 
-    public static Container getTheiaContainer(PodSpec podSpec, AppDefinitionSpec appDefinition) {
+    public static Container getTheiaContainer(PodSpec podSpec, AppDefinitionV8betaSpec appDefinition) {
 	String image = appDefinition.getImage();
 	for (Container container : podSpec.getContainers()) {
 	    if (container.getImage().startsWith(image)) {

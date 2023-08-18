@@ -18,7 +18,7 @@ package org.eclipse.theia.cloud.operator.handler.impl;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeTemplateReplacements;
@@ -39,7 +39,7 @@ public class DefaultPersistentVolumeTemplateReplacements implements PersistentVo
     TheiaCloudArguments arguments;
 
     @Override
-    public Map<String, String> getPersistentVolumeReplacements(String namespace, Workspace workspace) {
+    public Map<String, String> getPersistentVolumeReplacements(String namespace, WorkspaceV3beta workspace) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
@@ -50,7 +50,7 @@ public class DefaultPersistentVolumeTemplateReplacements implements PersistentVo
     }
 
     @Override
-    public Map<String, String> getPersistentVolumeClaimReplacements(String namespace, Workspace workspace) {
+    public Map<String, String> getPersistentVolumeClaimReplacements(String namespace, WorkspaceV3beta workspace) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_PERSISTENTVOLUMENAME, WorkspaceUtil.getStorageName(workspace));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);

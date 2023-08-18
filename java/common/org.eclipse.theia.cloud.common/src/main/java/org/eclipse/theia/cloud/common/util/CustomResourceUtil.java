@@ -20,9 +20,9 @@ import java.util.Objects;
 
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
@@ -58,15 +58,16 @@ public final class CustomResourceUtil {
     }
 
     public static void registerSessionResource(NamespacedKubernetesClient client) {
-	registerCustomResource(client, Session.class, Session.KIND, Session.CRD_NAME);
+	registerCustomResource(client, SessionV6beta.class, SessionV6beta.KIND, SessionV6beta.CRD_NAME);
     }
 
     public static void registerWorkspaceResource(NamespacedKubernetesClient client) {
-	registerCustomResource(client, Workspace.class, Workspace.KIND, Workspace.CRD_NAME);
+	registerCustomResource(client, WorkspaceV3beta.class, WorkspaceV3beta.KIND, WorkspaceV3beta.CRD_NAME);
     }
 
     public static void registerAppDefinitionResource(NamespacedKubernetesClient client) {
-	registerCustomResource(client, AppDefinition.class, AppDefinition.KIND, AppDefinition.CRD_NAME);
+	registerCustomResource(client, AppDefinitionV8beta.class, AppDefinitionV8beta.KIND,
+		AppDefinitionV8beta.CRD_NAME);
     }
 
     public static void registerCustomResource(NamespacedKubernetesClient client,

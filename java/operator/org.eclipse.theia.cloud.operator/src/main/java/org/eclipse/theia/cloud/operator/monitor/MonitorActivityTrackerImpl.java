@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
 
 import com.google.inject.Inject;
 
@@ -69,17 +69,17 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
     }
 
     protected void pingAllSessions() {
-	List<Session> sessions = resourceClient.sessions().list();
+	List<SessionV6beta> sessions = resourceClient.sessions().list();
 
 	LOGGER.debug("Pinging sessions: " + sessions);
 
-	for (Session session : sessions) {
+	for (SessionV6beta session : sessions) {
 	    Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getName());
 	    if (sessionIP.isPresent()) {
 		String appDefinitionName = session.getSpec().getAppDefinition();
-		Optional<AppDefinition> appDefinitionOptional = resourceClient.appDefinitions().get(appDefinitionName);
+		Optional<AppDefinitionV8beta> appDefinitionOptional = resourceClient.appDefinitions().get(appDefinitionName);
 		if (appDefinitionOptional.isPresent()) {
-		    AppDefinition appDefinition = appDefinitionOptional.get();
+		    AppDefinitionV8beta appDefinition = appDefinitionOptional.get();
 		    int timeoutAfter = appDefinition.getSpec().getMonitor().getActivityTracker()
 			    .getTimeoutAfter();
 		    int notifyAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getNotifyAfter();
@@ -93,7 +93,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	}
     }
 
-    protected void pingSession(Session session, String sessionURL, int port, int shutdownAfter, int notifyAfter) {
+    protected void pingSession(SessionV6beta session, String sessionURL, int port, int shutdownAfter, int notifyAfter) {
 	String sessionName = session.getSpec().getName();
 	logInfo(sessionName, "Pinging session at " + sessionURL);
 	OkHttpClient client = new OkHttpClient().newBuilder().build();
@@ -149,7 +149,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	}
     }
 
-    protected void updateLastActivity(Session session, long reportedTimestamp) {
+    protected void updateLastActivity(SessionV6beta session, long reportedTimestamp) {
 	long currentTimestamp = session.getSpec().getLastActivity();
 	if (currentTimestamp < reportedTimestamp) {
 	    logInfo(session.getSpec().getName(), "Update lastActivity in CR");
@@ -162,7 +162,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	return TimeUnit.MILLISECONDS.toMinutes(timePassed);
     }
 
-    protected void stopNonActiveSession(Session session, int shutdownAfter) {
+    protected void stopNonActiveSession(SessionV6beta session, int shutdownAfter) {
 	String sessionName = session.getSpec().getName();
 	String correlationId = generateCorrelationId();
 	try {

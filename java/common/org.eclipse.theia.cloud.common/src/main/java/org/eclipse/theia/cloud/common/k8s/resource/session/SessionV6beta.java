@@ -14,7 +14,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.k8s.resource.session;
 
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
@@ -29,7 +29,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Group("theia.cloud")
 @Singular("session")
 @Plural("sessions")
-public class Session extends CustomResource<SessionSpec, SessionStatus> implements Namespaced {
+public class SessionV6beta extends CustomResource<SessionV6betaSpec, SessionV6betaStatus> implements Namespaced {
 
     private static final long serialVersionUID = 4518092300237069237L;
     public static final String API = "theia.cloud/v6beta";

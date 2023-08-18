@@ -22,7 +22,7 @@ import static org.eclipse.theia.cloud.common.util.WorkspaceUtil.generateWorkspac
 import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpec;
 
 @Schema(name = "UserWorkspace", description = "Description of a user workspace")
 public class UserWorkspace {
@@ -61,7 +61,7 @@ public class UserWorkspace {
 	this.user = user;
     }
 
-    public UserWorkspace(WorkspaceSpec data) {
+    public UserWorkspace(WorkspaceV3betaSpec data) {
 	this(data.getAppDefinition(), data.getUser(), data.getName(), data.getLabel());
     }
 

@@ -21,6 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaStatus;
 import org.eclipse.theia.cloud.conversion.Conversion.ConversionException;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -32,7 +41,28 @@ public final class ConversionController {
 
     private static final Map<String, Conversion> CONVERSIONS = new LinkedHashMap<>();
 
+    @SuppressWarnings("deprecation")
     private ConversionController() {
+
+	CONVERSIONS.put(org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7.AppDefinitionV7beta.API,
+		new GenericConversion<>(
+			org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7.AppDefinitionV7betaSpec.class,
+			org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7.AppDefinitionV7betaStatus.class,
+			org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7.AppDefinitionV7beta.class,
+			AppDefinitionV8betaSpec.class, AppDefinitionV8betaStatus.class, AppDefinitionV8beta.class));
+
+	CONVERSIONS.put(org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5beta.API,
+		new GenericConversion<>(org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5betaSpec.class,
+			org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5betaStatus.class,
+			org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5beta.class,
+			SessionV6betaSpec.class, SessionV6betaStatus.class, SessionV6beta.class));
+
+	CONVERSIONS.put(org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2beta.API,
+		new GenericConversion<>(
+			org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2betaSpec.class,
+			org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2betaStatus.class,
+			org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2beta.class,
+			WorkspaceV3betaSpec.class, WorkspaceV3betaStatus.class, WorkspaceV3beta.class));
     }
 
     public static ConversionReview handle(ConversionReview conversionReview) {
@@ -41,16 +71,22 @@ public final class ConversionController {
 
 	List<HasMetadata> convertedObjects = new ArrayList<>(objects.size());
 	for (HasMetadata object : objects) {
-	    String currentAPIVersion = object.getApiVersion();
-	    Conversion conversion = CONVERSIONS.get(currentAPIVersion);
-	    if (conversion == null) {
-		return createConversionReview(conversionReview,
-			new NoSuchElementException("No Conversion for " + currentAPIVersion));
-	    }
-	    try {
-		convertedObjects.add(conversion.convert(object, desiredAPIVersion));
-	    } catch (ConversionException e) {
-		return createConversionReview(conversionReview, e);
+
+	    HasMetadata objectUnderMigration = object;
+	    String currentAPIVersion = objectUnderMigration.getApiVersion();
+
+	    while (!desiredAPIVersion.equals(currentAPIVersion)) {
+		Conversion conversion = CONVERSIONS.get(currentAPIVersion);
+		if (conversion == null) {
+		    return createConversionReview(conversionReview,
+			    new NoSuchElementException("No Conversion for " + currentAPIVersion));
+		}
+		try {
+		    objectUnderMigration = conversion.convert(objectUnderMigration);
+		} catch (ConversionException e) {
+		    return createConversionReview(conversionReview, e);
+		}
+		currentAPIVersion = objectUnderMigration.getApiVersion();
 	    }
 	}
 

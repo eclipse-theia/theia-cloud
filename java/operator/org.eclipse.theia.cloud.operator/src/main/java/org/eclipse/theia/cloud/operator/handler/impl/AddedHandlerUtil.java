@@ -47,9 +47,9 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpecResourceList;
 import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -128,7 +128,7 @@ public final class AddedHandlerUtil {
 	configMap.setData(data);
     }
 
-    public static void updateSessionURLAsync(NamespacedKubernetesClient client, Session session, String namespace,
+    public static void updateSessionURLAsync(NamespacedKubernetesClient client, SessionV6beta session, String namespace,
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {
 	    boolean updateURL = false;
@@ -201,7 +201,7 @@ public final class AddedHandlerUtil {
 
 		if (updateURL) {
 		    LOGGER.info(formatLogMessage(correlationId, url + " is available."));
-		    client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
+		    client.resources(SessionV6beta.class, SessionV6betaSpecResourceList.class).inNamespace(namespace)
 			    .withName(session.getMetadata().getName())//
 			    .edit(ws -> {
 				ws.getSpec().setUrl(url);
@@ -263,7 +263,7 @@ public final class AddedHandlerUtil {
 
     /* ------------------- Addition of env vars to Deployments ------------------ */
     public static void addCustomEnvVarsToDeploymentFromSession(String correlationId, Deployment deployment,
-	    Session session, AppDefinition appDefinition) {
+	    SessionV6beta session, AppDefinitionV8beta appDefinition) {
 	String containerName = appDefinition.getSpec().getName();
 	Optional<Integer> maybeContainerIdx = findContainerIdxInDeployment(deployment, containerName);
 
