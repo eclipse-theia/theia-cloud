@@ -23,11 +23,11 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.OperatorStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaStatus;
 import org.eclipse.theia.cloud.operator.handler.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudIngressUtil;
@@ -45,7 +45,7 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
     protected IngressPathProvider ingressPathProvider;
 
     @Override
-    public boolean appDefinitionAdded(AppDefinition appDefinition, String correlationId) {
+    public boolean appDefinitionAdded(AppDefinitionV8beta appDefinition, String correlationId) {
 	try {
 	    return doAppDefinitionAdded(appDefinition, correlationId);
 	} catch (Throwable ex) {
@@ -59,11 +59,11 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 	}
     }
 
-    protected boolean doAppDefinitionAdded(AppDefinition appDefinition, String correlationId) {
+    protected boolean doAppDefinitionAdded(AppDefinitionV8beta appDefinition, String correlationId) {
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + appDefinition));
 
 	// Check current session status and ignore if handling failed or finished before
-	Optional<AppDefinitionStatus> status = Optional.ofNullable(appDefinition.getStatus());
+	Optional<AppDefinitionV8betaStatus> status = Optional.ofNullable(appDefinition.getStatus());
 	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
 	if (OperatorStatus.HANDLED.equals(operatorStatus)) {
 	    LOGGER.trace(formatLogMessage(correlationId,
@@ -93,7 +93,7 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 	    s.setOperatorStatus(OperatorStatus.HANDLING);
 	});
 
-	AppDefinitionSpec spec = appDefinition.getSpec();
+	AppDefinitionV8betaSpec spec = appDefinition.getSpec();
 	String appDefinitionResourceName = appDefinition.getMetadata().getName();
 
 	/* Create ingress if not existing */

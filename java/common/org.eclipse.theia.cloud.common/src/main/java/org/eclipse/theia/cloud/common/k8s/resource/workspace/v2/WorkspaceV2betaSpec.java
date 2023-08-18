@@ -14,15 +14,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.k8s.resource.workspace.v2;
 
+import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@Deprecated
 @JsonDeserialize()
-public class WorkspaceSpec implements UserScopedSpec {
+public class WorkspaceV2betaSpec implements UserScopedSpec {
 
     @JsonProperty("name")
     private String name;
@@ -42,10 +44,10 @@ public class WorkspaceSpec implements UserScopedSpec {
     @JsonProperty("error")
     private String error;
 
-    public WorkspaceSpec() {
+    public WorkspaceV2betaSpec() {
     }
 
-    public WorkspaceSpec(String name, String label, String appDefinition, String user) {
+    public WorkspaceV2betaSpec(String name, String label, String appDefinition, String user) {
 	this.name = name;
 	this.appDefinition = appDefinition;
 	this.user = user;

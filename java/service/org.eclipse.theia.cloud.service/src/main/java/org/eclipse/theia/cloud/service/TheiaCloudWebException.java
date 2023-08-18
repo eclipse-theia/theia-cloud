@@ -19,10 +19,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 public class TheiaCloudWebException extends WebApplicationException {
@@ -49,24 +49,24 @@ public class TheiaCloudWebException extends WebApplicationException {
 	this(TheiaCloudError.fromString(error));
     }
 
-    public static Session throwIfErroneous(Session session) {
+    public static SessionV6beta throwIfErroneous(SessionV6beta session) {
 	throwIfErroneous(session.getSpec());
 	return session;
     }
 
-    public static SessionSpec throwIfErroneous(SessionSpec spec) {
+    public static SessionV6betaSpec throwIfErroneous(SessionV6betaSpec spec) {
 	if (spec.hasError()) {
 	    throw new TheiaCloudWebException(TheiaCloudError.fromString(spec.getError()));
 	}
 	return spec;
     }
 
-    public static Workspace throwIfErroneous(Workspace workspace) {
+    public static WorkspaceV3beta throwIfErroneous(WorkspaceV3beta workspace) {
 	throwIfErroneous(workspace.getSpec());
 	return workspace;
     }
 
-    public static WorkspaceSpec throwIfErroneous(WorkspaceSpec spec) {
+    public static WorkspaceV3betaSpec throwIfErroneous(WorkspaceV3betaSpec spec) {
 	if (spec.hasError()) {
 	    throw new TheiaCloudWebException(TheiaCloudError.fromString(spec.getError()));
 	}

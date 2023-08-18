@@ -21,8 +21,8 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.json.JSONObject;
 
@@ -47,7 +47,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
     private TheiaCloudArguments arguments;
 
     @Override
-    public void sendMessage(Session session, String level, String message) {
+    public void sendMessage(SessionV6beta session, String level, String message) {
 	if (isEnabled()) {
 	    postMessage(session, level, message, true, "");
 	}
@@ -55,7 +55,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
     }
 
     @Override
-    public void sendFullscreenMessage(Session session, String level, String message, String detail) {
+    public void sendFullscreenMessage(SessionV6beta session, String level, String message, String detail) {
 	if (isEnabled()) {
 	    postMessage(session, level, message, true, detail);
 	}
@@ -63,13 +63,13 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
     }
 
     @Override
-    public void sendTimeoutMessage(Session session, String detail) {
+    public void sendTimeoutMessage(SessionV6beta session, String detail) {
 	if (isEnabled()) {
 	    postMessage(session, "info", "Your session has timed out!", true, detail);
 	}
     }
 
-    protected void postMessage(Session session, String level, String message, boolean fullscreen, String detail) {
+    protected void postMessage(SessionV6beta session, String level, String message, boolean fullscreen, String detail) {
 	OkHttpClient client = new OkHttpClient().newBuilder().build();
 
 	Optional<String> postMessageURL = getURL(session);
@@ -90,7 +90,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 	}
     }
 
-    protected Optional<String> getURL(Session session) {
+    protected Optional<String> getURL(SessionV6beta session) {
 	Optional<String> ip = getIP(session);
 	Optional<Integer> port = getPort(session);
 	if (ip.isPresent() && port.isPresent()) {
@@ -99,14 +99,14 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 	return Optional.empty();
     }
 
-    protected Optional<String> getIP(Session session) {
+    protected Optional<String> getIP(SessionV6beta session) {
 	Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getName());
 	return sessionIP;
     }
 
-    protected Optional<Integer> getPort(Session session) {
+    protected Optional<Integer> getPort(SessionV6beta session) {
 	String appDefinitionId = session.getSpec().getAppDefinition();
-	Optional<AppDefinition> optionalAppDefinition = resourceClient.appDefinitions().get(appDefinitionId);
+	Optional<AppDefinitionV8beta> optionalAppDefinition = resourceClient.appDefinitions().get(appDefinitionId);
 	if (optionalAppDefinition.isPresent()) {
 	    return Optional.of(optionalAppDefinition.get().getSpec().getMonitor().getPort());
 	}

@@ -1,5 +1,6 @@
 /********************************************************************************
- * Copyright (C) 2023 EclipseSource and others.
+ * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,33 +14,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.k8s.resource.session.v5;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.fabric8.kubernetes.client.CustomResourceList;
 
-@JsonDeserialize
-public class WorkspaceStatus extends ResourceStatus {
+@Deprecated
+public class SessionV5betaSpecResourceList extends CustomResourceList<SessionV5beta> {
 
-    @JsonProperty("volumeClaim")
-    private StatusStep volumeClaim;
-
-    @JsonProperty("volumeAttach")
-    private StatusStep volumeAttach;
-
-    public StatusStep getVolumeClaim() {
-	return volumeClaim;
-    }
-
-    public void setVolumeClaim(StatusStep volumeClaim) {
-	this.volumeClaim = volumeClaim;
-    }
-
-    public StatusStep getVolumeAttach() {
-	return volumeAttach;
-    }
-
-    public void setVolumeAttach(StatusStep volumeAttach) {
-	this.volumeAttach = volumeAttach;
-    }
 }

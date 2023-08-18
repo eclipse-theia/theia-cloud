@@ -32,10 +32,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec.Timeout;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec.Timeout;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
 import org.eclipse.theia.cloud.operator.handler.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.SessionHandler;
 import org.eclipse.theia.cloud.operator.handler.TimeoutStrategy;
@@ -79,9 +79,9 @@ public class TheiaCloudImpl implements TheiaCloud {
     @Inject
     private TheiaCloudArguments arguments;
 
-    private final Map<String, AppDefinition> appDefinitionCache = new ConcurrentHashMap<>();
-    private final Map<String, Workspace> workspaceCache = new ConcurrentHashMap<>();
-    private final Map<String, Session> sessionCache = new ConcurrentHashMap<>();
+    private final Map<String, AppDefinitionV8beta> appDefinitionCache = new ConcurrentHashMap<>();
+    private final Map<String, WorkspaceV3beta> workspaceCache = new ConcurrentHashMap<>();
+    private final Map<String, SessionV6beta> sessionCache = new ConcurrentHashMap<>();
     private final Set<SpecWatch<?>> watches = new LinkedHashSet<>();
 
     @Override
@@ -97,10 +97,10 @@ public class TheiaCloudImpl implements TheiaCloud {
 	WATCH_EXECUTOR.scheduleWithFixedDelay(this::lookForIdleWatches, 1, 1, TimeUnit.MINUTES);
     }
 
-    protected SpecWatch<AppDefinition> initAppDefinitionsAndWatchForChanges() {
+    protected SpecWatch<AppDefinitionV8beta> initAppDefinitionsAndWatchForChanges() {
 	try {
 	    resourceClient.appDefinitions().list().forEach(this::initAppDefinition);
-	    SpecWatch<AppDefinition> watcher = new SpecWatch<>(appDefinitionCache, this::handleAppDefnitionEvent,
+	    SpecWatch<AppDefinitionV8beta> watcher = new SpecWatch<>(appDefinitionCache, this::handleAppDefnitionEvent,
 		    "App Definition", COR_ID_APPDEFINITIONPREFIX);
 	    resourceClient.appDefinitions().operation().watch(watcher);
 	    return watcher;
@@ -111,10 +111,10 @@ public class TheiaCloudImpl implements TheiaCloud {
 	}
     }
 
-    protected SpecWatch<Workspace> initWorkspacesAndWatchForChanges() {
+    protected SpecWatch<WorkspaceV3beta> initWorkspacesAndWatchForChanges() {
 	try {
 	    resourceClient.workspaces().list().forEach(this::initWorkspace);
-	    SpecWatch<Workspace> watcher = new SpecWatch<>(workspaceCache, this::handleWorkspaceEvent, "Workspace",
+	    SpecWatch<WorkspaceV3beta> watcher = new SpecWatch<>(workspaceCache, this::handleWorkspaceEvent, "Workspace",
 		    COR_ID_WORKSPACEPREFIX);
 	    resourceClient.workspaces().operation().watch(watcher);
 	    return watcher;
@@ -125,10 +125,10 @@ public class TheiaCloudImpl implements TheiaCloud {
 	}
     }
 
-    protected SpecWatch<Session> initSessionsAndWatchForChanges() {
+    protected SpecWatch<SessionV6beta> initSessionsAndWatchForChanges() {
 	try {
 	    resourceClient.sessions().list().forEach(this::initSession);
-	    SpecWatch<Session> watcher = new SpecWatch<>(sessionCache, this::handleSessionEvent, "Session",
+	    SpecWatch<SessionV6beta> watcher = new SpecWatch<>(sessionCache, this::handleSessionEvent, "Session",
 		    COR_ID_SESSIONPREFIX);
 	    resourceClient.sessions().operation().watch(watcher);
 	    return watcher;
@@ -139,19 +139,19 @@ public class TheiaCloudImpl implements TheiaCloud {
 	}
     }
 
-    protected void initAppDefinition(AppDefinition resource) {
+    protected void initAppDefinition(AppDefinitionV8beta resource) {
 	appDefinitionCache.put(resource.getMetadata().getUid(), resource);
 	String uid = resource.getMetadata().getUid();
 	handleAppDefnitionEvent(Watcher.Action.ADDED, uid, Main.COR_ID_INIT);
     }
 
-    protected void initWorkspace(Workspace resource) {
+    protected void initWorkspace(WorkspaceV3beta resource) {
 	workspaceCache.put(resource.getMetadata().getUid(), resource);
 	String uid = resource.getMetadata().getUid();
 	handleWorkspaceEvent(Watcher.Action.ADDED, uid, Main.COR_ID_INIT);
     }
 
-    protected void initSession(Session resource) {
+    protected void initSession(SessionV6beta resource) {
 	sessionCache.put(resource.getMetadata().getUid(), resource);
 	String uid = resource.getMetadata().getUid();
 	handleSessionEvent(Watcher.Action.ADDED, uid, Main.COR_ID_INIT);
@@ -159,7 +159,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 
     protected void handleAppDefnitionEvent(Watcher.Action action, String uid, String correlationId) {
 	try {
-	    AppDefinition appDefinition = appDefinitionCache.get(uid);
+	    AppDefinitionV8beta appDefinition = appDefinitionCache.get(uid);
 	    switch (action) {
 	    case ADDED:
 		appDefinitionAddedHandler.appDefinitionAdded(appDefinition, correlationId);
@@ -184,7 +184,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 
     protected void handleSessionEvent(Watcher.Action action, String uid, String correlationId) {
 	try {
-	    Session session = sessionCache.get(uid);
+	    SessionV6beta session = sessionCache.get(uid);
 	    switch (action) {
 	    case ADDED:
 		sessionHandler.sessionAdded(session, correlationId);
@@ -212,7 +212,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 
     protected void handleWorkspaceEvent(Watcher.Action action, String uid, String correlationId) {
 	try {
-	    Workspace workspace = workspaceCache.get(uid);
+	    WorkspaceV3beta workspace = workspaceCache.get(uid);
 	    switch (action) {
 	    case ADDED:
 		workspaceHandler.workspaceAdded(workspace, correlationId);
@@ -244,7 +244,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 	try {
 	    Set<String> timedOutSessions = new LinkedHashSet<>();
 	    Instant now = Instant.now();
-	    for (Session session : resourceClient.sessions().list()) {
+	    for (SessionV6beta session : resourceClient.sessions().list()) {
 		if (isSessionTimedOut(correlationId, now, session)) {
 		    timedOutSessions.add(session.getSpec().getName());
 		}
@@ -282,7 +282,7 @@ public class TheiaCloudImpl implements TheiaCloud {
 	}
     }
 
-    protected boolean isSessionTimedOut(String correlationId, Instant now, Session session) {
+    protected boolean isSessionTimedOut(String correlationId, Instant now, SessionV6beta session) {
 	Optional<Timeout> timeout = resourceClient.appDefinitions().get(session.getSpec().getAppDefinition())
 		.map(appDef -> appDef.getSpec().getTimeout());
 	if (timeout.isEmpty() || timeout.get().getLimit() <= 0) {

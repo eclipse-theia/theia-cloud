@@ -27,10 +27,10 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpec;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 import org.eclipse.theia.cloud.service.session.SessionPerformance;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
@@ -49,8 +49,8 @@ public final class K8sUtil {
     private NamespacedKubernetesClient KUBERNETES = CustomResourceUtil.createClient();
     private TheiaCloudClient CLIENT = new DefaultTheiaCloudClient(KUBERNETES);
 
-    public Workspace createWorkspace(String correlationId, UserWorkspace data) {
-	WorkspaceSpec spec = new WorkspaceSpec(data.name, data.label, data.appDefinition, data.user);
+    public WorkspaceV3beta createWorkspace(String correlationId, UserWorkspace data) {
+	WorkspaceV3betaSpec spec = new WorkspaceV3betaSpec(data.name, data.label, data.appDefinition, data.user);
 	return CLIENT.workspaces().launch(correlationId, spec);
     }
 
@@ -58,21 +58,21 @@ public final class K8sUtil {
 	return CLIENT.workspaces().delete(correlationId, workspaceName);
     }
 
-    public List<SessionSpec> listSessions(String user) {
+    public List<SessionV6betaSpec> listSessions(String user) {
 	return CLIENT.sessions().specs(user);
     }
 
-    public Optional<SessionSpec> findExistingSession(SessionSpec spec) {
+    public Optional<SessionV6betaSpec> findExistingSession(SessionV6betaSpec spec) {
 	return CLIENT.sessions().specs().stream().filter(sessionSpec -> sessionSpec.equals(spec)).findAny();
     }
 
-    public Optional<SessionSpec> findSession(String sessionName) {
-	return CLIENT.sessions().get(sessionName).map(Session::getSpec);
+    public Optional<SessionV6betaSpec> findSession(String sessionName) {
+	return CLIENT.sessions().get(sessionName).map(SessionV6beta::getSpec);
     }
 
     public String launchEphemeralSession(String correlationId, String appDefinition, String user, int timeout,
 	    EnvironmentVars env) {
-	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition, false), appDefinition, user);
+	SessionV6betaSpec sessionSpec = new SessionV6betaSpec(getSessionName(user, appDefinition, false), appDefinition, user);
 	sessionSpec = sessionSpecWithEnv(sessionSpec, env);
 
 	return launchSession(correlationId, sessionSpec, timeout);
@@ -80,24 +80,24 @@ public final class K8sUtil {
 
     public String launchWorkspaceSession(String correlationId, UserWorkspace workspace, int timeout,
 	    EnvironmentVars env) {
-	SessionSpec sessionSpec = new SessionSpec(getSessionName(workspace.name), workspace.appDefinition,
+	SessionV6betaSpec sessionSpec = new SessionV6betaSpec(getSessionName(workspace.name), workspace.appDefinition,
 		workspace.user, workspace.name);
 	sessionSpec = sessionSpecWithEnv(sessionSpec, env);
 
 	return launchSession(correlationId, sessionSpec, timeout);
     }
 
-    private String launchSession(String correlationId, SessionSpec sessionSpec, int timeout) {
-	SessionSpec spec = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getSpec();
+    private String launchSession(String correlationId, SessionV6betaSpec sessionSpec, int timeout) {
+	SessionV6betaSpec spec = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getSpec();
 	TheiaCloudWebException.throwIfErroneous(spec);
 	return spec.getUrl();
     }
 
-    private SessionSpec sessionSpecWithEnv(SessionSpec spec, EnvironmentVars env) {
+    private SessionV6betaSpec sessionSpecWithEnv(SessionV6betaSpec spec, EnvironmentVars env) {
 	if (env == null)
 	    return spec;
 
-	return new SessionSpec(spec.getName(), spec.getAppDefinition(), spec.getUser(), spec.getWorkspace(),
+	return new SessionV6betaSpec(spec.getName(), spec.getAppDefinition(), spec.getUser(), spec.getWorkspace(),
 		env.fromMap, env.fromConfigMaps, env.fromSecrets);
     }
 
@@ -109,17 +109,17 @@ public final class K8sUtil {
 	return CLIENT.sessions().delete(correlationId, sessionName);
     }
 
-    public Optional<WorkspaceSpec> findWorkspace(String workspaceName) {
-	return CLIENT.workspaces().get(workspaceName).map(Workspace::getSpec);
+    public Optional<WorkspaceV3betaSpec> findWorkspace(String workspaceName) {
+	return CLIENT.workspaces().get(workspaceName).map(WorkspaceV3beta::getSpec);
     }
 
-    public Optional<Workspace> getWorkspace(String user, String workspaceName) {
+    public Optional<WorkspaceV3beta> getWorkspace(String user, String workspaceName) {
 	return CLIENT.workspaces().get(workspaceName)
 		.filter(workspace -> Objects.equals(workspace.getSpec().getUser(), user));
     }
 
     public List<UserWorkspace> listWorkspaces(String user) {
-	List<Workspace> workspaces = CLIENT.workspaces().list(user);
+	List<WorkspaceV3beta> workspaces = CLIENT.workspaces().list(user);
 
 	List<UserWorkspace> userWorkspaces = workspaces.stream()
 		.map(workspace -> new UserWorkspace(workspace.getSpec())).collect(Collectors.toList());
@@ -132,11 +132,11 @@ public final class K8sUtil {
     }
 
     public SessionPerformance reportPerformance(String sessionName) {
-	Optional<Session> optionalSession = CLIENT.sessions().get(sessionName);
+	Optional<SessionV6beta> optionalSession = CLIENT.sessions().get(sessionName);
 	if (optionalSession.isEmpty()) {
 	    return null;
 	}
-	Session session = optionalSession.get();
+	SessionV6beta session = optionalSession.get();
 	Optional<Pod> optionalPod = getPodForSession(session);
 	if (optionalPod.isEmpty()) {
 	    return null;
@@ -154,12 +154,12 @@ public final class K8sUtil {
 		String.valueOf(Quantity.getAmountInBytes(container.getUsage().get("memory"))), "B");
     }
 
-    public Optional<Pod> getPodForSession(Session session) {
+    public Optional<Pod> getPodForSession(SessionV6beta session) {
 	PodList podlist = CLIENT.kubernetes().pods().list();
 	return podlist.getItems().stream().filter(pod -> isPodFromSession(pod, session)).findFirst();
     }
 
-    private boolean isPodFromSession(Pod pod, Session session) {
+    private boolean isPodFromSession(Pod pod, SessionV6beta session) {
 	Optional<Container> optionalContainer = pod.getSpec().getContainers().stream()
 		.filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
 	if (optionalContainer.isEmpty()) {

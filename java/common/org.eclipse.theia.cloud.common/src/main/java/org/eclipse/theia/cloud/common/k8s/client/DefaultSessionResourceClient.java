@@ -19,27 +19,27 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaStatus;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
-public class DefaultSessionResourceClient extends BaseResourceClient<Session, SessionSpecResourceList>
+public class DefaultSessionResourceClient extends BaseResourceClient<SessionV6beta, SessionV6betaSpecResourceList>
 	implements SessionResourceClient {
 
     protected NamespacedKubernetesClient client;
 
     public DefaultSessionResourceClient(NamespacedKubernetesClient client) {
-	super(client, Session.class, SessionSpecResourceList.class);
+	super(client, SessionV6beta.class, SessionV6betaSpecResourceList.class);
     }
 
     @Override
-    public Session create(String correlationId, SessionSpec spec) {
-	Session session = new Session();
+    public SessionV6beta create(String correlationId, SessionV6betaSpec spec) {
+	SessionV6beta session = new SessionV6beta();
 	session.setSpec(spec);
 	spec.setLastActivity(Instant.now().toEpochMilli());
 	spec.setSessionSecret(UUID.randomUUID().toString());
@@ -53,10 +53,10 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
     }
 
     @Override
-    public Session launch(String correlationId, SessionSpec spec, long timeout, TimeUnit unit) {
+    public SessionV6beta launch(String correlationId, SessionV6betaSpec spec, long timeout, TimeUnit unit) {
 	// get or create session
-	Session session = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
-	SessionSpec sessionSpec = session.getSpec();
+	SessionV6beta session = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
+	SessionV6betaSpec sessionSpec = session.getSpec();
 
 	// if session is available and has already an url or error, return that session
 	if (sessionSpec.hasUrl()) {
@@ -78,7 +78,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	return session;
     }
 
-    protected boolean isSessionComplete(String correlationId, SessionSpec sessionSpec, Session changedSession) {
+    protected boolean isSessionComplete(String correlationId, SessionV6betaSpec sessionSpec, SessionV6beta changedSession) {
 	if (sessionSpec.getName().equals(changedSession.getSpec().getName())) {
 	    if (changedSession.getSpec().hasUrl()) {
 		info(correlationId, "Received URL for " + changedSession);
@@ -104,8 +104,8 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
     }
 
     @Override
-    public SessionStatus createDefaultStatus() {
-	return new SessionStatus();
+    public SessionV6betaStatus createDefaultStatus() {
+	return new SessionV6betaStatus();
     }
 
 }

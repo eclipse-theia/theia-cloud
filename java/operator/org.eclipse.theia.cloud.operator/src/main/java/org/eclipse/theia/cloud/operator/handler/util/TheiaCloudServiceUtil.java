@@ -26,9 +26,9 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -45,15 +45,15 @@ public final class TheiaCloudServiceUtil {
     private TheiaCloudServiceUtil() {
     }
 
-    public static String getServiceName(AppDefinition appDefinition, int instance) {
+    public static String getServiceName(AppDefinitionV8beta appDefinition, int instance) {
 	return NamingUtil.createName(appDefinition, instance, SERVICE_NAME);
     }
 
-    public static String getServiceName(Session session) {
+    public static String getServiceName(SessionV6beta session) {
 	return NamingUtil.createName(session, SERVICE_NAME);
     }
 
-    public static Integer getId(String correlationId, AppDefinition appDefinition, Service service) {
+    public static Integer getId(String correlationId, AppDefinitionV8beta appDefinition, Service service) {
 	String instance = TheiaCloudK8sUtil.extractIdFromName(service.getMetadata());
 	try {
 	    return Integer.valueOf(instance);
@@ -63,13 +63,13 @@ public final class TheiaCloudServiceUtil {
 	return null;
     }
 
-    public static Set<Integer> computeIdsOfMissingServices(AppDefinition appDefinition, String correlationId,
+    public static Set<Integer> computeIdsOfMissingServices(AppDefinitionV8beta appDefinition, String correlationId,
 	    int instances, List<Service> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
 		service -> getId(correlationId, appDefinition, service));
     }
 
-    public static Map<String, String> getServiceReplacements(String namespace, AppDefinition appDefinition,
+    public static Map<String, String> getServiceReplacements(String namespace, AppDefinitionV8beta appDefinition,
 	    int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_SERVICENAME, getServiceName(appDefinition, instance));
@@ -81,8 +81,8 @@ public final class TheiaCloudServiceUtil {
 	return replacements;
     }
 
-    public static Map<String, String> getServiceReplacements(String namespace, Session session,
-	    AppDefinitionSpec appDefinitionSpec) {
+    public static Map<String, String> getServiceReplacements(String namespace, SessionV6beta session,
+	    AppDefinitionV8betaSpec appDefinitionSpec) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_SERVICENAME, getServiceName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(session));
@@ -92,22 +92,23 @@ public final class TheiaCloudServiceUtil {
 	return replacements;
     }
 
-	private static void putMonitorReplacements(AppDefinitionSpec appDefinitionSpec, Map<String, String> replacements) {
-		if (appDefinitionSpec.getMonitor() != null && appDefinitionSpec.getMonitor().getPort() > 0) {
-		    String port = String.valueOf(appDefinitionSpec.getMonitor().getPort());
-		    String replacement = "- name: monitor-express\n" + "      port: " + port + "\n" + "      targetPort: "
-			    + port + "\n" + "      protocol: TCP";
-		    if (appDefinitionSpec.getMonitor().getPort() == appDefinitionSpec.getPort()) {
-			// Just remove the placeholder, otherwise the port would be duplicate
-			replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
-		    } else {
-			// Replace the placeholder with the port information
-			replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, replacement);
-		    }
-		} else {
-		    replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
-		}
+    private static void putMonitorReplacements(AppDefinitionV8betaSpec appDefinitionSpec,
+	    Map<String, String> replacements) {
+	if (appDefinitionSpec.getMonitor() != null && appDefinitionSpec.getMonitor().getPort() > 0) {
+	    String port = String.valueOf(appDefinitionSpec.getMonitor().getPort());
+	    String replacement = "- name: monitor-express\n" + "      port: " + port + "\n" + "      targetPort: "
+		    + port + "\n" + "      protocol: TCP";
+	    if (appDefinitionSpec.getMonitor().getPort() == appDefinitionSpec.getPort()) {
+		// Just remove the placeholder, otherwise the port would be duplicate
+		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
+	    } else {
+		// Replace the placeholder with the port information
+		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, replacement);
+	    }
+	} else {
+	    replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
 	}
+    }
 
     public static Optional<Service> getServiceOwnedBySession(String sessionResourceName, String sessionResourceUID,
 	    List<Service> existingServices) {

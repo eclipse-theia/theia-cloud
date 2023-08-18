@@ -29,8 +29,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.BaseResource;
@@ -58,7 +58,7 @@ public class SessionResource extends BaseResource {
     @GET
     @Path("/{appId}/{user}")
     @NoAnonymousAccess
-    public List<SessionSpec> list(@PathParam("appId") String appId, @PathParam("user") String user) {
+    public List<SessionV6betaSpec> list(@PathParam("appId") String appId, @PathParam("user") String user) {
 	SessionListRequest request = new SessionListRequest(appId, user);
 	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
 	info(evaluatedRequest.getCorrelationId(), "Listing sessions " + request);
@@ -79,7 +79,7 @@ public class SessionResource extends BaseResource {
 		    request.env);
 	}
 
-	Optional<Workspace> workspace = k8sUtil.getWorkspace(user,
+	Optional<WorkspaceV3beta> workspace = k8sUtil.getWorkspace(user,
 		org.eclipse.theia.cloud.common.util.NamingUtil.asValidName(request.workspaceName));
 	if (workspace.isEmpty()) {
 	    info(correlationId, "No workspace for given workspace name: " + request);
@@ -106,7 +106,7 @@ public class SessionResource extends BaseResource {
 	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_SESSION_NAME);
 	}
 
-	SessionSpec existingSession = k8sUtil.findSession(request.sessionName).orElse(null);
+	SessionV6betaSpec existingSession = k8sUtil.findSession(request.sessionName).orElse(null);
 	if (existingSession == null) {
 	    info(correlationId, "Session " + request.sessionName + " does not exist.");
 	    // Return true because the goal of not having a running session of the
@@ -150,7 +150,7 @@ public class SessionResource extends BaseResource {
 	final String user = theiaCloudUser.getIdentifier();
 
 	// Ensure session belongs to the requesting user.
-	SessionSpec existingSession = k8sUtil.findSession(request.sessionName).orElse(null);
+	SessionV6betaSpec existingSession = k8sUtil.findSession(request.sessionName).orElse(null);
 	if (existingSession == null) {
 	    info(correlationId, "Session " + request.sessionName + " does not exist.");
 	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_SESSION_NAME);
@@ -172,7 +172,7 @@ public class SessionResource extends BaseResource {
 	return performance;
     }
 
-    protected boolean isOwner(String user, SessionSpec session) {
+    protected boolean isOwner(String user, SessionV6betaSpec session) {
 	if (session.getUser() == null || session.getUser().isBlank()) {
 	    logger.warnv("Session does not have a user. {0}", session);
 	    return false;

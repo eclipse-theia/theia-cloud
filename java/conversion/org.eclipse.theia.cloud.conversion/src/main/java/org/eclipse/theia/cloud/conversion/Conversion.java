@@ -19,7 +19,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 
 public interface Conversion {
 
-    HasMetadata convert(HasMetadata object, String desiredAPIVersion) throws ConversionException;
+    HasMetadata convert(HasMetadata object) throws ConversionException;
 
     class ConversionException extends Exception {
 	public ConversionException(String message) {

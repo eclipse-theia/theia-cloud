@@ -15,26 +15,26 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
 
 public interface SessionHandler {
-    default boolean sessionAdded(Session session, String correlationId) {
+    default boolean sessionAdded(SessionV6beta session, String correlationId) {
 	return true;
     }
 
-    default boolean sessionDeleted(Session session, String correlationId) {
+    default boolean sessionDeleted(SessionV6beta session, String correlationId) {
 	return true;
     }
 
-    default boolean sessionModified(Session session, String correlationId) {
+    default boolean sessionModified(SessionV6beta session, String correlationId) {
 	return true;
     }
 
-    default boolean sessionErrored(Session session, String correlationId) {
+    default boolean sessionErrored(SessionV6beta session, String correlationId) {
 	return true;
     }
 
-    default boolean sessionBookmarked(Session session, String correlationId) {
+    default boolean sessionBookmarked(SessionV6beta session, String correlationId) {
 	return true;
     }
 }

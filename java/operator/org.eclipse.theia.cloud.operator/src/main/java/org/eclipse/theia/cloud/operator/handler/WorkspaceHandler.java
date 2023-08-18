@@ -15,26 +15,26 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
 
 public interface WorkspaceHandler {
-    default boolean workspaceAdded(Workspace workspace, String correlationId) {
+    default boolean workspaceAdded(WorkspaceV3beta workspace, String correlationId) {
 	return true;
     }
 
-    default boolean workspaceDeleted(Workspace workspace, String correlationId) {
+    default boolean workspaceDeleted(WorkspaceV3beta workspace, String correlationId) {
 	return true;
     }
 
-    default boolean workspaceModified(Workspace workspace, String correlationId) {
+    default boolean workspaceModified(WorkspaceV3beta workspace, String correlationId) {
 	return true;
     }
 
-    default boolean workspaceErrored(Workspace workspace, String correlationId) {
+    default boolean workspaceErrored(WorkspaceV3beta workspace, String correlationId) {
 	return true;
     }
 
-    default boolean workspaceBookmarked(Workspace workspace, String correlationId) {
+    default boolean workspaceBookmarked(WorkspaceV3beta workspace, String correlationId) {
 	return true;
     }
 }

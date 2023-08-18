@@ -25,7 +25,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeTemplateReplacements;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
@@ -53,13 +53,13 @@ public class DefaultPersistentVolumeCreator implements PersistentVolumeCreator {
     protected PersistentVolumeTemplateReplacements replacementsProvider;
 
     @Override
-    public Optional<PersistentVolume> createAndApplyPersistentVolume(String correlationId, Workspace workspace) {
+    public Optional<PersistentVolume> createAndApplyPersistentVolume(String correlationId, WorkspaceV3beta workspace) {
 	return Optional.empty();
     }
 
     @Override
     public Optional<PersistentVolumeClaim> createAndApplyPersistentVolumeClaim(String correlationId,
-	    Workspace workspace) {
+	    WorkspaceV3beta workspace) {
 
 	Map<String, String> replacements = replacementsProvider.getPersistentVolumeClaimReplacements(client.namespace(),
 		workspace);

@@ -27,7 +27,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
@@ -74,7 +74,7 @@ public class RootResource extends BaseResource {
 	}
 
 	if (request.isExistingWorkspace()) {
-	    Optional<Workspace> workspace = k8sUtil.getWorkspace(user, asValidName(request.workspaceName));
+	    Optional<WorkspaceV3beta> workspace = k8sUtil.getWorkspace(user, asValidName(request.workspaceName));
 	    if (workspace.isPresent()) {
 		String workspaceAppDefinition = workspace.get().getSpec().getAppDefinition();
 		if (!workspaceAppDefinition.equals(request.appDefinition)) {
@@ -92,7 +92,7 @@ public class RootResource extends BaseResource {
 	}
 
 	info(correlationId, "Create workspace " + request);
-	Workspace workspace = k8sUtil.createWorkspace(correlationId,
+	WorkspaceV3beta workspace = k8sUtil.createWorkspace(correlationId,
 		new UserWorkspace(request.appDefinition, user, request.workspaceName, request.label));
 	TheiaCloudWebException.throwIfErroneous(workspace);
 
