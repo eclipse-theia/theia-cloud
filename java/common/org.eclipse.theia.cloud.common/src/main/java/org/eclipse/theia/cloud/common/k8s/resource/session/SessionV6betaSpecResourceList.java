@@ -16,9 +16,9 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.session;
 
-import io.fabric8.kubernetes.client.CustomResourceList;
+import io.fabric8.kubernetes.api.model.DefaultKubernetesResourceList;
 
-public class SessionV6betaSpecResourceList extends CustomResourceList<SessionV6beta> {
+public class SessionV6betaSpecResourceList extends DefaultKubernetesResourceList<SessionV6beta> {
 
     private static final long serialVersionUID = -4808662679268313876L;
 

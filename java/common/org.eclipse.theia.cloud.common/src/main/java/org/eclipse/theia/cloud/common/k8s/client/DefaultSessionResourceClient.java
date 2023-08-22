@@ -49,7 +49,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<SessionV6be
 	session.setMetadata(metadata);
 
 	info(correlationId, "Create Session " + session.getSpec());
-	return operation().create(session);
+	return operation().resource(session).create();
     }
 
     @Override
@@ -78,7 +78,8 @@ public class DefaultSessionResourceClient extends BaseResourceClient<SessionV6be
 	return session;
     }
 
-    protected boolean isSessionComplete(String correlationId, SessionV6betaSpec sessionSpec, SessionV6beta changedSession) {
+    protected boolean isSessionComplete(String correlationId, SessionV6betaSpec sessionSpec,
+	    SessionV6beta changedSession) {
 	if (sessionSpec.getName().equals(changedSession.getSpec().getName())) {
 	    if (changedSession.getSpec().hasUrl()) {
 		info(correlationId, "Received URL for " + changedSession);

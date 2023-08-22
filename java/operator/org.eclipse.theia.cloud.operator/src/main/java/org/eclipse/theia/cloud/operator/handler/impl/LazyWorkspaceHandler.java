@@ -94,7 +94,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	String storageName = WorkspaceUtil.getStorageName(workspace);
 	client.workspaces().updateStatus(correlationId, workspace, s -> s.setVolumeClaim(new StatusStep("started")));
 
-	if (!client.persistentVolumes().has(storageName)) {
+	if (!client.persistentVolumesClient().has(storageName)) {
 	    LOGGER.trace(formatLogMessage(correlationId, "Creating new persistent volume named " + storageName));
 	    persistentVolumeHandler.createAndApplyPersistentVolume(correlationId, workspace);
 	}
@@ -104,7 +104,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	    s.setVolumeAttach(new StatusStep("started"));
 	});
 
-	if (!client.persistentVolumeClaims().has(storageName)) {
+	if (!client.persistentVolumeClaimsClient().has(storageName)) {
 	    LOGGER.trace(formatLogMessage(correlationId, "Creating new persistent volume claim named " + storageName));
 	    persistentVolumeHandler.createAndApplyPersistentVolumeClaim(correlationId, workspace);
 	}
@@ -133,8 +133,8 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	client.sessions().delete(correlationId, sessionName);
 
 	String storageName = WorkspaceUtil.getStorageName(workspace);
-	client.persistentVolumeClaims().delete(correlationId, storageName);
-	client.persistentVolumes().delete(correlationId, storageName);
+	client.persistentVolumeClaimsClient().delete(correlationId, storageName);
+	client.persistentVolumesClient().delete(correlationId, storageName);
 	return true;
     }
 }

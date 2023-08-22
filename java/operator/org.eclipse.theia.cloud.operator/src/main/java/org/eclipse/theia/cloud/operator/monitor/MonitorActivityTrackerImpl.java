@@ -43,6 +43,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 
@@ -77,11 +78,11 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	    Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getName());
 	    if (sessionIP.isPresent()) {
 		String appDefinitionName = session.getSpec().getAppDefinition();
-		Optional<AppDefinitionV8beta> appDefinitionOptional = resourceClient.appDefinitions().get(appDefinitionName);
+		Optional<AppDefinitionV8beta> appDefinitionOptional = resourceClient.appDefinitions()
+			.get(appDefinitionName);
 		if (appDefinitionOptional.isPresent()) {
 		    AppDefinitionV8beta appDefinition = appDefinitionOptional.get();
-		    int timeoutAfter = appDefinition.getSpec().getMonitor().getActivityTracker()
-			    .getTimeoutAfter();
+		    int timeoutAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getTimeoutAfter();
 		    int notifyAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getNotifyAfter();
 		    int port = appDefinition.getSpec().getMonitor().getPort();
 
@@ -106,8 +107,9 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	Response getActivityResponse;
 	try {
 	    getActivityResponse = client.newCall(getActivityRequest).execute();
-	    if (getActivityResponse.code() == 200) {
-		long lastReportedMilliseconds = Long.valueOf(getActivityResponse.body().string());
+	    ResponseBody body = getActivityResponse.body();
+	    if (getActivityResponse.code() == 200 && body != null) {
+		long lastReportedMilliseconds = Long.valueOf(body.string());
 
 		updateLastActivity(session, lastReportedMilliseconds);
 	    } else {

@@ -65,7 +65,7 @@ public class MinikubePersistentVolumeCreator implements PersistentVolumeCreator 
 		    e);
 	    return Optional.empty();
 	}
-	return client.persistentVolumes().loadAndCreate(correlationId, persistentVolumeYaml,
+	return client.persistentVolumesClient().loadAndCreate(correlationId, persistentVolumeYaml,
 		volume -> volume.addOwnerReference(workspace));
     }
 
@@ -83,7 +83,7 @@ public class MinikubePersistentVolumeCreator implements PersistentVolumeCreator 
 		    e);
 	    return Optional.empty();
 	}
-	return client.persistentVolumeClaims().loadAndCreate(correlationId, persistentVolumeClaimYaml,
+	return client.persistentVolumeClaimsClient().loadAndCreate(correlationId, persistentVolumeClaimYaml,
 		claim -> claim.addOwnerReference(workspace));
     }
 
