@@ -95,7 +95,7 @@ public class BaseResourceClient<T extends HasMetadata, L extends KubernetesResou
 	    customization.accept(newItem);
 
 	    trace(correlationId, "Creating new " + getTypeName());
-	    operation().create(newItem);
+	    operation().resource(newItem).create();
 	    info(correlationId, "Created a new " + getTypeName());
 
 	    return Optional.of(newItem);

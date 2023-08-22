@@ -72,7 +72,7 @@ public class DefaultPersistentVolumeCreator implements PersistentVolumeCreator {
 		    e);
 	    return Optional.empty();
 	}
-	return client.persistentVolumeClaims().loadAndCreate(correlationId, persistentVolumeClaimYaml,
+	return client.persistentVolumeClaimsClient().loadAndCreate(correlationId, persistentVolumeClaimYaml,
 		claim -> claim.addOwnerReference(workspace));
     }
 

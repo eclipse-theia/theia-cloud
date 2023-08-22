@@ -288,7 +288,8 @@ public class LazySessionHandler implements SessionHandler {
 	}
     }
 
-    protected boolean hasMaxInstancesReached(AppDefinitionV8beta appDefinition, SessionV6beta session, String correlationId) {
+    protected boolean hasMaxInstancesReached(AppDefinitionV8beta appDefinition, SessionV6beta session,
+	    String correlationId) {
 	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), session.getSpec(),
 		appDefinition.getSpec(), correlationId)) {
 	    LOGGER.info(formatMetric(correlationId, "Max instances reached for " + appDefinition.getSpec().getName()));
@@ -346,7 +347,7 @@ public class LazySessionHandler implements SessionHandler {
 
 	}
 	String storageName = WorkspaceUtil.getStorageName(workspace.get());
-	if (!client.persistentVolumeClaims().has(storageName)) {
+	if (!client.persistentVolumeClaimsClient().has(storageName)) {
 	    LOGGER.info(formatLogMessage(correlationId,
 		    "No storage found for started session, will use ephemeral storage instead", correlationId));
 	    return Optional.empty();
@@ -355,7 +356,8 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected Optional<Service> createAndApplyService(String correlationId, String sessionResourceName,
-	    String sessionResourceUID, SessionV6beta session, AppDefinitionV8betaSpec appDefinitionSpec, boolean useOAuth2Proxy) {
+	    String sessionResourceUID, SessionV6beta session, AppDefinitionV8betaSpec appDefinitionSpec,
+	    boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(client.namespace(), session,
 		appDefinitionSpec);
 	String templateYaml = useOAuth2Proxy ? AddedHandlerUtil.TEMPLATE_SERVICE_YAML
@@ -385,7 +387,8 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0, configmap -> {
+		configMapYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0,
+		configmap -> {
 		    configmap.setData(Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST,
 			    session.getSpec().getUser()));
 		});
@@ -404,7 +407,8 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0, configMap -> {
+		configMapYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0,
+		configMap -> {
 		    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, session);
 		    int port = appDefinition.getSpec().getPort();
 		    AddedHandlerUtil.updateProxyConfigMap(client.kubernetes(), client.namespace(), configMap, host,
@@ -427,7 +431,8 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		deploymentYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0, deployment -> {
+		deploymentYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0,
+		deployment -> {
 		    pvName.ifPresent(name -> addVolumeClaim(deployment, name, appDefinition.getSpec()));
 		    bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
 			    appDefinition.getSpec().getUplinkLimit(), correlationId);

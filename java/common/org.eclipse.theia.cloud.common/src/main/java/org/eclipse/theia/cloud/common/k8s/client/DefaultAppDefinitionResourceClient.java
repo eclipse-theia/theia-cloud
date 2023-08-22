@@ -23,7 +23,8 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
-public class DefaultAppDefinitionResourceClient extends BaseResourceClient<AppDefinitionV8beta, AppDefinitionV8betaSpecResourceList>
+public class DefaultAppDefinitionResourceClient
+	extends BaseResourceClient<AppDefinitionV8beta, AppDefinitionV8betaSpecResourceList>
 	implements AppDefinitionResourceClient {
 
     public DefaultAppDefinitionResourceClient(NamespacedKubernetesClient client) {
@@ -40,7 +41,7 @@ public class DefaultAppDefinitionResourceClient extends BaseResourceClient<AppDe
 	appDefinition.setMetadata(metadata);
 
 	info(correlationId, "Create AppDefinition " + appDefinition.getSpec());
-	return operation().create(appDefinition);
+	return operation().resource(appDefinition).create();
     }
 
     @Override

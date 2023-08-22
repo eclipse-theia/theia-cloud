@@ -52,12 +52,6 @@
             <groupId>io.javaoperatorsdk</groupId>
             <artifactId>kubernetes-webhooks-framework-core</artifactId>
             <version>${webhooks.framework.core.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>kubernetes-client</artifactId>
-                    <groupId>io.fabric8</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 		<!-- Test utilities -->
 		<dependency>

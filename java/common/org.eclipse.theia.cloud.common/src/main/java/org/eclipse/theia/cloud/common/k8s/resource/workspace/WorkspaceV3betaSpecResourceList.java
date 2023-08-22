@@ -15,9 +15,9 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.workspace;
 
-import io.fabric8.kubernetes.client.CustomResourceList;
+import io.fabric8.kubernetes.api.model.DefaultKubernetesResourceList;
 
-public class WorkspaceV3betaSpecResourceList extends CustomResourceList<WorkspaceV3beta> {
+public class WorkspaceV3betaSpecResourceList extends DefaultKubernetesResourceList<WorkspaceV3beta> {
 
     private static final long serialVersionUID = -1041641821546201565L;
 

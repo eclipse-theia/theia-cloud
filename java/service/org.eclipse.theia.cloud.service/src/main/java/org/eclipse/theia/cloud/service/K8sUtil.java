@@ -42,6 +42,7 @@ import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.metrics.v1beta1.ContainerMetrics;
 import io.fabric8.kubernetes.api.model.metrics.v1beta1.PodMetrics;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 @ApplicationScoped
@@ -55,7 +56,12 @@ public final class K8sUtil {
     }
 
     public boolean deleteWorkspace(String correlationId, String workspaceName) {
-	return CLIENT.workspaces().delete(correlationId, workspaceName);
+	try {
+	    CLIENT.workspaces().delete(correlationId, workspaceName);
+	} catch (KubernetesClientException e) {
+	    return false;
+	}
+	return true;
     }
 
     public List<SessionV6betaSpec> listSessions(String user) {
@@ -106,7 +112,12 @@ public final class K8sUtil {
     }
 
     public boolean stopSession(String correlationId, String sessionName, String user) {
-	return CLIENT.sessions().delete(correlationId, sessionName);
+	try {
+	    CLIENT.sessions().delete(correlationId, sessionName);
+	} catch (KubernetesClientException e) {
+	    return false;
+	}
+	return true;
     }
 
     public Optional<WorkspaceV3betaSpec> findWorkspace(String workspaceName) {
