@@ -71,10 +71,20 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 			    + appDefinition));
 	    return true;
 	}
-	if (OperatorStatus.ERROR.equals(operatorStatus) || OperatorStatus.HANDLING.equals(operatorStatus)) {
+	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    // TODO We should not return but continue where we left off.
 	    LOGGER.warn(formatLogMessage(correlationId,
-		    "AppDefinition could not be handled before and is skipped now. Current status: " + operatorStatus
-			    + ". AppDefinition: " + appDefinition));
+		    "AppDefinition handling was unexpectedly interrupted before. AppDefinition is skipped now and its status is set to ERROR. AppDefinition: "
+			    + appDefinition));
+	    client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Handling was unexpectedly interrupted before. CorrelationId: " + correlationId);
+	    });
+	    return false;
+	}
+	if (OperatorStatus.ERROR.equals(operatorStatus)) {
+	    LOGGER.warn(formatLogMessage(correlationId,
+		    "AppDefinition could not be handled before and is skipped now. AppDefinition: " + appDefinition));
 	    return false;
 	}
 

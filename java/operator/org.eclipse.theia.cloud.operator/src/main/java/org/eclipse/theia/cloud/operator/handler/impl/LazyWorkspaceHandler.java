@@ -69,12 +69,20 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 		    "Workspace was successfully handled before and is skipped now. Workspace: " + workspace));
 	    return true;
 	}
-	if (OperatorStatus.ERROR.equals(operatorStatus) || OperatorStatus.HANDLING.equals(operatorStatus)) {
-	    // TODO In the HANDLING case we should not return but continue where we left
-	    // off.
+	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    // TODO We should not return but continue where we left off.
 	    LOGGER.warn(formatLogMessage(correlationId,
-		    "Workspace could not be handled before and is skipped now. Current status: " + operatorStatus
-			    + ". Workspace: " + workspace));
+		    "Workspace handling was unexpectedly interrupted before. Workspace is skipped now and its status is set to ERROR. Workspace: "
+			    + workspace));
+	    client.workspaces().updateStatus(correlationId, workspace, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Handling was unexpectedly interrupted before. CorrelationId: " + correlationId);
+	    });
+	    return false;
+	}
+	if (OperatorStatus.ERROR.equals(operatorStatus)) {
+	    LOGGER.warn(formatLogMessage(correlationId,
+		    "Workspace could not be handled before and is skipped now. Workspace: " + workspace));
 	    return false;
 	}
 
