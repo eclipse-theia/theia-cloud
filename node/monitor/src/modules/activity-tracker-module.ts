@@ -100,6 +100,8 @@ export class ActivityTrackerModule implements MonitorModule {
       message.then(answer => {
         if (answer === yesOption) {
           this.reportActivity('Popup dialog was confirmed');
+        } else {
+          this.messageAlreadyDisplayed = false;
         }
       });
     }
