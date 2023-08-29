@@ -117,12 +117,20 @@ public class LazySessionHandler implements SessionHandler {
 		    "Session was successfully handled before and is skipped now. Session: " + session));
 	    return true;
 	}
-	if (OperatorStatus.ERROR.equals(operatorStatus) || OperatorStatus.HANDLING.equals(operatorStatus)) {
-	    // TODO In the HANDLING case we should not return but continue where we left
-	    // off.
+	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    // TODO We should not return but continue where we left off.
 	    LOGGER.warn(formatLogMessage(correlationId,
-		    "Session could not be handled before and is skipped now. Current status: " + operatorStatus
-			    + ". Session: " + session));
+		    "Session handling was unexpectedly interrupted before. Session is skipped now and its status is set to ERROR. Session: "
+			    + session));
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.ERROR);
+		s.setOperatorMessage("Handling was unexpectedly interrupted before. CorrelationId: " + correlationId);
+	    });
+	    return false;
+	}
+	if (OperatorStatus.ERROR.equals(operatorStatus)) {
+	    LOGGER.warn(formatLogMessage(correlationId,
+		    "Session could not be handled before and is skipped now. Session: " + session));
 	    return false;
 	}
 
