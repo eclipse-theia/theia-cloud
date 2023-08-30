@@ -8,7 +8,7 @@ issuer:
   email: jfaltermeier@eclipsesource.com
 
 image:
-  name: theiacloud/theia-cloud-demo:0.8.1.OSWeek23-v3
+  name: theiacloud/theia-cloud-demo:0.8.1.MS2
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
@@ -22,7 +22,7 @@ hosts:
   instance: ws.theia-cloud.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.1.OSWeek23-v3
+  image: theiacloud/theia-cloud-try-now-page:0.8.1.MS2
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
   additionalApps:

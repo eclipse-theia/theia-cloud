@@ -39,7 +39,6 @@ Build and push the Landing page with:
 ```bash
 docker build -t theiacloud/theia-cloud-landing-page:latest -f dockerfiles/landing-page/Dockerfile .
 docker push theiacloud/theia-cloud-landing-page:latest
-
 ```
 
 Build and push the Try Now page with:
@@ -47,7 +46,6 @@ Build and push the Try Now page with:
 ```bash
 docker build -t theiacloud/theia-cloud-try-now-page:latest -f dockerfiles/try-now-page/Dockerfile .
 docker push theiacloud/theia-cloud-try-now-page:latest
-
 ```
 
 Build and push the Theia.cloud REST service with:
