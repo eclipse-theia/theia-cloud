@@ -19,12 +19,19 @@ docker build -t theiacloud/theia-cloud-demo:latest -f demo/dockerfiles/demo-thei
 docker push theiacloud/theia-cloud-demo:latest
 ```
 
-Build and push the Theia Activity Tracker Demo application with:
+Build and push the Theia Activity Tracker VSCode Demo application with:
 
 ```bash
 docker tag theiacloud/theia-cloud-demo:latest theiacloud/theia-cloud-demo
 docker build -t theiacloud/theia-cloud-activity-demo:latest -f demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile demo/dockerfiles/demo-theia-monitor-vscode/.
 docker push theiacloud/theia-cloud-activity-demo:latest
+```
+
+Build and push the Theia Activity Tracker Theia Extension Demo application with:
+
+```bash
+docker build -t theiacloud/theia-cloud-activity-demo-theia:latest -f demo/dockerfiles/demo-theia-monitor-theia/Dockerfile demo/dockerfiles/demo-theia-monitor-theia/.
+docker push theiacloud/theia-cloud-activity-demo-theia:latest
 ```
 
 Build and push the Landing page with:
@@ -46,13 +53,13 @@ docker push theiacloud/theia-cloud-try-now-page:latest
 Build and push the Theia.cloud REST service with:
 
 ```bash
-docker build -t theiacloud/theia-cloud-service:latest -f dockerfiles/service/Dockerfile .
+docker build --no-cache -t theiacloud/theia-cloud-service:latest -f dockerfiles/service/Dockerfile .
 docker push theiacloud/theia-cloud-service:latest
 ```
 
 Build and push the operator with:
 
 ```bash
-docker build -t theiacloud/theia-cloud-operator:latest -f dockerfiles/operator/Dockerfile .
+docker build --no-cache -t theiacloud/theia-cloud-operator:latest -f dockerfiles/operator/Dockerfile .
 docker push theiacloud/theia-cloud-operator:latest
 ```

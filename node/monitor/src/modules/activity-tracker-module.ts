@@ -14,6 +14,7 @@ export const COMMAND_ACTIVITY_REPORT_TITLE = 'theia.cloud.monitor.activity.repor
  */
 export class ActivityTrackerModule implements MonitorModule {
   protected timeInMilliseconds: number;
+  protected messageAlreadyDisplayed = false;
 
   constructor() {
     this.timeInMilliseconds = Date.now();
@@ -54,6 +55,7 @@ export class ActivityTrackerModule implements MonitorModule {
    * @param reason optional parameter to log a reason for the activity
    */
   protected reportActivity(reason?: string): void {
+    this.messageAlreadyDisplayed = false;
     this.timeInMilliseconds = Date.now();
     console.debug(`Activity reported: ${this.formatTime(this.timeInMilliseconds)} (${reason ?? 'unknown'})`);
   }
@@ -84,20 +86,25 @@ export class ActivityTrackerModule implements MonitorModule {
    * If the user confirms an activity is reported
    */
   protected createPopup(): void {
-    const options: vscode.MessageOptions = {
-      detail: 'Pod will be shutdown after some inactivity',
-      modal: true
-    };
+    if (!this.messageAlreadyDisplayed) {
+      const options: vscode.MessageOptions = {
+        detail: 'Pod will be shutdown after some inactivity',
+        modal: true
+      };
 
-    const yesOption: vscode.MessageItem = { title: 'Yes', isCloseAffordance: true };
+      const yesOption: vscode.MessageItem = { title: 'Yes', isCloseAffordance: true };
 
-    const message = vscode.window.showInformationMessage('Are you still here?', options, yesOption);
+      const message = vscode.window.showInformationMessage('Are you still here?', options, yesOption);
+      this.messageAlreadyDisplayed = true;
 
-    message.then(answer => {
-      if (answer === yesOption) {
-        this.reportActivity('Popup dialog was confirmed');
-      }
-    });
+      message.then(answer => {
+        if (answer === yesOption) {
+          this.reportActivity('Popup dialog was confirmed');
+        } else {
+          this.messageAlreadyDisplayed = false;
+        }
+      });
+    }
   }
 
   /**

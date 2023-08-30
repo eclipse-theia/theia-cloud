@@ -28,6 +28,7 @@ spec:
             - --authenticated-emails-file=/emails/authenticated-emails-list
             - --gcp-healthchecks
             - --reverse-proxy
+            - --skip-auth-route=/monitor/*
           ports:
             - containerPort: 5000
               name: web

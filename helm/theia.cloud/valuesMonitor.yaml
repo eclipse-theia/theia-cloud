@@ -12,40 +12,40 @@ image:
   imagePullPolicy: IfNotPresent
 
 hosts:
-  usePaths: true
-  paths:
-    baseHost: my-ip.nip.io
-    service: servicex
-    landing: theiacloud
-    instance: instances
+  usePaths: false
+  service: service.theia-cloud.io
+  serviceProtocol: https
+  landing: try.theia-cloud.io
+  instance: ws.theia-cloud.io
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.8.1.OSWeek23-v1
+  image: theiacloud/theia-cloud-try-now-page:0.8.1.OSWeek23-v1
+  appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
 
 keycloak:
-  enable: false
+  enable: true
+  authUrl: "https://keycloak.34.141.62.32.nip.io/"
   keycloakRealm: "TheiaCloud"
   keycloakClientId: "theia-cloud"
   clientSecret: "publicbutoauth2proxywantsasecret"
   cookieSecret: "s-p4GxfRlPa_BI1XsLuvE2ihNOqYD1vmewWcXcpYjr0="
 
 operator:
-  cloudProvider: MINIKUBE
-  imagePullPolicy: Always
-
-service:
-  imagePullPolicy: Always
+  eagerStart: false
+  bandwidthLimiter: "WONDERSHAPER"
+  sessionsPerUser: "3"
 
 ingress:
-  clusterIssuer: theia-cloud-selfsigned-issuer
-  theiaCloudCommonName: true
+  instanceName: "theia-cloud-demo-ws-ingress"
+  clusterIssuer: letsencrypt-prod
+  theiaCloudCommonName: false
 
 monitor:
   enable: true
   port: 8081
   activityTracker:
     enable: true
-    interval: 1    
+    interval: 1
     timeoutAfter: 4
     notifyAfter: 2

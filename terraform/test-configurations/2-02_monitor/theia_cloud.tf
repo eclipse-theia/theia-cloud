@@ -1,0 +1,93 @@
+variable "enable_keycloak" {
+  description = "Whether keycloak should be enabled"
+  type        = bool
+}
+
+variable "use_vscode_extension" {
+  description = "Whether the VSCode extension should be used."
+  type        = bool
+}
+
+data "terraform_remote_state" "minikube" {
+  backend = "local"
+
+  config = {
+    path = "${path.module}/../0_minikube-setup/terraform.tfstate"
+  }
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.terraform_remote_state.minikube.outputs.host
+    client_certificate     = data.terraform_remote_state.minikube.outputs.client_certificate
+    client_key             = data.terraform_remote_state.minikube.outputs.client_key
+    cluster_ca_certificate = data.terraform_remote_state.minikube.outputs.cluster_ca_certificate
+  }
+}
+
+resource "helm_release" "theia-cloud" {
+  name             = "theia-cloud"
+  chart            = "../../../../theia-cloud-helm/charts/theia.cloud"
+  namespace        = "theiacloud"
+  create_namespace = true
+
+  values = [
+    "${file("${path.module}/../../../helm/theia.cloud/valuesMonitor.yaml")}"
+  ]
+
+  set {
+    name  = "hosts.service"
+    value = "service.${data.terraform_remote_state.minikube.outputs.hostname}"
+  }
+
+  set {
+    name  = "hosts.landing"
+    value = "try.${data.terraform_remote_state.minikube.outputs.hostname}"
+  }
+
+  set {
+    name  = "hosts.instance"
+    value = "ws.${data.terraform_remote_state.minikube.outputs.hostname}"
+  }
+
+  set {
+    name  = "keycloak.authUrl"
+    value = "https://${data.terraform_remote_state.minikube.outputs.hostname}/keycloak/"
+  }
+
+  set {
+    name  = "operator.cloudProvider"
+    value = "MINIKUBE"
+  }
+
+  set {
+    name  = "ingress.clusterIssuer"
+    value = "theia-cloud-selfsigned-issuer"
+  }
+
+  set {
+    name  = "ingress.theiaCloudCommonName"
+    value = true
+  }
+
+  set {
+    name  = "keycloak.enable"
+    value = var.enable_keycloak
+  }
+
+  set {
+    name  = "image.name"
+    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:0.8.1.OSWeek23-v1" : "theiacloud/theia-cloud-activity-demo-theia:0.8.1.OSWeek23-v1"
+  }
+
+  set {
+    name  = "monitor.port"
+    value = var.use_vscode_extension ? 8081 : 3000
+  }
+
+  # # Comment in to only pull missing images. This is needed to use images built locally in Minikube
+  # set {
+  #   name  = "imagePullPolicy"
+  #   value = "IfNotPresent"
+  # }
+}
