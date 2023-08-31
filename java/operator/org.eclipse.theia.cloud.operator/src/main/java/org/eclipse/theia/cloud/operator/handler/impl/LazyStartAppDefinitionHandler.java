@@ -71,32 +71,34 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
 			    + appDefinition));
 	    return true;
 	}
-	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
-	    // TODO We should not return but continue where we left off.
-	    LOGGER.warn(formatLogMessage(correlationId,
-		    "AppDefinition handling was unexpectedly interrupted before. AppDefinition is skipped now and its status is set to ERROR. AppDefinition: "
-			    + appDefinition));
-	    client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
-		s.setOperatorStatus(OperatorStatus.ERROR);
-		s.setOperatorMessage("Handling was unexpectedly interrupted before. CorrelationId: " + correlationId);
-	    });
-	    return false;
-	}
 	if (OperatorStatus.ERROR.equals(operatorStatus)) {
 	    LOGGER.warn(formatLogMessage(correlationId,
 		    "AppDefinition could not be handled before and is skipped now. AppDefinition: " + appDefinition));
 	    return false;
 	}
-
-	// Set app definition status to being handled
-	client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
-	    s.setOperatorStatus(OperatorStatus.HANDLING);
-	});
+	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    LOGGER.debug(formatLogMessage(correlationId,
+		    "AppDefinition handling was unexpectedly interrupted before and is continued now. AppDefinition: "
+			    + appDefinition));
+	    client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
+		// Reset status message
+		s.setOperatorMessage("");
+	    });
+	} else {
+	    // Set app definition status to being handled
+	    client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
+		s.setOperatorStatus(OperatorStatus.HANDLING);
+	    });
+	}
 
 	AppDefinitionSpec spec = appDefinition.getSpec();
 	String appDefinitionResourceName = appDefinition.getMetadata().getName();
 
-	/* Create ingress if not existing */
+	/*
+	 * Create ingress if not existing. As this operation is idempotent, no special
+	 * handling is necessary if the resource was already in HANDLING state before
+	 * this handler.
+	 */
 	if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client.kubernetes(),
 		client.namespace(), appDefinition, correlationId)) {
 	    LOGGER.error(formatLogMessage(correlationId,
