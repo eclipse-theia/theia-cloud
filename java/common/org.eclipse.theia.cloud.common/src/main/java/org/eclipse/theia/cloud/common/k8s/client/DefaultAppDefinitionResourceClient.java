@@ -15,25 +15,25 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.client;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionStatus;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public class DefaultAppDefinitionResourceClient
-	extends BaseResourceClient<AppDefinitionV8beta, AppDefinitionV8betaSpecResourceList>
+	extends BaseResourceClient<AppDefinition, AppDefinitionSpecResourceList>
 	implements AppDefinitionResourceClient {
 
     public DefaultAppDefinitionResourceClient(NamespacedKubernetesClient client) {
-	super(client, AppDefinitionV8beta.class, AppDefinitionV8betaSpecResourceList.class);
+	super(client, AppDefinition.class, AppDefinitionSpecResourceList.class);
     }
 
     @Override
-    public AppDefinitionV8beta create(String correlationId, AppDefinitionV8betaSpec spec) {
-	AppDefinitionV8beta appDefinition = new AppDefinitionV8beta();
+    public AppDefinition create(String correlationId, AppDefinitionSpec spec) {
+	AppDefinition appDefinition = new AppDefinition();
 	appDefinition.setSpec(spec);
 
 	ObjectMeta metadata = new ObjectMeta();
@@ -45,8 +45,8 @@ public class DefaultAppDefinitionResourceClient
     }
 
     @Override
-    public AppDefinitionV8betaStatus createDefaultStatus() {
-	return new AppDefinitionV8betaStatus();
+    public AppDefinitionStatus createDefaultStatus() {
+	return new AppDefinitionStatus();
     }
 
 }

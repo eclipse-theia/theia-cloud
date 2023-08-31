@@ -1,6 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
- * others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,7 +13,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
+package org.eclipse.theia.cloud.common.k8s.resource.workspace;
 
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
@@ -25,16 +24,17 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v8beta")
+@Version("v3beta")
 @Group("theia.cloud")
-@Singular("appdefinition")
-@Plural("appdefinitions")
-public class AppDefinitionV8beta extends CustomResource<AppDefinitionV8betaSpec, AppDefinitionV8betaStatus> implements Namespaced {
+@Singular("workspace")
+@Plural("workspaces")
+public class Workspace extends CustomResource<WorkspaceSpec, WorkspaceStatus> implements Namespaced {
 
-    private static final long serialVersionUID = 8749670583218521755L;
-    public static final String API = "theia.cloud/v8beta";
-    public static final String KIND = "AppDefinition";
-    public static final String CRD_NAME = "appdefinitions.theia.cloud";
+    public static final String API = "theia.cloud/v3beta";
+    public static final String CRD_NAME = "workspaces.theia.cloud";
+    public static final String KIND = "Workspace";
+
+    private static final long serialVersionUID = 6437279756051357397L;
 
     @Override
     public String toString() {

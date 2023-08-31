@@ -16,27 +16,27 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 
 public interface AppDefinitionHandler {
 
-    default boolean appDefinitionAdded(AppDefinitionV8beta appDefinition, String correlationId) {
+    default boolean appDefinitionAdded(AppDefinition appDefinition, String correlationId) {
 	return true;
     }
 
-    default boolean appDefinitionDeleted(AppDefinitionV8beta appDefinition, String correlationId) {
+    default boolean appDefinitionDeleted(AppDefinition appDefinition, String correlationId) {
 	return true;
     }
 
-    default boolean appDefinitionModified(AppDefinitionV8beta appDefinition, String correlationId) {
+    default boolean appDefinitionModified(AppDefinition appDefinition, String correlationId) {
 	return true;
     }
 
-    default boolean appDefinitionErrored(AppDefinitionV8beta appDefinition, String correlationId) {
+    default boolean appDefinitionErrored(AppDefinition appDefinition, String correlationId) {
 	return true;
     }
 
-    default boolean appDefinitionBookmarked(AppDefinitionV8beta appDefinition, String correlationId) {
+    default boolean appDefinitionBookmarked(AppDefinition appDefinition, String correlationId) {
 	return true;
     }
 }

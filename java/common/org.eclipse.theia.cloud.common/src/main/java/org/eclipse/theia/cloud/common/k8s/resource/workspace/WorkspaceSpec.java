@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize()
-public class WorkspaceV3betaSpec implements UserScopedSpec {
+public class WorkspaceSpec implements UserScopedSpec {
 
     @JsonProperty("name")
     private String name;
@@ -46,10 +46,10 @@ public class WorkspaceV3betaSpec implements UserScopedSpec {
     /**
      * Default constructor.
      */
-    public WorkspaceV3betaSpec() {
+    public WorkspaceSpec() {
     }
 
-    public WorkspaceV3betaSpec(String name, String label, String appDefinition, String user) {
+    public WorkspaceSpec(String name, String label, String appDefinition, String user) {
 	this.name = name;
 	this.appDefinition = appDefinition;
 	this.user = user;
@@ -57,7 +57,7 @@ public class WorkspaceV3betaSpec implements UserScopedSpec {
     }
 
     @SuppressWarnings("deprecation")
-    public WorkspaceV3betaSpec(org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2betaSpec toMigrate) {
+    public WorkspaceSpec(org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2betaSpec toMigrate) {
 	this.name = toMigrate.getName();
 	this.label = toMigrate.getLabel();
 	this.appDefinition = toMigrate.getAppDefinition();

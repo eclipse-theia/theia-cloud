@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.monitor;
 
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 
 public interface MonitorMessagingService {
 
@@ -26,7 +26,7 @@ public interface MonitorMessagingService {
      * @param level   of the message ("warn", "error" or "info")
      * @param message to be displayed
      */
-    void sendMessage(SessionV6beta session, String level, String message);
+    void sendMessage(Session session, String level, String message);
 
     /**
      * Renders a fullscreen message to the client.
@@ -36,7 +36,7 @@ public interface MonitorMessagingService {
      * @param message to be displayed
      * @param detail  additional information displayed on the message
      */
-    void sendFullscreenMessage(SessionV6beta session, String level, String message, String detail);
+    void sendFullscreenMessage(Session session, String level, String message, String detail);
 
     /**
      * Renders a timeout message to the client.
@@ -44,6 +44,6 @@ public interface MonitorMessagingService {
      * @param session to which the timeout should be sent
      * @param detail  additional information on the timeout
      */
-    void sendTimeoutMessage(SessionV6beta session, String detail);
+    void sendTimeoutMessage(Session session, String detail);
 
 }

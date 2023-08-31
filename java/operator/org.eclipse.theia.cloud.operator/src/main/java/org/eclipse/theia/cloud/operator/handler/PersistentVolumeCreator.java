@@ -18,15 +18,15 @@ package org.eclipse.theia.cloud.operator.handler;
 
 import java.util.Optional;
 
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 
 public interface PersistentVolumeCreator {
 
-    Optional<PersistentVolume> createAndApplyPersistentVolume(String correlationId, WorkspaceV3beta workspace);
+    Optional<PersistentVolume> createAndApplyPersistentVolume(String correlationId, Workspace workspace);
 
-    Optional<PersistentVolumeClaim> createAndApplyPersistentVolumeClaim(String correlationId, WorkspaceV3beta workspace);
+    Optional<PersistentVolumeClaim> createAndApplyPersistentVolumeClaim(String correlationId, Workspace workspace);
 
 }

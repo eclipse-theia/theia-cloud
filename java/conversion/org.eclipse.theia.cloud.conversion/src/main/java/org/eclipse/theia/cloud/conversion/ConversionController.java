@@ -21,15 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 import org.eclipse.theia.cloud.conversion.Conversion.ConversionException;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -49,20 +49,20 @@ public final class ConversionController {
 			org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7.AppDefinitionV7betaSpec.class,
 			org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7.AppDefinitionV7betaStatus.class,
 			org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7.AppDefinitionV7beta.class,
-			AppDefinitionV8betaSpec.class, AppDefinitionV8betaStatus.class, AppDefinitionV8beta.class));
+			AppDefinitionSpec.class, AppDefinitionStatus.class, AppDefinition.class));
 
 	CONVERSIONS.put(org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5beta.API,
 		new GenericConversion<>(org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5betaSpec.class,
 			org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5betaStatus.class,
 			org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5beta.class,
-			SessionV6betaSpec.class, SessionV6betaStatus.class, SessionV6beta.class));
+			SessionSpec.class, SessionStatus.class, Session.class));
 
 	CONVERSIONS.put(org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2beta.API,
 		new GenericConversion<>(
 			org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2betaSpec.class,
 			org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2betaStatus.class,
 			org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2beta.class,
-			WorkspaceV3betaSpec.class, WorkspaceV3betaStatus.class, WorkspaceV3beta.class));
+			WorkspaceSpec.class, WorkspaceStatus.class, Workspace.class));
     }
 
     public static ConversionReview handle(ConversionReview conversionReview) {

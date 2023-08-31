@@ -27,8 +27,8 @@ import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -57,11 +57,11 @@ public final class TheiaCloudHandlerUtil {
 	return missing;
     }
 
-    public static String getAppSelector(AppDefinitionV8beta appDefinition, int instance) {
+    public static String getAppSelector(AppDefinition appDefinition, int instance) {
 	return asValidName(appDefinition.getSpec().getName() + "-" + instance);
     }
 
-    public static String getAppSelector(SessionV6beta session) {
+    public static String getAppSelector(Session session) {
 	return asValidName(session.getSpec().getName() + "-" + session.getMetadata().getUid());
     }
 
@@ -75,8 +75,8 @@ public final class TheiaCloudHandlerUtil {
 
     public static OwnerReference createOwnerReference(String sessionResourceName, String sessionResourceUID) {
 	OwnerReference ownerReference = new OwnerReference();
-	ownerReference.setApiVersion(HasMetadata.getApiVersion(SessionV6beta.class));
-	ownerReference.setKind(SessionV6beta.KIND);
+	ownerReference.setApiVersion(HasMetadata.getApiVersion(Session.class));
+	ownerReference.setKind(Session.KIND);
 	ownerReference.setName(sessionResourceName);
 	ownerReference.setUid(sessionResourceUID);
 	return ownerReference;

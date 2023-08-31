@@ -25,8 +25,8 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -41,23 +41,23 @@ public final class TheiaCloudConfigMapUtil {
     private TheiaCloudConfigMapUtil() {
     }
 
-    public static String getProxyConfigName(AppDefinitionV8beta appDefinition, int instance) {
+    public static String getProxyConfigName(AppDefinition appDefinition, int instance) {
 	return NamingUtil.createName(appDefinition, instance, CONFIGMAP_PROXY_NAME);
     }
 
-    public static String getProxyConfigName(SessionV6beta session) {
+    public static String getProxyConfigName(Session session) {
 	return NamingUtil.createName(session, CONFIGMAP_PROXY_NAME);
     }
 
-    public static String getEmailConfigName(AppDefinitionV8beta appDefinition, int instance) {
+    public static String getEmailConfigName(AppDefinition appDefinition, int instance) {
 	return NamingUtil.createName(appDefinition, instance, CONFIGMAP_EMAIL_NAME);
     }
 
-    public static String getEmailConfigName(SessionV6beta session) {
+    public static String getEmailConfigName(Session session) {
 	return NamingUtil.createName(session, CONFIGMAP_EMAIL_NAME);
     }
 
-    public static Integer getProxyId(String correlationId, AppDefinitionV8beta appDefinition, ConfigMap item) {
+    public static Integer getProxyId(String correlationId, AppDefinition appDefinition, ConfigMap item) {
 	String instance = TheiaCloudK8sUtil.extractIdFromName(item.getMetadata());
 	try {
 	    return Integer.valueOf(instance);
@@ -67,7 +67,7 @@ public final class TheiaCloudConfigMapUtil {
 	return null;
     }
 
-    public static Integer getEmailId(String correlationId, AppDefinitionV8beta appDefinition, ConfigMap item) {
+    public static Integer getEmailId(String correlationId, AppDefinition appDefinition, ConfigMap item) {
 	String instance = TheiaCloudK8sUtil.extractIdFromName(item.getMetadata());
 	try {
 	    return Integer.valueOf(instance);
@@ -77,19 +77,19 @@ public final class TheiaCloudConfigMapUtil {
 	return null;
     }
 
-    public static Set<Integer> computeIdsOfMissingProxyConfigMaps(AppDefinitionV8beta appDefinition, String correlationId,
+    public static Set<Integer> computeIdsOfMissingProxyConfigMaps(AppDefinition appDefinition, String correlationId,
 	    int instances, List<ConfigMap> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
 		service -> getProxyId(correlationId, appDefinition, service));
     }
 
-    public static Set<Integer> computeIdsOfMissingEmailConfigMaps(AppDefinitionV8beta appDefinition, String correlationId,
+    public static Set<Integer> computeIdsOfMissingEmailConfigMaps(AppDefinition appDefinition, String correlationId,
 	    int instances, List<ConfigMap> existingItems) {
 	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
 		service -> getEmailId(correlationId, appDefinition, service));
     }
 
-    public static Map<String, String> getProxyConfigMapReplacements(String namespace, AppDefinitionV8beta appDefinition,
+    public static Map<String, String> getProxyConfigMapReplacements(String namespace, AppDefinition appDefinition,
 	    int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(appDefinition, instance));
@@ -97,14 +97,14 @@ public final class TheiaCloudConfigMapUtil {
 	return replacements;
     }
 
-    public static Map<String, String> getProxyConfigMapReplacements(String namespace, SessionV6beta session) {
+    public static Map<String, String> getProxyConfigMapReplacements(String namespace, Session session) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
 	return replacements;
     }
 
-    public static Map<String, String> getEmailConfigMapReplacements(String namespace, AppDefinitionV8beta appDefinition,
+    public static Map<String, String> getEmailConfigMapReplacements(String namespace, AppDefinition appDefinition,
 	    int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
@@ -113,7 +113,7 @@ public final class TheiaCloudConfigMapUtil {
 	return replacements;
     }
 
-    public static Map<String, String> getEmailConfigMapReplacements(String namespace, SessionV6beta session) {
+    public static Map<String, String> getEmailConfigMapReplacements(String namespace, Session session) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(session));
 	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);

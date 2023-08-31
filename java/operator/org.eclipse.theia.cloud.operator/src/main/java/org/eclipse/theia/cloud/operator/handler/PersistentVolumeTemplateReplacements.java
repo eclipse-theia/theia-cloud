@@ -17,11 +17,11 @@ package org.eclipse.theia.cloud.operator.handler;
 
 import java.util.Map;
 
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 public interface PersistentVolumeTemplateReplacements extends TemplateReplacements {
 
-    Map<String, String> getPersistentVolumeReplacements(String namespace, WorkspaceV3beta workspace);
+    Map<String, String> getPersistentVolumeReplacements(String namespace, Workspace workspace);
 
-    Map<String, String> getPersistentVolumeClaimReplacements(String namespace, WorkspaceV3beta workspace);
+    Map<String, String> getPersistentVolumeClaimReplacements(String namespace, Workspace workspace);
 }

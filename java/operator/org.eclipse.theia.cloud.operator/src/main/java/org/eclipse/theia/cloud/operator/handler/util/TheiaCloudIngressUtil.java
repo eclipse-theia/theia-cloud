@@ -22,7 +22,7 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.util.JavaUtil;
 import org.eclipse.theia.cloud.operator.handler.impl.AddedHandlerUtil;
 
@@ -42,7 +42,7 @@ public final class TheiaCloudIngressUtil {
     }
 
     public static boolean checkForExistingIngressAndAddOwnerReferencesIfMissing(NamespacedKubernetesClient client,
-	    String namespace, AppDefinitionV8beta appDefinition, String correlationId) {
+	    String namespace, AppDefinition appDefinition, String correlationId) {
 	Optional<Ingress> existingIngressWithParentAppDefinition = K8sUtil.getExistingIngress(client, namespace,
 		appDefinition.getMetadata().getName(), appDefinition.getMetadata().getUid());
 	if (existingIngressWithParentAppDefinition.isPresent()) {
@@ -52,8 +52,8 @@ public final class TheiaCloudIngressUtil {
 		appDefinition.getSpec().getIngressname());
 	if (ingress.isPresent()) {
 	    OwnerReference ownerReference = new OwnerReference();
-	    ownerReference.setApiVersion(HasMetadata.getApiVersion(AppDefinitionV8beta.class));
-	    ownerReference.setKind(AppDefinitionV8beta.KIND);
+	    ownerReference.setApiVersion(HasMetadata.getApiVersion(AppDefinition.class));
+	    ownerReference.setKind(AppDefinition.KIND);
 	    ownerReference.setName(appDefinition.getMetadata().getName());
 	    ownerReference.setUid(appDefinition.getMetadata().getUid());
 	    addOwnerReferenceToIngress(client, namespace, ingress.get(), ownerReference);
@@ -61,7 +61,7 @@ public final class TheiaCloudIngressUtil {
 	return ingress.isPresent();
     }
 
-    public static String getIngressName(AppDefinitionV8beta appDefinition) {
+    public static String getIngressName(AppDefinition appDefinition) {
 	return appDefinition.getSpec().getIngressname();
     }
 

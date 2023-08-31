@@ -29,7 +29,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Group("theia.cloud")
 @Singular("session")
 @Plural("sessions")
-public class SessionV6beta extends CustomResource<SessionV6betaSpec, SessionV6betaStatus> implements Namespaced {
+public class Session extends CustomResource<SessionSpec, SessionStatus> implements Namespaced {
 
     private static final long serialVersionUID = 4518092300237069237L;
     public static final String API = "theia.cloud/v6beta";

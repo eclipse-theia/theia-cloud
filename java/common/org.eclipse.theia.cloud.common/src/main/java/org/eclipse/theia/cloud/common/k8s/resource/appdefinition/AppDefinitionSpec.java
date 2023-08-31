@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize()
-public class AppDefinitionV8betaSpec {
+public class AppDefinitionSpec {
 
     @JsonProperty("name")
     private String name;
@@ -79,7 +79,7 @@ public class AppDefinitionV8betaSpec {
     /**
      * Default constructor.
      */
-    public AppDefinitionV8betaSpec() {
+    public AppDefinitionSpec() {
     }
 
     /**
@@ -88,7 +88,7 @@ public class AppDefinitionV8betaSpec {
      * @param toMigrate previous version
      */
     @SuppressWarnings("deprecation")
-    public AppDefinitionV8betaSpec(
+    public AppDefinitionSpec(
 	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7.AppDefinitionV7betaSpec toMigrate) {
 	this.name = toMigrate.getName();
 	this.image = toMigrate.getImage();

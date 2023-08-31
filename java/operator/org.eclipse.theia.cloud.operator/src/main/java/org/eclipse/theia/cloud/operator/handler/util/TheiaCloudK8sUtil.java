@@ -20,10 +20,10 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpecResourceList;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -37,7 +37,7 @@ public final class TheiaCloudK8sUtil {
     }
 
     public static boolean checkIfMaxInstancesReached(NamespacedKubernetesClient client, String namespace,
-	    SessionV6betaSpec sessionSpec, AppDefinitionV8betaSpec appDefinitionSpec, String correlationId) {
+	    SessionSpec sessionSpec, AppDefinitionSpec appDefinitionSpec, String correlationId) {
 
 	if (appDefinitionSpec.getMaxInstances() == null || appDefinitionSpec.getMaxInstances() < 0) {
 	    LOGGER.debug(formatLogMessage(correlationId,
@@ -52,7 +52,7 @@ public final class TheiaCloudK8sUtil {
 	    return true;
 	}
 
-	long currentInstances = client.resources(SessionV6beta.class, SessionV6betaSpecResourceList.class).inNamespace(namespace)
+	long currentInstances = client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
 		.list().getItems().stream()//
 		.filter(w -> {
 		    String sessionAppDefinition = w.getSpec().getAppDefinition();

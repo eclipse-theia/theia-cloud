@@ -17,25 +17,25 @@ package org.eclipse.theia.cloud.common.k8s.client;
 
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
-public class DefaultWorkspaceResourceClient extends BaseResourceClient<WorkspaceV3beta, WorkspaceV3betaSpecResourceList>
+public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace, WorkspaceSpecResourceList>
 	implements WorkspaceResourceClient {
 
     public DefaultWorkspaceResourceClient(NamespacedKubernetesClient client) {
-	super(client, WorkspaceV3beta.class, WorkspaceV3betaSpecResourceList.class);
+	super(client, Workspace.class, WorkspaceSpecResourceList.class);
     }
 
     @Override
-    public WorkspaceV3beta create(String correlationId, WorkspaceV3betaSpec spec) {
-	WorkspaceV3beta workspace = new WorkspaceV3beta();
+    public Workspace create(String correlationId, WorkspaceSpec spec) {
+	Workspace workspace = new Workspace();
 	workspace.setSpec(spec);
 
 	ObjectMeta metadata = new ObjectMeta();
@@ -47,9 +47,9 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
     }
 
     @Override
-    public WorkspaceV3beta launch(String correlationId, WorkspaceV3betaSpec spec, long timeout, TimeUnit unit) {
-	WorkspaceV3beta workspace = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
-	WorkspaceV3betaSpec workspaceSpec = workspace.getSpec();
+    public Workspace launch(String correlationId, WorkspaceSpec spec, long timeout, TimeUnit unit) {
+	Workspace workspace = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
+	WorkspaceSpec workspaceSpec = workspace.getSpec();
 
 	if (workspaceSpec.hasStorage()) {
 	    return workspace;
@@ -72,8 +72,8 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	return workspace;
     }
 
-    protected boolean isWorkspaceComplete(String correlationId, WorkspaceV3betaSpec createdWorkspace,
-	    WorkspaceV3beta changedWorkspace) {
+    protected boolean isWorkspaceComplete(String correlationId, WorkspaceSpec createdWorkspace,
+	    Workspace changedWorkspace) {
 	if (createdWorkspace.getName().equals(changedWorkspace.getSpec().getName())) {
 	    if (changedWorkspace.getSpec().hasStorage()) {
 		info(correlationId, "Received URL for " + createdWorkspace);
@@ -91,7 +91,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
     }
 
     @Override
-    public WorkspaceV3betaStatus createDefaultStatus() {
-	return new WorkspaceV3betaStatus();
+    public WorkspaceStatus createDefaultStatus() {
+	return new WorkspaceStatus();
     }
 }

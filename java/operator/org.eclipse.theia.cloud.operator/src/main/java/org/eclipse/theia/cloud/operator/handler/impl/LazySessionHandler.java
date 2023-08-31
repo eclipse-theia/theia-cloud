@@ -31,12 +31,12 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.OperatorStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
@@ -89,7 +89,7 @@ public class LazySessionHandler implements SessionHandler {
     protected TheiaCloudClient client;
 
     @Override
-    public boolean sessionAdded(SessionV6beta session, String correlationId) {
+    public boolean sessionAdded(Session session, String correlationId) {
 	try {
 	    return doSessionAdded(session, correlationId);
 	} catch (Throwable ex) {
@@ -104,13 +104,13 @@ public class LazySessionHandler implements SessionHandler {
 	}
     }
 
-    protected boolean doSessionAdded(SessionV6beta session, String correlationId) {
+    protected boolean doSessionAdded(Session session, String correlationId) {
 	/* session information */
 	String sessionResourceName = session.getMetadata().getName();
 	String sessionResourceUID = session.getMetadata().getUid();
 
 	// Check current session status and ignore if handling failed or finished before
-	Optional<SessionV6betaStatus> status = Optional.ofNullable(session.getStatus());
+	Optional<SessionStatus> status = Optional.ofNullable(session.getStatus());
 	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
 	if (OperatorStatus.HANDLED.equals(operatorStatus)) {
 	    LOGGER.trace(formatLogMessage(correlationId,
@@ -139,11 +139,11 @@ public class LazySessionHandler implements SessionHandler {
 	    s.setOperatorStatus(OperatorStatus.HANDLING);
 	});
 
-	SessionV6betaSpec sessionSpec = session.getSpec();
+	SessionSpec sessionSpec = session.getSpec();
 
 	/* find app definition for session */
 	String appDefinitionID = sessionSpec.getAppDefinition();
-	Optional<AppDefinitionV8beta> optionalAppDefinition = client.appDefinitions().get(appDefinitionID);
+	Optional<AppDefinition> optionalAppDefinition = client.appDefinitions().get(appDefinitionID);
 	if (optionalAppDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    client.sessions().updateStatus(correlationId, session, s -> {
@@ -152,7 +152,7 @@ public class LazySessionHandler implements SessionHandler {
 	    });
 	    return false;
 	}
-	AppDefinitionV8beta appDefinition = optionalAppDefinition.get();
+	AppDefinition appDefinition = optionalAppDefinition.get();
 
 	if (hasMaxInstancesReached(appDefinition, session, correlationId)) {
 	    client.sessions().updateStatus(correlationId, session, s -> {
@@ -279,7 +279,7 @@ public class LazySessionHandler implements SessionHandler {
 	return true;
     }
 
-    protected void syncSessionDataToWorkspace(SessionV6beta session, String correlationId) {
+    protected void syncSessionDataToWorkspace(Session session, String correlationId) {
 	if (!session.getSpec().isEphemeral() && session.getSpec().hasAppDefinition()) {
 	    // update last used workspace
 	    client.workspaces().edit(correlationId, session.getSpec().getWorkspace(), workspace -> {
@@ -288,7 +288,7 @@ public class LazySessionHandler implements SessionHandler {
 	}
     }
 
-    protected boolean hasMaxInstancesReached(AppDefinitionV8beta appDefinition, SessionV6beta session,
+    protected boolean hasMaxInstancesReached(AppDefinition appDefinition, Session session,
 	    String correlationId) {
 	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), session.getSpec(),
 		appDefinition.getSpec(), correlationId)) {
@@ -300,7 +300,7 @@ public class LazySessionHandler implements SessionHandler {
 	return false;
     }
 
-    protected boolean hasMaxSessionsReached(SessionV6beta session, String correlationId) {
+    protected boolean hasMaxSessionsReached(Session session, String correlationId) {
 	/* check if max sessions reached already */
 	if (arguments.getSessionsPerUser() != null && arguments.getSessionsPerUser() >= 0) {
 	    if (arguments.getSessionsPerUser() == 0) {
@@ -323,7 +323,7 @@ public class LazySessionHandler implements SessionHandler {
 	return false;
     }
 
-    protected Optional<Ingress> getIngress(AppDefinitionV8beta appDefinition, String correlationId) {
+    protected Optional<Ingress> getIngress(AppDefinition appDefinition, String correlationId) {
 	String appDefinitionResourceName = appDefinition.getMetadata().getName();
 	String appDefinitionResourceUID = appDefinition.getMetadata().getUid();
 	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client.kubernetes(), client.namespace(),
@@ -335,11 +335,11 @@ public class LazySessionHandler implements SessionHandler {
 	return ingress;
     }
 
-    protected Optional<String> getStorageName(SessionV6beta session, String correlationId) {
+    protected Optional<String> getStorageName(Session session, String correlationId) {
 	if (session.getSpec().isEphemeral()) {
 	    return Optional.empty();
 	}
-	Optional<WorkspaceV3beta> workspace = client.workspaces().get(session.getSpec().getWorkspace());
+	Optional<Workspace> workspace = client.workspaces().get(session.getSpec().getWorkspace());
 	if (!workspace.isPresent()) {
 	    LOGGER.info(formatLogMessage(correlationId, "No workspace with name " + session.getSpec().getWorkspace()
 		    + " found for session " + session.getSpec().getName(), correlationId));
@@ -356,7 +356,7 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected Optional<Service> createAndApplyService(String correlationId, String sessionResourceName,
-	    String sessionResourceUID, SessionV6beta session, AppDefinitionV8betaSpec appDefinitionSpec,
+	    String sessionResourceUID, Session session, AppDefinitionSpec appDefinitionSpec,
 	    boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(client.namespace(), session,
 		appDefinitionSpec);
@@ -371,11 +371,11 @@ public class LazySessionHandler implements SessionHandler {
 	    return Optional.empty();
 	}
 	return K8sUtil.loadAndCreateServiceWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		serviceYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0);
+		serviceYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0);
     }
 
     protected void createAndApplyEmailConfigMap(String correlationId, String sessionResourceName,
-	    String sessionResourceUID, SessionV6beta session) {
+	    String sessionResourceUID, Session session) {
 	Map<String, String> replacements = TheiaCloudConfigMapUtil.getEmailConfigMapReplacements(client.namespace(),
 		session);
 	String configMapYaml;
@@ -387,7 +387,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0,
+		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
 		configmap -> {
 		    configmap.setData(Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST,
 			    session.getSpec().getUser()));
@@ -395,7 +395,7 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected void createAndApplyProxyConfigMap(String correlationId, String sessionResourceName,
-	    String sessionResourceUID, SessionV6beta session, AppDefinitionV8beta appDefinition) {
+	    String sessionResourceUID, Session session, AppDefinition appDefinition) {
 	Map<String, String> replacements = TheiaCloudConfigMapUtil.getProxyConfigMapReplacements(client.namespace(),
 		session);
 	String configMapYaml;
@@ -407,7 +407,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0,
+		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
 		configMap -> {
 		    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, session);
 		    int port = appDefinition.getSpec().getPort();
@@ -417,7 +417,7 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected void createAndApplyDeployment(String correlationId, String sessionResourceName, String sessionResourceUID,
-	    SessionV6beta session, AppDefinitionV8beta appDefinition, Optional<String> pvName, boolean useOAuth2Proxy) {
+	    Session session, AppDefinition appDefinition, Optional<String> pvName, boolean useOAuth2Proxy) {
 	Map<String, String> replacements = deploymentReplacements.getReplacements(client.namespace(), appDefinition,
 		session);
 	String templateYaml = useOAuth2Proxy ? AddedHandlerUtil.TEMPLATE_DEPLOYMENT_YAML
@@ -431,7 +431,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		deploymentYaml, SessionV6beta.API, SessionV6beta.KIND, sessionResourceName, sessionResourceUID, 0,
+		deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
 		deployment -> {
 		    pvName.ifPresent(name -> addVolumeClaim(deployment, name, appDefinition.getSpec()));
 		    bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
@@ -448,7 +448,7 @@ public class LazySessionHandler implements SessionHandler {
 		});
     }
 
-    protected void addVolumeClaim(Deployment deployment, String pvcName, AppDefinitionV8betaSpec appDefinition) {
+    protected void addVolumeClaim(Deployment deployment, String pvcName, AppDefinitionSpec appDefinition) {
 	PodSpec podSpec = deployment.getSpec().getTemplate().getSpec();
 
 	Volume volume = new Volume();
@@ -467,7 +467,7 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
-	    SessionV6beta session, AppDefinitionV8beta appDefinition, String correlationId) {
+	    Session session, AppDefinition appDefinition, String correlationId) {
 	final String host = arguments.getInstancesHost();
 	String path = ingressPathProvider.getPath(appDefinition, session);
 	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(), ingressToUpdate -> {
@@ -499,14 +499,14 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     @Override
-    public boolean sessionDeleted(SessionV6beta session, String correlationId) {
+    public boolean sessionDeleted(Session session, String correlationId) {
 	/* session information */
-	SessionV6betaSpec sessionSpec = session.getSpec();
+	SessionSpec sessionSpec = session.getSpec();
 
 	/* find appDefinition for session */
 	String appDefinitionID = sessionSpec.getAppDefinition();
 
-	Optional<AppDefinitionV8beta> optionalAppDefinition = client.appDefinitions().get(appDefinitionID);
+	Optional<AppDefinition> optionalAppDefinition = client.appDefinitions().get(appDefinitionID);
 	if (optionalAppDefinition.isEmpty()) {
 	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
 	    return false;

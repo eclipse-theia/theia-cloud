@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize()
-public class SessionV6betaSpec implements UserScopedSpec {
+public class SessionSpec implements UserScopedSpec {
 
     @JsonProperty("name")
     private String name;
@@ -67,28 +67,28 @@ public class SessionV6betaSpec implements UserScopedSpec {
     /**
      * Default constructor.
      */
-    public SessionV6betaSpec() {
+    public SessionSpec() {
     }
 
-    public SessionV6betaSpec(String name, String appDefinition, String user) {
+    public SessionSpec(String name, String appDefinition, String user) {
 	this(name, appDefinition, user, null);
     }
 
-    public SessionV6betaSpec(String name, String appDefinition, String user, String workspace) {
+    public SessionSpec(String name, String appDefinition, String user, String workspace) {
 	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
     }
 
-    public SessionV6betaSpec(String name, String appDefinition, String user, String workspace,
+    public SessionSpec(String name, String appDefinition, String user, String workspace,
 	    Map<String, String> envVars) {
 	this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
     }
 
-    public SessionV6betaSpec(String name, String appDefinition, String user, String workspace,
+    public SessionSpec(String name, String appDefinition, String user, String workspace,
 	    Map<String, String> envVars, List<String> envVarsFromConfigMaps) {
 	this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
     }
 
-    public SessionV6betaSpec(String name, String appDefinition, String user, String workspace,
+    public SessionSpec(String name, String appDefinition, String user, String workspace,
 	    Map<String, String> envVars, List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
 	this.name = name;
 	this.appDefinition = appDefinition;
@@ -105,7 +105,7 @@ public class SessionV6betaSpec implements UserScopedSpec {
      * @param toMigrate
      */
     @SuppressWarnings("deprecation")
-    public SessionV6betaSpec(org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5betaSpec toMigrate) {
+    public SessionSpec(org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5betaSpec toMigrate) {
 	this.name = toMigrate.getName();
 	this.appDefinition = toMigrate.getAppDefinition();
 	this.user = toMigrate.getUser();
@@ -226,7 +226,7 @@ public class SessionV6betaSpec implements UserScopedSpec {
 	    return false;
 	if (getClass() != obj.getClass())
 	    return false;
-	SessionV6betaSpec other = (SessionV6betaSpec) obj;
+	SessionSpec other = (SessionSpec) obj;
 	if (appDefinition == null) {
 	    if (other.appDefinition != null)
 		return false;

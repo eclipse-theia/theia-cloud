@@ -25,8 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.DeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
@@ -74,7 +74,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     protected IngressPathProvider ingressPathProvider;
 
     @Override
-    public Map<String, String> getReplacements(String namespace, AppDefinitionV8beta appDefinition, int instance) {
+    public Map<String, String> getReplacements(String namespace, AppDefinition appDefinition, int instance) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
 	replacements.putAll(getAppDefinitionData(appDefinition));
@@ -84,7 +84,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     }
 
     @Override
-    public Map<String, String> getReplacements(String namespace, AppDefinitionV8beta appDefinition, SessionV6beta session) {
+    public Map<String, String> getReplacements(String namespace, AppDefinition appDefinition, Session session) {
 	Map<String, String> replacements = new LinkedHashMap<String, String>();
 	replacements.put(PLACEHOLDER_NAMESPACE, namespace);
 	replacements.putAll(getAppDefinitionData(appDefinition));
@@ -93,7 +93,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	return replacements;
     }
 
-    protected Map<String, String> getAppDefinitionData(AppDefinitionV8beta appDefinition) {
+    protected Map<String, String> getAppDefinitionData(AppDefinition appDefinition) {
 	Map<String, String> appDefinitionData = new LinkedHashMap<String, String>();
 	appDefinitionData.put(PLACEHOLDER_APPDEFINITIONNAME, appDefinition.getSpec().getName());
 	appDefinitionData.put(PLACEHOLDER_IMAGE, appDefinition.getSpec().getImage());
@@ -108,21 +108,21 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	return appDefinitionData;
     }
 
-    protected Map<String, String> getEnvironmentVariables(AppDefinitionV8beta appDefinition, SessionV6beta session) {
+    protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, Session session) {
 	Map<String, String> environmentVariables = getEnvironmentVariables(appDefinition, Optional.of(session));
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL, TheiaCloudDeploymentUtil
 		.getSessionURL(arguments.getInstancesHost(), ingressPathProvider, appDefinition, session));
 	return environmentVariables;
     }
 
-    protected Map<String, String> getEnvironmentVariables(AppDefinitionV8beta appDefinition, int instance) {
+    protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, int instance) {
 	Map<String, String> environmentVariables = getEnvironmentVariables(appDefinition, Optional.empty());
 	environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL, TheiaCloudDeploymentUtil
 		.getSessionURL(arguments.getInstancesHost(), ingressPathProvider, appDefinition, instance));
 	return environmentVariables;
     }
 
-    protected Map<String, String> getEnvironmentVariables(AppDefinitionV8beta appDefinition, Optional<SessionV6beta> session) {
+    protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, Optional<Session> session) {
 	Map<String, String> environmentVariables = new LinkedHashMap<String, String>();
 	environmentVariables.put(PLACEHOLDER_ENV_APP_ID, arguments.getAppId());
 	environmentVariables.put(PLACEHOLDER_ENV_SERVICE_URL, arguments.getServiceUrl());
@@ -166,7 +166,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	return environmentVariables;
     }
 
-    protected Map<String, String> getSessionData(SessionV6beta session) {
+    protected Map<String, String> getSessionData(Session session) {
 	Map<String, String> sessionData = new LinkedHashMap<String, String>();
 	sessionData.put(PLACEHOLDER_DEPLOYMENTNAME, TheiaCloudDeploymentUtil.getDeploymentName(session));
 	sessionData.put(PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(session));
@@ -175,7 +175,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	return sessionData;
     }
 
-    protected Map<String, String> getInstanceData(AppDefinitionV8beta appDefinition, int instance) {
+    protected Map<String, String> getInstanceData(AppDefinition appDefinition, int instance) {
 	Map<String, String> sessionData = new LinkedHashMap<String, String>();
 	sessionData.put(PLACEHOLDER_DEPLOYMENTNAME,
 		TheiaCloudDeploymentUtil.getDeploymentName(appDefinition, instance));

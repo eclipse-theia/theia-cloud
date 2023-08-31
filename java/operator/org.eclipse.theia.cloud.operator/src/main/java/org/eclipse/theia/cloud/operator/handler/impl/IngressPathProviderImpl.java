@@ -18,8 +18,8 @@ package org.eclipse.theia.cloud.operator.handler.impl;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 
@@ -33,12 +33,12 @@ public class IngressPathProviderImpl implements IngressPathProvider {
     TheiaCloudArguments arguments;
 
     @Override
-    public String getPath(AppDefinitionV8beta appDefinition, int instance) {
+    public String getPath(AppDefinition appDefinition, int instance) {
 	return getBasePath() + appDefinition.getSpec().getName() + "-" + instance;
     }
 
     @Override
-    public String getPath(AppDefinitionV8beta appDefinition, SessionV6beta session) {
+    public String getPath(AppDefinition appDefinition, Session session) {
 	return getBasePath() + session.getMetadata().getUid();
     }
 

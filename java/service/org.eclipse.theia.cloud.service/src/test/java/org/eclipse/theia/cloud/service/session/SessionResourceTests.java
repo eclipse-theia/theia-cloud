@@ -31,7 +31,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.K8sUtil;
@@ -88,7 +88,7 @@ class SessionResourceTests {
     void stop_matchingUser_true() {
 	// Prepare
 	mockUser(false, TEST_USER);
-	SessionV6betaSpec session = mockDefaultSession();
+	SessionSpec session = mockDefaultSession();
 	SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
 	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 	Mockito.when(k8sUtil.stopSession(anyString(), eq(TEST_SESSION), eq(TEST_USER))).thenReturn(true);
@@ -109,7 +109,7 @@ class SessionResourceTests {
     void stop_otherUser_throwForbidden() {
 	// Prepare
 	mockUser(false, OTHER_TEST_USER);
-	SessionV6betaSpec session = mockDefaultSession();
+	SessionSpec session = mockDefaultSession();
 	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
 	// We leave the matching user in the request to verify that the stop is
@@ -135,7 +135,7 @@ class SessionResourceTests {
     void stop_otherUserWithNullName_throwForbidden() {
 	// Prepare
 	mockUser(false, null);
-	SessionV6betaSpec session = mockDefaultSession();
+	SessionSpec session = mockDefaultSession();
 	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
 	// We leave the matching user in the request to verify that the stop is
@@ -196,7 +196,7 @@ class SessionResourceTests {
     void stop_anonymousUser_throwForbidden() {
 	// Prepare
 	mockUser(true, null);
-	SessionV6betaSpec session = mockDefaultSession();
+	SessionSpec session = mockDefaultSession();
 	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
 	// We leave the matching user in the request to verify that the stop is
@@ -223,7 +223,7 @@ class SessionResourceTests {
 	// Prepare
 	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
 	mockUser(true, null);
-	SessionV6betaSpec session = mockDefaultSession();
+	SessionSpec session = mockDefaultSession();
 	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
 	// We leave the matching user in the request to verify that the deletion is
@@ -251,10 +251,10 @@ class SessionResourceTests {
     void list_matchingUser_SessionSpecs() {
 	// Prepare
 	mockUser(false, TEST_USER);
-	List<SessionV6betaSpec> resultList = List.of();
+	List<SessionSpec> resultList = List.of();
 	Mockito.when(k8sUtil.listSessions(TEST_USER)).thenReturn(resultList);
 
-	List<SessionV6betaSpec> result = fixture.list(APP_ID, TEST_USER);
+	List<SessionSpec> result = fixture.list(APP_ID, TEST_USER);
 
 	assertSame(resultList, result);
     }
@@ -302,7 +302,7 @@ class SessionResourceTests {
     void performance_matchingUser_SessionPerformance() {
 	// Prepare
 	mockUser(false, TEST_USER);
-	SessionV6betaSpec sessionSpec = new SessionV6betaSpec(TEST_SESSION, APP_ID, TEST_USER);
+	SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, TEST_USER);
 	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
 	SessionPerformance sessionPerformance = Mockito.mock(SessionPerformance.class);
 	Mockito.when(k8sUtil.reportPerformance(TEST_SESSION)).thenReturn(sessionPerformance);
@@ -318,7 +318,7 @@ class SessionResourceTests {
     void performance_noPerformanceData_throwMetricsServerUnavailable() {
 	// Prepare
 	mockUser(false, TEST_USER);
-	SessionV6betaSpec sessionSpec = new SessionV6betaSpec(TEST_SESSION, APP_ID, TEST_USER);
+	SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, TEST_USER);
 	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
 	Mockito.when(k8sUtil.reportPerformance(TEST_SESSION)).thenReturn(null);
 
@@ -352,7 +352,7 @@ class SessionResourceTests {
     void performance_otherUser_throwForbidden() {
 	// Prepare
 	mockUser(false, TEST_USER);
-	SessionV6betaSpec sessionSpec = new SessionV6betaSpec(TEST_SESSION, APP_ID, OTHER_TEST_USER);
+	SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, OTHER_TEST_USER);
 	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
 
 	// Execute
@@ -410,7 +410,7 @@ class SessionResourceTests {
     void start_otherUser_throwForbidden() {
 	// Prepare
 	mockUser(false, TEST_USER);
-	SessionV6betaSpec session = mockDefaultSession();
+	SessionSpec session = mockDefaultSession();
 	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
 	// We leave the matching user in the request to verify that the stop is
@@ -444,8 +444,8 @@ class SessionResourceTests {
 	Mockito.when(user.getIdentifier()).thenReturn(name);
     }
 
-    private SessionV6betaSpec mockDefaultSession() {
-	SessionV6betaSpec session = Mockito.mock(SessionV6betaSpec.class);
+    private SessionSpec mockDefaultSession() {
+	SessionSpec session = Mockito.mock(SessionSpec.class);
 	Mockito.when(session.getName()).thenReturn(TEST_SESSION);
 	Mockito.when(session.getUser()).thenReturn(TEST_USER);
 	return session;

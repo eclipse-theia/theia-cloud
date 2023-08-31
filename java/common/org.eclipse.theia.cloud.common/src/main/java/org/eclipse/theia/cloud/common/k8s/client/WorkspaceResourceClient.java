@@ -17,17 +17,17 @@ package org.eclipse.theia.cloud.common.k8s.client;
 
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 
 public interface WorkspaceResourceClient
-	extends CustomResourceClient<WorkspaceV3betaSpec, WorkspaceV3betaStatus, WorkspaceV3beta, WorkspaceV3betaSpecResourceList> {
+	extends CustomResourceClient<WorkspaceSpec, WorkspaceStatus, Workspace, WorkspaceSpecResourceList> {
 
-    WorkspaceV3beta launch(String correlationId, WorkspaceV3betaSpec spec, long timeout, TimeUnit unit);
+    Workspace launch(String correlationId, WorkspaceSpec spec, long timeout, TimeUnit unit);
 
-    default WorkspaceV3beta launch(String correlationId, WorkspaceV3betaSpec spec) {
+    default Workspace launch(String correlationId, WorkspaceSpec spec) {
 	return launch(correlationId, spec, 1, TimeUnit.MINUTES);
     }
 }

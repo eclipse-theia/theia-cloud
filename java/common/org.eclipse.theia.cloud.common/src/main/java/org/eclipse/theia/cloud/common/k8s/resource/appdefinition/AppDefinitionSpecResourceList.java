@@ -14,12 +14,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.session;
+package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 
 import io.fabric8.kubernetes.api.model.DefaultKubernetesResourceList;
 
-public class SessionV6betaSpecResourceList extends DefaultKubernetesResourceList<SessionV6beta> {
+public class AppDefinitionSpecResourceList extends DefaultKubernetesResourceList<AppDefinition> {
 
-    private static final long serialVersionUID = -4808662679268313876L;
+    private static final long serialVersionUID = 722136158817065564L;
 
 }
