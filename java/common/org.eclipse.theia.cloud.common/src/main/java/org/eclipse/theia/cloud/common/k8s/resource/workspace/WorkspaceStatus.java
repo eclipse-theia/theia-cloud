@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize
-public class WorkspaceV3betaStatus extends ResourceStatus {
+public class WorkspaceStatus extends ResourceStatus {
 
     @JsonProperty("volumeClaim")
     private StatusStep volumeClaim;
@@ -33,7 +33,7 @@ public class WorkspaceV3betaStatus extends ResourceStatus {
     /**
      * Default constructor.
      */
-    public WorkspaceV3betaStatus() {
+    public WorkspaceStatus() {
     }
 
     /**
@@ -42,7 +42,7 @@ public class WorkspaceV3betaStatus extends ResourceStatus {
      * @param toMigrate
      */
     @SuppressWarnings("deprecation")
-    public WorkspaceV3betaStatus(
+    public WorkspaceStatus(
 	    org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2betaStatus toMigrate) {
 	setOperatorStatus(toMigrate.getOperatorStatus());
 	setOperatorMessage(toMigrate.getOperatorMessage());

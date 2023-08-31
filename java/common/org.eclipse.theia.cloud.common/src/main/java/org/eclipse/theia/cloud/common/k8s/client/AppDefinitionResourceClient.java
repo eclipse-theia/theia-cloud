@@ -15,11 +15,11 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.client;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8betaStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionStatus;
 
 public interface AppDefinitionResourceClient extends
-	CustomResourceClient<AppDefinitionV8betaSpec, AppDefinitionV8betaStatus, AppDefinitionV8beta, AppDefinitionV8betaSpecResourceList> {
+	CustomResourceClient<AppDefinitionSpec, AppDefinitionStatus, AppDefinition, AppDefinitionSpecResourceList> {
 }

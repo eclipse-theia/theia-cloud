@@ -19,7 +19,7 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.time.Instant;
 
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 public final class WorkspaceUtil {
     private static final String SESSION_SUFFIX = "-session";
@@ -51,7 +51,7 @@ public final class WorkspaceUtil {
 	return getSessionName(workspaceName);
     }
 
-    public static String getStorageName(WorkspaceV3beta workspace) {
+    public static String getStorageName(Workspace workspace) {
 	return NamingUtil.createName(workspace, STORAGE_SUFFIX);
     }
 

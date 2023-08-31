@@ -25,8 +25,8 @@ import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.OperatorStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.StatusStep;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3betaStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
@@ -43,7 +43,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
     protected PersistentVolumeCreator persistentVolumeHandler;
 
     @Override
-    public boolean workspaceAdded(WorkspaceV3beta workspace, String correlationId) {
+    public boolean workspaceAdded(Workspace workspace, String correlationId) {
 	try {
 	    return doWorkspaceAdded(workspace, correlationId);
 	} catch (Throwable ex) {
@@ -58,11 +58,11 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 	}
     }
 
-    protected boolean doWorkspaceAdded(WorkspaceV3beta workspace, String correlationId) {
+    protected boolean doWorkspaceAdded(Workspace workspace, String correlationId) {
 	LOGGER.info(formatLogMessage(correlationId, "Handling " + workspace));
 
 	// Check current session status and ignore if handling failed or finished before
-	Optional<WorkspaceV3betaStatus> status = Optional.ofNullable(workspace.getStatus());
+	Optional<WorkspaceStatus> status = Optional.ofNullable(workspace.getStatus());
 	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
 	if (OperatorStatus.HANDLED.equals(operatorStatus)) {
 	    LOGGER.trace(formatLogMessage(correlationId,
@@ -128,7 +128,7 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
     }
 
     @Override
-    public boolean workspaceDeleted(WorkspaceV3beta workspace, String correlationId) {
+    public boolean workspaceDeleted(Workspace workspace, String correlationId) {
 	String sessionName = WorkspaceUtil.getSessionName(workspace.getSpec().getName());
 	client.sessions().delete(correlationId, sessionName);
 

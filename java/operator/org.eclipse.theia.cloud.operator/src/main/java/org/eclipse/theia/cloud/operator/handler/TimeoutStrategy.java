@@ -22,13 +22,13 @@ import java.time.temporal.ChronoUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 
 public interface TimeoutStrategy {
 
     String getName();
 
-    boolean evaluate(String correlationId, SessionV6beta session, Instant now, Integer limit);
+    boolean evaluate(String correlationId, Session session, Instant now, Integer limit);
 
     static class FixedTime implements TimeoutStrategy {
 
@@ -41,7 +41,7 @@ public interface TimeoutStrategy {
 	}
 
 	@Override
-	public boolean evaluate(String correlationId, SessionV6beta session, Instant now, Integer limit) {
+	public boolean evaluate(String correlationId, Session session, Instant now, Integer limit) {
 	    String creationTimestamp = session.getMetadata().getCreationTimestamp();
 	    Instant parse = Instant.parse(creationTimestamp);
 	    long minutesSinceCreation = ChronoUnit.MINUTES.between(parse, now);

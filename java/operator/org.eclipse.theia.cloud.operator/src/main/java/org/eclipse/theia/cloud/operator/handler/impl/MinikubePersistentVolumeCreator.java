@@ -25,7 +25,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeTemplateReplacements;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
@@ -53,7 +53,7 @@ public class MinikubePersistentVolumeCreator implements PersistentVolumeCreator 
     protected PersistentVolumeTemplateReplacements replacementsProvider;
 
     @Override
-    public Optional<PersistentVolume> createAndApplyPersistentVolume(String correlationId, WorkspaceV3beta workspace) {
+    public Optional<PersistentVolume> createAndApplyPersistentVolume(String correlationId, Workspace workspace) {
 	Map<String, String> replacements = replacementsProvider.getPersistentVolumeReplacements(client.namespace(),
 		workspace);
 	String persistentVolumeYaml;
@@ -71,7 +71,7 @@ public class MinikubePersistentVolumeCreator implements PersistentVolumeCreator 
 
     @Override
     public Optional<PersistentVolumeClaim> createAndApplyPersistentVolumeClaim(String correlationId,
-	    WorkspaceV3beta workspace) {
+	    Workspace workspace) {
 	Map<String, String> replacements = replacementsProvider.getPersistentVolumeClaimReplacements(client.namespace(),
 		workspace);
 	String persistentVolumeClaimYaml;

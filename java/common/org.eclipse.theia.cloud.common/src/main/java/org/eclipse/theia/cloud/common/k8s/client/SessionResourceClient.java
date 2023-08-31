@@ -17,16 +17,16 @@ package org.eclipse.theia.cloud.common.k8s.client;
 
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6betaStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 
 public interface SessionResourceClient
-	extends CustomResourceClient<SessionV6betaSpec, SessionV6betaStatus, SessionV6beta, SessionV6betaSpecResourceList> {
-    SessionV6beta launch(String correlationId, SessionV6betaSpec spec, long timeout, TimeUnit unit);
+	extends CustomResourceClient<SessionSpec, SessionStatus, Session, SessionSpecResourceList> {
+    Session launch(String correlationId, SessionSpec spec, long timeout, TimeUnit unit);
 
-    default SessionV6beta launch(String correlationId, SessionV6betaSpec spec, int timeout) {
+    default Session launch(String correlationId, SessionSpec spec, int timeout) {
 	return launch(correlationId, spec, timeout, TimeUnit.MINUTES);
     }
 

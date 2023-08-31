@@ -17,9 +17,9 @@ package org.eclipse.theia.cloud.common.util;
 
 import java.util.Locale;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionV8beta;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionV6beta;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceV3beta;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 public final class NamingUtil {
 
@@ -45,7 +45,7 @@ public final class NamingUtil {
      * 
      * For different arguments the resulting name will be unique in the cluster.
      * 
-     * @param appDefinition the {@link AppDefinitionV8beta}
+     * @param appDefinition the {@link AppDefinition}
      * @param instance      instance id
      * @param identifier    a short description/name of the kubernetes object for
      *                      which this name will be used. This will be part of the
@@ -54,7 +54,7 @@ public final class NamingUtil {
      *                      most 23 characters long!</b>
      * @return the name
      */
-    public static String createName(AppDefinitionV8beta appDefinition, int instance, String identifier) {
+    public static String createName(AppDefinition appDefinition, int instance, String identifier) {
 	/*
 	 * Kubenertes UIDs are standardized UUIDs/GUIDs. This means the uid string will
 	 * have a length of 36.
@@ -79,14 +79,14 @@ public final class NamingUtil {
      * 
      * For different arguments the resulting name will be unique in the cluster.
      * 
-     * @param session    the {@link SessionV6beta}
+     * @param session    the {@link Session}
      * @param identifier a short description/name of the kubernetes object for which
      *                   this name will be used. This will be part of the unique
      *                   sections of the generated name. <b>Must be at most 24
      *                   characters long!</b>
      * @return the name
      */
-    public static String createName(SessionV6beta session, String identifier) {
+    public static String createName(Session session, String identifier) {
 	/*
 	 * Kubenertes UIDs are standardized UUIDs/GUIDs. This means the uid string will
 	 * have a length of 36.
@@ -110,14 +110,14 @@ public final class NamingUtil {
      * 
      * For different arguments the resulting name will be unique in the cluster.
      * 
-     * @param workspace  the {@link WorkspaceV3beta}
+     * @param workspace  the {@link Workspace}
      * @param identifier a short description/name of the kubernetes object for which
      *                   this name will be used. This will be part of the unique
      *                   sections of the generated name. <b>Must be at most 24
      *                   characters long!</b>
      * @return the name
      */
-    public static String createName(WorkspaceV3beta workspace, String identifier) {
+    public static String createName(Workspace workspace, String identifier) {
 	/*
 	 * Kubenertes UIDs are standardized UUIDs/GUIDs. This means the uid string will
 	 * have a length of 36.
@@ -155,18 +155,18 @@ public final class NamingUtil {
 	return asValidName(String.join("-", prefix, identifier, additionalInformation));
     }
 
-    private static String getAdditionalInformation(AppDefinitionV8beta appDefinition) {
+    private static String getAdditionalInformation(AppDefinition appDefinition) {
 	return appDefinition.getSpec().getName();
     }
 
-    private static String getAdditionalInformation(SessionV6beta session) {
+    private static String getAdditionalInformation(Session session) {
 	String workspace = (session.getSpec().getWorkspace() == null || session.getSpec().getWorkspace().isBlank())
 		? "none"
 		: session.getSpec().getWorkspace();
 	return session.getSpec().getUser() + "-" + workspace + "-" + session.getSpec().getAppDefinition();
     }
 
-    private static String getAdditionalInformation(WorkspaceV3beta workspace) {
+    private static String getAdditionalInformation(Workspace workspace) {
 	return workspace.getSpec().getName();
     }
 
