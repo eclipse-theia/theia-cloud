@@ -15,7 +15,7 @@ docker push theiacloud/theia-cloud-wondershaper:latest
 Build and push the Theia Cloud conversion hook with:
 
 ```bash
-docker build -t theiacloud/theia-cloud-conversion:latest -f dockerfiles/conversion-hook/Dockerfile .
+docker build --no-cache -t theiacloud/theia-cloud-conversion:latest -f dockerfiles/conversion-hook/Dockerfile .
 docker push theiacloud/theia-cloud-conversion:latest
 ```
 

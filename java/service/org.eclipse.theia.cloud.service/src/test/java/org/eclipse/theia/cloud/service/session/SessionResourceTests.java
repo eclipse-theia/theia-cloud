@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
@@ -45,6 +44,7 @@ import org.mockito.Mockito;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.quarkus.test.security.TestSecurity;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Unit tests for

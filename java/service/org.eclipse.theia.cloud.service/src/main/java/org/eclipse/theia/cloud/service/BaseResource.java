@@ -17,12 +17,12 @@ package org.eclipse.theia.cloud.service;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response.Status;
-
 import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.jboss.logging.Logger;
+
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response.Status;
 
 public class BaseResource {
 

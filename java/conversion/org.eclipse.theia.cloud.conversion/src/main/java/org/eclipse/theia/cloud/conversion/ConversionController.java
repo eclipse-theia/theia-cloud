@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
@@ -33,6 +34,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 import org.eclipse.theia.cloud.conversion.Conversion.ConversionException;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.KubernetesResource;
 import io.fabric8.kubernetes.api.model.Status;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.ConversionResponse;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.ConversionReview;
@@ -54,8 +56,8 @@ public final class ConversionController {
 	CONVERSIONS.put(org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5beta.API,
 		new GenericConversion<>(org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5betaSpec.class,
 			org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5betaStatus.class,
-			org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5beta.class,
-			SessionSpec.class, SessionStatus.class, Session.class));
+			org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5beta.class, SessionSpec.class,
+			SessionStatus.class, Session.class));
 
 	CONVERSIONS.put(org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2beta.API,
 		new GenericConversion<>(
@@ -66,7 +68,8 @@ public final class ConversionController {
     }
 
     public static ConversionReview handle(ConversionReview conversionReview) {
-	List<HasMetadata> objects = conversionReview.getRequest().getObjects();
+	List<HasMetadata> objects = conversionReview.getRequest().getObjects().stream()
+		.filter(HasMetadata.class::isInstance).map(HasMetadata.class::cast).collect(Collectors.toList());
 	String desiredAPIVersion = conversionReview.getRequest().getDesiredAPIVersion();
 
 	List<HasMetadata> convertedObjects = new ArrayList<>(objects.size());
@@ -100,7 +103,8 @@ public final class ConversionController {
 	response.setUid(conversionReview.getRequest().getUid());
 	response.setResult(new Status());
 	response.getResult().setStatus("Success");
-	response.setConvertedObjects(convertedObjects);
+	response.setConvertedObjects(convertedObjects.stream().filter(KubernetesResource.class::isInstance)
+		.map(KubernetesResource.class::cast).collect(Collectors.toList()));
 	result.setResponse(response);
 	return result;
     }

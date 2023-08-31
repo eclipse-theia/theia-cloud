@@ -80,12 +80,6 @@
 			<version>${kubernetes-client.version}</version><!--$NO-MVN-MAN-VER$ -->
 		</dependency>
 		<dependency>
-			<groupId>io.fabric8</groupId>
-			<artifactId>kubernetes-model-common</artifactId>
-			<version>${kubernetes-client.version}</version><!--$NO-MVN-MAN-VER$ -->
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
 			<version>${log4j.version}</version><!--$NO-MVN-MAN-VER$ -->
