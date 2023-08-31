@@ -15,9 +15,9 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.jboss.logging.Logger;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Injectable bean providing access to the service's configurable application

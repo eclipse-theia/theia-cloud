@@ -19,19 +19,18 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.util.Optional;
 
-import javax.annotation.security.PermitAll;
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 import io.quarkus.security.Authenticated;
+import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 
 @Path("/service")
 @Authenticated

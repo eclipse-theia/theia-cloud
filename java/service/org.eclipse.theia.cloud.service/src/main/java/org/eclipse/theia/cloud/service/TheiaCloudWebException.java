@@ -15,15 +15,15 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
+
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public class TheiaCloudWebException extends WebApplicationException {
     private static final long serialVersionUID = -4151261201767478256L;
