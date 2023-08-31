@@ -69,27 +69,25 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 		    "Workspace was successfully handled before and is skipped now. Workspace: " + workspace));
 	    return true;
 	}
-	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
-	    // TODO We should not return but continue where we left off.
-	    LOGGER.warn(formatLogMessage(correlationId,
-		    "Workspace handling was unexpectedly interrupted before. Workspace is skipped now and its status is set to ERROR. Workspace: "
-			    + workspace));
-	    client.workspaces().updateStatus(correlationId, workspace, s -> {
-		s.setOperatorStatus(OperatorStatus.ERROR);
-		s.setOperatorMessage("Handling was unexpectedly interrupted before. CorrelationId: " + correlationId);
-	    });
-	    return false;
-	}
 	if (OperatorStatus.ERROR.equals(operatorStatus)) {
 	    LOGGER.warn(formatLogMessage(correlationId,
 		    "Workspace could not be handled before and is skipped now. Workspace: " + workspace));
 	    return false;
 	}
-
-	// Set workspace status to being handled
-	client.workspaces().updateStatus(correlationId, workspace, s -> {
-	    s.setOperatorStatus(OperatorStatus.HANDLING);
-	});
+	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    LOGGER.debug(formatLogMessage(correlationId,
+		    "Workspace handling was unexpectedly interrupted before and is continued now. Workspace: "
+			    + workspace));
+	    client.workspaces().updateStatus(correlationId, workspace, s -> {
+		// Reset status message
+		s.setOperatorMessage("");
+	    });
+	} else {
+	    // Set workspace status to being handled
+	    client.workspaces().updateStatus(correlationId, workspace, s -> {
+		s.setOperatorStatus(OperatorStatus.HANDLING);
+	    });
+	}
 
 	String storageName = WorkspaceUtil.getStorageName(workspace);
 	client.workspaces().updateStatus(correlationId, workspace, s -> s.setVolumeClaim(new StatusStep("started")));
