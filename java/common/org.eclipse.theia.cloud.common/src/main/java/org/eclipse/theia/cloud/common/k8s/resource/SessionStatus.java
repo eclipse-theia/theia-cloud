@@ -15,12 +15,56 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource;
 
+import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize
 public class SessionStatus extends ResourceStatus {
-    // This class is empty as only the common properties of the super class are
-    // used. Already define a specific class to allow easier extension, properly
-    // type the resources and resource clients.
-    // It is planned to extend this later with Session specific status steps.
+
+    @JsonProperty()
+    private StatusStep serviceCreation;
+
+    @JsonProperty()
+    private StatusStep configMapCreation;
+
+    @JsonProperty()
+    private StatusStep deploymentCreation;
+
+    @JsonProperty()
+    private StatusStep ingressUpdate;
+
+    public Optional<StatusStep> getServiceCreation() {
+	return Optional.ofNullable(serviceCreation);
+    }
+
+    public void setServiceCreation(StatusStep serviceCreation) {
+	this.serviceCreation = serviceCreation;
+    }
+
+    public Optional<StatusStep> getConfigMapCreation() {
+	return Optional.ofNullable(configMapCreation);
+    }
+
+    public void setConfigMapCreation(StatusStep configMapCreation) {
+	this.configMapCreation = configMapCreation;
+    }
+
+    public Optional<StatusStep> getDeploymentCreation() {
+	return Optional.ofNullable(deploymentCreation);
+    }
+
+    public void setDeploymentCreation(StatusStep deploymentCreation) {
+	this.deploymentCreation = deploymentCreation;
+    }
+
+    public Optional<StatusStep> getIngressUpdate() {
+	return Optional.ofNullable(ingressUpdate);
+    }
+
+    public void setIngressUpdate(StatusStep ingressUpdate) {
+	this.ingressUpdate = ingressUpdate;
+    }
+
 }

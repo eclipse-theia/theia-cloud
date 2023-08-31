@@ -18,6 +18,14 @@ package org.eclipse.theia.cloud.common.k8s.resource;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StatusStep {
+
+    /** Constant value that indicates that a step has been started. */
+    public static final String STARTED = "started";
+    /**
+     * Constant value that indicates that a step has been successfully completed.
+     */
+    public static final String FINISHED = "finished";
+
     @JsonProperty("status")
     private String status;
 

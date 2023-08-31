@@ -36,6 +36,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.StatusStep;
 import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
@@ -117,27 +118,27 @@ public class LazySessionHandler implements SessionHandler {
 		    "Session was successfully handled before and is skipped now. Session: " + session));
 	    return true;
 	}
-	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
-	    // TODO We should not return but continue where we left off.
-	    LOGGER.warn(formatLogMessage(correlationId,
-		    "Session handling was unexpectedly interrupted before. Session is skipped now and its status is set to ERROR. Session: "
-			    + session));
-	    client.sessions().updateStatus(correlationId, session, s -> {
-		s.setOperatorStatus(OperatorStatus.ERROR);
-		s.setOperatorMessage("Handling was unexpectedly interrupted before. CorrelationId: " + correlationId);
-	    });
-	    return false;
-	}
 	if (OperatorStatus.ERROR.equals(operatorStatus)) {
 	    LOGGER.warn(formatLogMessage(correlationId,
 		    "Session could not be handled before and is skipped now. Session: " + session));
 	    return false;
 	}
 
-	// Set session status to being handled
-	client.sessions().updateStatus(correlationId, session, s -> {
-	    s.setOperatorStatus(OperatorStatus.HANDLING);
-	});
+	boolean initialAttempt = true; // Tracks whether this is the first handling attempt
+	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
+	    LOGGER.debug(formatLogMessage(correlationId,
+		    "Session handling was unexpectedly interrupted before and is continued now. Session: " + session));
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		// Reset status message
+		s.setOperatorMessage("");
+	    });
+	    initialAttempt = false;
+	} else {
+	    // Set session status to being handled
+	    client.sessions().updateStatus(correlationId, session, s -> {
+		s.setOperatorStatus(OperatorStatus.HANDLING);
+	    });
+	}
 
 	SessionSpec sessionSpec = session.getSpec();
 
@@ -170,6 +171,8 @@ public class LazySessionHandler implements SessionHandler {
 	    return false;
 	}
 
+	// No special considerations for continued handling necessary as the ingress is
+	// only retrieved, not created
 	Optional<Ingress> ingress = getIngress(appDefinition, correlationId);
 	if (ingress.isEmpty()) {
 	    client.sessions().updateStatus(correlationId, session, s -> {
@@ -179,23 +182,32 @@ public class LazySessionHandler implements SessionHandler {
 	    return false;
 	}
 
+	// Idempotent operation that can be executed again on continued handling
 	syncSessionDataToWorkspace(session, correlationId);
 
+	// TODO service creation handling dependent on whether this is the initial
+	// attempt.
+	// If not, the status must also be considered, i.e. was this step already
+	// started and interrupted, finished or not started at all
+	String serviceCreationStatus = status.flatMap(SessionStatus::getServiceCreation).map(StatusStep::getStatus)
+		.orElse("");
 	/* Create service for this session */
 	List<Service> existingServices = K8sUtil.getExistingServices(client.kubernetes(), client.namespace(),
 		sessionResourceName, sessionResourceUID);
-	if (!existingServices.isEmpty()) {
+	if (!existingServices.isEmpty() && initialAttempt) {
+	    // TODO do not return true if the sessions was in handling state and this step
+	    // not yet completed
 	    LOGGER.warn(formatLogMessage(correlationId,
 		    "Existing service for " + sessionSpec + ". Session already running?"));
 	    client.sessions().updateStatus(correlationId, session, s -> {
 		s.setOperatorStatus(OperatorStatus.HANDLED);
 		s.setOperatorMessage("Service already exists.");
 	    });
-	    // TODO do not return true if the sessions was in handling state at the start of
-	    // this handler
 	    return true;
 	}
 
+	// TODO do not do this again if session was in handling state but this step
+	// already completed
 	Optional<Service> serviceToUse = createAndApplyService(correlationId, sessionResourceName, sessionResourceUID,
 		session, appDefinition.getSpec(), arguments.isUseKeycloak());
 	if (serviceToUse.isEmpty()) {
@@ -212,16 +224,17 @@ public class LazySessionHandler implements SessionHandler {
 	    List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client.kubernetes(), client.namespace(),
 		    sessionResourceName, sessionResourceUID);
 	    if (!existingConfigMaps.isEmpty()) {
+		// TODO do not return true if the sessions was in handling state and this step
+		// not yet completed
 		LOGGER.warn(formatLogMessage(correlationId,
 			"Existing configmaps for " + sessionSpec + ". Session already running?"));
 		client.sessions().updateStatus(correlationId, session, s -> {
 		    s.setOperatorStatus(OperatorStatus.HANDLED);
 		    s.setOperatorMessage("Configmaps already exist.");
 		});
-		// TODO do not return true if the sessions was in handling state at the start of
-		// this handler
 		return true;
 	    }
+	    // TODO is this idempotent and can be executed again for continue?
 	    createAndApplyEmailConfigMap(correlationId, sessionResourceName, sessionResourceUID, session);
 	    createAndApplyProxyConfigMap(correlationId, sessionResourceName, sessionResourceUID, session,
 		    appDefinition);
@@ -231,6 +244,8 @@ public class LazySessionHandler implements SessionHandler {
 	List<Deployment> existingDeployments = K8sUtil.getExistingDeployments(client.kubernetes(), client.namespace(),
 		sessionResourceName, sessionResourceUID);
 	if (!existingDeployments.isEmpty()) {
+	    // TODO do not return true if the sessions was in handling state and this step
+	    // not yet completed
 	    LOGGER.warn(formatLogMessage(correlationId,
 		    "Existing deployments for " + sessionSpec + ". Session already running?"));
 	    client.sessions().updateStatus(correlationId, session, s -> {
@@ -240,11 +255,14 @@ public class LazySessionHandler implements SessionHandler {
 	    return true;
 	}
 
+	// TODO is this idempotent? probably needs to be skipped if already done
 	Optional<String> storageName = getStorageName(session, correlationId);
 	createAndApplyDeployment(correlationId, sessionResourceName, sessionResourceUID, session, appDefinition,
 		storageName, arguments.isUseKeycloak());
 
 	/* adjust the ingress */
+	// TODO do not do this again if session was in handling state but this step
+	// already completed
 	String host;
 	try {
 	    host = updateIngress(ingress, serviceToUse, session, appDefinition, correlationId);
@@ -259,6 +277,8 @@ public class LazySessionHandler implements SessionHandler {
 	}
 
 	/* Update session resource */
+	// TODO do not do this again if session was in handling state but this step
+	// already completed
 	try {
 	    AddedHandlerUtil.updateSessionURLAsync(client.kubernetes(), session, client.namespace(), host,
 		    correlationId);
