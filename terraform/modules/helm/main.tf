@@ -156,6 +156,14 @@ resource "kubectl_manifest" "selfsigned_issuer" {
   yaml_body  = file("${path.module}/clusterissuer-selfsigned.yaml")
 }
 
+locals {
+  jsonpatch = jsonencode([{
+      "op" = "add",
+      "path" = "/spec/template/spec/containers/0/args/-",
+      "value" = "--default-ssl-certificate=keycloak/${var.hostname}-tls"
+  }])
+}
+
 resource "helm_release" "keycloak" {
   depends_on       = [helm_release.theia-cloud-base, kubectl_manifest.selfsigned_issuer] # we need an existing issuer
   name             = "keycloak"
@@ -207,7 +215,7 @@ resource "helm_release" "keycloak" {
   # Below command connects to the cluster in the local environment and patches the ingress-controller accordingly. 
   # Theia Cloud is then installed with path based hosts reusing the same certificate. 
   provisioner "local-exec" {
-    command = "kubectl patch deploy ingress-nginx-controller --type='json' -n ingress-nginx -p '[{ \"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/args/-\", \"value\": \"--default-ssl-certificate=keycloak/${var.hostname}-tls\" }]' && kubectl wait pods -n ingress-nginx -l app.kubernetes.io/component=controller --for condition=Ready --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s"
+    command = "kubectl patch deploy ingress-nginx-controller --type=json -n ingress-nginx -p ${local.jsonpatch} && kubectl wait pods -n ingress-nginx -l app.kubernetes.io/component=controller --for condition=Ready --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s"
   }
 }
 
