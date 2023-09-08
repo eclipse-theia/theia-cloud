@@ -89,7 +89,7 @@ public class BaseResourceClient<T extends HasMetadata, L extends KubernetesResou
     public Optional<T> loadAndCreate(String correlationId, String yaml, Consumer<T> customization) {
 	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
 	    trace(correlationId, "Loading new " + getTypeName() + ":\n" + yaml);
-	    T newItem = operation().load(inputStream).get();
+	    T newItem = operation().load(inputStream).item();
 
 	    trace(correlationId, "Customizing new " + getTypeName());
 	    customization.accept(newItem);
