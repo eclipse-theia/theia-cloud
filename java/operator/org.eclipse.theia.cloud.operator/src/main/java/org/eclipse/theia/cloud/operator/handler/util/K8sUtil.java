@@ -158,7 +158,11 @@ public final class K8sUtil {
 	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
 
 	    LOGGER.trace(formatLogMessage(correlationId, "Loading new " + typeName + ":\n" + yaml));
-	    T newItem = items.load(inputStream).get();
+	    T newItem = items.load(inputStream).item();
+	    if (newItem == null) {
+		LOGGER.error(formatLogMessage(correlationId, "Loading new " + typeName + " resulted in null object"));
+		return Optional.empty();
+	    }
 
 	    ResourceEdit.<T>updateOwnerReference(ownerReferenceIndex, ownerAPIVersion, ownerKind, ownerName, ownerUid,
 		    correlationId).andThen(additionalModification).accept(newItem);
