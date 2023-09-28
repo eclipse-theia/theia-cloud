@@ -13,37 +13,30 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.workspace.v2;
+package org.eclipse.theia.cloud.common.k8s.resource.session.hub;
 
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.StatusStep;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+public class SessionHubStatus extends ResourceStatus {
 
-@Deprecated
-@JsonDeserialize
-public class WorkspaceV2betaStatus extends ResourceStatus {
-
-    @JsonProperty("volumeClaim")
-    private StatusStep volumeClaim;
-
-    @JsonProperty("volumeAttach")
-    private StatusStep volumeAttach;
-
-    public StatusStep getVolumeClaim() {
-	return volumeClaim;
+    public SessionHubStatus(SessionStatus toHub) {
+	if (toHub.getOperatorMessage() != null) {
+	    this.setOperatorMessage(toHub.getOperatorMessage());
+	}
+	if (toHub.getOperatorStatus() != null) {
+	    this.setOperatorStatus(toHub.getOperatorStatus());
+	}
     }
 
-    public void setVolumeClaim(StatusStep volumeClaim) {
-	this.volumeClaim = volumeClaim;
+    @SuppressWarnings("deprecation")
+    public SessionHubStatus(org.eclipse.theia.cloud.common.k8s.resource.session.v1beta5.SessionV1beta5Status toHub) {
+	if (toHub.getOperatorMessage() != null) {
+	    this.setOperatorMessage(toHub.getOperatorMessage());
+	}
+	if (toHub.getOperatorStatus() != null) {
+	    this.setOperatorStatus(toHub.getOperatorStatus());
+	}
     }
 
-    public StatusStep getVolumeAttach() {
-	return volumeAttach;
-    }
-
-    public void setVolumeAttach(StatusStep volumeAttach) {
-	this.volumeAttach = volumeAttach;
-    }
 }

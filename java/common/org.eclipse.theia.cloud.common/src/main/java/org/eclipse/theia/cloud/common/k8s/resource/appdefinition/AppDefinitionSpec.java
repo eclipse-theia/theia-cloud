@@ -85,7 +85,7 @@ public class AppDefinitionSpec {
     }
 
     public AppDefinitionSpec(AppDefinitionHubSpec fromHub) {
-	this.name = fromHub.getName() + "-v8";
+	this.name = fromHub.getName();
 	this.image = fromHub.getImage();
 	this.imagePullPolicy = fromHub.getImagePullPolicy();
 	this.pullSecret = fromHub.getPullSecret();

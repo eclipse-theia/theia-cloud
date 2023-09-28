@@ -13,11 +13,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.workspace.v2;
+package org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta2;
 
 import io.fabric8.kubernetes.client.CustomResourceList;
 
 @Deprecated
-public class WorkspaceV2betaSpecResourceList extends CustomResourceList<WorkspaceV2beta> {
+public class WorkspaceV1beta2SpecResourceList extends CustomResourceList<WorkspaceV1beta2> {
 
 }

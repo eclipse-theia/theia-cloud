@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.common.k8s.resource.workspace;
 
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHubSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -56,14 +57,13 @@ public class WorkspaceSpec implements UserScopedSpec {
 	this.label = label;
     }
 
-    @SuppressWarnings("deprecation")
-    public WorkspaceSpec(org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2betaSpec toMigrate) {
-	this.name = toMigrate.getName();
-	this.label = toMigrate.getLabel();
-	this.appDefinition = toMigrate.getAppDefinition();
-	this.user = toMigrate.getUser();
-	this.storage = toMigrate.getStorage();
-	this.error = toMigrate.getError();
+    public WorkspaceSpec(WorkspaceHubSpec spec) {
+	this.name = spec.getName();
+	this.label = spec.getLabel();
+	this.appDefinition = spec.getAppDefinition();
+	this.user = spec.getUser();
+	this.storage = spec.getStorage();
+	this.error = spec.getError();
     }
 
     public String getName() {

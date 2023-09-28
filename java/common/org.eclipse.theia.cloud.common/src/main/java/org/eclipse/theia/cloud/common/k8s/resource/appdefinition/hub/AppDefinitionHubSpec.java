@@ -18,51 +18,43 @@ package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7.AppDefinitionV1beta7Spec;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class AppDefinitionHubSpec {
 
-    private String name;
+    private final String name;
 
-    private String image;
+    private final String image;
 
-    private String imagePullPolicy;
+    private final String imagePullPolicy;
 
-    private String pullSecret;
+    private final String pullSecret;
 
-    private int uid;
+    private final int uid;
 
-    private int port;
+    private final int port;
 
-    private String ingressname;
+    private final String ingressname;
 
-    private int minInstances;
+    private final int minInstances;
 
-    private Integer maxInstances;
+    private final Integer maxInstances;
 
-    private Timeout timeout;
+    private final TimeoutHub timeout;
 
-    private String requestsMemory;
+    private final String requestsMemory;
 
-    private String requestsCpu;
+    private final String requestsCpu;
 
-    private String limitsMemory;
+    private final String limitsMemory;
 
-    private String limitsCpu;
+    private final String limitsCpu;
 
-    private int downlinkLimit;// kilobits per second
+    private final int downlinkLimit;// kilobits per second
 
-    private int uplinkLimit;// kilobits per second
+    private final int uplinkLimit;// kilobits per second
 
-    private String mountPath;
+    private final String mountPath;
 
-    private Monitor monitor;
-
-    /**
-     * Default constructor.
-     */
-    public AppDefinitionHubSpec() {
-    }
+    private final MonitorHub monitor;
 
     public AppDefinitionHubSpec(AppDefinitionSpec toHub) {
 	this.name = toHub.getName();
@@ -82,21 +74,28 @@ public class AppDefinitionHubSpec {
 	this.uplinkLimit = toHub.getUplinkLimit();
 	this.mountPath = toHub.getMountPath();
 
-	this.timeout = new Timeout();
 	if (toHub.getTimeout() != null) {
-	    this.timeout.limit = toHub.getTimeout().getLimit();
-	    this.timeout.strategy = toHub.getTimeout().getStrategy();
+	    this.timeout = new TimeoutHub(//
+		    toHub.getTimeout().getStrategy(), //
+		    toHub.getTimeout().getLimit());
+	} else {
+	    this.timeout = new TimeoutHub();
 	}
 
-	this.monitor = new Monitor();
 	if (toHub.getMonitor() != null) {
-	    this.monitor.port = toHub.getMonitor().getPort();
 
-	    this.monitor.activityTracker = new Monitor.ActivityTracker();
+	    MonitorHub.ActivityTrackerHub activityTracker;
 	    if (toHub.getMonitor().getActivityTracker() != null) {
-		this.monitor.activityTracker.timeoutAfter = toHub.getMonitor().getActivityTracker().getTimeoutAfter();
-		this.monitor.activityTracker.notifyAfter = toHub.getMonitor().getActivityTracker().getNotifyAfter();
+		activityTracker = new MonitorHub.ActivityTrackerHub(
+			toHub.getMonitor().getActivityTracker().getTimeoutAfter(),
+			toHub.getMonitor().getActivityTracker().getNotifyAfter());
+	    } else {
+		activityTracker = new MonitorHub.ActivityTrackerHub();
 	    }
+
+	    this.monitor = new MonitorHub(activityTracker, toHub.getMonitor().getPort());
+	} else {
+	    this.monitor = new MonitorHub();
 	}
     }
 
@@ -118,21 +117,27 @@ public class AppDefinitionHubSpec {
 	this.uplinkLimit = toHub.getUplinkLimit();
 	this.mountPath = toHub.getMountPath();
 
-	this.timeout = new Timeout();
 	if (toHub.getTimeout() != null) {
-	    this.timeout.limit = toHub.getTimeout().getLimit();
-	    this.timeout.strategy = toHub.getTimeout().getStrategy();
+	    this.timeout = new TimeoutHub(//
+		    toHub.getTimeout().getStrategy(), //
+		    toHub.getTimeout().getLimit());
+	} else {
+	    this.timeout = new TimeoutHub();
 	}
 
-	this.monitor = new Monitor();
 	if (toHub.getMonitor() != null) {
-	    this.monitor.port = toHub.getMonitor().getPort();
-
-	    this.monitor.activityTracker = new Monitor.ActivityTracker();
+	    MonitorHub.ActivityTrackerHub activityTracker;
 	    if (toHub.getMonitor().getActivityTracker() != null) {
-		this.monitor.activityTracker.timeoutAfter = toHub.getMonitor().getActivityTracker().getTimeoutAfter();
-		this.monitor.activityTracker.notifyAfter = toHub.getMonitor().getActivityTracker().getNotifyAfter();
+		activityTracker = new MonitorHub.ActivityTrackerHub(
+			toHub.getMonitor().getActivityTracker().getTimeoutAfter(),
+			toHub.getMonitor().getActivityTracker().getNotifyAfter());
+	    } else {
+		activityTracker = new MonitorHub.ActivityTrackerHub();
 	    }
+
+	    this.monitor = new MonitorHub(activityTracker, toHub.getMonitor().getPort());
+	} else {
+	    this.monitor = new MonitorHub();
 	}
     }
 
@@ -172,7 +177,7 @@ public class AppDefinitionHubSpec {
 	return maxInstances;
     }
 
-    public Timeout getTimeout() {
+    public TimeoutHub getTimeout() {
 	return timeout;
     }
 
@@ -204,33 +209,33 @@ public class AppDefinitionHubSpec {
 	return mountPath;
     }
 
-    public Monitor getMonitor() {
+    public MonitorHub getMonitor() {
 	return monitor;
     }
 
     @Override
     public String toString() {
-	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
+	return "AppDefinitionHubSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
 		+ ", pullSecret=" + pullSecret + ", uid=" + uid + ", port=" + port + ", ingressname=" + ingressname
 		+ ", minInstances=" + minInstances + ", maxInstances=" + maxInstances + ", timeout=" + timeout
 		+ ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="
 		+ limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit="
-		+ uplinkLimit + ", mountPath=" + mountPath + "]";
+		+ uplinkLimit + ", mountPath=" + mountPath + ", monitor=" + monitor + "]";
     }
 
-    public static class Timeout {
-	@JsonProperty("limit")
-	private int limit;
+    public static class TimeoutHub {
+	private final int limit;
 
-	@JsonProperty("strategy")
-	private String strategy;
+	private final String strategy;
 
-	public Timeout() {
-	}
-
-	public Timeout(String strategy, int limit) {
+	public TimeoutHub(String strategy, int limit) {
 	    this.strategy = strategy;
 	    this.limit = limit;
+	}
+
+	public TimeoutHub() {
+	    this.strategy = "FIXEDTIME";
+	    this.limit = 60;
 	}
 
 	public int getLimit() {
@@ -243,51 +248,52 @@ public class AppDefinitionHubSpec {
 
 	@Override
 	public String toString() {
-	    return "Timeout [limit=" + limit + ", strategy=" + strategy + "]";
+	    return "TimeoutHub [limit=" + limit + ", strategy=" + strategy + "]";
 	}
+
     }
 
-    public static class Monitor {
-	@JsonProperty("port")
-	private int port;
+    public static class MonitorHub {
+	private final int port;
 
-	@JsonProperty("activityTracker")
-	private ActivityTracker activityTracker;
+	private final ActivityTrackerHub activityTracker;
 
-	public Monitor() {
-	}
-
-	public Monitor(ActivityTracker activityTracker, int port) {
+	public MonitorHub(ActivityTrackerHub activityTracker, int port) {
 	    this.activityTracker = activityTracker;
 	    this.port = port;
+	}
+
+	public MonitorHub() {
+	    this.activityTracker = new ActivityTrackerHub();
+	    this.port = 3000;
 	}
 
 	public int getPort() {
 	    return port;
 	}
 
-	public ActivityTracker getActivityTracker() {
+	public ActivityTrackerHub getActivityTracker() {
 	    return activityTracker;
 	}
 
 	@Override
 	public String toString() {
-	    return "Monitor [activityTracker=" + activityTracker + ", port=" + port + "]";
+	    return "MonitorHub [port=" + port + ", activityTracker=" + activityTracker + "]";
 	}
 
-	public static class ActivityTracker {
-	    @JsonProperty("timeoutAfter")
-	    private int timeoutAfter;
+	public static class ActivityTrackerHub {
+	    private final int timeoutAfter;
 
-	    @JsonProperty("notifyAfter")
-	    private int notifyAfter;
+	    private final int notifyAfter;
 
-	    public ActivityTracker() {
-	    }
-
-	    public ActivityTracker(int timeoutAfter, int notifyAfter) {
+	    public ActivityTrackerHub(int timeoutAfter, int notifyAfter) {
 		this.timeoutAfter = timeoutAfter;
 		this.notifyAfter = notifyAfter;
+	    }
+
+	    public ActivityTrackerHub() {
+		this.timeoutAfter = 60;
+		this.notifyAfter = 30;
 	    }
 
 	    public int getTimeoutAfter() {
@@ -300,7 +306,7 @@ public class AppDefinitionHubSpec {
 
 	    @Override
 	    public String toString() {
-		return "ActivityTracker [timeoutAfter=" + timeoutAfter + ", notifyAfter=" + notifyAfter + "]";
+		return "ActivityTrackerHub [timeoutAfter=" + timeoutAfter + ", notifyAfter=" + notifyAfter + "]";
 	    }
 
 	}

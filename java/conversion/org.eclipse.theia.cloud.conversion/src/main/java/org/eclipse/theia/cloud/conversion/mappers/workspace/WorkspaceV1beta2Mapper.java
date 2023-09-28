@@ -13,25 +13,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7;
+package org.eclipse.theia.cloud.conversion.mappers.workspace;
 
-import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHubStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta2.WorkspaceV1beta2;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.javaoperatorsdk.webhook.conversion.Mapper;
 
-@Deprecated
-@JsonDeserialize
-public class AppDefinitionV1beta7Status extends ResourceStatus {
-    public AppDefinitionV1beta7Status() {
+@SuppressWarnings("deprecation")
+public class WorkspaceV1beta2Mapper implements Mapper<WorkspaceV1beta2, WorkspaceHub> {
+
+    @Override
+    public WorkspaceHub toHub(WorkspaceV1beta2 resource) {
+	return new WorkspaceHub(resource);
     }
 
-    public AppDefinitionV1beta7Status(AppDefinitionHubStatus fromHub) {
-	if (fromHub.getOperatorMessage() != null) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage());
-	}
-	if (fromHub.getOperatorStatus() != null) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus());
-	}
+    @Override
+    public WorkspaceV1beta2 fromHub(WorkspaceHub hub) {
+	return new WorkspaceV1beta2(hub);
     }
 }

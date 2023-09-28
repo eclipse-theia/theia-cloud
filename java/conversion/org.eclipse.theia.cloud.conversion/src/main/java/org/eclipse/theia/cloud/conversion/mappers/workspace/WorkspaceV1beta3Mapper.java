@@ -13,17 +13,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.session.v5;
+package org.eclipse.theia.cloud.conversion.mappers.workspace;
 
-import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.javaoperatorsdk.webhook.conversion.Mapper;
 
-@Deprecated
-@JsonDeserialize
-public class SessionV5betaStatus extends ResourceStatus {
-    // This class is empty as only the common properties of the super class are
-    // used. Already define a specific class to allow easier extension, properly
-    // type the resources and resource clients.
-    // It is planned to extend this later with Session specific status steps.
+public class WorkspaceV1beta3Mapper implements Mapper<Workspace, WorkspaceHub> {
+
+    @Override
+    public WorkspaceHub toHub(Workspace resource) {
+	return new WorkspaceHub(resource);
+    }
+
+    @Override
+    public Workspace fromHub(WorkspaceHub hub) {
+	return new Workspace(hub);
+    }
+
 }
