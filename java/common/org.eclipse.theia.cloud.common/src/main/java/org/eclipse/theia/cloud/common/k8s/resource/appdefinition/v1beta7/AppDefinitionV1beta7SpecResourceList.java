@@ -1,5 +1,6 @@
 /********************************************************************************
- * Copyright (C) 2023 EclipseSource and others.
+ * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,17 +14,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7;
+package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7;
 
-import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.fabric8.kubernetes.client.CustomResourceList;
 
 @Deprecated
-@JsonDeserialize
-public class AppDefinitionV7betaStatus extends ResourceStatus {
-    // This class is empty as only the common properties of the super class are
-    // used. Already define a specific class to allow easier extension, properly
-    // type the resources and resource clients.
-    // It is planned to extend this later with AppDefinition specific status steps.
+public class AppDefinitionV1beta7SpecResourceList extends CustomResourceList<AppDefinitionV1beta7> {
+
 }

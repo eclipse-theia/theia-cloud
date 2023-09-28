@@ -13,22 +13,25 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.conversion;
+package org.eclipse.theia.cloud.conversion.mappers.appdefinition;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 
-public interface Conversion {
+import io.javaoperatorsdk.webhook.conversion.Mapper;
+import io.javaoperatorsdk.webhook.conversion.TargetVersion;
 
-    HasMetadata convert(HasMetadata object) throws ConversionException;
+@TargetVersion("v1beta8")
+public class AppDefinitionV1beta8Mapper implements Mapper<AppDefinition, AppDefinitionHub> {
 
-    class ConversionException extends Exception {
-	public ConversionException(String message) {
-	    super(message);
-	}
+    @Override
+    public AppDefinitionHub toHub(AppDefinition resource) {
+	return new AppDefinitionHub(resource);
+    }
 
-	public ConversionException(String message, Throwable cause) {
-	    super(message, cause);
-	}
+    @Override
+    public AppDefinition fromHub(AppDefinitionHub hub) {
+	return new AppDefinition(hub);
     }
 
 }

@@ -16,29 +16,44 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.Group;
+import io.fabric8.kubernetes.model.annotation.Kind;
 import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v8beta")
+@Version("v1beta8")
 @Group("theia.cloud")
+@Kind("AppDefinition")
 @Singular("appdefinition")
 @Plural("appdefinitions")
 public class AppDefinition extends CustomResource<AppDefinitionSpec, AppDefinitionStatus> implements Namespaced {
 
     private static final long serialVersionUID = 8749670583218521755L;
-    public static final String API = "theia.cloud/v8beta";
+    public static final String API = "theia.cloud/v1beta8";
     public static final String KIND = "AppDefinition";
     public static final String CRD_NAME = "appdefinitions.theia.cloud";
 
     @Override
     public String toString() {
 	return CustomResourceUtil.toString(this);
+    }
+
+    public AppDefinition() {
+
+    }
+
+    public AppDefinition(AppDefinitionHub fromHub) {
+	this.setMetadata(fromHub.getMetadata());
+	this.spec = new AppDefinitionSpec(fromHub.getSpec());
+	if (fromHub.getStatus() != null) {
+	    this.status = new AppDefinitionStatus(fromHub.getStatus());
+	}
     }
 
 }
