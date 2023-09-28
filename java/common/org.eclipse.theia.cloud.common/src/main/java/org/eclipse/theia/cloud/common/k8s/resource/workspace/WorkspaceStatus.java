@@ -17,6 +17,7 @@ package org.eclipse.theia.cloud.common.k8s.resource.workspace;
 
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.StatusStep;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHubStatus;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -36,28 +37,18 @@ public class WorkspaceStatus extends ResourceStatus {
     public WorkspaceStatus() {
     }
 
-    /**
-     * Migration constructor.
-     * 
-     * @param toMigrate
-     */
-    @SuppressWarnings("deprecation")
-    public WorkspaceStatus(
-	    org.eclipse.theia.cloud.common.k8s.resource.workspace.v2.WorkspaceV2betaStatus toMigrate) {
-	setOperatorStatus(toMigrate.getOperatorStatus());
-	setOperatorMessage(toMigrate.getOperatorMessage());
-
-	this.volumeClaim = new StatusStep();
-	if (toMigrate.getVolumeClaim() != null) {
-	    this.volumeClaim.setStatus(toMigrate.getVolumeClaim().getStatus());
-	    this.volumeClaim.setMessage(toMigrate.getVolumeClaim().getMessage());
-
+    public WorkspaceStatus(WorkspaceHubStatus fromHub) {
+	if (fromHub.getOperatorMessage() != null) {
+	    this.setOperatorMessage(fromHub.getOperatorMessage());
 	}
-
-	this.volumeAttach = new StatusStep();
-	if (toMigrate.getVolumeAttach() != null) {
-	    this.volumeAttach.setStatus(toMigrate.getVolumeAttach().getStatus());
-	    this.volumeAttach.setMessage(toMigrate.getVolumeAttach().getMessage());
+	if (fromHub.getOperatorStatus() != null) {
+	    this.setOperatorStatus(fromHub.getOperatorStatus());
+	}
+	if (fromHub.getVolumeClaim() != null) {
+	    this.setVolumeClaim(fromHub.getVolumeClaim());
+	}
+	if (fromHub.getVolumeAttach() != null) {
+	    this.setVolumeClaim(fromHub.getVolumeAttach());
 	}
     }
 

@@ -14,12 +14,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.session.v5;
+package org.eclipse.theia.cloud.common.k8s.resource.session.v1beta5;
 
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHubSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,7 +29,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Deprecated
 @JsonDeserialize()
-public class SessionV5betaSpec implements UserScopedSpec {
+public class SessionV1beta5Spec implements UserScopedSpec {
 
     @JsonProperty("name")
     private String name;
@@ -63,28 +64,42 @@ public class SessionV5betaSpec implements UserScopedSpec {
     @JsonProperty("envVarsFromSecrets")
     private List<String> envVarsFromSecrets;
 
-    public SessionV5betaSpec() {
+    public SessionV1beta5Spec() {
     }
 
-    public SessionV5betaSpec(String name, String appDefinition, String user) {
+    public SessionV1beta5Spec(SessionHubSpec fromHub) {
+	this.name = fromHub.getName();
+	this.appDefinition = fromHub.getAppDefinition();
+	this.user = fromHub.getUser();
+	this.url = fromHub.getUrl();
+	this.error = fromHub.getError();
+	this.workspace = fromHub.getWorkspace();
+	this.lastActivity = fromHub.getLastActivity();
+	this.sessionSecret = fromHub.getSessionSecret();
+	this.envVars = fromHub.getEnvVars();
+	this.envVarsFromConfigMaps = fromHub.getEnvVarsFromConfigMaps();
+	this.envVarsFromSecrets = fromHub.getEnvVarsFromSecrets();
+    }
+
+    public SessionV1beta5Spec(String name, String appDefinition, String user) {
 	this(name, appDefinition, user, null);
     }
 
-    public SessionV5betaSpec(String name, String appDefinition, String user, String workspace) {
+    public SessionV1beta5Spec(String name, String appDefinition, String user, String workspace) {
 	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
     }
 
-    public SessionV5betaSpec(String name, String appDefinition, String user, String workspace,
+    public SessionV1beta5Spec(String name, String appDefinition, String user, String workspace,
 	    Map<String, String> envVars) {
 	this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
     }
 
-    public SessionV5betaSpec(String name, String appDefinition, String user, String workspace,
+    public SessionV1beta5Spec(String name, String appDefinition, String user, String workspace,
 	    Map<String, String> envVars, List<String> envVarsFromConfigMaps) {
 	this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
     }
 
-    public SessionV5betaSpec(String name, String appDefinition, String user, String workspace,
+    public SessionV1beta5Spec(String name, String appDefinition, String user, String workspace,
 	    Map<String, String> envVars, List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
 	this.name = name;
 	this.appDefinition = appDefinition;
@@ -196,7 +211,7 @@ public class SessionV5betaSpec implements UserScopedSpec {
 	    return false;
 	if (getClass() != obj.getClass())
 	    return false;
-	SessionV5betaSpec other = (SessionV5betaSpec) obj;
+	SessionV1beta5Spec other = (SessionV1beta5Spec) obj;
 	if (appDefinition == null) {
 	    if (other.appDefinition != null)
 		return false;

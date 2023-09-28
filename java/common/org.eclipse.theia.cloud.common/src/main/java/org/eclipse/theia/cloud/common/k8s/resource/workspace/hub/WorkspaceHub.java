@@ -13,17 +13,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub;
+package org.eclipse.theia.cloud.common.k8s.resource.workspace.hub;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-public class AppDefinitionHub {
+public class WorkspaceHub {
 
     private ObjectMeta metadata = new ObjectMeta();
-    private AppDefinitionHubSpec spec;
-    private AppDefinitionHubStatus status;
+    private WorkspaceHubSpec spec;
+    private WorkspaceHubStatus status;
 
     public ObjectMeta getMetadata() {
 	return metadata;
@@ -33,37 +33,36 @@ public class AppDefinitionHub {
 	this.metadata = metadata;
     }
 
-    public AppDefinitionHubSpec getSpec() {
+    public WorkspaceHubSpec getSpec() {
 	return spec;
     }
 
-    public void setSpec(AppDefinitionHubSpec spec) {
+    public void setSpec(WorkspaceHubSpec spec) {
 	this.spec = spec;
     }
 
-    public AppDefinitionHubStatus getStatus() {
+    public WorkspaceHubStatus getStatus() {
 	return status;
     }
 
-    public void setStatus(AppDefinitionHubStatus status) {
+    public void setStatus(WorkspaceHubStatus status) {
 	this.status = status;
     }
 
-    public AppDefinitionHub(AppDefinition toHub) {
+    public WorkspaceHub(Workspace toHub) {
 	this.setMetadata(toHub.getMetadata());
-	this.spec = new AppDefinitionHubSpec(toHub.getSpec());
+	this.spec = new WorkspaceHubSpec(toHub.getSpec());
 	if (toHub.getStatus() != null) {
-	    this.status = new AppDefinitionHubStatus(toHub.getStatus());
+	    this.status = new WorkspaceHubStatus(toHub.getStatus());
 	}
     }
 
     @SuppressWarnings("deprecation")
-    public AppDefinitionHub(
-	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7.AppDefinitionV1beta7 toHub) {
+    public WorkspaceHub(org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta2.WorkspaceV1beta2 toHub) {
 	this.setMetadata(toHub.getMetadata());
-	this.spec = new AppDefinitionHubSpec(toHub.getSpec());
+	this.spec = new WorkspaceHubSpec(toHub.getSpec());
 	if (toHub.getStatus() != null) {
-	    this.status = new AppDefinitionHubStatus(toHub.getStatus());
+	    this.status = new WorkspaceHubStatus(toHub.getStatus());
 	}
     }
 }

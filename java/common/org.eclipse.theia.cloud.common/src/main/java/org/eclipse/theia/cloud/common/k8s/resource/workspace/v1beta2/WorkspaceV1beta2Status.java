@@ -13,32 +13,56 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.session;
+package org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta2;
 
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHubStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.StatusStep;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHubStatus;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@Deprecated
 @JsonDeserialize
-public class SessionStatus extends ResourceStatus {
-    // This class is empty as only the common properties of the super class are
-    // used. Already define a specific class to allow easier extension, properly
-    // type the resources and resource clients.
-    // It is planned to extend this later with Session specific status steps.
+public class WorkspaceV1beta2Status extends ResourceStatus {
 
-    /**
-     * Default constructor.
-     */
-    public SessionStatus() {
+    @JsonProperty("volumeClaim")
+    private StatusStep volumeClaim;
+
+    @JsonProperty("volumeAttach")
+    private StatusStep volumeAttach;
+
+    public WorkspaceV1beta2Status() {
     }
 
-    public SessionStatus(SessionHubStatus fromHub) {
+    public WorkspaceV1beta2Status(WorkspaceHubStatus fromHub) {
 	if (fromHub.getOperatorMessage() != null) {
 	    this.setOperatorMessage(fromHub.getOperatorMessage());
 	}
 	if (fromHub.getOperatorStatus() != null) {
 	    this.setOperatorStatus(fromHub.getOperatorStatus());
 	}
+	if (fromHub.getVolumeClaim() != null) {
+	    this.setVolumeClaim(fromHub.getVolumeClaim());
+	}
+	if (fromHub.getVolumeAttach() != null) {
+	    this.setVolumeClaim(fromHub.getVolumeAttach());
+	}
+    }
+
+    public StatusStep getVolumeClaim() {
+	return volumeClaim;
+    }
+
+    public void setVolumeClaim(StatusStep volumeClaim) {
+	this.volumeClaim = volumeClaim;
+    }
+
+    public StatusStep getVolumeAttach() {
+	return volumeAttach;
+    }
+
+    public void setVolumeAttach(StatusStep volumeAttach) {
+	this.volumeAttach = volumeAttach;
     }
 }

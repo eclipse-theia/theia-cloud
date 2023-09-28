@@ -17,11 +17,8 @@ package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub;
 
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7.AppDefinitionV1beta7Status;
 
 public class AppDefinitionHubStatus extends ResourceStatus {
-    public AppDefinitionHubStatus() {
-    }
 
     public AppDefinitionHubStatus(AppDefinitionStatus toHub) {
 	if (toHub.getOperatorMessage() != null) {
@@ -32,7 +29,9 @@ public class AppDefinitionHubStatus extends ResourceStatus {
 	}
     }
 
-    public AppDefinitionHubStatus(AppDefinitionV1beta7Status toHub) {
+    @SuppressWarnings("deprecation")
+    public AppDefinitionHubStatus(
+	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7.AppDefinitionV1beta7Status toHub) {
 	if (toHub.getOperatorMessage() != null) {
 	    this.setOperatorMessage(toHub.getOperatorMessage());
 	}

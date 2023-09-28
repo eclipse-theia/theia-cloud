@@ -16,12 +16,11 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.session;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHubSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -78,18 +77,17 @@ public class SessionSpec implements UserScopedSpec {
 	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
     }
 
-    public SessionSpec(String name, String appDefinition, String user, String workspace,
-	    Map<String, String> envVars) {
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars) {
 	this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
     }
 
-    public SessionSpec(String name, String appDefinition, String user, String workspace,
-	    Map<String, String> envVars, List<String> envVarsFromConfigMaps) {
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps) {
 	this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
     }
 
-    public SessionSpec(String name, String appDefinition, String user, String workspace,
-	    Map<String, String> envVars, List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
 	this.name = name;
 	this.appDefinition = appDefinition;
 	this.user = user;
@@ -99,30 +97,18 @@ public class SessionSpec implements UserScopedSpec {
 	this.envVarsFromSecrets = envVarsFromSecrets;
     }
 
-    /**
-     * Migration constructor.
-     * 
-     * @param toMigrate
-     */
-    @SuppressWarnings("deprecation")
-    public SessionSpec(org.eclipse.theia.cloud.common.k8s.resource.session.v5.SessionV5betaSpec toMigrate) {
-	this.name = toMigrate.getName();
-	this.appDefinition = toMigrate.getAppDefinition();
-	this.user = toMigrate.getUser();
-	this.url = toMigrate.getUrl();
-	this.error = toMigrate.getError();
-	this.workspace = toMigrate.getWorkspace();
-	this.lastActivity = toMigrate.getLastActivity();
-	this.sessionSecret = toMigrate.getSessionSecret();
-	if (toMigrate.getEnvVars() != null) {
-	    this.envVars = new LinkedHashMap<>(toMigrate.getEnvVars());
-	}
-	if (toMigrate.getEnvVarsFromConfigMaps() != null) {
-	    this.envVarsFromConfigMaps = new ArrayList<>(toMigrate.getEnvVarsFromConfigMaps());
-	}
-	if (toMigrate.getEnvVarsFromSecrets() != null) {
-	    this.envVarsFromSecrets = new ArrayList<>(toMigrate.getEnvVarsFromSecrets());
-	}
+    public SessionSpec(SessionHubSpec fromHub) {
+	this.name = fromHub.getName();
+	this.appDefinition = fromHub.getAppDefinition();
+	this.user = fromHub.getUser();
+	this.url = fromHub.getUrl();
+	this.error = fromHub.getError();
+	this.workspace = fromHub.getWorkspace();
+	this.lastActivity = fromHub.getLastActivity();
+	this.sessionSecret = fromHub.getSessionSecret();
+	this.envVars = fromHub.getEnvVars();
+	this.envVarsFromConfigMaps = fromHub.getEnvVarsFromConfigMaps();
+	this.envVarsFromSecrets = fromHub.getEnvVarsFromSecrets();
     }
 
     public String getName() {

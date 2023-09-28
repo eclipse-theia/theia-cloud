@@ -14,11 +14,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.session.v5;
+package org.eclipse.theia.cloud.common.k8s.resource.session.v1beta5;
 
 import io.fabric8.kubernetes.client.CustomResourceList;
 
 @Deprecated
-public class SessionV5betaSpecResourceList extends CustomResourceList<SessionV5beta> {
+public class SessionV1beta5SpecResourceList extends CustomResourceList<SessionV1beta5> {
 
 }

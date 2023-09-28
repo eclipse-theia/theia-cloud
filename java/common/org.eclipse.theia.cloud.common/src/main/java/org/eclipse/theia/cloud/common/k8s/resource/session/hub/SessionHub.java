@@ -13,17 +13,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub;
+package org.eclipse.theia.cloud.common.k8s.resource.session.hub;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
-public class AppDefinitionHub {
+public class SessionHub {
 
     private ObjectMeta metadata = new ObjectMeta();
-    private AppDefinitionHubSpec spec;
-    private AppDefinitionHubStatus status;
+    private SessionHubSpec spec;
+    private SessionHubStatus status;
 
     public ObjectMeta getMetadata() {
 	return metadata;
@@ -33,37 +33,37 @@ public class AppDefinitionHub {
 	this.metadata = metadata;
     }
 
-    public AppDefinitionHubSpec getSpec() {
+    public SessionHubSpec getSpec() {
 	return spec;
     }
 
-    public void setSpec(AppDefinitionHubSpec spec) {
+    public void setSpec(SessionHubSpec spec) {
 	this.spec = spec;
     }
 
-    public AppDefinitionHubStatus getStatus() {
+    public SessionHubStatus getStatus() {
 	return status;
     }
 
-    public void setStatus(AppDefinitionHubStatus status) {
+    public void setStatus(SessionHubStatus status) {
 	this.status = status;
     }
 
-    public AppDefinitionHub(AppDefinition toHub) {
+    public SessionHub(Session toHub) {
 	this.setMetadata(toHub.getMetadata());
-	this.spec = new AppDefinitionHubSpec(toHub.getSpec());
+	this.spec = new SessionHubSpec(toHub.getSpec());
 	if (toHub.getStatus() != null) {
-	    this.status = new AppDefinitionHubStatus(toHub.getStatus());
+	    this.status = new SessionHubStatus(toHub.getStatus());
 	}
     }
 
     @SuppressWarnings("deprecation")
-    public AppDefinitionHub(
-	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7.AppDefinitionV1beta7 toHub) {
+    public SessionHub(org.eclipse.theia.cloud.common.k8s.resource.session.v1beta5.SessionV1beta5 toHub) {
 	this.setMetadata(toHub.getMetadata());
-	this.spec = new AppDefinitionHubSpec(toHub.getSpec());
+	this.spec = new SessionHubSpec(toHub.getSpec());
 	if (toHub.getStatus() != null) {
-	    this.status = new AppDefinitionHubStatus(toHub.getStatus());
+	    this.status = new SessionHubStatus(toHub.getStatus());
 	}
     }
+
 }

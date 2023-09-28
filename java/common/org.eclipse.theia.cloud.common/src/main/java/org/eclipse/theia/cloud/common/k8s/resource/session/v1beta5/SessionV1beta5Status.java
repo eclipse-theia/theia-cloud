@@ -13,27 +13,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.session;
+package org.eclipse.theia.cloud.common.k8s.resource.session.v1beta5;
 
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHubStatus;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@Deprecated
 @JsonDeserialize
-public class SessionStatus extends ResourceStatus {
-    // This class is empty as only the common properties of the super class are
-    // used. Already define a specific class to allow easier extension, properly
-    // type the resources and resource clients.
-    // It is planned to extend this later with Session specific status steps.
+public class SessionV1beta5Status extends ResourceStatus {
 
-    /**
-     * Default constructor.
-     */
-    public SessionStatus() {
+    public SessionV1beta5Status() {
     }
 
-    public SessionStatus(SessionHubStatus fromHub) {
+    public SessionV1beta5Status(SessionHubStatus fromHub) {
 	if (fromHub.getOperatorMessage() != null) {
 	    this.setOperatorMessage(fromHub.getOperatorMessage());
 	}
