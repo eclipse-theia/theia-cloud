@@ -14,32 +14,46 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7;
+package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7;
 
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.Group;
+import io.fabric8.kubernetes.model.annotation.Kind;
 import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
 @Deprecated
-@Version("v7beta")
+@Version("v1beta7")
 @Group("theia.cloud")
+@Kind("AppDefinition")
 @Singular("appdefinition")
 @Plural("appdefinitions")
-public class AppDefinitionV7beta extends CustomResource<AppDefinitionV7betaSpec, AppDefinitionV7betaStatus>
+public class AppDefinitionV1beta7 extends CustomResource<AppDefinitionV1beta7Spec, AppDefinitionV1beta7Status>
 	implements Namespaced {
 
-    public static final String API = "theia.cloud/v7beta";
+    public static final String API = "theia.cloud/v1beta7";
     public static final String KIND = "AppDefinition";
     public static final String CRD_NAME = "appdefinitions.theia.cloud";
 
     @Override
     public String toString() {
 	return CustomResourceUtil.toString(this);
+    }
+
+    public AppDefinitionV1beta7() {
+    }
+
+    public AppDefinitionV1beta7(AppDefinitionHub fromHub) {
+	this.setMetadata(fromHub.getMetadata());
+	this.spec = new AppDefinitionV1beta7Spec(fromHub.getSpec());
+	if (fromHub.getStatus() != null) {
+	    this.status = new AppDefinitionV1beta7Status(fromHub.getStatus());
+	}
     }
 
 }

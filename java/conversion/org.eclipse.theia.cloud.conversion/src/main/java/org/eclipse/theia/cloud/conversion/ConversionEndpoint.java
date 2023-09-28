@@ -15,7 +15,12 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.conversion;
 
+import org.eclipse.theia.cloud.conversion.mappers.appdefinition.AppDefinitionV1beta8Mapper;
+import org.eclipse.theia.cloud.conversion.mappers.appdefinition.AppDefinitionV1beta7Mapper;
+
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.apiextensions.v1.ConversionReview;
+import io.javaoperatorsdk.webhook.conversion.ConversionController;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -24,13 +29,25 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/")
 public class ConversionEndpoint {
+    private final ConversionController appDefinitionController;
+
+    public ConversionEndpoint() {
+	this.appDefinitionController = new ConversionController();
+	appDefinitionController.registerMapper(new AppDefinitionV1beta7Mapper());
+	appDefinitionController.registerMapper(new AppDefinitionV1beta8Mapper());
+    }
 
     @POST
-    @Path("convert")
+    @Path("convert/appdefinition")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ConversionReview convert(ConversionReview conversionReview) {
-	return ConversionController.handle(conversionReview);
+	conversionReview.getRequest().getObjects().forEach(obj -> {
+	    System.out.println("[" + conversionReview.getRequest().getUid() + "] Converting "
+		    + ((HasMetadata) obj).getKind() + " (version: '" + ((HasMetadata) obj).getApiVersion()
+		    + "') to version '" + conversionReview.getRequest().getDesiredAPIVersion() + "'");
+	});
+	return this.appDefinitionController.handle(conversionReview);
     }
 
 }

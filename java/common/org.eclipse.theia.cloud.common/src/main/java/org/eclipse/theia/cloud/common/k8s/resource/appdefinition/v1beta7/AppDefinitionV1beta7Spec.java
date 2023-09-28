@@ -14,14 +14,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7;
+package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7;
+
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHubSpec;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@Deprecated
 @JsonDeserialize()
-public class AppDefinitionV7betaSpec {
+public class AppDefinitionV1beta7Spec {
 
     @JsonProperty("name")
     private String name;
@@ -76,6 +77,53 @@ public class AppDefinitionV7betaSpec {
 
     @JsonProperty("monitor")
     private Monitor monitor;
+
+    /**
+     * Default constructor.
+     */
+    public AppDefinitionV1beta7Spec() {
+    }
+
+    /**
+     * Migration constructor.
+     * 
+     * @param fromHub previous version
+     */
+    public AppDefinitionV1beta7Spec(AppDefinitionHubSpec fromHub) {
+	this.name = fromHub.getName() + "-v7";
+	this.image = fromHub.getImage();
+	this.imagePullPolicy = fromHub.getImagePullPolicy();
+	this.pullSecret = fromHub.getPullSecret();
+	this.uid = fromHub.getUid();
+	this.port = fromHub.getPort();
+	this.ingressname = fromHub.getIngressname();
+	this.minInstances = fromHub.getMinInstances();
+	this.maxInstances = fromHub.getMaxInstances();
+	this.requestsMemory = fromHub.getRequestsMemory();
+	this.requestsCpu = fromHub.getRequestsCpu();
+	this.limitsMemory = fromHub.getLimitsMemory();
+	this.limitsCpu = fromHub.getLimitsCpu();
+	this.downlinkLimit = fromHub.getDownlinkLimit();
+	this.uplinkLimit = fromHub.getUplinkLimit();
+	this.mountPath = fromHub.getMountPath();
+
+	this.timeout = new Timeout();
+	if (fromHub.getTimeout() != null) {
+	    this.timeout.limit = fromHub.getTimeout().getLimit();
+	    this.timeout.strategy = fromHub.getTimeout().getStrategy();
+	}
+
+	this.monitor = new Monitor();
+	if (fromHub.getMonitor() != null) {
+	    this.monitor.port = fromHub.getMonitor().getPort();
+
+	    this.monitor.activityTracker = new Monitor.ActivityTracker();
+	    if (fromHub.getMonitor().getActivityTracker() != null) {
+		this.monitor.activityTracker.timeoutAfter = fromHub.getMonitor().getActivityTracker().getTimeoutAfter();
+		this.monitor.activityTracker.notifyAfter = fromHub.getMonitor().getActivityTracker().getNotifyAfter();
+	    }
+	}
+    }
 
     public String getName() {
 	return name;

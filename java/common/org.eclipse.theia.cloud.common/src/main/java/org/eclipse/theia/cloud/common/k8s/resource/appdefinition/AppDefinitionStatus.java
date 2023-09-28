@@ -16,6 +16,7 @@
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHubStatus;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -32,15 +33,12 @@ public class AppDefinitionStatus extends ResourceStatus {
     public AppDefinitionStatus() {
     }
 
-    /**
-     * Migration constructor.
-     * 
-     * @param toMigrate
-     */
-    @SuppressWarnings("deprecation")
-    public AppDefinitionStatus(
-	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v7.AppDefinitionV7betaStatus toMigrate) {
-	setOperatorStatus(toMigrate.getOperatorStatus());
-	setOperatorMessage(toMigrate.getOperatorMessage());
+    public AppDefinitionStatus(AppDefinitionHubStatus fromHub) {
+	if (fromHub.getOperatorMessage() != null) {
+	    this.setOperatorMessage(fromHub.getOperatorMessage());
+	}
+	if (fromHub.getOperatorStatus() != null) {
+	    this.setOperatorStatus(fromHub.getOperatorStatus());
+	}
     }
 }

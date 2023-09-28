@@ -1,6 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
- * others.
+ * Copyright (C) 2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,108 +13,125 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
+package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHubSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7.AppDefinitionV1beta7Spec;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-@JsonDeserialize()
-public class AppDefinitionSpec {
+public class AppDefinitionHubSpec {
 
-    @JsonProperty("name")
     private String name;
 
-    @JsonProperty("image")
     private String image;
 
-    @JsonProperty("imagePullPolicy")
     private String imagePullPolicy;
 
-    @JsonProperty("pullSecret")
     private String pullSecret;
 
-    @JsonProperty("uid")
     private int uid;
 
-    @JsonProperty("port")
     private int port;
 
-    @JsonProperty("ingressname")
     private String ingressname;
 
-    @JsonProperty("minInstances")
     private int minInstances;
 
-    @JsonProperty("maxInstances")
     private Integer maxInstances;
 
-    @JsonProperty("timeout")
     private Timeout timeout;
 
-    @JsonProperty("requestsMemory")
     private String requestsMemory;
 
-    @JsonProperty("requestsCpu")
     private String requestsCpu;
 
-    @JsonProperty("limitsMemory")
     private String limitsMemory;
 
-    @JsonProperty("limitsCpu")
     private String limitsCpu;
 
-    @JsonProperty("downlinkLimit")
     private int downlinkLimit;// kilobits per second
 
-    @JsonProperty("uplinkLimit")
     private int uplinkLimit;// kilobits per second
 
-    @JsonProperty("mountPath")
     private String mountPath;
 
-    @JsonProperty("monitor")
     private Monitor monitor;
 
     /**
      * Default constructor.
      */
-    public AppDefinitionSpec() {
+    public AppDefinitionHubSpec() {
     }
 
-    public AppDefinitionSpec(AppDefinitionHubSpec fromHub) {
-	this.name = fromHub.getName() + "-v8";
-	this.image = fromHub.getImage();
-	this.imagePullPolicy = fromHub.getImagePullPolicy();
-	this.pullSecret = fromHub.getPullSecret();
-	this.uid = fromHub.getUid();
-	this.port = fromHub.getPort();
-	this.ingressname = fromHub.getIngressname();
-	this.minInstances = fromHub.getMinInstances();
-	this.maxInstances = fromHub.getMaxInstances();
-	this.requestsMemory = fromHub.getRequestsMemory();
-	this.requestsCpu = fromHub.getRequestsCpu();
-	this.limitsMemory = fromHub.getLimitsMemory();
-	this.limitsCpu = fromHub.getLimitsCpu();
-	this.downlinkLimit = fromHub.getDownlinkLimit();
-	this.uplinkLimit = fromHub.getUplinkLimit();
-	this.mountPath = fromHub.getMountPath();
+    public AppDefinitionHubSpec(AppDefinitionSpec toHub) {
+	this.name = toHub.getName();
+	this.image = toHub.getImage();
+	this.imagePullPolicy = toHub.getImagePullPolicy();
+	this.pullSecret = toHub.getPullSecret();
+	this.uid = toHub.getUid();
+	this.port = toHub.getPort();
+	this.ingressname = toHub.getIngressname();
+	this.minInstances = toHub.getMinInstances();
+	this.maxInstances = toHub.getMaxInstances();
+	this.requestsMemory = toHub.getRequestsMemory();
+	this.requestsCpu = toHub.getRequestsCpu();
+	this.limitsMemory = toHub.getLimitsMemory();
+	this.limitsCpu = toHub.getLimitsCpu();
+	this.downlinkLimit = toHub.getDownlinkLimit();
+	this.uplinkLimit = toHub.getUplinkLimit();
+	this.mountPath = toHub.getMountPath();
 
 	this.timeout = new Timeout();
-	if (fromHub.getTimeout() != null) {
-	    this.timeout.limit = fromHub.getTimeout().getLimit();
-	    this.timeout.strategy = fromHub.getTimeout().getStrategy();
+	if (toHub.getTimeout() != null) {
+	    this.timeout.limit = toHub.getTimeout().getLimit();
+	    this.timeout.strategy = toHub.getTimeout().getStrategy();
 	}
 
 	this.monitor = new Monitor();
-	if (fromHub.getMonitor() != null) {
-	    this.monitor.port = fromHub.getMonitor().getPort();
+	if (toHub.getMonitor() != null) {
+	    this.monitor.port = toHub.getMonitor().getPort();
 
 	    this.monitor.activityTracker = new Monitor.ActivityTracker();
-	    if (fromHub.getMonitor().getActivityTracker() != null) {
-		this.monitor.activityTracker.timeoutAfter = fromHub.getMonitor().getActivityTracker().getTimeoutAfter();
-		this.monitor.activityTracker.notifyAfter = fromHub.getMonitor().getActivityTracker().getNotifyAfter();
+	    if (toHub.getMonitor().getActivityTracker() != null) {
+		this.monitor.activityTracker.timeoutAfter = toHub.getMonitor().getActivityTracker().getTimeoutAfter();
+		this.monitor.activityTracker.notifyAfter = toHub.getMonitor().getActivityTracker().getNotifyAfter();
+	    }
+	}
+    }
+
+    public AppDefinitionHubSpec(AppDefinitionV1beta7Spec toHub) {
+	this.name = toHub.getName();
+	this.image = toHub.getImage();
+	this.imagePullPolicy = toHub.getImagePullPolicy();
+	this.pullSecret = toHub.getPullSecret();
+	this.uid = toHub.getUid();
+	this.port = toHub.getPort();
+	this.ingressname = toHub.getIngressname();
+	this.minInstances = toHub.getMinInstances();
+	this.maxInstances = toHub.getMaxInstances();
+	this.requestsMemory = toHub.getRequestsMemory();
+	this.requestsCpu = toHub.getRequestsCpu();
+	this.limitsMemory = toHub.getLimitsMemory();
+	this.limitsCpu = toHub.getLimitsCpu();
+	this.downlinkLimit = toHub.getDownlinkLimit();
+	this.uplinkLimit = toHub.getUplinkLimit();
+	this.mountPath = toHub.getMountPath();
+
+	this.timeout = new Timeout();
+	if (toHub.getTimeout() != null) {
+	    this.timeout.limit = toHub.getTimeout().getLimit();
+	    this.timeout.strategy = toHub.getTimeout().getStrategy();
+	}
+
+	this.monitor = new Monitor();
+	if (toHub.getMonitor() != null) {
+	    this.monitor.port = toHub.getMonitor().getPort();
+
+	    this.monitor.activityTracker = new Monitor.ActivityTracker();
+	    if (toHub.getMonitor().getActivityTracker() != null) {
+		this.monitor.activityTracker.timeoutAfter = toHub.getMonitor().getActivityTracker().getTimeoutAfter();
+		this.monitor.activityTracker.notifyAfter = toHub.getMonitor().getActivityTracker().getNotifyAfter();
 	    }
 	}
     }
@@ -289,4 +305,5 @@ public class AppDefinitionSpec {
 
 	}
     }
+
 }
