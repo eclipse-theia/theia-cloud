@@ -118,6 +118,10 @@ public class TheiaCloudArguments {
 	    "--continueOnException" }, description = "Whether the operator will continue to run in case of unexpected exceptions.", required = false)
     private boolean continueOnException;
 
+    @Option(names = {
+	    "--oAuth2ProxyImage" }, description = "The version to use of the quay.io/oauth2-proxy/oauth2-proxy image.", required = false, defaultValue = "latest")
+    private String oAuth2ProxyImage;
+
     public boolean isUseKeycloak() {
 	return useKeycloak;
     }
@@ -214,6 +218,10 @@ public class TheiaCloudArguments {
 	return continueOnException;
     }
 
+    public String getoAuth2ProxyImage() {
+	return oAuth2ProxyImage;
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -242,6 +250,7 @@ public class TheiaCloudArguments {
 	result = prime * result + (useKeycloak ? 1231 : 1237);
 	result = prime * result + (usePaths ? 1231 : 1237);
 	result = prime * result + ((wondershaperImage == null) ? 0 : wondershaperImage.hashCode());
+	result = prime * result + ((oAuth2ProxyImage == null) ? 0 : oAuth2ProxyImage.hashCode());
 	return result;
     }
 
@@ -338,6 +347,11 @@ public class TheiaCloudArguments {
 		return false;
 	} else if (!wondershaperImage.equals(other.wondershaperImage))
 	    return false;
+	if (oAuth2ProxyImage == null) {
+	    if (other.oAuth2ProxyImage != null)
+		return false;
+	} else if (!oAuth2ProxyImage.equals(other.oAuth2ProxyImage))
+	    return false;
 	return true;
     }
 
@@ -352,7 +366,8 @@ public class TheiaCloudArguments {
 		+ requestedStorage + ", keycloakURL=" + keycloakURL + ", keycloakRealm=" + keycloakRealm
 		+ ", keycloakClientId=" + keycloakClientId + ", leaderLeaseDuration=" + leaderLeaseDuration
 		+ ", leaderRenewDeadline=" + leaderRenewDeadline + ", leaderRetryPeriod=" + leaderRetryPeriod
-		+ ", maxWatchIdleTime=" + maxWatchIdleTime + ", continueOnException=" + continueOnException + "]";
+		+ ", maxWatchIdleTime=" + maxWatchIdleTime + ", continueOnException=" + continueOnException
+		+ ", oAuth2ProxyImage=" + oAuth2ProxyImage + "]";
     }
 
 }
