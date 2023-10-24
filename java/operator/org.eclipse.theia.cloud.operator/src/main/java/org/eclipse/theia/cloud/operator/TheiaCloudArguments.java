@@ -218,7 +218,7 @@ public class TheiaCloudArguments {
 	return continueOnException;
     }
 
-    public String getoAuth2ProxyVersion() {
+    public String getOAuth2ProxyVersion() {
 	return oAuth2ProxyVersion;
     }
 

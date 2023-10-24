@@ -81,7 +81,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	replacements.putAll(getAppDefinitionData(appDefinition));
 	replacements.putAll(getEnvironmentVariables(appDefinition, instance));
 	replacements.putAll(getInstanceData(appDefinition, instance));
-	replacements.put(PLACEHOLDER_OAUTH2_PROXY_VERSION, arguments.getoAuth2ProxyVersion());
+	replacements.put(PLACEHOLDER_OAUTH2_PROXY_VERSION, arguments.getOAuth2ProxyVersion());
 	return replacements;
     }
 
@@ -92,7 +92,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	replacements.putAll(getAppDefinitionData(appDefinition));
 	replacements.putAll(getEnvironmentVariables(appDefinition, session));
 	replacements.putAll(getSessionData(session));
-	replacements.put(PLACEHOLDER_OAUTH2_PROXY_VERSION, arguments.getoAuth2ProxyVersion());
+	replacements.put(PLACEHOLDER_OAUTH2_PROXY_VERSION, arguments.getOAuth2ProxyVersion());
 	return replacements;
     }
 
