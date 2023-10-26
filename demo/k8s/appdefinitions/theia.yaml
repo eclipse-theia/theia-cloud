@@ -5,7 +5,7 @@ metadata:
   namespace: theiacloud
 spec:
   downlinkLimit: 30000
-  image: theiacloud/theia-cloud-demo:0.8.1.MS2
+  image: theiacloud/theia-cloud-demo:0.8.1.MS3
   imagePullPolicy: IfNotPresent
   ingressname: theia-cloud-demo-ws-ingress
   limitsCpu: "2"

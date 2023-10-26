@@ -15,7 +15,7 @@ hosts:
   instance: ws.192.168.39.3.nip.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.8.1.MS2
+  image: theiacloud/theia-cloud-try-now-page:0.8.1.MS3
   imagePullPolicy: Always
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true

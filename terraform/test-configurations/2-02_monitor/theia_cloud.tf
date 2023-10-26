@@ -77,7 +77,7 @@ resource "helm_release" "theia-cloud" {
 
   set {
     name  = "image.name"
-    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:0.8.1.MS2" : "theiacloud/theia-cloud-activity-demo-theia:0.8.1.MS2"
+    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:0.8.1.MS3" : "theiacloud/theia-cloud-activity-demo-theia:0.8.1.MS3"
   }
 
   set {
