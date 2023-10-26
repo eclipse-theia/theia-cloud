@@ -130,7 +130,7 @@ resource "helm_release" "theia-cloud-base" {
   name             = "theia-cloud-base"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud-base"
-  version          = "0.8.1-v004-MS2"
+  version          = "0.8.1-v004-MS3"
   namespace        = "theiacloud"
   create_namespace = true
 
@@ -145,7 +145,7 @@ resource "helm_release" "theia-cloud-crds" {
   name             = "theia-cloud-crds"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud-crds"
-  version          = "0.8.1-v004-MS2"
+  version          = "0.8.1-v004-MS3"
   namespace        = "theiacloud"
   create_namespace = true
 }
@@ -162,9 +162,9 @@ locals {
   # it will output "".
   local_exec_quotes = startswith(abspath(path.module), "/") ? "'" : ""
   jsonpatch = jsonencode([{
-      "op" = "add",
-      "path" = "/spec/template/spec/containers/0/args/-",
-      "value" = "--default-ssl-certificate=keycloak/${var.hostname}-tls"
+    "op"    = "add",
+    "path"  = "/spec/template/spec/containers/0/args/-",
+    "value" = "--default-ssl-certificate=keycloak/${var.hostname}-tls"
   }])
 }
 
@@ -229,7 +229,7 @@ resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud"
-  version          = "0.8.1-v008-MS2"
+  version          = "0.8.1-v009-MS3"
   namespace        = "theiacloud"
   create_namespace = true
 
