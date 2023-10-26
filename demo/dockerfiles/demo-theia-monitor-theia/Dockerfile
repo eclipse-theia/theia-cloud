@@ -1,4 +1,4 @@
-FROM node:16-bullseye as build-stage
+FROM node:16-bookworm as build-stage
 RUN apt-get update && apt-get install -y libxkbfile-dev libsecret-1-dev
 WORKDIR /home/theia
 ADD package.json ./package.json
@@ -13,10 +13,11 @@ RUN yarn --pure-lockfile && \
     yarn autoclean --force && \
     yarn cache clean
 
-FROM node:16-bullseye-slim as production-stage
+FROM node:16-bookworm-slim as production-stage
 RUN adduser --system --group theia
 RUN chmod g+rw /home && \
     mkdir -p /home/project && \
+    mkdir -p /home/theia && \
     chown -R theia:theia /home/theia && \
     chown -R theia:theia /home/project;
 RUN apt-get update && apt-get install -y wget apt-transport-https && \
