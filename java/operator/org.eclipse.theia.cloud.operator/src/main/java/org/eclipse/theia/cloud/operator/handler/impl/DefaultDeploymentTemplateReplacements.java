@@ -64,6 +64,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     public static final String PLACEHOLDER_MONITOR_PORT = "placeholder-monitor-port";
     public static final String PLACEHOLDER_MONITOR_PORT_ENV = "placeholder-monitor-env-port";
     public static final String PLACEHOLDER_ENABLE_ACTIVITY_TRACKER = "placeholder-enable-activity-tracker";
+    public static final String PLACEHOLDER_OAUTH2_PROXY_VERSION = "placeholder-oauth2-proxy-version";
 
     protected static final String DEFAULT_UID = "1000";
 
@@ -80,6 +81,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	replacements.putAll(getAppDefinitionData(appDefinition));
 	replacements.putAll(getEnvironmentVariables(appDefinition, instance));
 	replacements.putAll(getInstanceData(appDefinition, instance));
+	replacements.put(PLACEHOLDER_OAUTH2_PROXY_VERSION, arguments.getOAuth2ProxyVersion());
 	return replacements;
     }
 
@@ -90,6 +92,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 	replacements.putAll(getAppDefinitionData(appDefinition));
 	replacements.putAll(getEnvironmentVariables(appDefinition, session));
 	replacements.putAll(getSessionData(session));
+	replacements.put(PLACEHOLDER_OAUTH2_PROXY_VERSION, arguments.getOAuth2ProxyVersion());
 	return replacements;
     }
 
