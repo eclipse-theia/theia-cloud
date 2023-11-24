@@ -26,10 +26,11 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 public interface InitOperationHandler {
 
     static final String THEIA_CLOUD_INIT_LABEL = "theiaCloudInit";
+    static final String THEIA_CLOUD_USER_LABEL = "theiaCloudUser";
 
     String operationId();
 
-    void addInitContainer(String correlationId, TheiaCloudClient client, Deployment deployment,
+    void handleInitOperation(String correlationId, TheiaCloudClient client, Deployment deployment,
 	    AppDefinition appDefinition, Session session, List<String> args);
 
 }

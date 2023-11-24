@@ -1,7 +1,7 @@
 FROM debian:11-slim
 
 RUN apt update && \
-    apt install python git -y && \
+    apt install python3 git -y && \
     apt clean && \
     mkdir /user && \
     chmod 777 /user && \

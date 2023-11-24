@@ -420,7 +420,7 @@ public class LazySessionHandler implements SessionHandler {
 			AddedHandlerUtil.addImagePullSecret(deployment, appDefinition.getSpec().getPullSecret());
 		    }
 
-		    AddedHandlerUtil.addInitContainers(correlationId, client, deployment, appDefinition, session,
+		    AddedHandlerUtil.handleInitOperations(correlationId, client, deployment, appDefinition, session,
 			    initOperationHandlers);
 		});
     }

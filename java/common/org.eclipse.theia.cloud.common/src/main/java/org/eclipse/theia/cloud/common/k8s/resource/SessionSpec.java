@@ -179,7 +179,7 @@ public class SessionSpec implements UserScopedSpec {
 	return envVarsFromSecrets;
     }
 
-    public List<InitOperation> getinitOperations() {
+    public List<InitOperation> getInitOperations() {
 	return initOperations;
     }
 
@@ -279,10 +279,9 @@ public class SessionSpec implements UserScopedSpec {
     @Override
     public String toString() {
 	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
-		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity
-		+ ", sessionSecret=" + sessionSecret + ", envVars=" + envVars + ", envVarsFromConfigMaps="
-		+ envVarsFromConfigMaps + ", envVarsFromSecrets=" + envVarsFromSecrets + ", initOperations="
-		+ initOperations + "]";
+		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity + ", envVars="
+		+ envVars + ", envVarsFromConfigMaps=" + envVarsFromConfigMaps + ", envVarsFromSecrets="
+		+ envVarsFromSecrets + ", initOperations=" + initOperations + "]";
     }
 
     public static boolean isEphemeral(String workspace) {

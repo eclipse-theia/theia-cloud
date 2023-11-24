@@ -342,9 +342,9 @@ public final class AddedHandlerUtil {
 	return Optional.empty();
     }
 
-    public static void addInitContainers(String correlationId, TheiaCloudClient client, Deployment deployment,
+    public static void handleInitOperations(String correlationId, TheiaCloudClient client, Deployment deployment,
 	    AppDefinition appDefinition, Session session, Set<InitOperationHandler> initOperationHandlers) {
-	List<InitOperation> initOperations = session.getSpec().getinitOperations();
+	List<InitOperation> initOperations = session.getSpec().getInitOperations();
 	if (initOperations == null) {
 	    return;
 	}
@@ -356,7 +356,7 @@ public final class AddedHandlerUtil {
 			.format("No Init Handler found for operation with id {0}.", initOperation.getId())));
 		continue;
 	    }
-	    handler.get().addInitContainer(correlationId, client, deployment, appDefinition, session,
+	    handler.get().handleInitOperation(correlationId, client, deployment, appDefinition, session,
 		    initOperation.getArguments());
 	    LOGGER.info(formatLogMessage(correlationId,
 		    MessageFormat.format("Added init container with id {0} to deployment.", initOperation.getId())));

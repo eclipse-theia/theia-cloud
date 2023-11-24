@@ -61,6 +61,7 @@ public class GitInitOperationHandler implements InitOperationHandler {
     protected static final String IMAGE_ENV_KEY = "GIT_INIT_OPERATION_IMAGE";
     protected static final String DEFAULT_IMAGE = "theiacloud/theia-cloud-git-init:latest";
     protected static final String ID = "git";
+    protected static final String INIT_CONTAINER_NAME = "git-init";
 
     private static final Logger LOGGER = LogManager.getLogger(GitInitOperationHandler.class);
 
@@ -70,7 +71,7 @@ public class GitInitOperationHandler implements InitOperationHandler {
     }
 
     @Override
-    public void addInitContainer(String correlationId, TheiaCloudClient client, Deployment deployment,
+    public void handleInitOperation(String correlationId, TheiaCloudClient client, Deployment deployment,
 	    AppDefinition appDefinition, Session session, List<String> args) {
 
 	if (args.size() < 2 || args.size() > 3) {
@@ -93,7 +94,7 @@ public class GitInitOperationHandler implements InitOperationHandler {
 	Container gitInitContainer = new Container();
 	initContainers.add(gitInitContainer);
 
-	gitInitContainer.setName("git-init");
+	gitInitContainer.setName(INIT_CONTAINER_NAME);
 	gitInitContainer.setImage(getImage());
 	String repository = args.get(0);
 	String branch = args.get(1);
@@ -129,7 +130,7 @@ public class GitInitOperationHandler implements InitOperationHandler {
 		return;
 	    }
 
-	    String theiaCloudUser = k8sSecret.getMetadata().getAnnotations().get("theiaCloudUser");
+	    String theiaCloudUser = k8sSecret.getMetadata().getAnnotations().get(THEIA_CLOUD_USER_LABEL);
 	    if (theiaCloudUser == null || !session.getSpec().getUser().equals(theiaCloudUser)) {
 		LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId,
 			MessageFormat.format("Secret with name {0} is not configured to be used by user {1}.",
@@ -143,13 +144,19 @@ public class GitInitOperationHandler implements InitOperationHandler {
 
 	if (isHTTP(repository)) {
 	    if (!injectHTTPRepoCredentials(correlationId, secret, secretName, repository, gitInitContainer)) {
+		// problem during injection, return early
 		return;
 	    }
 	} else {
 	    if (!injectSSHRepoCredentials(correlationId, secret, secretName, repository, gitInitContainer, volumes)) {
+		// problem during injection, return early
 		return;
 	    }
 	}
+
+	// init container is added to the deployment at this point
+	// any additional init code (e.g. injecting SSH Keys into the running IDE itself
+	// may follow below or may be added by extending this handler)
 
     }
 
@@ -175,7 +182,10 @@ public class GitInitOperationHandler implements InitOperationHandler {
 	    String repositoryWithoutProtocol = split[1];
 	    if (repositoryWithoutProtocol.contains("@")) {
 		if (repositoryWithoutProtocol.split(Pattern.quote("@"))[0].contains(":")) {
-		    /* username and password part of URL */
+		    /*
+		     * username and password part of URL. keep injectUsername and injectPassword as
+		     * false
+		     */
 		} else {
 		    /* username part of url */
 		    injectPassword = true;

@@ -23,9 +23,17 @@ docker build -t theiacloud/theia-cloud-git-init:local -f dockerfiles/git-init/Do
 ```bash
 # don't save in ~/.ssh/... but e.g. in ~/tmp/ssh/id_theiacloud
 ssh-keygen -t ed25519 -C "Test TC Git Init SSH Keypair"
+
+# check if key is added already
+ssh-add -L
+
+# add the key if necessary
+ssh-add ~/tmp/ssh/id_theiacloud
 ```
 
 ### Test Checkout with container
+
+Please also play with wrong password or public SSH Keys that are not (yet) added to the repository to get the known error cases.
 
 ```bash
 # Adjust URLs and Password/PATs below
@@ -43,6 +51,7 @@ ssh-keygen -t ed25519 -C "Test TC Git Init SSH Keypair"
 # HTTPS Public
 docker run --rm theiacloud/theia-cloud-git-init:local "$HTTP_PUBLIC" "/tmp/my-repo" "$BRANCH"
 
+# For HTTPS auth with PATs as password a lot of providers accept any username
 # HTTPS Private
 docker run --env GIT_PROMPT1=$HTTP_USERNAME --env GIT_PROMPT2=$HTTP_PASSWORD --rm theiacloud/theia-cloud-git-init:local "$HTTP_PRIVATE" "/tmp/my-repo" "$BRANCH"
 
@@ -52,11 +61,30 @@ docker run --env GIT_PROMPT1=$HTTP_PASSWORD --rm theiacloud/theia-cloud-git-init
 # HTTPS Private with Username and Password
 docker run --rm theiacloud/theia-cloud-git-init:local "$HTTP_PRIVATE_WITH_USERNAME_AND_PASSWORD" "/tmp/my-repo" "$BRANCH"
 
-# SSH
+# SSH (the expected keyname is id_theiacloud ! With a different naming pattern this command will fail. Rename/Create a copy of you keyname if necessary)
 docker run --env GIT_PROMPT1=$SSH_PASSWORD -v ~/tmp/ssh/:/etc/theia-cloud-ssh --rm theiacloud/theia-cloud-git-init:local "$SSH_REPO" "/tmp/my-repo" "$BRANCH"
 ```
 
 ### Create Kubernetes Resources
+
+#### Workspace
+
+If testing on Minikube also mount a directory with expected user permissions: `minikube mount --uid 101 --gid 101 ~/tmp/minikube:/tmp/hostpath-provisioner/theia-cloud`
+
+You might have to adjust your firewall (temporarily).
+
+With below Sessions, the Workspace will be mounted inside the `persisted` subdirectory in the workspace.
+
+```yaml
+apiVersion: theia.cloud/v3beta
+kind: Workspace
+metadata:
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io
+  namespace: theiacloud
+spec:
+  name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io
+  user: foo@theia-cloud.io
+```
 
 #### Secret for HTTP(S) auth
 
@@ -79,7 +107,7 @@ stringData:
 #### Example Session for HTTP(S) auth
 
 ```yaml
-apiVersion: theia.cloud/v5beta
+apiVersion: theia.cloud/v7beta
 kind: Session
 metadata:
   name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io-session
@@ -124,7 +152,7 @@ stringData:
 #### Example Session for SSH auth
 
 ```yaml
-apiVersion: theia.cloud/v5beta
+apiVersion: theia.cloud/v7beta
 kind: Session
 metadata:
   name: ws-asdfghjkl-theia-cloud-demo-foo-theia-cloud-io-session

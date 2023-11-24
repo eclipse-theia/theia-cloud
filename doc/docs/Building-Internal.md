@@ -62,7 +62,7 @@ docker build --no-cache -t theiacloud/theia-cloud-operator:latest -f dockerfiles
 docker push theiacloud/theia-cloud-operator:latest
 ```
 
-Build and pish the git-init container:
+Build and push the git-init container:
 
 ```bash
 docker build -t theiacloud/theia-cloud-git-init:latest -f dockerfiles/git-init/Dockerfile .
