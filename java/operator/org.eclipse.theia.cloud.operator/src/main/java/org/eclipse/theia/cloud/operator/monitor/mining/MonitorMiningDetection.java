@@ -13,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.operator.monitor;
+package org.eclipse.theia.cloud.operator.monitor.mining;
 
-public interface MonitorActivityTracker {
+public interface MonitorMiningDetection {
 
     void start(int interval);
 

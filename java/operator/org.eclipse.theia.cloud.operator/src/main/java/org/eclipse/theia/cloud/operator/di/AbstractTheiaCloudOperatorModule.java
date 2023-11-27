@@ -40,10 +40,12 @@ import org.eclipse.theia.cloud.operator.handler.impl.DefaultDeploymentTemplateRe
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultPersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultPersistentVolumeTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.impl.IngressPathProviderImpl;
-import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTracker;
-import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTrackerImpl;
-import org.eclipse.theia.cloud.operator.monitor.MonitorMessagingService;
-import org.eclipse.theia.cloud.operator.monitor.MonitorMessagingServiceImpl;
+import org.eclipse.theia.cloud.operator.monitor.activity.MonitorActivityTracker;
+import org.eclipse.theia.cloud.operator.monitor.activity.MonitorActivityTrackerImpl;
+import org.eclipse.theia.cloud.operator.monitor.activity.MonitorMessagingService;
+import org.eclipse.theia.cloud.operator.monitor.activity.MonitorMessagingServiceImpl;
+import org.eclipse.theia.cloud.operator.monitor.mining.MonitorMiningDetection;
+import org.eclipse.theia.cloud.operator.monitor.mining.MonitorMiningDetectionImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -69,6 +71,8 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
 	bind(MonitorActivityTracker.class).to(bindMonitorActivityTracker()).in(Singleton.class);
 	bind(MonitorMessagingService.class).to(bindMonitorMessagingService()).in(Singleton.class);
+
+	bind(MonitorMiningDetection.class).to(bindMonitorMiningDetection()).in(Singleton.class);
 
 	configure(MultiBinding.create(TimeoutStrategy.class), this::configureTimeoutStrategies);
     }
@@ -104,6 +108,10 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
     protected Class<? extends MonitorMessagingService> bindMonitorMessagingService() {
 	return MonitorMessagingServiceImpl.class;
+    }
+
+    protected Class<? extends MonitorMiningDetection> bindMonitorMiningDetection() {
+	return MonitorMiningDetectionImpl.class;
     }
 
     protected Class<? extends PersistentVolumeTemplateReplacements> bindPersistentVolumeTemplateReplacements() {
