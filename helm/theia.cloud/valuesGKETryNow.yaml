@@ -33,7 +33,7 @@ landingPage:
 
 keycloak:
   enable: true
-  authUrl: "https://keycloak.34.141.62.32.nip.io/"
+  authUrl: "https://keycloak.theia-cloud.io/"
   keycloakRealm: "TheiaCloud"
   keycloakClientId: "theia-cloud"
   clientSecret: "publicbutoauth2proxywantsasecret"
