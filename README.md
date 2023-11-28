@@ -34,6 +34,17 @@ We offer a common ts library for the API of the Theia Cloud service, which may b
 
 We plan to offer reusable ui components in the future as well.
 
+## Versioning
+
+From version 0.9.0 onwards, every component in this repository (and the helm chart repo) will follow the same version number. This change will make it clearer which versions of different components are compatible with each other.
+
+### Release Types
+
+- **Releases:** Standard releases will occur every three months. We recommend to use these for deployments as those are thoroughly tested and are stable versions. You can then update, after three months, when the next version is available.
+- **Pre-Releases:** Pre-release versions will be released on every commit. These versions will be tagged as `<current-version>-next.<git-sha>`. The latest version of a next version is available at `<current-version>-next`. Pre-releases are ideal for testing the latest features and changes or for making contributions. However we do not recommend, to use those versions in deployments.
+
+The [helm charts](https://github.com/eclipsesource/theia-cloud-helm) are referencing the compatible version in their `appVersion` field.
+
 ## Building
 
 All components are deployed as docker images and may be built with docker. See [Building.md](doc/docs/Building.md) for more information. We offer prebuilt images ready to use.
