@@ -45,6 +45,14 @@ From version 0.9.0 onwards, every component in this repository (and the helm cha
 
 The [helm charts](https://github.com/eclipsesource/theia-cloud-helm) are referencing the compatible version in their `appVersion` field.
 
+### Release a new version
+
+New release every three months.
+
+Make a commit were the next parts are removed from the `versions` across the repo. When this commit is merged it should not result in pushed artifacts.
+Create a `releases/<currentVersion>` branch. This will be used in the future if any backports are necessary. Also it makes versions easier to find.
+Then create a Github release pointing to the commit. This will then publish the artifacts for the specific version and also set the version to latest.
+
 ## Building
 
 All components are deployed as docker images and may be built with docker. See [Building.md](doc/docs/Building.md) for more information. We offer prebuilt images ready to use.
