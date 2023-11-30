@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get Short SHA
         id: get_sha
@@ -55,7 +55,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build the Docker image
         run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build Docker image
         run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
@@ -93,7 +93,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build Docker image
         run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
