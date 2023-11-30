@@ -4,9 +4,17 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "java/common/**"
+      - "java/service/**"
+      - "dockerfiles/service/**"
   pull_request:
     branches:
       - main
+    paths:
+      - "java/common/**"
+      - "java/service/**"
+      - "dockerfiles/service/**"
   release:
     types:
       - published
@@ -52,14 +60,17 @@ jobs:
       - name: Build the Docker image
         run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
 
-  push:
+  publish-next:
     needs: prepare
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'release'
+    if: github.event_name == 'push'
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
@@ -67,20 +78,34 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
-        run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
-
       # Push version and SHA tag for main pushes of next versions (This avoids duplicate pushes for release commits on main)
       - name: Push version and SHA tag
-        if: github.event_name == 'push' && endsWith(env.VERSION, '-next')
+        if: endsWith(env.VERSION, '-next')
         run: |
           docker push ${{ needs.prepare.outputs.version_tag }}
           docker tag ${{ needs.prepare.outputs.version_tag }} ${{ needs.prepare.outputs.sha_tag }}
           docker push ${{ needs.prepare.outputs.sha_tag }}
 
+  publish-latest:
+    needs: prepare
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       # Push version and latest tag for releases (version should be valid semver)
       - name: Push version and latest tag
-        if: github.event_name == 'release'
         run: |
           docker push ${{ needs.prepare.outputs.version_tag }}
           docker tag ${{ needs.prepare.outputs.version_tag }} ${{ needs.prepare.outputs.latest_tag }}
