@@ -19,94 +19,13 @@ on:
     types:
       - published
 
-env:
-  DOCKER_ORG: theiacloud
-  DOCKER_IMAGE: theia-cloud-landing-page
-  DOCKER_FILE: dockerfiles/landing-page/Dockerfile.local
-  VERSION: 0.9.0-next
-
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    outputs:
-      version_tag: ${{ steps.get_tags.outputs.version_tag }}
-      latest_tag: ${{ steps.get_tags.outputs.latest_tag }}
-      sha_tag: ${{ steps.get_tags.outputs.sha_tag }}
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Get Short SHA
-        id: get_sha
-        run: echo "sha=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
-
-      - name: Get docker
-        id: get_tags
-        run: |
-          echo "sha_tag=${{ env.DOCKER_ORG }}/${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}.${{ steps.get_sha.outputs.sha }}" >> $GITHUB_ENV
-          echo "version_tag=${{ env.DOCKER_ORG }}/${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}" >> $GITHUB_ENV
-          echo "latest_tag=${{ env.DOCKER_ORG }}/${{ env.DOCKER_IMAGE }}:latest" >> $GITHUB_ENV
-
-  build:
-    needs: prepare
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Build the Docker image
-        run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
-
-  publish-next:
-    needs: prepare
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Push version and SHA tag for main pushes of next versions (This avoids duplicate pushes for release commits on main)
-      - name: Push version and SHA tag
-        if: endsWith(env.VERSION, '-next')
-        run: |
-          docker push ${{ needs.prepare.outputs.version_tag }}
-          docker tag ${{ needs.prepare.outputs.version_tag }} ${{ needs.prepare.outputs.sha_tag }}
-          docker push ${{ needs.prepare.outputs.sha_tag }}
-
-  publish-latest:
-    needs: prepare
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: docker build -t ${{ needs.prepare.outputs.version_tag }} -f ${{ env.DOCKER_FILE }} .
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Push version and latest tag for releases (version should be valid semver)
-      - name: Push version and latest tag
-        run: |
-          docker push ${{ needs.prepare.outputs.version_tag }}
-          docker tag ${{ needs.prepare.outputs.version_tag }} ${{ needs.prepare.outputs.latest_tag }}
-          docker push ${{ needs.prepare.outputs.latest_tag }}
+  call-reusable-docker-workflow:
+    uses: ./.github/workflows/reusable-docker.yml
+    with:
+      docker_org: theiacloud
+      docker_image: theia-cloud-landing-page
+      docker_file: dockerfiles/landing-page/Dockerfile.local
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
