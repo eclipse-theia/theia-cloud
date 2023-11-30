@@ -20,7 +20,10 @@
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "prepublishOnly": "yarn build",
+    "publish:next": "npm version `npm pkg get version | tr -d '\"'`.`git rev-parse --short HEAD` && npm publish --tag next",
+    "publish": "npm publish --tag latest"
   },
   "theiaExtensions": [
     {

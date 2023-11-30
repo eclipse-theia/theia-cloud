@@ -32,7 +32,9 @@
   ],
   "scripts": {
     "build": "tsc",
-    "publish:next": "SHA=$(git rev-parse --short HEAD) && npm version prepatch --preid next.${SHA}"
+    "prepublishOnly": "yarn build",
+    "publish:next": "npm version `npm pkg get version | tr -d '\"'`.`git rev-parse --short HEAD` && npm publish --tag next",
+    "publish": "npm publish --tag latest"
   },
   "dependencies": {
     "@types/uuid": "^8.3.4",
