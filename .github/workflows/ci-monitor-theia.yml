@@ -1,0 +1,24 @@
+name: Monitor Theia extension CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "node/monitor-theia/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "node/monitor-theia/**"
+  release:
+    types:
+      - published
+
+jobs:
+  call-reusable-npm-workflow:
+    uses: ./.github/workflows/reusable-npm.yml
+    with:
+      package_workspace: monitor-theia
+    secrets:
+      npm-token: ${{ secrets.NPM_TOKEN }}

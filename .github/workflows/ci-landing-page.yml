@@ -1,0 +1,31 @@
+name: Landing Page CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "node/common/**"
+      - "node/landing-page/**"
+      - "dockerfiles/landing-page/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "node/common/**"
+      - "node/landing-page/**"
+      - "dockerfiles/landing-page/**"
+  release:
+    types:
+      - published
+
+jobs:
+  call-reusable-docker-workflow:
+    uses: ./.github/workflows/reusable-docker.yml
+    with:
+      docker_org: theiacloud
+      docker_image: theia-cloud-landing-page
+      docker_file: dockerfiles/landing-page/Dockerfile.local
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
