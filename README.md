@@ -34,6 +34,29 @@ We offer a common ts library for the API of the Theia Cloud service, which may b
 
 We plan to offer reusable ui components in the future as well.
 
+## Versioning
+
+From version 0.9.0 onwards, every component in this repository (and the helm chart repo) will follow the same version number. This change will make it clearer which versions of different components are compatible with each other.
+
+### Release Types
+
+- **Releases:** Standard releases will occur every three months. We recommend to use these for deployments as those are thoroughly tested and are stable versions. You can then update, after three months, when the next version is available.
+- **Pre-Releases:** Pre-release versions will be released on every commit. These versions will be tagged as `<current-version>-next.<git-sha>`. The latest version of a next version is available at `<current-version>-next`. Pre-releases are ideal for testing the latest features and changes or for making contributions. However we do not recommend, to use those versions in deployments.
+
+The [helm charts](https://github.com/eclipsesource/theia-cloud-helm) are referencing the compatible version in their `appVersion` field.
+
+Since, npm does not allow tags that follow Semver, next artifacts published to npm have the `next` tag instead of `<currentVersion-next>`.
+This means, that those dependencies will be updated to newer version, once they are available. So again, for deployments you should either pin the version to a specific commit or use the released versions.
+
+### Release a new version
+
+New release every three months.
+
+Make a commit were the next parts are removed from the `versions` across the repo (For consumed Theia Cloud npm dependencies, e.g. @eclipse-theiacloud/common, needs to be changed from `next` to the desired version).
+When this commit is merged it should not result in pushed artifacts.
+Create a `releases/<currentVersion>` branch. This will be used in the future if any backports are necessary. Also it makes versions easier to find.
+Then create a Github release pointing to the commit. This will then publish the artifacts for the specific version and also set the version to latest.
+
 ## Building
 
 All components are deployed as docker images and may be built with docker. See [Building.md](doc/docs/Building.md) for more information. We offer prebuilt images ready to use.
