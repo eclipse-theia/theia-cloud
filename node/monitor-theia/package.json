@@ -1,6 +1,6 @@
 {
   "name": "@eclipse-theiacloud/monitor-theia",
-  "version": "0.8.1-alpha.2",
+  "version": "0.9.0-next",
   "keywords": [
     "theia-extension"
   ],
@@ -17,10 +17,13 @@
     "typescript": "^4.6.3"
   },
   "scripts": {
-    "prepare": "yarn run clean && yarn run build",
+    "prepare": "npm run clean && npm run build",
     "clean": "rimraf lib",
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "prepublishOnly": "npm run build",
+    "publish:next": "npm version `npm pkg get version | tr -d '\"'`.`git rev-parse --short HEAD` && npm publish --tag next",
+    "publish": "npm publish --tag latest"
   },
   "theiaExtensions": [
     {

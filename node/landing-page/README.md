@@ -1,24 +1,29 @@
 # landing-page
 
 ## Project setup
-```
-yarn install
+
+```sh
+npm install
 ```
 
 ### Compiles and hot-reloads for development
-```
-yarn serve
+
+```sh
+npm run serve
 ```
 
 ### Compiles and minifies for production
-```
-yarn build
+
+```sh
+npm run build
 ```
 
 ### Lints and fixes files
-```
-yarn lint
+
+```sh
+npm run lint
 ```
 
 ### Customize configuration
+
 See [Configuration Reference](https://cli.vuejs.org/config/).

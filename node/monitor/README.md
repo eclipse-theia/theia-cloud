@@ -27,4 +27,4 @@ Open this folder in vscode. A `Run Extension` debug config will be available. Th
 
 ## Bundle the extension
 
-Run `yarn bundle` to create a `vsix` file that can be installed in VSCode/Theia.
+Run `npm run bundle` to create a `vsix` file that can be installed in VSCode/Theia.
