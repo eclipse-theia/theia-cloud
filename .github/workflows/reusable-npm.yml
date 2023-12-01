@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Build package
-        run: npm run build -w common
+        run: npm run build -w ${{ inputs.package_workspace }}
 
   publish-next:
     runs-on: ubuntu-latest
