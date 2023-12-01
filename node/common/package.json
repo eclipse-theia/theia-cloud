@@ -1,6 +1,6 @@
 {
   "name": "@eclipse-theiacloud/common",
-  "version": "0.8.1-alpha.1",
+  "version": "0.9.0-next",
   "description": "Common functionality for Theia.cloud",
   "license": "EPL-2.0",
   "keywords": [
@@ -32,7 +32,9 @@
   ],
   "scripts": {
     "build": "tsc",
-    "publish:next": "SHA=$(git rev-parse --short HEAD) && npm version prepatch --preid next.${SHA}"
+    "prepublishOnly": "npm run build",
+    "publish:next": "npm version `npm pkg get version | tr -d '\"'`.`git rev-parse --short HEAD` && npm publish --tag next",
+    "publish": "npm publish --tag latest"
   },
   "dependencies": {
     "@types/uuid": "^8.3.4",

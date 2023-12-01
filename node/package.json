@@ -18,6 +18,7 @@
   },
   "workspaces": [
     "common",
+    "landing-page",
     "monitor",
     "monitor-theia",
     "try-now-page",
