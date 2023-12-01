@@ -1,0 +1,31 @@
+name: Service CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/service/**"
+      - "dockerfiles/service/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/service/**"
+      - "dockerfiles/service/**"
+  release:
+    types:
+      - published
+
+jobs:
+  call-reusable-docker-workflow:
+    uses: ./.github/workflows/reusable-docker.yml
+    with:
+      docker_org: theiacloud
+      docker_image: theia-cloud-service
+      docker_file: dockerfiles/service/Dockerfile
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}

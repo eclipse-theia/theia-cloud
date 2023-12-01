@@ -1,0 +1,81 @@
+name: Reusable workflow for npm packages
+
+on:
+  workflow_call:
+    inputs:
+      package_workspace:
+        required: true
+        type: string
+    secrets:
+      npm-token:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: ./node
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build -w ${{ inputs.package_workspace }}
+
+  publish-next:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: ./node
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish next version
+        run: npm run publish:next -w ${{ inputs.package_workspace }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
+
+  publish-latest:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    defaults:
+      run:
+        working-directory: ./node
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish new version and latest
+        run: npm run publish -w ${{ inputs.package_workspace }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-token }}

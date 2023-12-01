@@ -1,0 +1,31 @@
+name: Operator CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/operator/**"
+      - "dockerfiles/operator/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/operator/**"
+      - "dockerfiles/operator/**"
+  release:
+    types:
+      - published
+
+jobs:
+  call-reusable-docker-workflow:
+    uses: ./.github/workflows/reusable-docker.yml
+    with:
+      docker_org: theiacloud
+      docker_image: theia-cloud-operator
+      docker_file: dockerfiles/operator/Dockerfile
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
