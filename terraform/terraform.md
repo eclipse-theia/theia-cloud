@@ -61,6 +61,15 @@ terraform apply
 
 Point your browser to the `try_now` output value URL printed to the console at the end.
 
+If you want to use non ephemeral workspaces with minikube you have to mount a directory with the expected user id. Please check the existing persisted volume in Minikube for the path.\
+You might have to configure the firewall for mounting.
+
+```bash
+# This mounts the ~/tmp/minikube on the machine running minikube into minkube. 
+# Check the persisted volume to find the exact /tmp/hostpath-provisioner/theia-cloud/ path
+minikube mount --uid 101 --gid 101 ~/tmp/minikube:/tmp/hostpath-provisioner/theia-cloud
+```
+
 #### Destroy Minikube Cluster
 
 First remove the persistent volume from the terraform state:

@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,13 +37,12 @@ import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
-import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.DeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
+import org.eclipse.theia.cloud.operator.handler.InitOperationHandler;
 import org.eclipse.theia.cloud.operator.handler.SessionHandler;
 import org.eclipse.theia.cloud.operator.handler.util.K8sUtil;
 import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudConfigMapUtil;
@@ -56,7 +56,6 @@ import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.Volume;
@@ -74,7 +73,6 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 public class LazySessionHandler implements SessionHandler {
 
     private static final Logger LOGGER = LogManager.getLogger(LazySessionHandler.class);
-    protected static final String USER_DATA = "user-data";
 
     @Inject
     protected IngressPathProvider ingressPathProvider;
@@ -84,7 +82,8 @@ public class LazySessionHandler implements SessionHandler {
     protected BandwidthLimiter bandwidthLimiter;
     @Inject
     protected DeploymentTemplateReplacements deploymentReplacements;
-
+    @Inject
+    protected Set<InitOperationHandler> initOperationHandlers;
     @Inject
     protected TheiaCloudClient client;
 
@@ -240,7 +239,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return true;
 	}
 
-	Optional<String> storageName = getStorageName(session, correlationId);
+	Optional<String> storageName = AddedHandlerUtil.getStorageName(client, session, correlationId);
 	createAndApplyDeployment(correlationId, sessionResourceName, sessionResourceUID, session, appDefinition,
 		storageName, arguments.isUseKeycloak());
 
@@ -334,26 +333,6 @@ public class LazySessionHandler implements SessionHandler {
 	return ingress;
     }
 
-    protected Optional<String> getStorageName(Session session, String correlationId) {
-	if (session.getSpec().isEphemeral()) {
-	    return Optional.empty();
-	}
-	Optional<Workspace> workspace = client.workspaces().get(session.getSpec().getWorkspace());
-	if (!workspace.isPresent()) {
-	    LOGGER.info(formatLogMessage(correlationId, "No workspace with name " + session.getSpec().getWorkspace()
-		    + " found for session " + session.getSpec().getName(), correlationId));
-	    return Optional.empty();
-
-	}
-	String storageName = WorkspaceUtil.getStorageName(workspace.get());
-	if (!client.persistentVolumeClaims().has(storageName)) {
-	    LOGGER.info(formatLogMessage(correlationId,
-		    "No storage found for started session, will use ephemeral storage instead", correlationId));
-	    return Optional.empty();
-	}
-	return Optional.of(storageName);
-    }
-
     protected Optional<Service> createAndApplyService(String correlationId, String sessionResourceName,
 	    String sessionResourceUID, Session session, AppDefinitionSpec appDefinitionSpec, boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(client.namespace(), session,
@@ -440,25 +419,19 @@ public class LazySessionHandler implements SessionHandler {
 			    && !appDefinition.getSpec().getPullSecret().isEmpty()) {
 			AddedHandlerUtil.addImagePullSecret(deployment, appDefinition.getSpec().getPullSecret());
 		    }
+
+		    AddedHandlerUtil.handleInitOperations(correlationId, client, deployment, appDefinition, session,
+			    initOperationHandlers);
 		});
     }
 
     protected void addVolumeClaim(Deployment deployment, String pvcName, AppDefinitionSpec appDefinition) {
 	PodSpec podSpec = deployment.getSpec().getTemplate().getSpec();
-
-	Volume volume = new Volume();
+	Volume volume = AddedHandlerUtil.createUserDataVolume(pvcName);
 	podSpec.getVolumes().add(volume);
-	volume.setName(USER_DATA);
-	PersistentVolumeClaimVolumeSource persistentVolumeClaim = new PersistentVolumeClaimVolumeSource();
-	volume.setPersistentVolumeClaim(persistentVolumeClaim);
-	persistentVolumeClaim.setClaimName(pvcName);
-
-	Container theiaContainer = TheiaCloudPersistentVolumeUtil.getTheiaContainer(podSpec, appDefinition);
-
-	VolumeMount volumeMount = new VolumeMount();
-	theiaContainer.getVolumeMounts().add(volumeMount);
-	volumeMount.setName(USER_DATA);
-	volumeMount.setMountPath(TheiaCloudPersistentVolumeUtil.getMountPath(appDefinition));
+	Container container = TheiaCloudPersistentVolumeUtil.getTheiaContainer(podSpec, appDefinition);
+	VolumeMount volumeMount = AddedHandlerUtil.createUserDataVolumeMount(appDefinition);
+	container.getVolumeMounts().add(volumeMount);
     }
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,

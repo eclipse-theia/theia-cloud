@@ -54,12 +54,15 @@ public class SessionSpec implements UserScopedSpec {
 
     @JsonProperty("envVars")
     private Map<String, String> envVars;
-        
+
     @JsonProperty("envVarsFromConfigMaps")
     private List<String> envVarsFromConfigMaps;
 
     @JsonProperty("envVarsFromSecrets")
     private List<String> envVarsFromSecrets;
+
+    @JsonProperty("initOperations")
+    private List<InitOperation> initOperations;
 
     public SessionSpec() {
     }
@@ -68,33 +71,35 @@ public class SessionSpec implements UserScopedSpec {
 	this(name, appDefinition, user, null);
     }
 
+    public SessionSpec(String name, String appDefinition, String user, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
+	this(name, appDefinition, user, null, Map.of(), List.of(), List.of(), List.of());
+    }
+
     public SessionSpec(String name, String appDefinition, String user, String workspace) {
-        this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
-    }
-    public SessionSpec(
-        String name, String appDefinition, String user, String workspace, Map<String, String> envVars
-    )  {
-        this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
+	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of(), List.of());
     }
 
-    public SessionSpec(
-        String name, String appDefinition, String user, String workspace, 
-        Map<String, String> envVars, List<String> envVarsFromConfigMaps
-    ) { 
-        this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
+	this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, envVarsFromSecrets, List.of());
     }
 
-    public SessionSpec(
-        String name, String appDefinition, String user, String workspace, 
-        Map<String, String> envVars, List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets
-    ) {
-        this.name = name;
-        this.appDefinition = appDefinition;
-        this.user = user;
-        this.workspace = workspace;
-        this.envVars = envVars;
-        this.envVarsFromConfigMaps = envVarsFromConfigMaps;
-        this.envVarsFromSecrets = envVarsFromSecrets;
+    public SessionSpec(String name, String appDefinition, String user, String workspace,
+	    List<InitOperation> initOperations) {
+	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of(), initOperations);
+    }
+
+    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
+	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets, List<InitOperation> initOperations) {
+	this.name = name;
+	this.appDefinition = appDefinition;
+	this.user = user;
+	this.workspace = workspace;
+	this.envVars = envVars;
+	this.envVarsFromConfigMaps = envVarsFromConfigMaps;
+	this.envVarsFromSecrets = envVarsFromSecrets;
+	this.initOperations = initOperations;
     }
 
     public String getName() {
@@ -163,14 +168,19 @@ public class SessionSpec implements UserScopedSpec {
     }
 
     public Map<String, String> getEnvVars() {
-        return envVars;
+	return envVars;
     }
 
     public List<String> getEnvVarsFromConfigMaps() {
-        return envVarsFromConfigMaps;
+	return envVarsFromConfigMaps;
     }
+
     public List<String> getEnvVarsFromSecrets() {
-        return envVarsFromSecrets;
+	return envVarsFromSecrets;
+    }
+
+    public List<InitOperation> getInitOperations() {
+	return initOperations;
     }
 
     @JsonIgnore
@@ -183,9 +193,17 @@ public class SessionSpec implements UserScopedSpec {
 	final int prime = 31;
 	int result = 1;
 	result = prime * result + ((appDefinition == null) ? 0 : appDefinition.hashCode());
+	result = prime * result + ((envVars == null) ? 0 : envVars.hashCode());
+	result = prime * result + ((envVarsFromConfigMaps == null) ? 0 : envVarsFromConfigMaps.hashCode());
+	result = prime * result + ((envVarsFromSecrets == null) ? 0 : envVarsFromSecrets.hashCode());
+	result = prime * result + ((error == null) ? 0 : error.hashCode());
+	result = prime * result + ((initOperations == null) ? 0 : initOperations.hashCode());
+	result = prime * result + (int) (lastActivity ^ (lastActivity >>> 32));
+	result = prime * result + ((name == null) ? 0 : name.hashCode());
+	result = prime * result + ((sessionSecret == null) ? 0 : sessionSecret.hashCode());
+	result = prime * result + ((url == null) ? 0 : url.hashCode());
 	result = prime * result + ((user == null) ? 0 : user.hashCode());
 	result = prime * result + ((workspace == null) ? 0 : workspace.hashCode());
-	result = prime * result + ((sessionSecret == null) ? 0 : sessionSecret.hashCode());
 	return result;
     }
 
@@ -203,6 +221,48 @@ public class SessionSpec implements UserScopedSpec {
 		return false;
 	} else if (!appDefinition.equals(other.appDefinition))
 	    return false;
+	if (envVars == null) {
+	    if (other.envVars != null)
+		return false;
+	} else if (!envVars.equals(other.envVars))
+	    return false;
+	if (envVarsFromConfigMaps == null) {
+	    if (other.envVarsFromConfigMaps != null)
+		return false;
+	} else if (!envVarsFromConfigMaps.equals(other.envVarsFromConfigMaps))
+	    return false;
+	if (envVarsFromSecrets == null) {
+	    if (other.envVarsFromSecrets != null)
+		return false;
+	} else if (!envVarsFromSecrets.equals(other.envVarsFromSecrets))
+	    return false;
+	if (error == null) {
+	    if (other.error != null)
+		return false;
+	} else if (!error.equals(other.error))
+	    return false;
+	if (initOperations == null) {
+	    if (other.initOperations != null)
+		return false;
+	} else if (!initOperations.equals(other.initOperations))
+	    return false;
+	if (lastActivity != other.lastActivity)
+	    return false;
+	if (name == null) {
+	    if (other.name != null)
+		return false;
+	} else if (!name.equals(other.name))
+	    return false;
+	if (sessionSecret == null) {
+	    if (other.sessionSecret != null)
+		return false;
+	} else if (!sessionSecret.equals(other.sessionSecret))
+	    return false;
+	if (url == null) {
+	    if (other.url != null)
+		return false;
+	} else if (!url.equals(other.url))
+	    return false;
 	if (user == null) {
 	    if (other.user != null)
 		return false;
@@ -213,37 +273,81 @@ public class SessionSpec implements UserScopedSpec {
 		return false;
 	} else if (!workspace.equals(other.workspace))
 	    return false;
-	if (sessionSecret == null) {
-	    if (other.sessionSecret != null)
-		return false;
-	} else if (!sessionSecret.equals(other.sessionSecret))
-	    return false;
-    if (envVars == null) {
-        if (other.envVars != null)
-        return false;
-    } else if (!envVars.equals(other.envVars))
-        return false;
-    if (envVarsFromConfigMaps == null) {
-        if (other.envVarsFromConfigMaps != null)
-        return false;
-    } else if (!envVarsFromConfigMaps.equals(other.envVarsFromConfigMaps))
-        return false;
-    if (envVarsFromSecrets == null) {
-        if (other.envVarsFromSecrets != null)
-        return false;
-    } else if (!envVarsFromSecrets.equals(other.envVarsFromSecrets))
-        return false;        
 	return true;
     }
 
     @Override
     public String toString() {
 	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
-		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity + "]";
+		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity + ", envVars="
+		+ envVars + ", envVarsFromConfigMaps=" + envVarsFromConfigMaps + ", envVarsFromSecrets="
+		+ envVarsFromSecrets + ", initOperations=" + initOperations + "]";
     }
 
     public static boolean isEphemeral(String workspace) {
 	return workspace == null || workspace.isBlank();
+    }
+
+    public static class InitOperation {
+
+	@JsonProperty("id")
+	private String id;
+
+	@JsonProperty("arguments")
+	private List<String> arguments;
+
+	public InitOperation() {
+	}
+
+	public InitOperation(String id, List<String> arguments) {
+	    this.id = id;
+	    this.arguments = arguments;
+	}
+
+	public String getId() {
+	    return id;
+	}
+
+	public List<String> getArguments() {
+	    return arguments;
+	}
+
+	@Override
+	public int hashCode() {
+	    final int prime = 31;
+	    int result = 1;
+	    result = prime * result + ((arguments == null) ? 0 : arguments.hashCode());
+	    result = prime * result + ((id == null) ? 0 : id.hashCode());
+	    return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+	    if (this == obj)
+		return true;
+	    if (obj == null)
+		return false;
+	    if (getClass() != obj.getClass())
+		return false;
+	    InitOperation other = (InitOperation) obj;
+	    if (arguments == null) {
+		if (other.arguments != null)
+		    return false;
+	    } else if (!arguments.equals(other.arguments))
+		return false;
+	    if (id == null) {
+		if (other.id != null)
+		    return false;
+	    } else if (!id.equals(other.id))
+		return false;
+	    return true;
+	}
+
+	@Override
+	public String toString() {
+	    return "InitOperation [id=" + id + ", arguments=" + arguments + "]";
+	}
+
     }
 
 }

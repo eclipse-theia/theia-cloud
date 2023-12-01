@@ -1,4 +1,4 @@
-name: Docker Wondershaper CI
+name: Docker Git Init CI
 
 on:
   push:
@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build -t theia-cloud-wondershaper:$(date +%s) -f dockerfiles/wondershaper/Dockerfile .
+      run: docker build -t theia-cloud-git-init:$(date +%s) -f dockerfiles/git-init/Dockerfile .

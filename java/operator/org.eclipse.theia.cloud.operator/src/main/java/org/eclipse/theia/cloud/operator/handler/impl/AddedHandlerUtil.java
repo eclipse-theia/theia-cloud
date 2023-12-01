@@ -26,6 +26,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -47,10 +48,17 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec.InitOperation;
 import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
 import org.eclipse.theia.cloud.common.util.LogMessageUtil;
+import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
+import org.eclipse.theia.cloud.operator.handler.InitOperationHandler;
+import org.eclipse.theia.cloud.operator.handler.util.TheiaCloudPersistentVolumeUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapEnvSource;
@@ -58,9 +66,12 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvFromSource;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.SecretEnvSource;
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
@@ -69,6 +80,8 @@ public final class AddedHandlerUtil {
     private static final Logger LOGGER = LogManager.getLogger(AddedHandlerUtil.class);
 
     private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+
+    public static final String USER_DATA = "user-data";
 
     public static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     public static final String TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML = "/templateServiceWithoutOAuthProxy.yaml";
@@ -327,6 +340,63 @@ public final class AddedHandlerUtil {
 	}
 
 	return Optional.empty();
+    }
+
+    public static void handleInitOperations(String correlationId, TheiaCloudClient client, Deployment deployment,
+	    AppDefinition appDefinition, Session session, Set<InitOperationHandler> initOperationHandlers) {
+	List<InitOperation> initOperations = session.getSpec().getInitOperations();
+	if (initOperations == null) {
+	    return;
+	}
+	for (InitOperation initOperation : initOperations) {
+	    Optional<InitOperationHandler> handler = initOperationHandlers.stream()
+		    .filter(h -> h.operationId().equalsIgnoreCase(initOperation.getId())).findAny();
+	    if (handler.isEmpty()) {
+		LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, MessageFormat
+			.format("No Init Handler found for operation with id {0}.", initOperation.getId())));
+		continue;
+	    }
+	    handler.get().handleInitOperation(correlationId, client, deployment, appDefinition, session,
+		    initOperation.getArguments());
+	    LOGGER.info(formatLogMessage(correlationId,
+		    MessageFormat.format("Added init container with id {0} to deployment.", initOperation.getId())));
+	}
+    }
+
+    public static Volume createUserDataVolume(String pvcName) {
+	Volume volume = new Volume();
+	volume.setName(USER_DATA);
+	PersistentVolumeClaimVolumeSource persistentVolumeClaim = new PersistentVolumeClaimVolumeSource();
+	volume.setPersistentVolumeClaim(persistentVolumeClaim);
+	persistentVolumeClaim.setClaimName(pvcName);
+	return volume;
+    }
+
+    public static VolumeMount createUserDataVolumeMount(AppDefinitionSpec appDefinition) {
+	VolumeMount volumeMount = new VolumeMount();
+	volumeMount.setName(AddedHandlerUtil.USER_DATA);
+	volumeMount.setMountPath(TheiaCloudPersistentVolumeUtil.getMountPath(appDefinition));
+	return volumeMount;
+    }
+
+    public static Optional<String> getStorageName(TheiaCloudClient client, Session session, String correlationId) {
+	if (session.getSpec().isEphemeral()) {
+	    return Optional.empty();
+	}
+	Optional<Workspace> workspace = client.workspaces().get(session.getSpec().getWorkspace());
+	if (!workspace.isPresent()) {
+	    LOGGER.info(formatLogMessage(correlationId, "No workspace with name " + session.getSpec().getWorkspace()
+		    + " found for session " + session.getSpec().getName(), correlationId));
+	    return Optional.empty();
+
+	}
+	String storageName = WorkspaceUtil.getStorageName(workspace.get());
+	if (!client.persistentVolumeClaims().has(storageName)) {
+	    LOGGER.info(formatLogMessage(correlationId,
+		    "No storage found for started session, will use ephemeral storage instead", correlationId));
+	    return Optional.empty();
+	}
+	return Optional.of(storageName);
     }
 
 }

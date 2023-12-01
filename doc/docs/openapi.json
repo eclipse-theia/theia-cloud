@@ -2,7 +2,7 @@
   "openapi" : "3.0.3",
   "info" : {
     "title" : "Theia.cloud API",
-    "version" : "0.8.0"
+    "version" : "0.8.1"
   },
   "paths" : {
     "/service" : {
@@ -144,6 +144,7 @@
             "description" : "Not Allowed"
           }
         },
+        "deprecated" : true,
         "security" : [ {
           "SecurityScheme" : [ ]
         } ]
@@ -422,6 +423,40 @@
           }
         }
       },
+      "GitInit" : {
+        "description" : "Holds information used to initialize a Workspace with a clone of a Git repository.",
+        "required" : [ "repository", "checkout" ],
+        "type" : "object",
+        "properties" : {
+          "repository" : {
+            "description" : "The Git repository URL.",
+            "type" : "string"
+          },
+          "checkout" : {
+            "description" : "The branch, commit-id, or tag name to checkout.",
+            "type" : "string",
+            "example" : "main, bd402d6, tags/1.0.0"
+          },
+          "authInformation" : {
+            "description" : "Key for the required auth information, if the repository is not public.",
+            "type" : "string"
+          }
+        }
+      },
+      "InitOperation" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "arguments" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
       "LaunchRequest" : {
         "description" : "A request to launch a new session.",
         "required" : [ "appId", "user" ],
@@ -461,6 +496,13 @@
               "$ref" : "#/components/schemas/EnvironmentVars"
             }, {
               "description" : "Environment variables"
+            } ]
+          },
+          "gitInit" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/GitInit"
+            }, {
+              "description" : "Git Init information"
             } ]
           }
         }
@@ -589,6 +631,12 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "initOperations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InitOperation"
+            }
           }
         }
       },
@@ -623,6 +671,13 @@
               "$ref" : "#/components/schemas/EnvironmentVars"
             }, {
               "description" : "Environment variables"
+            } ]
+          },
+          "gitInit" : {
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/GitInit"
+            }, {
+              "description" : "Git Init information"
             } ]
           }
         }
@@ -737,6 +792,9 @@
         "description" : "Authentication",
         "flows" : {
           "implicit" : {
+            "authorizationUrl" : "http://localhost:34159/realms/quarkus/protocol/openid-connect/auth",
+            "tokenUrl" : "http://localhost:34159/realms/quarkus/protocol/openid-connect/token/introspect",
+            "refreshUrl" : "http://localhost:34159/realms/quarkus/protocol/openid-connect/token"
           }
         }
       }

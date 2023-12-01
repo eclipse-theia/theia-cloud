@@ -39,6 +39,9 @@ public class LaunchRequest extends UserScopedServiceRequest {
     @Schema(description = "Environment variables", required = false)
     public EnvironmentVars env = new EnvironmentVars();
 
+    @Schema(description = "Git Init information", required = false)
+    public GitInit gitInit;
+
     public LaunchRequest() {
 	super(KIND);
     }
@@ -61,8 +64,8 @@ public class LaunchRequest extends UserScopedServiceRequest {
     @Override
     public String toString() {
 	return "LaunchRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName=" + workspaceName
-		+ ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + ", timeout="
-		+ timeout + ", " + env + "]";
+		+ ", label=" + label + ", ephemeral=" + ephemeral + ", timeout=" + timeout + ", env=" + env
+		+ ", gitInit=" + gitInit + "]";
     }
 
 }

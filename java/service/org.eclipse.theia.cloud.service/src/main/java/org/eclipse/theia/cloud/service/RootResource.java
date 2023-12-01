@@ -67,6 +67,18 @@ public class RootResource extends BaseResource {
 	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_DEFINITION_NAME);
 	}
 
+	if (request.gitInit != null) {
+	    if (request.isEphemeral()) {
+		/*
+		 * Git init is currently only possible with non ephemeral sessions because we
+		 * are initialising the mounted volume
+		 */
+		error(correlationId,
+			"Failed to lauch session. Initialising a git repository with an ephemeral session is not supported at the moment.");
+		throw new TheiaCloudWebException(TheiaCloudError.INVALID_GIT_INIT_CONFIGURATION);
+	    }
+	}
+
 	if (request.isEphemeral()) {
 	    info(correlationId, "Launching ephemeral session " + request);
 	    return k8sUtil.launchEphemeralSession(correlationId, request.appDefinition, user, request.timeout,
@@ -87,7 +99,7 @@ public class RootResource extends BaseResource {
 
 		info(correlationId, "Launching existing workspace session " + request);
 		return k8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.get().getSpec()),
-			request.timeout, request.env);
+			request.timeout, Optional.ofNullable(request.env), Optional.ofNullable(request.gitInit));
 	    }
 	}
 
@@ -99,7 +111,7 @@ public class RootResource extends BaseResource {
 	info(correlationId, "Launch workspace session " + request);
 	try {
 	    return k8sUtil.launchWorkspaceSession(correlationId, new UserWorkspace(workspace.getSpec()),
-		    request.timeout, request.env);
+		    request.timeout, Optional.ofNullable(request.env), Optional.ofNullable(request.gitInit));
 	} catch (Exception exception) {
 	    info(correlationId, "Delete workspace due to launch error " + request);
 	    k8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());

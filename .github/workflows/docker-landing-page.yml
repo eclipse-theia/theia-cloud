@@ -1,10 +1,10 @@
-name: Docker landing Page CI
+name: Docker Landing Page CI
 
 on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main, osweek23 ]
+    branches: [ main ]
 
 jobs:
 
