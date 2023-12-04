@@ -1,0 +1,62 @@
+name: Publish Demos CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_type:
+        description: "Which build to trigger"
+        required: true
+        default: "next"
+        type: choice
+        options:
+          - next
+          - latest
+      publish_theia_cloud_demo:
+        description: "Should theia-cloud-demo be published"
+        type: boolean
+        required: true
+      publish_theia_cloud_activity_demo_theia:
+        description: "Should theia-cloud-activity-demo-theia be published"
+        type: boolean
+        required: true
+      publish_theia_cloud_activity_demo:
+        description: "Should theia-cloud-activity-demo be published"
+        type: boolean
+        required: true
+
+jobs:
+  publish-theia-cloud-demo:
+    if: ${{ inputs.publish_theia_cloud_demo }} == true
+    uses: ./.github/workflows/reusable-demo.yml
+    with:
+      docker_org: theiacloud
+      docker_image: theia-cloud-demo
+      docker_file: demo/dockerfiles/demo-theia-docker/Dockerfile
+      publish_type: ${{ inputs.publish_type }}
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  publish-theia-cloud-activity-demo-theia:
+    if: ${{ inputs.publish_theia_cloud_activity_demo_theia }} == true
+    uses: ./.github/workflows/reusable-demo.yml
+    with:
+      docker_org: theiacloud
+      docker_image: theia-cloud-activity-demo-theia
+      docker_file: demo/dockerfiles/demo-theia-monitor-theia/Dockerfile
+      publish_type: ${{ inputs.publish_type }}
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  publish-theia-cloud-activity-demo:
+    if: ${{ inputs.publish_theia_cloud_activity_demo }} == true
+    uses: ./.github/workflows/reusable-demo.yml
+    with:
+      docker_org: theiacloud
+      docker_image: theia-cloud-activity-demo
+      docker_file: demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile
+      publish_type: ${{ inputs.publish_type }}
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}

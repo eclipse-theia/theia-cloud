@@ -4,9 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "java/common/**"
+      - "java/service/**"
   pull_request:
     branches:
       - main
+    paths:
+      - "java/common/**"
+      - "java/service/**"
 
 jobs:
   tests:

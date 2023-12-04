@@ -1,4 +1,4 @@
-name: Reusable workflow for docker images
+name: Reusable workflow publishing demo applications
 
 on:
   workflow_call:
@@ -12,6 +12,10 @@ on:
       docker_file:
         required: true
         type: string
+      publish_type:
+        description: "Pubish as latest ('latest') or next ('next')"
+        required: true
+        type: string
     secrets:
       dockerhub_username:
         required: true
@@ -22,26 +26,9 @@ env:
   VERSION: 0.9.0-next
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Create docker tags
-        id: get_tags
-        run: |
-          echo "version_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
-
-      - name: Build the Docker image
-        run: |
-          docker build -t ${{ steps.get_tags.outputs.version_tag }} -f ${{ inputs.docker_file }} .
-
   publish-next:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: ${{ inputs.publish_type }} == 'next'
 
     steps:
       - name: Checkout Repository
@@ -72,7 +59,7 @@ jobs:
 
   publish-latest:
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+    if: ${{ inputs.publish_type }} == 'latest'
 
     steps:
       - name: Checkout Repository
