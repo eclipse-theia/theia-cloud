@@ -8,6 +8,9 @@ on:
       - "java/common/**"
       - "java/service/**"
       - "dockerfiles/service/**"
+      # Publish when a workflow has changed (this is needed to detect version updates)
+      - ".github/workflows/ci-service.yml"
+      - ".github/workflows/reuseable-docker.yml"
   pull_request:
     branches:
       - main
