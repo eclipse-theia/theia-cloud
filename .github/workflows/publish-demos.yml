@@ -12,50 +12,53 @@ on:
           - next
           - latest
       publish_theia_cloud_demo:
-        description: "Should theia-cloud-demo be published"
+        description: "Publish theia-cloud-demo?"
         type: boolean
         required: true
       publish_theia_cloud_activity_demo_theia:
-        description: "Should theia-cloud-activity-demo-theia be published"
+        description: "Publish theia-cloud-activity-demo-theia?"
         type: boolean
         required: true
       publish_theia_cloud_activity_demo:
-        description: "Should theia-cloud-activity-demo be published"
+        description: "Publishtheia-cloud-activity-demo?"
         type: boolean
         required: true
 
 jobs:
   publish-theia-cloud-demo:
-    if: ${{ inputs.publish_theia_cloud_demo }} == true
+    if: ${{ inputs.publish_theia_cloud_demo == true }}
     uses: ./.github/workflows/reusable-demo.yml
     with:
       docker_org: theiacloud
       docker_image: theia-cloud-demo
       docker_file: demo/dockerfiles/demo-theia-docker/Dockerfile
+      docker_location: demo/dockerfiles/demo-theia-docker/.
       publish_type: ${{ inputs.publish_type }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   publish-theia-cloud-activity-demo-theia:
-    if: ${{ inputs.publish_theia_cloud_activity_demo_theia }} == true
+    if: ${{ inputs.publish_theia_cloud_activity_demo_theia == true }}
     uses: ./.github/workflows/reusable-demo.yml
     with:
       docker_org: theiacloud
       docker_image: theia-cloud-activity-demo-theia
       docker_file: demo/dockerfiles/demo-theia-monitor-theia/Dockerfile
+      docker_location: demo/dockerfiles/demo-theia-monitor-theia/.
       publish_type: ${{ inputs.publish_type }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   publish-theia-cloud-activity-demo:
-    if: ${{ inputs.publish_theia_cloud_activity_demo }} == true
+    if: ${{ inputs.publish_theia_cloud_activity_demo == true }}
     uses: ./.github/workflows/reusable-demo.yml
     with:
       docker_org: theiacloud
       docker_image: theia-cloud-activity-demo
       docker_file: demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile
+      docker_location: demo/dockerfiles/demo-theia-monitor-vscode/.
       publish_type: ${{ inputs.publish_type }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
