@@ -8,6 +8,9 @@ on:
       - "node/common/**"
       - "node/try-now-page/**"
       - "dockerfiles/try-now-page/**"
+      # Publish when a workflow has changed (this is needed to detect version updates)
+      - ".github/workflows/ci-try-now-page.yml"
+      - ".github/workflows/reuseable-docker.yml"
   pull_request:
     branches:
       - main

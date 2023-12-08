@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - "node/common/**"
+      # Publish when a workflow has changed (this is needed to detect version updates)
+      - ".github/workflows/ci-node-common.yml"
+      - ".github/workflows/reuseable-npm.yml"
   pull_request:
     branches:
       - main
