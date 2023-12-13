@@ -8,6 +8,8 @@
 - [java/service] Update Quarkus from 2.12.0 to 3.3.1 [#266](https://github.com/eclipsesource/theia-cloud/pull/266) - contributed on behalf of STMicroelectronics
 - [java] Update fabric8 Kubernetes client from 5.12.2 to 6.7.2 [#266](https://github.com/eclipsesource/theia-cloud/pull/266) - contributed on behalf of STMicroelectronics
 - [java/common] Introduce hub-objects for all custom resources [#266](https://github.com/eclipsesource/theia-cloud/pull/266) - contributed on behalf of STMicroelectronics
+- [demo] Fix demo applications to Theia's latest Community Release (1.43.1) [#267](https://github.com/eclipsesource/theia-cloud/pull/267) - contributed on behalf of STMicroelectronics
+- [node/monitor-theia] Make `@theia` dependencies peerDependencies [#267](https://github.com/eclipsesource/theia-cloud/pull/267) - contributed on behalf of STMicroelectronics
 
 ## [0.8.1] - 2023-10-01
   
