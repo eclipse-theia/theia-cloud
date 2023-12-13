@@ -30,7 +30,7 @@ docker push theiacloud/theia-cloud-activity-demo:latest
 Build and push the Theia Activity Tracker Theia Extension Demo application with:
 
 ```bash
-docker build -t theiacloud/theia-cloud-activity-demo-theia:latest -f demo/dockerfiles/demo-theia-monitor-theia/Dockerfile demo/dockerfiles/demo-theia-monitor-theia/.
+docker build -t theiacloud/theia-cloud-activity-demo-theia:latest -f demo/dockerfiles/demo-theia-monitor-theia/Dockerfile .
 docker push theiacloud/theia-cloud-activity-demo-theia:latest
 ```
 

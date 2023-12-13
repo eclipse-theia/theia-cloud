@@ -1,12 +1,21 @@
 FROM node:16-bookworm as build-stage
 RUN apt-get update && apt-get install -y libxkbfile-dev libsecret-1-dev
 WORKDIR /home/theia
-ADD package.json ./package.json
+ADD demo/dockerfiles/demo-theia-monitor-theia/package.json ./package.json
+
+## Link package from local
+ADD node ./node
+WORKDIR /home/theia/node
+RUN npm ci && npm run build -w monitor-theia
+WORKDIR /home/theia
+RUN sed -i 's/"@eclipse-theiacloud\/monitor-theia": "next"/"@eclipse-theiacloud\/monitor-theia": "file:node\/monitor-theia"/' package.json
+
 RUN yarn --pure-lockfile && \
     NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
     yarn theia download:plugins && \
     yarn --production && \
     yarn autoclean --init && \
+    sed -i '/__tests__\|test\|tests\|powered-test/ s/^/#/' .yarnclean && \
     echo *.ts >> .yarnclean && \
     echo *.ts.map >> .yarnclean && \
     echo *.spec.* >> .yarnclean && \
