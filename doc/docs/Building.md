@@ -6,6 +6,9 @@ Besides the Operator, Theia.cloud-REST-Service, and the Dashboard, Theia.Cloud a
 # Build the wondershaper init-container.
 docker build -t theia-cloud-wondershaper -f dockerfiles/wondershaper/Dockerfile .
 
+# Build the conversion hook.
+docker build -t theia-cloud-conversion -f dockerfiles/conversion-hook/Dockerfile .
+
 # Build the Theia Demo application with:
 docker build -t theia-cloud-demo -f demo/dockerfiles/demo-theia-docker/Dockerfile demo/dockerfiles/demo-theia-docker/.
 
