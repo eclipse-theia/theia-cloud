@@ -17,8 +17,8 @@ package org.eclipse.theia.cloud.operator.handler;
 
 import java.util.Map;
 
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 
 public interface DeploymentTemplateReplacements extends TemplateReplacements {
     Map<String, String> getReplacements(String namespace, AppDefinition appDefinition, int instance);

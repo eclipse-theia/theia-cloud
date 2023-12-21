@@ -15,10 +15,10 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
-import javax.ws.rs.core.Application;
-
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.info.Info;
+
+import jakarta.ws.rs.core.Application;
 
 @OpenAPIDefinition(info = @Info(title = "Theia.cloud API", version = "0.9.0"))
 public class TheiaCloudApiApplication extends Application {

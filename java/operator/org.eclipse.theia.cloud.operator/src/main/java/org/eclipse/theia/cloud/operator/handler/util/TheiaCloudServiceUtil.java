@@ -26,9 +26,9 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -92,22 +92,23 @@ public final class TheiaCloudServiceUtil {
 	return replacements;
     }
 
-	private static void putMonitorReplacements(AppDefinitionSpec appDefinitionSpec, Map<String, String> replacements) {
-		if (appDefinitionSpec.getMonitor() != null && appDefinitionSpec.getMonitor().getPort() > 0) {
-		    String port = String.valueOf(appDefinitionSpec.getMonitor().getPort());
-		    String replacement = "- name: monitor-express\n" + "      port: " + port + "\n" + "      targetPort: "
-			    + port + "\n" + "      protocol: TCP";
-		    if (appDefinitionSpec.getMonitor().getPort() == appDefinitionSpec.getPort()) {
-			// Just remove the placeholder, otherwise the port would be duplicate
-			replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
-		    } else {
-			// Replace the placeholder with the port information
-			replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, replacement);
-		    }
-		} else {
-		    replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
-		}
+    private static void putMonitorReplacements(AppDefinitionSpec appDefinitionSpec,
+	    Map<String, String> replacements) {
+	if (appDefinitionSpec.getMonitor() != null && appDefinitionSpec.getMonitor().getPort() > 0) {
+	    String port = String.valueOf(appDefinitionSpec.getMonitor().getPort());
+	    String replacement = "- name: monitor-express\n" + "      port: " + port + "\n" + "      targetPort: "
+		    + port + "\n" + "      protocol: TCP";
+	    if (appDefinitionSpec.getMonitor().getPort() == appDefinitionSpec.getPort()) {
+		// Just remove the placeholder, otherwise the port would be duplicate
+		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
+	    } else {
+		// Replace the placeholder with the port information
+		replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, replacement);
+	    }
+	} else {
+	    replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_MONITOR_PORT, "");
 	}
+    }
 
     public static Optional<Service> getServiceOwnedBySession(String sessionResourceName, String sessionResourceUID,
 	    List<Service> existingServices) {

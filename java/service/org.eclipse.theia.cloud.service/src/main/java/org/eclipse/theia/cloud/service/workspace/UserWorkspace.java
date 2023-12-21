@@ -22,7 +22,7 @@ import static org.eclipse.theia.cloud.common.util.WorkspaceUtil.generateWorkspac
 import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
 
 @Schema(name = "UserWorkspace", description = "Description of a user workspace")
 public class UserWorkspace {

@@ -17,10 +17,10 @@ package org.eclipse.theia.cloud.common.k8s.client;
 
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 
 public interface SessionResourceClient
 	extends CustomResourceClient<SessionSpec, SessionStatus, Session, SessionSpecResourceList> {

@@ -15,15 +15,16 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.client;
 
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionStatus;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
-public class DefaultAppDefinitionResourceClient extends BaseResourceClient<AppDefinition, AppDefinitionSpecResourceList>
+public class DefaultAppDefinitionResourceClient
+	extends BaseResourceClient<AppDefinition, AppDefinitionSpecResourceList>
 	implements AppDefinitionResourceClient {
 
     public DefaultAppDefinitionResourceClient(NamespacedKubernetesClient client) {
@@ -40,7 +41,7 @@ public class DefaultAppDefinitionResourceClient extends BaseResourceClient<AppDe
 	appDefinition.setMetadata(metadata);
 
 	info(correlationId, "Create AppDefinition " + appDefinition.getSpec());
-	return operation().create(appDefinition);
+	return operation().resource(appDefinition).create();
     }
 
     @Override

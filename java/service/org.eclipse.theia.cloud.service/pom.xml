@@ -123,7 +123,8 @@
 				<version>${surefire-plugin.version}</version>
 				<configuration>
 					<systemPropertyVariables>
-						<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+						<java.util.logging.manager>
+							org.jboss.logmanager.LogManager</java.util.logging.manager>
 						<maven.home>${maven.home}</maven.home>
 					</systemPropertyVariables>
 				</configuration>
@@ -139,8 +140,10 @@
 						</goals>
 						<configuration>
 							<systemPropertyVariables>
-								<native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
-								<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+								<native.image.path>
+									${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+								<java.util.logging.manager>
+									org.jboss.logmanager.LogManager</java.util.logging.manager>
 								<maven.home>${maven.home}</maven.home>
 							</systemPropertyVariables>
 						</configuration>

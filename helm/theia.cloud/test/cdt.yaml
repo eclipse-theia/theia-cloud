@@ -1,4 +1,4 @@
-apiVersion: theia.cloud/v8beta
+apiVersion: theia.cloud/v1beta8
 kind: AppDefinition
 metadata:
   name: cdt-cloud-demo

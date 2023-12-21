@@ -13,7 +13,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
+
+import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHubStatus;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -23,4 +26,19 @@ public class AppDefinitionStatus extends ResourceStatus {
     // used. Already define a specific class to allow easier extension, properly
     // type the resources and resource clients.
     // It is planned to extend this later with AppDefinition specific status steps.
+
+    /**
+     * Default constructor.
+     */
+    public AppDefinitionStatus() {
+    }
+
+    public AppDefinitionStatus(AppDefinitionHubStatus fromHub) {
+	if (fromHub.getOperatorMessage() != null) {
+	    this.setOperatorMessage(fromHub.getOperatorMessage());
+	}
+	if (fromHub.getOperatorStatus() != null) {
+	    this.setOperatorStatus(fromHub.getOperatorStatus());
+	}
+    }
 }
