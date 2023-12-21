@@ -30,11 +30,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response.Status;
-
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.K8sUtil;
@@ -49,6 +46,8 @@ import org.mockito.Mockito;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.quarkus.test.security.TestSecurity;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Unit tests for

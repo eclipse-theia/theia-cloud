@@ -1,6 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
- * others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,27 +13,42 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.k8s.resource.workspace;
 
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.Group;
+import io.fabric8.kubernetes.model.annotation.Kind;
 import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v6beta")
+@Version("v1beta3")
 @Group("theia.cloud")
-@Singular("session")
-@Plural("sessions")
-public class Session extends CustomResource<SessionSpec, SessionStatus> implements Namespaced {
+@Kind("Workspace")
+@Singular("workspace")
+@Plural("workspaces")
+public class Workspace extends CustomResource<WorkspaceSpec, WorkspaceStatus> implements Namespaced {
 
-    private static final long serialVersionUID = 4518092300237069237L;
-    public static final String API = "theia.cloud/v6beta";
-    public static final String KIND = "Session";
-    public static final String CRD_NAME = "sessions.theia.cloud";
+    public static final String API = "theia.cloud/v1beta3";
+    public static final String CRD_NAME = "workspaces.theia.cloud";
+    public static final String KIND = "Workspace";
+
+    private static final long serialVersionUID = 6437279756051357397L;
+
+    public Workspace() {
+    }
+
+    public Workspace(WorkspaceHub fromHub) {
+	this.setMetadata(fromHub.getMetadata());
+	this.spec = new WorkspaceSpec(fromHub.getSpec());
+	if (fromHub.getStatus() != null) {
+	    this.status = new WorkspaceStatus(fromHub.getStatus());
+	}
+    }
 
     @Override
     public String toString() {

@@ -18,7 +18,7 @@ package org.eclipse.theia.cloud.operator.handler;
 
 import java.util.Optional;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;

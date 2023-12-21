@@ -22,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.Principal;
 
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.junit.jupiter.api.Test;
@@ -32,6 +30,7 @@ import org.mockito.Mockito;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import jakarta.inject.Inject;
 
 /**
  * Unit tests for {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer}

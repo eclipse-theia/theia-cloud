@@ -17,10 +17,10 @@ package org.eclipse.theia.cloud.common.k8s.client;
 
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 
 public interface WorkspaceResourceClient
 	extends CustomResourceClient<WorkspaceSpec, WorkspaceStatus, Workspace, WorkspaceSpecResourceList> {

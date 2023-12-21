@@ -20,10 +20,10 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.SessionSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpecResourceList;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;

@@ -19,7 +19,7 @@ import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
 import java.time.Instant;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 public final class WorkspaceUtil {
     private static final String SESSION_SUFFIX = "-session";

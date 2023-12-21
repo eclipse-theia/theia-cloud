@@ -16,7 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler.util;
 
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PodSpec;

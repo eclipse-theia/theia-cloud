@@ -17,7 +17,7 @@ package org.eclipse.theia.cloud.operator.handler;
 
 import java.util.Map;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 public interface PersistentVolumeTemplateReplacements extends TemplateReplacements {
 

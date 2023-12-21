@@ -78,7 +78,7 @@ resource "helm_release" "theia-cloud" {
 resource "kubectl_manifest" "cdt-cloud-demo" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
-  apiVersion: theia.cloud/v8beta
+  apiVersion: theia.cloud/v1beta8
   kind: AppDefinition
   metadata:
     name: cdt-cloud-demo
@@ -114,7 +114,7 @@ resource "kubectl_manifest" "cdt-cloud-demo" {
 resource "kubectl_manifest" "coffee-editor" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
-  apiVersion: theia.cloud/v8beta
+  apiVersion: theia.cloud/v1beta8
   kind: AppDefinition
   metadata:
     name: coffee-editor

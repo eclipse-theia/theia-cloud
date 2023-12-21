@@ -21,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -32,6 +30,7 @@ import io.quarkus.security.identity.request.AnonymousAuthenticationRequest;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
 
 /**
  * Unit tests for
