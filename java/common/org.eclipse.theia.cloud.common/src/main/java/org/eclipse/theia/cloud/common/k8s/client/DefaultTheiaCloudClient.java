@@ -17,14 +17,17 @@ package org.eclipse.theia.cloud.common.k8s.client;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResourceList;
+import io.fabric8.kubernetes.client.Client;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.impl.KubernetesClientImpl;
 
-public class DefaultTheiaCloudClient implements TheiaCloudClient {
+public class DefaultTheiaCloudClient extends KubernetesClientImpl implements TheiaCloudClient {
 
     private NamespacedKubernetesClient client;
 
-    public DefaultTheiaCloudClient(NamespacedKubernetesClient client) {
-	this.client = client;
+    public DefaultTheiaCloudClient(Client client) {
+	super(client.adapt(KubernetesClientImpl.class));
+	this.client = client.adapt(NamespacedKubernetesClient.class);
     }
 
     @Override

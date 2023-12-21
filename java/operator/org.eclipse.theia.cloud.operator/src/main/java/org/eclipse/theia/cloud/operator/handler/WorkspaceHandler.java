@@ -15,7 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 public interface WorkspaceHandler {
     default boolean workspaceAdded(Workspace workspace, String correlationId) {

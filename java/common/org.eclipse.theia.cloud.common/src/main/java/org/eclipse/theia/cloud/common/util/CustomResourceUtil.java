@@ -18,29 +18,14 @@ package org.eclipse.theia.cloud.common.util;
 
 import java.util.Objects;
 
-import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesResource;
-import io.fabric8.kubernetes.client.Adapters;
-import io.fabric8.kubernetes.client.Client;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.ExtensionAdapter;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
-import io.fabric8.kubernetes.internal.KubernetesDeserializer;
 
 public final class CustomResourceUtil {
-
-    static {
-	Adapters.register(new CustomResourceClientAdapter());
-    }
 
     private CustomResourceUtil() {
     }
@@ -50,29 +35,8 @@ public final class CustomResourceUtil {
     }
 
     public static NamespacedKubernetesClient createClient(Config config) {
-	DefaultKubernetesClient client = new DefaultKubernetesClient(config);
-	registerSessionResource(client);
-	registerWorkspaceResource(client);
-	registerAppDefinitionResource(client);
-	return client;
-    }
-
-    public static void registerSessionResource(NamespacedKubernetesClient client) {
-	registerCustomResource(client, Session.class, Session.KIND, Session.CRD_NAME);
-    }
-
-    public static void registerWorkspaceResource(NamespacedKubernetesClient client) {
-	registerCustomResource(client, Workspace.class, Workspace.KIND, Workspace.CRD_NAME);
-    }
-
-    public static void registerAppDefinitionResource(NamespacedKubernetesClient client) {
-	registerCustomResource(client, AppDefinition.class, AppDefinition.KIND, AppDefinition.CRD_NAME);
-    }
-
-    public static void registerCustomResource(NamespacedKubernetesClient client,
-	    Class<? extends KubernetesResource> resourceClass, String kind, String crdName) {
-	String apiVersion = HasMetadata.getApiVersion(resourceClass);
-	KubernetesDeserializer.registerCustomKind(apiVersion, kind, resourceClass);
+	KubernetesClient client = new KubernetesClientBuilder().withConfig(config).build();
+	return client.adapt(NamespacedKubernetesClient.class);
     }
 
     public static void validateCustomResource(NamespacedKubernetesClient client, String crdName) {
@@ -86,23 +50,6 @@ public final class CustomResourceUtil {
 	String name = resource.getMetadata() != null ? resource.getMetadata().getName() : "unknown";
 	String version = resource.getMetadata() != null ? resource.getMetadata().getResourceVersion() : "unknown";
 	return "name=" + name + " version=" + version + " value=" + resource.getSpec();
-    }
-
-    private static class CustomResourceClientAdapter implements ExtensionAdapter<TheiaCloudClient> {
-	@Override
-	public Class<TheiaCloudClient> getExtensionType() {
-	    return TheiaCloudClient.class;
-	}
-
-	@Override
-	public Boolean isAdaptable(Client client) {
-	    return client instanceof NamespacedKubernetesClient;
-	}
-
-	@Override
-	public TheiaCloudClient adapt(Client client) {
-	    return new DefaultTheiaCloudClient((NamespacedKubernetesClient) client);
-	}
     }
 
 }

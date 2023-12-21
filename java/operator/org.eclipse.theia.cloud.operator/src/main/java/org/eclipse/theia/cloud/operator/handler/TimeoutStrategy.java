@@ -22,7 +22,7 @@ import java.time.temporal.ChronoUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 
 public interface TimeoutStrategy {
 

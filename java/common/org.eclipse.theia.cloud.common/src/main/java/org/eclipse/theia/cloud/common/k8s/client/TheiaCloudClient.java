@@ -28,14 +28,15 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressList;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
 
-public interface TheiaCloudClient {
+public interface TheiaCloudClient extends NamespacedKubernetesClient {
+    @Override
     TheiaCloudClient inNamespace(String namespace);
 
     String namespace();
@@ -48,11 +49,11 @@ public interface TheiaCloudClient {
 
     AppDefinitionResourceClient appDefinitions();
 
-    default ResourceClient<PersistentVolumeClaim, PersistentVolumeClaimList> persistentVolumeClaims() {
+    default ResourceClient<PersistentVolumeClaim, PersistentVolumeClaimList> persistentVolumeClaimsClient() {
 	return client(PersistentVolumeClaim.class, PersistentVolumeClaimList.class);
     }
 
-    default ResourceClient<PersistentVolume, PersistentVolumeList> persistentVolumes() {
+    default ResourceClient<PersistentVolume, PersistentVolumeList> persistentVolumesClient() {
 	return client(PersistentVolume.class, PersistentVolumeList.class);
     }
 
@@ -77,7 +78,7 @@ public interface TheiaCloudClient {
     }
 
     default Optional<String> getClusterIPFromSessionName(String sessionName) {
-	try (final KubernetesClient client = new DefaultKubernetesClient()) {
+	try (final KubernetesClient client = new KubernetesClientBuilder().build()) {
 	    ServiceList svcList = client.services().inNamespace(namespace()).list();
 	    for (Service svc : svcList.getItems()) {
 		for (OwnerReference ownerReference : svc.getMetadata().getOwnerReferences()) {

@@ -31,8 +31,8 @@ import com.google.inject.Injector;
 
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.extended.leaderelection.LeaderCallbacks;
 import io.fabric8.kubernetes.client.extended.leaderelection.LeaderElectionConfig;
 import io.fabric8.kubernetes.client.extended.leaderelection.LeaderElectionConfigBuilder;
@@ -67,7 +67,7 @@ public class Main {
 		"Launching Theia Cloud Leader Election now. Own lock identity is " + lockIdentity));
 	Config k8sConfig = new ConfigBuilder().build();
 
-	try (DefaultKubernetesClient k8sClient = new DefaultKubernetesClient(k8sConfig)) {
+	try (KubernetesClient k8sClient = new KubernetesClientBuilder().withConfig(k8sConfig).build()) {
 	    String leaseLockNamespace = k8sClient.getNamespace();
 
 	    LeaderElectionConfig leaderElectionConfig = new LeaderElectionConfigBuilder()//
@@ -87,8 +87,7 @@ public class Main {
 		    .withLeaderCallbacks(new LeaderCallbacks(Main.this::onStartLeading, Main.this::onStopLeading,
 			    Main.this::onNewLeader))//
 		    .build();
-	    LeaderElector<NamespacedKubernetesClient> leaderElector = k8sClient.leaderElector()
-		    .withConfig(leaderElectionConfig).build();
+	    LeaderElector leaderElector = k8sClient.leaderElector().withConfig(leaderElectionConfig).build();
 	    leaderElector.run();
 	}
 

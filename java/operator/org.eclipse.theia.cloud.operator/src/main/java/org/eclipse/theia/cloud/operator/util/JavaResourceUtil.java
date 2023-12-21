@@ -48,9 +48,10 @@ public final class JavaResourceUtil {
 	    String template = new BufferedReader(new InputStreamReader(inputStream)).lines().parallel()
 		    .collect(Collectors.joining("\n"));
 	    for (Entry<String, String> replacement : replacements.entrySet()) {
-		template = template.replace(replacement.getKey(), replacement.getValue());
+		String value = replacement.getValue() != null ? replacement.getValue() : "";
+		template = template.replace(replacement.getKey(), value);
 		LOGGER.trace(formatLogMessage(correlationId,
-			"Replaced " + replacement.getKey() + " with " + replacement.getValue() + " :\n" + template));
+			"Replaced " + replacement.getKey() + " with " + value + " :\n" + template));
 	    }
 	    return template;
 	}

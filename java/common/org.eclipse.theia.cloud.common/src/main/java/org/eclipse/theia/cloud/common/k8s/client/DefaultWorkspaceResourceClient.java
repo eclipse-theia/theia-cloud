@@ -17,10 +17,10 @@ package org.eclipse.theia.cloud.common.k8s.client;
 
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceSpecResourceList;
-import org.eclipse.theia.cloud.common.k8s.resource.WorkspaceStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpecResourceList;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -43,7 +43,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	workspace.setMetadata(metadata);
 
 	info(correlationId, "Create Workspace " + workspace.getSpec());
-	return operation().create(workspace);
+	return operation().resource(workspace).create();
     }
 
     @Override

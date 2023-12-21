@@ -18,7 +18,7 @@ package org.eclipse.theia.cloud.operator.handler.impl;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudArguments;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeTemplateReplacements;

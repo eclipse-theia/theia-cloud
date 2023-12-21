@@ -14,15 +14,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource;
+package org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta2;
 
+import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHubSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@Deprecated
 @JsonDeserialize()
-public class WorkspaceSpec implements UserScopedSpec {
+public class WorkspaceV1beta2Spec implements UserScopedSpec {
 
     @JsonProperty("name")
     private String name;
@@ -42,14 +45,23 @@ public class WorkspaceSpec implements UserScopedSpec {
     @JsonProperty("error")
     private String error;
 
-    public WorkspaceSpec() {
+    public WorkspaceV1beta2Spec() {
     }
 
-    public WorkspaceSpec(String name, String label, String appDefinition, String user) {
+    public WorkspaceV1beta2Spec(String name, String label, String appDefinition, String user) {
 	this.name = name;
 	this.appDefinition = appDefinition;
 	this.user = user;
 	this.label = label;
+    }
+
+    public WorkspaceV1beta2Spec(WorkspaceHubSpec spec) {
+	this.name = spec.getName();
+	this.label = spec.getLabel();
+	this.appDefinition = spec.getAppDefinition();
+	this.user = spec.getUser();
+	this.storage = spec.getStorage();
+	this.error = spec.getError();
     }
 
     public String getName() {

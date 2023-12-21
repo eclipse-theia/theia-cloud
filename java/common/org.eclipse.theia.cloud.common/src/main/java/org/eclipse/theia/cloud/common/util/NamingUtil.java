@@ -17,9 +17,9 @@ package org.eclipse.theia.cloud.common.util;
 
 import java.util.Locale;
 
-import org.eclipse.theia.cloud.common.k8s.resource.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 public final class NamingUtil {
 
