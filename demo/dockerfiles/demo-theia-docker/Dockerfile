@@ -1,4 +1,4 @@
-FROM ghcr.io/eclipse-theia/theia-blueprint/blueprint as production-stage
+FROM ghcr.io/eclipse-theia/theia-blueprint/theia-ide as production-stage
 
 ENV THEIA_MINI_BROWSER_HOST_PATTERN {{hostname}}
 ENV THEIA_WEBVIEW_ENDPOINT {{hostname}}
