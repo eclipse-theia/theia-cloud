@@ -13,8 +13,7 @@
     "@theia/plugin-ext": "^1.34.0"
   },
   "devDependencies": {
-    "rimraf": "^3.0.2",
-    "typescript": "^4.6.3"
+    "rimraf": "^3.0.2"
   },
   "scripts": {
     "prepare": "npm run clean && npm run build",
@@ -22,7 +21,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "prepublishOnly": "npm run build",
-    "publish:next": "npm version `npm pkg get version | tr -d '\"'`.`git rev-parse --short HEAD` && npm publish --tag next",
+    "publish:next": "npm pkg set version=`npm pkg get version | head -1  | tr -d '\"'`.`git rev-parse --short HEAD` && npm publish --tag next",
     "publish:latest": "npm publish --tag latest"
   },
   "theiaExtensions": [

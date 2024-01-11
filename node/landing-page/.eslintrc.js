@@ -8,8 +8,8 @@ module.exports = {
     'eslint:recommended',
     '@vue/typescript/recommended',
     '@vue/prettier',
-    '@vue/prettier/@typescript-eslint'
   ],
+  parser: "vue-eslint-parser",
   parserOptions: {
     ecmaVersion: 2020,
     parser: '@typescript-eslint/parser'

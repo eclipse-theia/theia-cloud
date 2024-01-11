@@ -1,7 +1,7 @@
 # This docker file build uses the local common package
 
 # build stage
-FROM node:16-alpine as build-stage
+FROM node:20-alpine as build-stage
 WORKDIR /app
 COPY node/common/src ./common/src
 COPY node/common/package.json node/common/tsconfig.json ./common/
