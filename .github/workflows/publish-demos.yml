@@ -45,7 +45,7 @@ jobs:
       docker_org: theiacloud
       docker_image: theia-cloud-activity-demo-theia
       docker_file: demo/dockerfiles/demo-theia-monitor-theia/Dockerfile
-      docker_location: demo/dockerfiles/demo-theia-monitor-theia/.
+      docker_location: .
       publish_type: ${{ inputs.publish_type }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
