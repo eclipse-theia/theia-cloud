@@ -19,7 +19,7 @@ Theia Cloud consists of the following components.
 
 Theia Cloud brings simple custom resource definitions (CRDs) that allow to specify the required configuration, like the docker image of the Theia-based product.\
 A Java-based operator will listen for the creation, modification, and deletion of custom resources based on those CRDs and will manage the application.\
-See [Architecture.md](doc/docs/Architecture.md) for more information on the architecture.
+See [Architecture.md](documentation/Architecture.md) for more information on the architecture.
 
 ### Theia Cloud Service
 
@@ -71,7 +71,7 @@ The next commit after a Release should then:
 
 ## Building
 
-All components are deployed as docker images and may be built with docker. See [Building.md](doc/docs/Building.md) for more information. We offer prebuilt images ready to use.
+All components are deployed as docker images and may be built with docker. See [Building.md](documentation/Building.md) for more information. We offer prebuilt images ready to use.
 
 ## Installation
 
@@ -113,11 +113,11 @@ helm uninstall theia-cloud -n theiacloud
 
 [...Terraform](terraform/terraform.md)
 
-[...Minikube](doc/docs/platforms/Minikube.md)
+[...Minikube](documentation/platforms/Minikube.md)
 
 [...GKE](terraform/terraform.md#google-kubernetes-engine)
 
-[...configuring the Keycloak Realm](doc/docs/Keycloak.md)
+[...configuring the Keycloak Realm](documentation/Keycloak.md)
 
 ## Security
 

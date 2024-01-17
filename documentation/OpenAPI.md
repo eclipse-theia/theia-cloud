@@ -29,14 +29,14 @@ docker pull swaggerapi/swagger-ui
 docker run -p 80:8080 swaggerapi/swagger-ui
 ```
 
-Then browse to <http://localhost/> and explore the spec from here: <https://raw.githubusercontent.com/eclipsesource/theia-cloud/main/doc/docs/openapi.json>
+Then browse to <http://localhost/> and explore the spec from here: <https://raw.githubusercontent.com/eclipsesource/theia-cloud/main/documentation/openapi.json>
 
 ## Generate Typescript API
 
 You can generate the typescript client used in the common package by using the following command from the root of this repository:
 
 ```bash
-openapi-generator-cli generate -g typescript-axios -i ./doc/docs/openapi.json -o node/common/src/client/ --additional-properties=supportsES6=true,typescriptThreePlus=true --skip-validate-spec
+openapi-generator-cli generate -g typescript-axios -i ./documentation/openapi.json -o node/common/src/client/ --additional-properties=supportsES6=true,typescriptThreePlus=true --skip-validate-spec
 ```
 
 If the command is not found, you may install the generator with:

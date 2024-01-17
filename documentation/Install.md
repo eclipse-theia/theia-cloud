@@ -31,7 +31,7 @@ If Theia Cloud is used with paths instead of subdomains, the global HTTPS certif
 
 You can either provide the default certificate yourself or use a dummy service to initially generate the certificate.
 In [global-certificate.yaml](./platforms/global-certificate.yaml), replace `example.com` with your own host and `letsencrypt-prod` with your certificate issuer of choice.
-Apply the configuration with `kubectl apply -f  ./doc/docs/platforms/global-certificate.yaml`.
+Apply the configuration with `kubectl apply -f  ./documentation/platforms/global-certificate.yaml`.
 
 Configure the nginx controllers deployment to use the certificate `default-tls` in the default namespace as its default certificate.
 For this, add argument `"--default-ssl-certificate=default/default-tls"` to the container by patching the controller's deployment.
