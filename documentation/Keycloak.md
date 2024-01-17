@@ -1,6 +1,6 @@
 # Keycloak Realm Setup
 
-We are using oauth2-proxy as reverse proxy. The official setup instructions to use the Keycloak OIDC Auth Provider with oauth2-proxy can be found here: https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#keycloak-oidc-auth-provider
+We are using oauth2-proxy as reverse proxy. The official setup instructions to use the Keycloak OIDC Auth Provider with oauth2-proxy can be found here: <https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#keycloak-oidc-auth-provider>
 
 The main difference is that our client is not confidential but public, since we are also initiating the login process via the keycloak js library, which requests a public client.
 

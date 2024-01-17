@@ -4,18 +4,18 @@
 
 ### Helm 3
 
-Follow the steps in https://helm.sh/docs/intro/install/ to install Helm on your system.
+Follow the steps in <https://helm.sh/docs/intro/install/> to install Helm on your system.
 
 ### Cert-Manager
 
-Please check https://cert-manager.io/docs/installation/ for the latest installation instructions.
+Please check <https://cert-manager.io/docs/installation/> for the latest installation instructions.
 
 As of writing this guide the installation command looks like this:\
 `kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml`
 
 ### Metrics Server
 
-Please check https://github.com/kubernetes-sigs/metrics-server#installation for the latest installation instructions.
+Please check <https://github.com/kubernetes-sigs/metrics-server#installation> for the latest installation instructions.
 
 As of writing this guide the installation command looks like this:\
 `kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml`
@@ -23,7 +23,7 @@ As of writing this guide the installation command looks like this:\
 ### NginX Ingress Controller
 
 Follow the installation guide for your platform:\
-https://kubernetes.github.io/ingress-nginx/deploy/
+<https://kubernetes.github.io/ingress-nginx/deploy/>
 
 ### Global certificate (Only when using paths)
 
@@ -41,8 +41,6 @@ kubectl patch deploy ingress-nginx-controller --type='json' -n ingress-nginx \
 -p '[{ "op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--default-ssl-certificate=default/default-tls" }]'
 ```
 
-### Optional: Keycloak
-
 ## Install
 
 For this demo we will use nip.io hostnames.
@@ -53,7 +51,6 @@ Obtain the external IP address of the `ingress-nginx-controller`:
 $ kubectl get svc --all-namespaces
 NAMESPACE       NAME                                 TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)                      AGE
 ingress-nginx   ingress-nginx-controller             LoadBalancer   10.52.4.129    34.141.62.32   80:32507/TCP,443:32114/TCP   11m
-
 ```
 
 Open `./helm/theia.cloud/valuesGKETryNow.yaml` and update the host section to use `subdomain.34.141.62.32.nip.io`:
@@ -65,27 +62,39 @@ hosts:
   instance: ws.34.141.62.32.nip.io
 ```
 
-```bash
-kubectl config set-context --current --namespace=theiacloud
+### Add & update Theia Cloud helm repo
 
+```bash
 helm repo add theia-cloud-remote https://github.eclipsesource.com/theia-cloud-helm
 helm repo update
+```
 
-# Last Release:
-helm install theia-cloud-base theia-cloud-remote/theia-cloud-base  --set issuer.email=your-mail@example.com
+### Install the last release
 
-helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --create-namespace
+```bash
+helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --set issuer.email=your-mail@example.com
 
-# Cutting Edge: 
-helm install theia-cloud-base theia-cloud-remote/theia-cloud-base  --set issuer.email=your-mail@example.com --devel
+helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theiacloud --create-namespace
+
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud
+```
+
+### Install the current next version
+
+Simply add the `--devel` flag:
+
+```bash
+helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --set issuer.email=your-mail@example.com --devel
 
 helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theiacloud --create-namespace --devel
 
-helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --create-namespace --devel
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --devel
+```
 
-# Uninstall
-helm uninstall theia-cloud -n theiacloud
+### Optional: switch to the newly created namespace
 
+```bash
+kubectl config set-context --current --namespace=theiacloud
 ```
 
 ### Trouble shooting

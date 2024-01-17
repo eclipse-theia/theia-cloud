@@ -1,23 +1,58 @@
 # Building
 
-Besides the Operator, Theia.cloud-REST-Service, and the Dashboard, Theia.Cloud also has a simple Theia-based demo application and an init-container running wondershaper which may enable limiting the network bandwidth of a running application.
+Besides the Operator, REST-Service, and the landing page, Theia Cloud also provides a few simple Theia-based demo applications and an init-container running wondershaper which may enable limiting the network bandwidth of a running application.
+
+**Note:** all commands are from the root of the repository.
+
+## REST service
 
 ```bash
-# Build the wondershaper init-container.
-docker build -t theia-cloud-wondershaper -f dockerfiles/wondershaper/Dockerfile .
+docker build --no-cache -t theia-cloud-service -f dockerfiles/service/Dockerfile .
+```
 
-# Build the Theia Demo application with:
-docker build -t theia-cloud-demo -f demo/dockerfiles/demo-theia-docker/Dockerfile demo/dockerfiles/demo-theia-docker/.
+## Operator
 
-# Build the Landing page/Dashboard with:
+```bash
+docker build --no-cache -t theia-cloud-operator -f dockerfiles/operator/Dockerfile .
+```
+
+## Landing page
+
+```bash
 docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile .
+```
 
-# Build the Try Now page with:
+## Try now page
+
+```bash
 docker build -t theia-cloud-try-now-page -f dockerfiles/try-now-page/Dockerfile .
+```
 
-# Build the Theia.cloud REST service with:
-docker build -t theia-cloud-service -f dockerfiles/service/Dockerfile .
+## Wondershaper
 
-# Build the operator with:
-docker build -t theia-cloud-operator -f dockerfiles/operator/Dockerfile .
+```bash
+docker build -t theia-cloud-wondershaper -f dockerfiles/wondershaper/Dockerfile .
+```
+
+## Demo applications
+
+### Theia demo
+
+```bash
+docker build -t theia-cloud-demo -f demo/dockerfiles/demo-theia-docker/Dockerfile demo/dockerfiles/demo-theia-docker/.
+```
+
+### Theia demo with Activity Tracker (VSCode extension)
+
+**Note:** requires the [Theia Demo](#theia-demo).
+
+```bash
+docker tag theiacloud/theia-cloud-demo:latest theiacloud/theia-cloud-demo
+docker build -t theiacloud/theia-cloud-activity-demo:latest -f demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile demo/dockerfiles/demo-theia-monitor-vscode/.
+```
+
+### Theia demo with Activity Tracker (Theia extension)
+
+```bash
+docker build -t theiacloud/theia-cloud-activity-demo-theia:latest -f demo/dockerfiles/demo-theia-monitor-theia/Dockerfile .
 ```

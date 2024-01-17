@@ -1,8 +1,8 @@
 # Architecture Overview
 
-The Theia.Cloud Operator listens for changes to custom resources inside the cluster. With those custom resources clients may trigger the creation/deletion/handling of workspaces and sessions. The Operator is responsible for handling all things that are related to the Kubernetes-Resources for workspaces and sessions. All access is authenticated via an Authenticator. 
+The Theia Cloud Operator listens for changes to custom resources inside the cluster. With those custom resources clients may trigger the creation/deletion/handling of workspaces and sessions. The Operator is responsible for handling all things that are related to the Kubernetes-Resources for workspaces and sessions. All access is authenticated via an Authenticator.
 
-![Theia.Cloud Diagram](theia.cloud.png "Theia.Cloud")
+![Theia Cloud Diagram](theia.cloud.png "Theia Cloud")
 
 ## Operator Java Overview
 
@@ -80,8 +80,8 @@ A concrete session associated with a user for a given workspace.
 
 Our default implementation is using these technologies:
 
-* oauth2-proxy as a reverse proxy to handle trafic to the running session container https://oauth2-proxy.github.io/oauth2-proxy/
-* keycloak for authentication/authorization https://www.keycloak.org/
+* oauth2-proxy as a reverse proxy to handle trafic to the running session container <https://oauth2-proxy.github.io/oauth2-proxy/>
+* keycloak for authentication/authorization <https://www.keycloak.org/>
 
 ## Session Deployment
 

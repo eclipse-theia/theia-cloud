@@ -1,5 +1,7 @@
 # Theia Cloud
 
+[![Try online](https://img.shields.io/badge/Try_Theia_Cloud-online-blue?logo=icloud&logoColor=f5f5f5)](https://try.theia-cloud.io/) [![Website](https://img.shields.io/badge/Website-black?style=flat&color=blue)](https://theia-cloud.io/)
+
 The goal of Theia Cloud is to simplify the deployment of Theia-based (and similar) products on Kubernetes. We follow a convention over configuration approach allowing users to get started fast. At the same time, we aim for extensibility allowing developers to customize all aspects of the kubernetes deployment as required.
 
 For more information, please also visit [our website](https://theia-cloud.io/).
@@ -79,33 +81,51 @@ We offer a helm chart at <https://github.com/eclipsesource/theia-cloud-helm> whi
 
 We offer three charts:
 
-* `theia-cloud-base` installs cluster wide resources that may be reused by multiple Theia Cloud installations in different namespaces
-* `theia-cloud-crds` (starting with version 0.8.1) installs the custom resource definitions for Theia Cloud and migration servers for older custom resources. This may be reused by multiple Theia Cloud installations in different namespaces.
-* `theia-cloud` installs the Theia Cloud operators, service, and landing-page. It depends on the two above charts.
+- `theia-cloud-base` installs cluster wide resources that may be reused by multiple Theia Cloud installations in different namespaces
+- `theia-cloud-crds` (starting with version 0.8.1) installs the custom resource definitions for Theia Cloud and migration servers for older custom resources. This may be reused by multiple Theia Cloud installations in different namespaces.
+- `theia-cloud` installs the Theia Cloud operators, service, and landing-page. It depends on the two above charts.
 
 Starting with version 0.8.1 you may use helm upgrade to update to newer Theia Cloud version.\
 Older versions (before the introduction of `theia-cloud-crds`) require a manual uninstall and reinstall as well as a manual CRD upgrade step.
 
+### Add & update Theia Cloud helm repo
+
 ```bash
 helm repo add theia-cloud-remote https://github.eclipsesource.com/theia-cloud-helm
 helm repo update
+```
 
-# Last Release:
+### Install the last release
+
+```bash
 helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --set issuer.email=your-mail@example.com
 
-helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --create-namespace
+helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theiacloud --create-namespace
 
-# Cutting Edge:
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud
+```
+
+### Install the current next version
+
+Simply add the `--devel` flag:
+
+```bash
 helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --set issuer.email=your-mail@example.com --devel
 
 helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theiacloud --create-namespace --devel
 
-helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --create-namespace --devel
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --devel
+```
 
-# Optional: switch to the newly created namespace
+### Optional: switch to the newly created namespace
+
+```bash
 kubectl config set-context --current --namespace=theiacloud
+```
 
-# Uninstall
+### Uninstall
+
+```bash
 helm uninstall theia-cloud -n theiacloud
 ```
 
