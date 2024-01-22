@@ -11,6 +11,7 @@
 - [demo] Fix demo applications to Theia's latest Community Release (1.43.1) [#267](https://github.com/eclipsesource/theia-cloud/pull/267) - contributed on behalf of STMicroelectronics
 - [node/monitor-theia] Make `@theia` dependencies peerDependencies [#267](https://github.com/eclipsesource/theia-cloud/pull/267) - contributed on behalf of STMicroelectronics
 - [node] Update to node 20 [#269](https://github.com/eclipsesource/theia-cloud/pull/269)
+- [All components] Clean up repository [#275](https://github.com/eclipsesource/theia-cloud/pull/275) - contributed on behalf of STMicroelectronics
 
 ## [0.8.1] - 2023-10-01
   
