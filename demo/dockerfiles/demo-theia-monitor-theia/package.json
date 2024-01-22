@@ -3,7 +3,7 @@
     "theia": {
         "frontend": {
             "config": {
-                "applicationName": "Theia.Cloud Example",
+                "applicationName": "Theia Cloud Example",
                 "warnOnPotentiallyInsecureHostPattern": false,
                 "preferences": {
                     "files.enableTrash": false

@@ -4,7 +4,7 @@ Minikube is a local Kubernetes that allows you to test and develop for Kubernete
 In this guide we will show you how to install minikube and helm 3 as well as cert-manager, the cloud native certificate management, the NginX Ingress Controller and Keycloak. We will use existing installation methods for all of the Theia.Cloud preqrequisites.\
 Finally we will install and try Theia.Cloud using helm.
 
-If you have no experience with Kubernetes/Minikube yet, we encourage you to check out some basic tutorials first, e.g. https://kubernetes.io/docs/tutorials/hello-minikube/ and https://kubernetes.io/docs/tutorials/kubernetes-basics/
+If you have no experience with Kubernetes/Minikube yet, we encourage you to check out some basic tutorials first, e.g. <https://kubernetes.io/docs/tutorials/hello-minikube/> and <https://kubernetes.io/docs/tutorials/kubernetes-basics/>
 
 ## Install and start Theia Cloud on minikube
 
@@ -46,9 +46,11 @@ Thus, the custom hostname could not be resolved in the cluster and, thus, the op
 
 - Service times out after launching a session
 - Operator log contains messages stating the session pod is not available. Log messages can look like this:
-```
+
+```bash
 ERROR org.eclipse.theia.cloud.operator.handler.impl.AddedHandlerUtil - [16695cf8-1e88-4ca9-93b2-483ebb89e5e4] ws.myhostname.io/e91be8be-0ed3-4c81-8a7b-b3d03bad6fd2/ is NOT available yet.
 ```
+
 - Session URL is never set to the Session custom resource
 
 **Potential solutions:**
