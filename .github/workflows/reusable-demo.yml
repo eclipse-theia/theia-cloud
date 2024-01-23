@@ -26,7 +26,7 @@ on:
         required: true
 
 env:
-  VERSION: 0.9.0-next
+  VERSION: 0.9.0
 
 jobs:
   publish-next:
