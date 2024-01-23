@@ -1,6 +1,6 @@
 {
   "name": "@eclipse-theiacloud/monitor-theia",
-  "version": "0.9.0-next",
+  "version": "0.9.0",
   "keywords": [
     "theia-extension"
   ],
