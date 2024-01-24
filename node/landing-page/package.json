@@ -9,7 +9,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@eclipse-theiacloud/common": "0.9.1",
+    "@eclipse-theiacloud/common": "0.10.0-next",
     "@types/uuid": "^8.3.2",
     "axios": "^0.25.0",
     "core-js": "^3.6.5",

@@ -12,7 +12,7 @@ RUN cd /service/common/maven-conf && \
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /service
-COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-0.9.1-runner.jar .
+COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-0.10.0-SNAPSHOT-runner.jar .
 ENV APPID default-app-id
 ENV SERVICE_PORT 8081
 
@@ -29,5 +29,5 @@ ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} \
     -Dquarkus.oidc.auth-server-url=${KEYCLOAK_SERVERURL} \
     -Dquarkus.oidc.client-id=${KEYCLOAK_CLIENTID} \
     -Dquarkus.oidc.credentials.secret=${KEYCLOAK_CLIENTSECRET} \
-    -jar ./service-0.9.1-runner.jar
+    -jar ./service-0.10.0-SNAPSHOT-runner.jar
 CMD [ "" ]
