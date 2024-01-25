@@ -32,9 +32,23 @@ jobs:
       - name: Build package
         run: npm run build -w ${{ inputs.package_workspace }}
 
+  check-version:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'next'
+    outputs:
+      is_next_version: ${{ steps.version_check.outputs.is_next_version }}
+    steps:
+      - id: version_check
+        run: |
+          if [[ $VERSION == *"-next" ]]; then
+            echo "::set-output name=is_next_version::true"
+          else
+            echo "::set-output name=is_next_version::false"
+          fi
+
   publish-next:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'next' && needs.check-version.outputs.is_next_version == 'true'
     defaults:
       run:
         working-directory: ./node
