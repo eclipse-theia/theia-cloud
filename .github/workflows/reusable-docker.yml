@@ -39,9 +39,23 @@ jobs:
         run: |
           docker build -t ${{ steps.get_tags.outputs.version_tag }} -f ${{ inputs.docker_file }} .
 
+  check-version:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'next'
+    outputs:
+      is_next_version: ${{ steps.version_check.outputs.is_next_version }}
+    steps:
+      - id: version_check
+        run: |
+          if [[ $VERSION == *"-next" ]]; then
+            echo "::set-output name=is_next_version::true"
+          else
+            echo "::set-output name=is_next_version::false"
+          fi
+
   publish-next:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'next' && needs.check-version.outputs.is_next_version == 'true'
 
     steps:
       - name: Checkout Repository
@@ -64,7 +78,6 @@ jobs:
 
       # Push version and SHA tag for main pushes of next versions (This avoids duplicate pushes for release commits on main)
       - name: Push version and SHA tag
-        if: endsWith(env.VERSION, '-next')
         run: |
           docker push ${{ steps.get_tags.outputs.version_tag }}
           docker tag ${{ steps.get_tags.outputs.version_tag }} ${{ steps.get_tags.outputs.sha_tag }}
