@@ -20,6 +20,7 @@
     "clean": "rimraf lib",
     "build": "tsc",
     "watch": "tsc -w",
+    "lint": "eslint -c ../.eslintrc.js --ext .ts ./src",
     "prepublishOnly": "npm run build",
     "publish:next": "npm pkg set version=`npm pkg get version | head -1  | tr -d '\"'`.`git rev-parse --short HEAD` && npm publish --tag next",
     "publish:latest": "npm publish --tag latest"

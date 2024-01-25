@@ -21,12 +21,15 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "build": "npm run build --workspaces --if-present"
+    "build": "npm run build --workspaces --if-present && npm run build:monitor",
+    "lint": "npm run lint --workspaces --if-present && npm run lint:monitor",
+    "build:monitor": "cd monitor && npm run build",
+    "lint:monitor": "cd monitor && npm run lint",
+    "update:demo:monitor": "cd monitor && npm run update:demo:monitor"
   },
   "workspaces": [
     "common",
     "landing-page",
-    "monitor",
     "monitor-theia",
     "try-now-page",
     "testing-page"

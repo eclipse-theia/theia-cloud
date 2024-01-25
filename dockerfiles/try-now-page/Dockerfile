@@ -4,13 +4,15 @@ FROM node:lts-alpine as build-stage
 ENV DISABLE_ESLINT_PLUGIN=true
 WORKDIR /app
 COPY node/package*.json ./
+COPY node/tsconfig.json ./
 COPY node/common/package.json ./common/package.json
 COPY node/try-now-page/package.json ./try-now-page/package.json
 RUN npm ci
 COPY node/configs/ ./configs/
 COPY node/common/ ./common/
 COPY node/try-now-page/ ./try-now-page/
-RUN npm run build && \
+RUN npm run build -w common && \
+    npm run build -w try-now-page && \
     chmod 644 /app/try-now-page/build/terms.html && \
     chmod 644 /app/try-now-page/build/favicon.ico
 
