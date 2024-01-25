@@ -27,4 +27,5 @@ Open this folder in vscode. A `Run Extension` debug config will be available. Th
 
 ## Bundle the extension
 
-Run `npm run bundle` to create a `vsix` file that can be installed in VSCode/Theia.
+Run `npm run build:vsix` to create a `vsix` file that can be installed in VSCode/Theia.
+Run `npm run update:demo:monitor` to update the `vsix` file in the `demo-theia-monitor-vscode` component.

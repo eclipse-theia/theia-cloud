@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-/* eslint-disable @typescript-eslint/naming-convention */
+// eslint-disable-next-line no-shadow
 export enum MessageLevel {
   WARN = 'warn',
   ERROR = 'error',
