@@ -32,8 +32,8 @@
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
     "build": "npm install && npm run webpack",
-		"webpack": "webpack --mode development",
-		"webpack-dev": "webpack --mode development --watch",
+    "webpack": "webpack --mode development",
+    "webpack-dev": "webpack --mode development --watch",
     "lint": "eslint -c ../.eslintrc.js --ext .ts ./src",
     "build:vsix": "npm install && vsce package --allow-star-activation --skip-license",
     "update:demo:monitor": "npm run build:vsix && rm ../../demo/dockerfiles/demo-theia-monitor-vscode/*vsix && mv *.vsix ../../demo/dockerfiles/demo-theia-monitor-vscode"
@@ -48,8 +48,8 @@
     "@types/glob": "^7.2.0",
     "@types/vscode": "^1.70.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
-		"@typescript-eslint/parser": "^6.7.0",
-		"eslint": "^8.26.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.26.0",
     "ts-loader": "^9.3.1",
     "@vscode/vsce": "^2.22.0",
     "webpack": "^5.74.0",
