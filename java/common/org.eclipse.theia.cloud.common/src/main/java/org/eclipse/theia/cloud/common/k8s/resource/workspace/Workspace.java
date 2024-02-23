@@ -26,14 +26,14 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v1beta3")
+@Version("v1beta4")
 @Group("theia.cloud")
 @Kind("Workspace")
 @Singular("workspace")
 @Plural("workspaces")
 public class Workspace extends CustomResource<WorkspaceSpec, WorkspaceStatus> implements Namespaced {
 
-    public static final String API = "theia.cloud/v1beta3";
+    public static final String API = "theia.cloud/v1beta4";
     public static final String CRD_NAME = "workspaces.theia.cloud";
     public static final String KIND = "Workspace";
 
@@ -43,11 +43,11 @@ public class Workspace extends CustomResource<WorkspaceSpec, WorkspaceStatus> im
     }
 
     public Workspace(WorkspaceHub fromHub) {
-	this.setMetadata(fromHub.getMetadata());
-	this.spec = new WorkspaceSpec(fromHub.getSpec());
-	if (fromHub.getStatus() != null) {
-	    this.status = new WorkspaceStatus(fromHub.getStatus());
+	if (fromHub.getMetadata().isPresent()) {
+	    this.setMetadata(fromHub.getMetadata().get());
 	}
+	this.spec = new WorkspaceSpec(fromHub);
+	this.status = new WorkspaceStatus(fromHub);
     }
 
     @Override

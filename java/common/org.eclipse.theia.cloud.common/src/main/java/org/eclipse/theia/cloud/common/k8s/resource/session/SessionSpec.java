@@ -20,8 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHubSpec;
-import org.eclipse.theia.cloud.common.util.TheiaCloudError;
+import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,17 +38,8 @@ public class SessionSpec implements UserScopedSpec {
     @JsonProperty("user")
     private String user;
 
-    @JsonProperty("url")
-    private String url;
-
-    @JsonProperty("error")
-    private String error;
-
     @JsonProperty("workspace")
     private String workspace;
-
-    @JsonProperty("lastActivity")
-    private long lastActivity;
 
     @JsonProperty("sessionSecret")
     private String sessionSecret;
@@ -97,18 +87,15 @@ public class SessionSpec implements UserScopedSpec {
 	this.envVarsFromSecrets = envVarsFromSecrets;
     }
 
-    public SessionSpec(SessionHubSpec fromHub) {
-	this.name = fromHub.getName();
-	this.appDefinition = fromHub.getAppDefinition();
-	this.user = fromHub.getUser();
-	this.url = fromHub.getUrl();
-	this.error = fromHub.getError();
-	this.workspace = fromHub.getWorkspace();
-	this.lastActivity = fromHub.getLastActivity();
-	this.sessionSecret = fromHub.getSessionSecret();
-	this.envVars = fromHub.getEnvVars();
-	this.envVarsFromConfigMaps = fromHub.getEnvVarsFromConfigMaps();
-	this.envVarsFromSecrets = fromHub.getEnvVarsFromSecrets();
+    public SessionSpec(SessionHub fromHub) {
+	this.name = fromHub.getName().orElse(null);
+	this.appDefinition = fromHub.getAppDefinition().orElse(null);
+	this.user = fromHub.getUser().orElse(null);
+	this.workspace = fromHub.getWorkspace().orElse(null);
+	this.sessionSecret = fromHub.getSessionSecret().orElse(null);
+	this.envVars = fromHub.getEnvVars().orElse(null);
+	this.envVarsFromConfigMaps = fromHub.getEnvVarsFromConfigMaps().orElse(null);
+	this.envVarsFromSecrets = fromHub.getEnvVarsFromSecrets().orElse(null);
     }
 
     public String getName() {
@@ -128,48 +115,12 @@ public class SessionSpec implements UserScopedSpec {
 	return user;
     }
 
-    public String getUrl() {
-	return url;
-    }
-
     public String getSessionSecret() {
 	return sessionSecret;
     }
 
     public void setSessionSecret(String sessionSecret) {
 	this.sessionSecret = sessionSecret;
-    }
-
-    public void setUrl(String url) {
-	this.url = url;
-    }
-
-    public boolean hasUrl() {
-	return getUrl() != null && !getUrl().isBlank();
-    }
-
-    public String getError() {
-	return error;
-    }
-
-    public void setError(TheiaCloudError error) {
-	setError(error.asString());
-    }
-
-    public void setError(String error) {
-	this.error = error;
-    }
-
-    public boolean hasError() {
-	return TheiaCloudError.isErrorString(getError());
-    }
-
-    public long getLastActivity() {
-	return lastActivity;
-    }
-
-    public void setLastActivity(long lastActivity) {
-	this.lastActivity = lastActivity;
     }
 
     public String getWorkspace() {
@@ -253,8 +204,8 @@ public class SessionSpec implements UserScopedSpec {
 
     @Override
     public String toString() {
-	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", url=" + url
-		+ ", error=" + error + ", workspace=" + workspace + ", lastActivity=" + lastActivity + "]";
+	return "SessionSpec [name=" + name + ", appDefinition=" + appDefinition + ", user=" + user + ", workspace="
+		+ workspace + "]";
     }
 
     public static boolean isEphemeral(String workspace) {

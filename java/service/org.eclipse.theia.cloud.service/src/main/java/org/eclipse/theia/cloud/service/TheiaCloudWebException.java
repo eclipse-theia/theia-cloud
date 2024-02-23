@@ -16,9 +16,9 @@
 package org.eclipse.theia.cloud.service;
 
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -50,27 +50,27 @@ public class TheiaCloudWebException extends WebApplicationException {
     }
 
     public static Session throwIfErroneous(Session session) {
-	throwIfErroneous(session.getSpec());
+	throwIfErroneous(session.getStatus());
 	return session;
     }
 
-    public static SessionSpec throwIfErroneous(SessionSpec spec) {
-	if (spec.hasError()) {
-	    throw new TheiaCloudWebException(TheiaCloudError.fromString(spec.getError()));
+    public static SessionStatus throwIfErroneous(SessionStatus status) {
+	if (status.hasError()) {
+	    throw new TheiaCloudWebException(TheiaCloudError.fromString(status.getError()));
 	}
-	return spec;
+	return status;
     }
 
     public static Workspace throwIfErroneous(Workspace workspace) {
-	throwIfErroneous(workspace.getSpec());
+	throwIfErroneous(workspace.getStatus());
 	return workspace;
     }
 
-    public static WorkspaceSpec throwIfErroneous(WorkspaceSpec spec) {
-	if (spec.hasError()) {
-	    throw new TheiaCloudWebException(TheiaCloudError.fromString(spec.getError()));
+    public static WorkspaceStatus throwIfErroneous(WorkspaceStatus status) {
+	if (status.getError() != null) {
+	    throw new TheiaCloudWebException(TheiaCloudError.fromString(status.getError()));
 	}
-	return spec;
+	return status;
     }
 
     public static void throwIfError(String error) {

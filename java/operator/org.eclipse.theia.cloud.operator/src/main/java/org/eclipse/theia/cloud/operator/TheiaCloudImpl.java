@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrelationId;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -33,12 +34,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec.Timeout;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.operator.handler.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.SessionHandler;
-import org.eclipse.theia.cloud.operator.handler.TimeoutStrategy;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
 import org.eclipse.theia.cloud.operator.monitor.MonitorActivityTracker;
 
@@ -72,9 +71,6 @@ public class TheiaCloudImpl implements TheiaCloud {
 
     @Inject
     private SessionHandler sessionHandler;
-
-    @Inject
-    private Set<TimeoutStrategy> timeoutStrategies;
 
     @Inject
     private TheiaCloudArguments arguments;
@@ -283,27 +279,26 @@ public class TheiaCloudImpl implements TheiaCloud {
     }
 
     protected boolean isSessionTimedOut(String correlationId, Instant now, Session session) {
-	Optional<Timeout> timeout = resourceClient.appDefinitions().get(session.getSpec().getAppDefinition())
+	Optional<Integer> timeout = resourceClient.appDefinitions().get(session.getSpec().getAppDefinition())
 		.map(appDef -> appDef.getSpec().getTimeout());
-	if (timeout.isEmpty() || timeout.get().getLimit() <= 0) {
+	if (timeout.isEmpty() || timeout.get() <= 0) {
 	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId,
-		    "Session " + session.getSpec().getName() + " will not be stopped automatically [NoTimout]."));
+		    "Session " + session.getSpec().getName() + " will not be stopped automatically [NoTimeout]."));
 	    return false;
 	}
-	String strategyName = timeout.get().getStrategy();
-	int limit = timeout.get().getLimit();
-	Optional<TimeoutStrategy> strategy = timeoutStrategies.stream()
-		.filter(registeredStrategy -> registeredStrategy.getName().equals(strategyName)).findAny();
-	if (!strategy.isPresent()) {
-	    LOGGER.warn(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "No strategy configured."));
-	}
-	if (strategy.isPresent() && strategy.get().evaluate(COR_ID_TIMEOUTPREFIX, session, now, limit)) {
-	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Session " + session.getSpec().getName()
-		    + " was stopped after " + limit + " minutes [" + strategyName + "]."));
+	int limit = timeout.get();
+	String creationTimestamp = session.getMetadata().getCreationTimestamp();
+	Instant parse = Instant.parse(creationTimestamp);
+	long minutesSinceCreation = ChronoUnit.MINUTES.between(parse, now);
+	LOGGER.trace(formatLogMessage(correlationId, "Checking " + session.getSpec().getName()
+		+ ". minutesSinceLastActivity: " + minutesSinceCreation + ". limit: " + limit));
+	if (minutesSinceCreation > limit) {
+	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId,
+		    "Session " + session.getSpec().getName() + " was stopped after " + limit + " minutes."));
 	    return true;
 	} else {
 	    LOGGER.trace(formatLogMessage(COR_ID_TIMEOUTPREFIX, correlationId, "Session " + session.getSpec().getName()
-		    + " will keep running until the limit of " + limit + " is hit [" + strategyName + "]."));
+		    + " will keep running until the limit of " + limit + " is hit."));
 	}
 	return false;
     }

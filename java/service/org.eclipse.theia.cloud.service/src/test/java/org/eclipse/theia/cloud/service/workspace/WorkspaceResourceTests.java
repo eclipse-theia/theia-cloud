@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.K8sUtil;
@@ -289,7 +290,8 @@ public class WorkspaceResourceTests {
 		TEST_WORKSPACE);
 	Workspace workspace = Mockito.mock(Workspace.class);
 	WorkspaceSpec workspaceSpec = new WorkspaceSpec("abc", "def", APP_DEFINITION, TEST_USER);
-	workspaceSpec.setError("TestError");
+	WorkspaceStatus workspaceStatus = new WorkspaceStatus();
+	workspaceStatus.setError("TestError");
 	Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
 	Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
 		.thenReturn(workspace);

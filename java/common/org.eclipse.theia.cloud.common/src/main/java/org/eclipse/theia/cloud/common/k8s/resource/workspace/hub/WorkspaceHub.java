@@ -15,54 +15,153 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.workspace.hub;
 
+import java.util.Optional;
+
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 public class WorkspaceHub {
 
-    private ObjectMeta metadata = new ObjectMeta();
-    private WorkspaceHubSpec spec;
-    private WorkspaceHubStatus status;
+    final Optional<ObjectMeta> metadata;
+    final Optional<String> name;
+    final Optional<String> label;
+    final Optional<String> appDefinition;
+    final Optional<String> user;
+    final Optional<String> storage;
+    final Optional<String> error;
 
-    public ObjectMeta getMetadata() {
-	return metadata;
-    }
-
-    public void setMetadata(ObjectMeta metadata) {
-	this.metadata = metadata;
-    }
-
-    public WorkspaceHubSpec getSpec() {
-	return spec;
-    }
-
-    public void setSpec(WorkspaceHubSpec spec) {
-	this.spec = spec;
-    }
-
-    public WorkspaceHubStatus getStatus() {
-	return status;
-    }
-
-    public void setStatus(WorkspaceHubStatus status) {
-	this.status = status;
-    }
+    final Optional<String> volumeClaimStatus;
+    final Optional<String> volumeClaimMessage;
+    final Optional<String> volumeAttachStatus;
+    final Optional<String> volumeAttachMessage;
+    final Optional<String> operatorStatus;
+    final Optional<String> operatorMessage;
 
     public WorkspaceHub(Workspace toHub) {
-	this.setMetadata(toHub.getMetadata());
-	this.spec = new WorkspaceHubSpec(toHub.getSpec());
+	this.metadata = Optional.ofNullable(toHub.getMetadata());
+	this.name = Optional.ofNullable(toHub.getSpec().getName());
+	this.label = Optional.ofNullable(toHub.getSpec().getLabel());
+	this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
+	this.user = Optional.ofNullable(toHub.getSpec().getUser());
+	this.storage = Optional.ofNullable(toHub.getSpec().getStorage());
 	if (toHub.getStatus() != null) {
-	    this.status = new WorkspaceHubStatus(toHub.getStatus());
+	    this.error = Optional.ofNullable(toHub.getStatus().getError());
+	    if (toHub.getStatus().getVolumeClaim() != null) {
+		this.volumeClaimStatus = Optional.ofNullable(toHub.getStatus().getVolumeClaim().getStatus());
+		this.volumeClaimMessage = Optional.ofNullable(toHub.getStatus().getVolumeClaim().getMessage());
+	    } else {
+		this.volumeClaimStatus = Optional.empty();
+		this.volumeClaimMessage = Optional.empty();
+	    }
+	    if (toHub.getStatus().getVolumeAttach() != null) {
+		this.volumeAttachStatus = Optional.ofNullable(toHub.getStatus().getVolumeAttach().getStatus());
+		this.volumeAttachMessage = Optional.ofNullable(toHub.getStatus().getVolumeAttach().getMessage());
+	    } else {
+		this.volumeAttachStatus = Optional.empty();
+		this.volumeAttachMessage = Optional.empty();
+	    }
+	    this.operatorStatus = Optional.ofNullable(toHub.getStatus().getOperatorStatus());
+	    this.operatorMessage = Optional.ofNullable(toHub.getStatus().getOperatorMessage());
+	} else {
+	    this.error = Optional.empty();
+	    this.volumeClaimStatus = Optional.empty();
+	    this.volumeClaimMessage = Optional.empty();
+	    this.volumeAttachStatus = Optional.empty();
+	    this.volumeAttachMessage = Optional.empty();
+	    this.operatorStatus = Optional.empty();
+	    this.operatorMessage = Optional.empty();
+
 	}
     }
 
     @SuppressWarnings("deprecation")
-    public WorkspaceHub(org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta2.WorkspaceV1beta2 toHub) {
-	this.setMetadata(toHub.getMetadata());
-	this.spec = new WorkspaceHubSpec(toHub.getSpec());
+    public WorkspaceHub(org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta3.WorkspaceV1beta3 toHub) {
+	this.metadata = Optional.ofNullable(toHub.getMetadata());
+	this.name = Optional.ofNullable(toHub.getSpec().getName());
+	this.label = Optional.ofNullable(toHub.getSpec().getLabel());
+	this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
+	this.user = Optional.ofNullable(toHub.getSpec().getUser());
+	this.storage = Optional.ofNullable(toHub.getSpec().getStorage());
+	this.error = Optional.ofNullable(toHub.getSpec().getError());
 	if (toHub.getStatus() != null) {
-	    this.status = new WorkspaceHubStatus(toHub.getStatus());
+	    if (toHub.getStatus().getVolumeClaim() != null) {
+		this.volumeClaimStatus = Optional.ofNullable(toHub.getStatus().getVolumeClaim().getStatus());
+		this.volumeClaimMessage = Optional.ofNullable(toHub.getStatus().getVolumeClaim().getMessage());
+	    } else {
+		this.volumeClaimStatus = Optional.empty();
+		this.volumeClaimMessage = Optional.empty();
+	    }
+	    if (toHub.getStatus().getVolumeAttach() != null) {
+		this.volumeAttachStatus = Optional.ofNullable(toHub.getStatus().getVolumeAttach().getStatus());
+		this.volumeAttachMessage = Optional.ofNullable(toHub.getStatus().getVolumeAttach().getMessage());
+	    } else {
+		this.volumeAttachStatus = Optional.empty();
+		this.volumeAttachMessage = Optional.empty();
+	    }
+	    this.operatorStatus = Optional.ofNullable(toHub.getStatus().getOperatorStatus());
+	    this.operatorMessage = Optional.ofNullable(toHub.getStatus().getOperatorMessage());
+	} else {
+	    this.volumeClaimStatus = Optional.empty();
+	    this.volumeClaimMessage = Optional.empty();
+	    this.volumeAttachStatus = Optional.empty();
+	    this.volumeAttachMessage = Optional.empty();
+	    this.operatorStatus = Optional.empty();
+	    this.operatorMessage = Optional.empty();
+
 	}
     }
+
+    public Optional<ObjectMeta> getMetadata() {
+	return metadata;
+    }
+
+    public Optional<String> getName() {
+	return name;
+    }
+
+    public Optional<String> getLabel() {
+	return label;
+    }
+
+    public Optional<String> getAppDefinition() {
+	return appDefinition;
+    }
+
+    public Optional<String> getUser() {
+	return user;
+    }
+
+    public Optional<String> getStorage() {
+	return storage;
+    }
+
+    public Optional<String> getError() {
+	return error;
+    }
+
+    public Optional<String> getVolumeClaimStatus() {
+	return volumeClaimStatus;
+    }
+
+    public Optional<String> getVolumeClaimMessage() {
+	return volumeClaimMessage;
+    }
+
+    public Optional<String> getVolumeAttachStatus() {
+	return volumeAttachStatus;
+    }
+
+    public Optional<String> getVolumeAttachMessage() {
+	return volumeAttachMessage;
+    }
+
+    public Optional<String> getOperatorStatus() {
+	return operatorStatus;
+    }
+
+    public Optional<String> getOperatorMessage() {
+	return operatorMessage;
+    }
+
 }
