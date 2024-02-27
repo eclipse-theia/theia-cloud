@@ -48,6 +48,7 @@ jobs:
 
   publish-next:
     runs-on: ubuntu-latest
+    needs: check-version
     if: github.event_name == 'next' && needs.check-version.outputs.is_next_version == 'true'
     defaults:
       run:

@@ -16,40 +16,65 @@ on:
         type: boolean
         required: true
 
+env:
+  VERSION: 0.10.0-next
+
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      is_next_version: ${{ steps.version_check.outputs.is_next_version }}
+      version: ${{ env.VERSION }}
+    steps:
+      - id: version_check
+        run: |
+          if [[ $VERSION == *"-next" ]]; then
+            echo "is_next_version=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_next_version=false" >> $GITHUB_OUTPUT
+          fi
+
   publish-theia-cloud-demo:
     if: inputs.publish_theia_cloud_demo == true
+    needs: check-version
     uses: ./.github/workflows/reusable-demo.yml
     with:
       docker_org: theiacloud
       docker_image: theia-cloud-demo
       docker_file: demo/dockerfiles/demo-theia-docker/Dockerfile
       docker_location: demo/dockerfiles/demo-theia-docker/.
+      publish_next: ${{ needs.check-version.outputs.is_next_version }}
+      version: ${{ needs.check-version.outputs.version }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   publish-theia-cloud-activity-demo-theia:
     if: inputs.publish_theia_cloud_activity_demo_theia == true
+    needs: check-version
     uses: ./.github/workflows/reusable-demo.yml
     with:
       docker_org: theiacloud
       docker_image: theia-cloud-activity-demo-theia
       docker_file: demo/dockerfiles/demo-theia-monitor-theia/Dockerfile
       docker_location: .
+      publish_next: ${{ needs.check-version.outputs.is_next_version }}
+      version: ${{ needs.check-version.outputs.version }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   publish-theia-cloud-activity-demo:
     if: inputs.publish_theia_cloud_activity_demo == true
-    needs: publish-theia-cloud-demo
+    needs: [check-version, publish-theia-cloud-demo]
     uses: ./.github/workflows/reusable-demo.yml
     with:
       docker_org: theiacloud
       docker_image: theia-cloud-activity-demo
       docker_file: demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile
       docker_location: demo/dockerfiles/demo-theia-monitor-vscode/.
+      publish_next: ${{ needs.check-version.outputs.is_next_version }}
+      version: ${{ needs.check-version.outputs.version }}
     secrets:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
