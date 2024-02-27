@@ -41,9 +41,9 @@ jobs:
       - id: version_check
         run: |
           if [[ $VERSION == *"-next" ]]; then
-            echo "::set-output name=is_next_version::true"
+            echo "is_next_version=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=is_next_version::false"
+            echo "is_next_version=false" >> $GITHUB_OUTPUT
           fi
 
   publish-next:
