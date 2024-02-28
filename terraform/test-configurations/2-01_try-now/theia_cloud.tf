@@ -96,9 +96,7 @@ resource "kubectl_manifest" "cdt-cloud-demo" {
     port: 3000
     requestsCpu: 100m
     requestsMemory: 1000M
-    timeout:
-      limit: 30
-      strategy: FIXEDTIME
+    timeout: 30
     uid: 101
     uplinkLimit: 30000
     mountPath: /home/project/persisted
@@ -132,9 +130,7 @@ resource "kubectl_manifest" "coffee-editor" {
     port: 3000
     requestsCpu: 100m
     requestsMemory: 1000M
-    timeout:
-      limit: 30
-      strategy: FIXEDTIME
+    timeout: 30
     uid: 1001
     uplinkLimit: 30000
     mountPath: /home/project/persisted
