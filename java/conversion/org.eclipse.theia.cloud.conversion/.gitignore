@@ -6,9 +6,6 @@ pom.xml.versionsBackup
 release.properties
 
 # Eclipse
-.project
-.classpath
-.settings/
 bin/
 
 # IntelliJ
