@@ -82,7 +82,7 @@ public class WorkspaceResourceTests {
 
     @BeforeEach
     void mockApplicationProperties() {
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
     }
 
     /**
@@ -91,21 +91,21 @@ public class WorkspaceResourceTests {
      */
     @Test
     void delete_matchingUser_true() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
+        // Prepare
+        mockUser(false, TEST_USER);
+        WorkspaceSpec workspace = mockDefaultWorkspace();
 
-	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
-	Mockito.when(k8sUtil.deleteWorkspace(anyString(), eq(TEST_WORKSPACE))).thenReturn(true);
+        Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
+        Mockito.when(k8sUtil.deleteWorkspace(anyString(), eq(TEST_WORKSPACE))).thenReturn(true);
 
-	WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
+        WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
 
-	// Execute
-	boolean result = fixture.delete(request);
+        // Execute
+        boolean result = fixture.delete(request);
 
-	// Assert
-	Mockito.verify(k8sUtil).deleteWorkspace(anyString(), eq(TEST_WORKSPACE));
-	assertEquals(true, result);
+        // Assert
+        Mockito.verify(k8sUtil).deleteWorkspace(anyString(), eq(TEST_WORKSPACE));
+        assertEquals(true, result);
     }
 
     /**
@@ -114,24 +114,24 @@ public class WorkspaceResourceTests {
      */
     @Test()
     void delete_otherUser_throwForbidden() {
-	// Prepare
-	mockUser(false, OTHER_TEST_USER);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
-	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
+        // Prepare
+        mockUser(false, OTHER_TEST_USER);
+        WorkspaceSpec workspace = mockDefaultWorkspace();
+        Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
 
-	// We leave the matching user in the request to verify that the deletion is
-	// denied even if the correct user is specified in the request.
-	// After all, an attacker could do this.
-	WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
+        // We leave the matching user in the request to verify that the deletion is
+        // denied even if the correct user is specified in the request.
+        // After all, an attacker could do this.
+        WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.delete(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.delete(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     /**
@@ -140,24 +140,24 @@ public class WorkspaceResourceTests {
      */
     @Test()
     void delete_otherUserWithNullName_throwForbidden() {
-	// Prepare
-	mockUser(false, null);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
-	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
+        // Prepare
+        mockUser(false, null);
+        WorkspaceSpec workspace = mockDefaultWorkspace();
+        Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
 
-	// We leave the matching user in the request to verify that the deletion is
-	// denied even if the correct user is specified in the request.
-	// After all, an attacker could now this.
-	WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
+        // We leave the matching user in the request to verify that the deletion is
+        // denied even if the correct user is specified in the request.
+        // After all, an attacker could now this.
+        WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.delete(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.delete(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     /**
@@ -166,17 +166,17 @@ public class WorkspaceResourceTests {
      */
     @Test()
     void delete_workspaceNotExisting_true() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.empty());
-	WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
+        // Prepare
+        mockUser(false, TEST_USER);
+        Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.empty());
+        WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
 
-	// Execute
-	boolean result = fixture.delete(request);
+        // Execute
+        boolean result = fixture.delete(request);
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
-	assertEquals(true, result);
+        // Assert
+        Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
+        assertEquals(true, result);
     }
 
     /**
@@ -185,18 +185,18 @@ public class WorkspaceResourceTests {
      */
     @Test()
     void delete_noRequestWorkspaceName_throwMissingWorkspaceName() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, null);
+        // Prepare
+        mockUser(false, TEST_USER);
+        WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, null);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.delete(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.delete(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
-	assertEquals(TheiaCloudError.MISSING_WORKSPACE_NAME.getCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
+        assertEquals(TheiaCloudError.MISSING_WORKSPACE_NAME.getCode(), exception.getResponse().getStatus());
     }
 
     /**
@@ -205,23 +205,23 @@ public class WorkspaceResourceTests {
      */
     @Test()
     void delete_anonymousUser_throwForbidden() {
-	// Prepare
-	mockUser(true, null);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
-	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
-	// We leave the matching user in the request to verify that the deletion is
-	// denied even if the correct user is specified in the request.
-	// After all, an attacker could now this.
-	WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
+        // Prepare
+        mockUser(true, null);
+        WorkspaceSpec workspace = mockDefaultWorkspace();
+        Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
+        // We leave the matching user in the request to verify that the deletion is
+        // denied even if the correct user is specified in the request.
+        // After all, an attacker could now this.
+        WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.delete(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.delete(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     /**
@@ -230,171 +230,172 @@ public class WorkspaceResourceTests {
      */
     @Test()
     void delete_noKeycloak_throwForbidden() {
-	// Prepare
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
-	mockUser(true, null);
-	WorkspaceSpec workspace = mockDefaultWorkspace();
-	Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
-	// We leave the matching user in the request to verify that the deletion is
-	// denied even if the correct user is specified in the request.
-	// After all, an attacker could know this.
-	WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
+        // Prepare
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+        mockUser(true, null);
+        WorkspaceSpec workspace = mockDefaultWorkspace();
+        Mockito.when(k8sUtil.findWorkspace(TEST_WORKSPACE)).thenReturn(Optional.of(workspace));
+        // We leave the matching user in the request to verify that the deletion is
+        // denied even if the correct user is specified in the request.
+        // After all, an attacker could know this.
+        WorkspaceDeletionRequest request = new WorkspaceDeletionRequest(APP_ID, TEST_USER, TEST_WORKSPACE);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.delete(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.delete(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).deleteWorkspace(anyString(), anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void delete_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
-	Method method = WorkspaceResource.class.getMethod("delete", WorkspaceDeletionRequest.class);
-	TestUtil.assertNoAnonymousAccessAnnotations(method);
+        Method method = WorkspaceResource.class.getMethod("delete", WorkspaceDeletionRequest.class);
+        TestUtil.assertNoAnonymousAccessAnnotations(method);
     }
 
     @Test
     void create_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
-	Method method = WorkspaceResource.class.getMethod("create", WorkspaceCreationRequest.class);
-	TestUtil.assertNoAnonymousAccessAnnotations(method);
+        Method method = WorkspaceResource.class.getMethod("create", WorkspaceCreationRequest.class);
+        TestUtil.assertNoAnonymousAccessAnnotations(method);
     }
 
     @Test
     void create_matchingUser_UserWorkspace() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
-		TEST_WORKSPACE);
-	Workspace workspace = Mockito.mock(Workspace.class);
-	WorkspaceSpec workspaceSpec = new WorkspaceSpec("abc", "def", APP_DEFINITION, TEST_USER);
-	Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
-	Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
-		.thenReturn(workspace);
+        // Prepare
+        mockUser(false, TEST_USER);
+        WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
+                TEST_WORKSPACE);
+        Workspace workspace = Mockito.mock(Workspace.class);
+        WorkspaceSpec workspaceSpec = new WorkspaceSpec("abc", "def", APP_DEFINITION, TEST_USER);
+        Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
+        Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
+                .thenReturn(workspace);
 
-	// Execute
-	UserWorkspace result = fixture.create(request);
+        // Execute
+        UserWorkspace result = fixture.create(request);
 
-	// Assert
-	assertNotNull(result);
-	assertEquals(TEST_USER, result.user);
+        // Assert
+        assertNotNull(result);
+        assertEquals(TEST_USER, result.user);
     }
 
     @Test
     void create_erroneousWorkspace_throwTheiaCloudWebException() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
-		TEST_WORKSPACE);
-	Workspace workspace = Mockito.mock(Workspace.class);
-	WorkspaceSpec workspaceSpec = new WorkspaceSpec("abc", "def", APP_DEFINITION, TEST_USER);
-	WorkspaceStatus workspaceStatus = new WorkspaceStatus();
-	workspaceStatus.setError("TestError");
-	Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
-	Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
-		.thenReturn(workspace);
+        // Prepare
+        mockUser(false, TEST_USER);
+        WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
+                TEST_WORKSPACE);
+        Workspace workspace = Mockito.mock(Workspace.class);
+        WorkspaceSpec workspaceSpec = new WorkspaceSpec("abc", "def", APP_DEFINITION, TEST_USER);
+        WorkspaceStatus workspaceStatus = new WorkspaceStatus();
+        workspaceStatus.setError("TestError");
+        Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
+        Mockito.when(workspace.getStatus()).thenReturn(workspaceStatus);
+        Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
+                .thenReturn(workspace);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.create(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.create(request);
+        });
 
-	// Assert
-	assertTrue(exception.getMessage().contains("TestError"));
+        // Assert
+        assertTrue(exception.getMessage().contains("TestError"));
     }
 
     @Test
     void create_otherUser_throwForbidden() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, OTHER_TEST_USER,
-		TEST_WORKSPACE);
+        // Prepare
+        mockUser(false, TEST_USER);
+        WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, OTHER_TEST_USER,
+                TEST_WORKSPACE);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.create(request);
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.create(request);
 
-	});
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).createWorkspace(anyString(), any());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).createWorkspace(anyString(), any());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void create_noKeycloak_throwForbidden() {
-	// Prepare
-	mockUser(true, null);
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
-	WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
-		TEST_WORKSPACE);
+        // Prepare
+        mockUser(true, null);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+        WorkspaceCreationRequest request = new WorkspaceCreationRequest(APP_ID, APP_DEFINITION, TEST_USER,
+                TEST_WORKSPACE);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.create(request);
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.create(request);
 
-	});
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).createWorkspace(anyString(), any());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).createWorkspace(anyString(), any());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void list_matchingUser_workspaces() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	List<UserWorkspace> resultList = List.of();
-	Mockito.when(k8sUtil.listWorkspaces(TEST_USER)).thenReturn(resultList);
+        // Prepare
+        mockUser(false, TEST_USER);
+        List<UserWorkspace> resultList = List.of();
+        Mockito.when(k8sUtil.listWorkspaces(TEST_USER)).thenReturn(resultList);
 
-	List<UserWorkspace> result = fixture.list(APP_ID, TEST_USER);
+        List<UserWorkspace> result = fixture.list(APP_ID, TEST_USER);
 
-	assertSame(resultList, result);
+        assertSame(resultList, result);
     }
 
     @Test
     void list_otherUser_throwForbidden() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	List<UserWorkspace> resultList = List.of();
-	Mockito.when(k8sUtil.listWorkspaces(TEST_USER)).thenReturn(resultList);
+        // Prepare
+        mockUser(false, TEST_USER);
+        List<UserWorkspace> resultList = List.of();
+        Mockito.when(k8sUtil.listWorkspaces(TEST_USER)).thenReturn(resultList);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.list(APP_ID, OTHER_TEST_USER);
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.list(APP_ID, OTHER_TEST_USER);
 
-	});
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).listWorkspaces(anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).listWorkspaces(anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void list_noKeycloak_throwForbidden() {
-	// Prepare
-	mockUser(true, null);
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
-	List<UserWorkspace> resultList = List.of();
-	Mockito.when(k8sUtil.listWorkspaces(TEST_USER)).thenReturn(resultList);
+        // Prepare
+        mockUser(true, null);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+        List<UserWorkspace> resultList = List.of();
+        Mockito.when(k8sUtil.listWorkspaces(TEST_USER)).thenReturn(resultList);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.list(APP_ID, TEST_USER);
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.list(APP_ID, TEST_USER);
 
-	});
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).listWorkspaces(anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).listWorkspaces(anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void list_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
-	Method method = WorkspaceResource.class.getMethod("list", String.class, String.class);
-	TestUtil.assertNoAnonymousAccessAnnotations(method);
+        Method method = WorkspaceResource.class.getMethod("list", String.class, String.class);
+        TestUtil.assertNoAnonymousAccessAnnotations(method);
     }
 
     // ---
@@ -402,28 +403,28 @@ public class WorkspaceResourceTests {
     // ---
 
     private void mockUser(boolean anonymous, String name) {
-	Mockito.when(user.isAnonymous()).thenReturn(anonymous);
-	Mockito.when(user.getIdentifier()).thenReturn(name);
+        Mockito.when(user.isAnonymous()).thenReturn(anonymous);
+        Mockito.when(user.getIdentifier()).thenReturn(name);
     }
 
     private WorkspaceSpec mockDefaultWorkspace() {
-	WorkspaceSpec workspace = Mockito.mock(WorkspaceSpec.class);
-	Mockito.when(workspace.getName()).thenReturn(TEST_WORKSPACE);
-	Mockito.when(workspace.getUser()).thenReturn(TEST_USER);
-	return workspace;
+        WorkspaceSpec workspace = Mockito.mock(WorkspaceSpec.class);
+        Mockito.when(workspace.getName()).thenReturn(TEST_WORKSPACE);
+        Mockito.when(workspace.getUser()).thenReturn(TEST_USER);
+        return workspace;
     }
 
     class WorkspaceWithUser implements ArgumentMatcher<UserWorkspace> {
 
-	private String user;
+        private String user;
 
-	WorkspaceWithUser(String user) {
-	    this.user = user;
-	}
+        WorkspaceWithUser(String user) {
+            this.user = user;
+        }
 
-	@Override
-	public boolean matches(UserWorkspace argument) {
-	    return user.equals(argument.user);
-	}
+        @Override
+        public boolean matches(UserWorkspace argument) {
+            return user.equals(argument.user);
+        }
     }
 }

@@ -29,57 +29,57 @@ public class TheiaCloudWebException extends WebApplicationException {
     private static final long serialVersionUID = -4151261201767478256L;
 
     public TheiaCloudWebException(Response response) {
-	super(response);
+        super(response);
     }
 
     public TheiaCloudWebException(Response.Status status) {
-	super(status);
+        super(status);
     }
 
     public TheiaCloudWebException(Response.Status status, String message) {
-	super(message, status);
+        super(message, status);
     }
 
     public TheiaCloudWebException(TheiaCloudError status) {
-	this(Response.status(status.getCode(), status.getReason()).entity(status).type(MediaType.APPLICATION_JSON_TYPE)
-		.build());
+        this(Response.status(status.getCode(), status.getReason()).entity(status).type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
     }
 
     public TheiaCloudWebException(String error) {
-	this(TheiaCloudError.fromString(error));
+        this(TheiaCloudError.fromString(error));
     }
 
     public static Session throwIfErroneous(Session session) {
-	throwIfErroneous(session.getStatus());
-	return session;
+        throwIfErroneous(session.getStatus());
+        return session;
     }
 
     public static SessionStatus throwIfErroneous(SessionStatus status) {
-	if (status.hasError()) {
-	    throw new TheiaCloudWebException(TheiaCloudError.fromString(status.getError()));
-	}
-	return status;
+        if (status != null && status.hasError()) {
+            throw new TheiaCloudWebException(TheiaCloudError.fromString(status.getError()));
+        }
+        return status;
     }
 
     public static Workspace throwIfErroneous(Workspace workspace) {
-	throwIfErroneous(workspace.getStatus());
-	return workspace;
+        throwIfErroneous(workspace.getStatus());
+        return workspace;
     }
 
     public static WorkspaceStatus throwIfErroneous(WorkspaceStatus status) {
-	if (status.getError() != null) {
-	    throw new TheiaCloudWebException(TheiaCloudError.fromString(status.getError()));
-	}
-	return status;
+        if (status != null && status.getError() != null) {
+            throw new TheiaCloudWebException(TheiaCloudError.fromString(status.getError()));
+        }
+        return status;
     }
 
     public static void throwIfError(String error) {
-	if (TheiaCloudError.isErrorString(error)) {
-	    throw new TheiaCloudWebException(TheiaCloudError.fromString(error));
-	}
+        if (TheiaCloudError.isErrorString(error)) {
+            throw new TheiaCloudWebException(TheiaCloudError.fromString(error));
+        }
     }
 
     public static void main(String[] args) {
-	throwIfError(TheiaCloudError.INVALID_APP_ID.asString());
+        throwIfError(TheiaCloudError.INVALID_APP_ID.asString());
     }
 }
