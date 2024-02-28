@@ -294,6 +294,7 @@ public class WorkspaceResourceTests {
 	workspaceStatus.setError("TestError");
 	Mockito.when(workspace.getSpec()).thenReturn(workspaceSpec);
 	Mockito.when(workspace.getStatus()).thenReturn(workspaceStatus);
+	Mockito.when(workspace.getNonNullStatus()).thenReturn(workspaceStatus);
 	Mockito.when(k8sUtil.createWorkspace(anyString(), argThat(new WorkspaceWithUser(TEST_USER))))
 		.thenReturn(workspace);
 
