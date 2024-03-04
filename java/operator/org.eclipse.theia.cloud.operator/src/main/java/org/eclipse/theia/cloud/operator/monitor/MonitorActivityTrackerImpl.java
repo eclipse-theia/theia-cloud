@@ -78,8 +78,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	    Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getName());
 	    if (sessionIP.isPresent()) {
 		String appDefinitionName = session.getSpec().getAppDefinition();
-		Optional<AppDefinition> appDefinitionOptional = resourceClient.appDefinitions()
-			.get(appDefinitionName);
+		Optional<AppDefinition> appDefinitionOptional = resourceClient.appDefinitions().get(appDefinitionName);
 		if (appDefinitionOptional.isPresent()) {
 		    AppDefinition appDefinition = appDefinitionOptional.get();
 		    int timeoutAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getTimeoutAfter();
@@ -120,7 +119,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	    logInfo(sessionName, "REQUEST FAILED: " + "GET " + getActivityURL + ". Error: " + e);
 
 	}
-	Date lastActivityDate = new Date(session.getSpec().getLastActivity());
+	Date lastActivityDate = new Date(session.getStatus().getLastActivity());
 	Date currentDate = new Date(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
 
 	long minutesPassed = getMinutesPassed(lastActivityDate, currentDate);
@@ -152,10 +151,10 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
     }
 
     protected void updateLastActivity(Session session, long reportedTimestamp) {
-	long currentTimestamp = session.getSpec().getLastActivity();
+	long currentTimestamp = session.getStatus().getLastActivity();
 	if (currentTimestamp < reportedTimestamp) {
 	    logInfo(session.getSpec().getName(), "Update lastActivity in CR");
-	    session.getSpec().setLastActivity(reportedTimestamp);
+	    session.getStatus().setLastActivity(reportedTimestamp);
 	}
     }
 

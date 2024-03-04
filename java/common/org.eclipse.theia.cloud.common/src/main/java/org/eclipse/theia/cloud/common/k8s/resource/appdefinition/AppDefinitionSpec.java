@@ -16,7 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHubSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -52,7 +52,7 @@ public class AppDefinitionSpec {
     private Integer maxInstances;
 
     @JsonProperty("timeout")
-    private Timeout timeout;
+    private Integer timeout;
 
     @JsonProperty("requestsMemory")
     private String requestsMemory;
@@ -84,209 +84,178 @@ public class AppDefinitionSpec {
     public AppDefinitionSpec() {
     }
 
-    public AppDefinitionSpec(AppDefinitionHubSpec fromHub) {
-	this.name = fromHub.getName();
-	this.image = fromHub.getImage();
-	this.imagePullPolicy = fromHub.getImagePullPolicy();
-	this.pullSecret = fromHub.getPullSecret();
-	this.uid = fromHub.getUid();
-	this.port = fromHub.getPort();
-	this.ingressname = fromHub.getIngressname();
-	this.minInstances = fromHub.getMinInstances();
-	this.maxInstances = fromHub.getMaxInstances();
-	this.requestsMemory = fromHub.getRequestsMemory();
-	this.requestsCpu = fromHub.getRequestsCpu();
-	this.limitsMemory = fromHub.getLimitsMemory();
-	this.limitsCpu = fromHub.getLimitsCpu();
-	this.downlinkLimit = fromHub.getDownlinkLimit();
-	this.uplinkLimit = fromHub.getUplinkLimit();
-	this.mountPath = fromHub.getMountPath();
+    public AppDefinitionSpec(AppDefinitionHub fromHub) {
+        this.name = fromHub.getName().orElse(null); // required
+        this.image = fromHub.getImage().orElse(null); // required
+        this.imagePullPolicy = fromHub.getImagePullPolicy().orElse(null);
+        this.pullSecret = fromHub.getPullSecret().orElse(null);
+        this.uid = fromHub.getUid().orElse(0); // required
+        this.port = fromHub.getPort().orElse(0); // required
+        this.ingressname = fromHub.getIngressname().orElse(null); // required
+        this.minInstances = fromHub.getMinInstances().orElse(0); // required
+        this.maxInstances = fromHub.getMaxInstances().orElse(0); // required
+        this.requestsMemory = fromHub.getRequestsMemory().orElse(null); // required
+        this.requestsCpu = fromHub.getRequestsCpu().orElse(null); // required
+        this.limitsMemory = fromHub.getLimitsMemory().orElse(null); // required
+        this.limitsCpu = fromHub.getLimitsCpu().orElse(null); // required
+        this.downlinkLimit = fromHub.getDownlinkLimit().orElse(0);
+        this.uplinkLimit = fromHub.getUplinkLimit().orElse(0);
+        this.mountPath = fromHub.getMountPath().orElse(null);
 
-	this.timeout = new Timeout();
-	if (fromHub.getTimeout() != null) {
-	    this.timeout.limit = fromHub.getTimeout().getLimit();
-	    this.timeout.strategy = fromHub.getTimeout().getStrategy();
-	}
+        this.timeout = fromHub.getTimeoutLimit().orElse(0);
 
-	this.monitor = new Monitor();
-	if (fromHub.getMonitor() != null) {
-	    this.monitor.port = fromHub.getMonitor().getPort();
+        int monitorPort = fromHub.getMonitorPort().orElse(0);
+        if (monitorPort > 0) {
+            this.monitor = new Monitor();
+            this.monitor.port = monitorPort;
 
-	    this.monitor.activityTracker = new Monitor.ActivityTracker();
-	    if (fromHub.getMonitor().getActivityTracker() != null) {
-		this.monitor.activityTracker.timeoutAfter = fromHub.getMonitor().getActivityTracker().getTimeoutAfter();
-		this.monitor.activityTracker.notifyAfter = fromHub.getMonitor().getActivityTracker().getNotifyAfter();
-	    }
-	}
+            int timeoutAfter = fromHub.getMonitorActivityTrackerTimeoutAfter().orElse(0);
+            if (timeoutAfter > 0) {
+                this.monitor.activityTracker = new Monitor.ActivityTracker();
+                this.monitor.activityTracker.timeoutAfter = timeoutAfter;
+                this.monitor.activityTracker.notifyAfter = fromHub.getMonitorActivityTrackerNotifyAfter().orElse(0);
+            }
+        }
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public String getImage() {
-	return image;
+        return image;
     }
 
     public String getImagePullPolicy() {
-	return imagePullPolicy;
+        return imagePullPolicy;
     }
 
     public String getPullSecret() {
-	return pullSecret;
+        return pullSecret;
     }
 
     public int getUid() {
-	return uid;
+        return uid;
     }
 
     public int getPort() {
-	return port;
+        return port;
     }
 
     public String getIngressname() {
-	return ingressname;
+        return ingressname;
     }
 
     public int getMinInstances() {
-	return minInstances;
+        return minInstances;
     }
 
     public Integer getMaxInstances() {
-	return maxInstances;
+        return maxInstances;
     }
 
-    public Timeout getTimeout() {
-	return timeout;
+    public Integer getTimeout() {
+        return timeout;
     }
 
     public String getRequestsMemory() {
-	return requestsMemory;
+        return requestsMemory;
     }
 
     public String getRequestsCpu() {
-	return requestsCpu;
+        return requestsCpu;
     }
 
     public String getLimitsMemory() {
-	return limitsMemory;
+        return limitsMemory;
     }
 
     public String getLimitsCpu() {
-	return limitsCpu;
+        return limitsCpu;
     }
 
     public int getDownlinkLimit() {
-	return downlinkLimit;
+        return downlinkLimit;
     }
 
     public int getUplinkLimit() {
-	return uplinkLimit;
+        return uplinkLimit;
     }
 
     public String getMountPath() {
-	return mountPath;
+        return mountPath;
     }
 
     public Monitor getMonitor() {
-	return monitor;
+        return monitor;
     }
 
     @Override
     public String toString() {
-	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
-		+ ", pullSecret=" + pullSecret + ", uid=" + uid + ", port=" + port + ", ingressname=" + ingressname
-		+ ", minInstances=" + minInstances + ", maxInstances=" + maxInstances + ", timeout=" + timeout
-		+ ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="
-		+ limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit="
-		+ uplinkLimit + ", mountPath=" + mountPath + "]";
-    }
-
-    public static class Timeout {
-	@JsonProperty("limit")
-	private int limit;
-
-	@JsonProperty("strategy")
-	private String strategy;
-
-	public Timeout() {
-	}
-
-	public Timeout(String strategy, int limit) {
-	    this.strategy = strategy;
-	    this.limit = limit;
-	}
-
-	public int getLimit() {
-	    return limit;
-	}
-
-	public String getStrategy() {
-	    return strategy;
-	}
-
-	@Override
-	public String toString() {
-	    return "Timeout [limit=" + limit + ", strategy=" + strategy + "]";
-	}
+        return "AppDefinitionSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
+                + ", pullSecret=" + pullSecret + ", uid=" + uid + ", port=" + port + ", ingressname=" + ingressname
+                + ", minInstances=" + minInstances + ", maxInstances=" + maxInstances + ", timeout=" + timeout
+                + ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="
+                + limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit="
+                + uplinkLimit + ", mountPath=" + mountPath + "]";
     }
 
     public static class Monitor {
-	@JsonProperty("port")
-	private int port;
+        @JsonProperty("port")
+        private int port;
 
-	@JsonProperty("activityTracker")
-	private ActivityTracker activityTracker;
+        @JsonProperty("activityTracker")
+        private ActivityTracker activityTracker;
 
-	public Monitor() {
-	}
+        public Monitor() {
+        }
 
-	public Monitor(ActivityTracker activityTracker, int port) {
-	    this.activityTracker = activityTracker;
-	    this.port = port;
-	}
+        public Monitor(ActivityTracker activityTracker, int port) {
+            this.activityTracker = activityTracker;
+            this.port = port;
+        }
 
-	public int getPort() {
-	    return port;
-	}
+        public int getPort() {
+            return port;
+        }
 
-	public ActivityTracker getActivityTracker() {
-	    return activityTracker;
-	}
+        public ActivityTracker getActivityTracker() {
+            return activityTracker;
+        }
 
-	@Override
-	public String toString() {
-	    return "Monitor [activityTracker=" + activityTracker + ", port=" + port + "]";
-	}
+        @Override
+        public String toString() {
+            return "Monitor [activityTracker=" + activityTracker + ", port=" + port + "]";
+        }
 
-	public static class ActivityTracker {
-	    @JsonProperty("timeoutAfter")
-	    private int timeoutAfter;
+        public static class ActivityTracker {
+            @JsonProperty("timeoutAfter")
+            private int timeoutAfter;
 
-	    @JsonProperty("notifyAfter")
-	    private int notifyAfter;
+            @JsonProperty("notifyAfter")
+            private int notifyAfter;
 
-	    public ActivityTracker() {
-	    }
+            public ActivityTracker() {
+            }
 
-	    public ActivityTracker(int timeoutAfter, int notifyAfter) {
-		this.timeoutAfter = timeoutAfter;
-		this.notifyAfter = notifyAfter;
-	    }
+            public ActivityTracker(int timeoutAfter, int notifyAfter) {
+                this.timeoutAfter = timeoutAfter;
+                this.notifyAfter = notifyAfter;
+            }
 
-	    public int getTimeoutAfter() {
-		return timeoutAfter;
-	    }
+            public int getTimeoutAfter() {
+                return timeoutAfter;
+            }
 
-	    public int getNotifyAfter() {
-		return notifyAfter;
-	    }
+            public int getNotifyAfter() {
+                return notifyAfter;
+            }
 
-	    @Override
-	    public String toString() {
-		return "ActivityTracker [timeoutAfter=" + timeoutAfter + ", notifyAfter=" + notifyAfter + "]";
-	    }
+            @Override
+            public String toString() {
+                return "ActivityTracker [timeoutAfter=" + timeoutAfter + ", notifyAfter=" + notifyAfter + "]";
+            }
 
-	}
+        }
     }
 }

@@ -34,6 +34,12 @@ docker build -t theia-cloud-try-now-page -f dockerfiles/try-now-page/Dockerfile 
 docker build -t theia-cloud-wondershaper -f dockerfiles/wondershaper/Dockerfile .
 ```
 
+## CRD conversion webhook
+
+```bash
+docker build -t theia-cloud-conversion-webhook -f dockerfiles/conversion-webhook/Dockerfile .
+```
+
 ## Demo applications
 
 ### Theia demo

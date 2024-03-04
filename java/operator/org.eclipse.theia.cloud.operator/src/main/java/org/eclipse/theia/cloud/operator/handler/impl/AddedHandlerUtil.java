@@ -204,7 +204,7 @@ public final class AddedHandlerUtil {
 		    client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
 			    .withName(session.getMetadata().getName())//
 			    .edit(ws -> {
-				ws.getSpec().setUrl(url);
+				ws.getStatus().setUrl(url);
 				return ws;
 			    });
 		    LOGGER.info(

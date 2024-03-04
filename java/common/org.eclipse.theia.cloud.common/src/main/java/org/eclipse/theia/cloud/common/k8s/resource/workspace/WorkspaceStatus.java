@@ -17,7 +17,8 @@ package org.eclipse.theia.cloud.common.k8s.resource.workspace;
 
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.StatusStep;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHubStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -31,25 +32,33 @@ public class WorkspaceStatus extends ResourceStatus {
     @JsonProperty("volumeAttach")
     private StatusStep volumeAttach;
 
+    @JsonProperty("error")
+    private String error;
+
     /**
      * Default constructor.
      */
     public WorkspaceStatus() {
     }
 
-    public WorkspaceStatus(WorkspaceHubStatus fromHub) {
-	if (fromHub.getOperatorMessage() != null) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage());
+    public WorkspaceStatus(WorkspaceHub fromHub) {
+	if (fromHub.getOperatorMessage().isPresent()) {
+	    this.setOperatorMessage(fromHub.getOperatorMessage().get());
 	}
-	if (fromHub.getOperatorStatus() != null) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus());
+	if (fromHub.getOperatorStatus().isPresent()) {
+	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
 	}
-	if (fromHub.getVolumeClaim() != null) {
-	    this.setVolumeClaim(fromHub.getVolumeClaim());
+	if (fromHub.getVolumeAttachMessage().isPresent() && fromHub.getVolumeAttachStatus().isPresent()) {
+	    this.volumeAttach = new StatusStep();
+	    this.volumeAttach.setStatus(fromHub.getVolumeAttachStatus().get());
+	    this.volumeAttach.setMessage(fromHub.getVolumeAttachMessage().get());
 	}
-	if (fromHub.getVolumeAttach() != null) {
-	    this.setVolumeClaim(fromHub.getVolumeAttach());
+	if (fromHub.getVolumeClaimMessage().isPresent() && fromHub.getVolumeClaimStatus().isPresent()) {
+	    this.volumeClaim = new StatusStep();
+	    this.volumeClaim.setStatus(fromHub.getVolumeClaimStatus().get());
+	    this.volumeClaim.setMessage(fromHub.getVolumeClaimMessage().get());
 	}
+	this.error = fromHub.getError().orElse(null);
     }
 
     public StatusStep getVolumeClaim() {
@@ -66,5 +75,21 @@ public class WorkspaceStatus extends ResourceStatus {
 
     public void setVolumeAttach(StatusStep volumeAttach) {
 	this.volumeAttach = volumeAttach;
+    }
+
+    public String getError() {
+	return error;
+    }
+
+    public void setError(TheiaCloudError error) {
+	setError(error.asString());
+    }
+
+    public void setError(String error) {
+	this.error = error;
+    }
+
+    public boolean hasError() {
+	return TheiaCloudError.isErrorString(getError());
     }
 }

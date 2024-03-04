@@ -1,0 +1,34 @@
+name: conversion-webhook CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/conversion/**"
+      - "dockerfiles/conversion-webhook/**"
+      # Publish when a workflow has changed (this is needed to detect version updates)
+      - ".github/workflows/ci-conversion-webhook.yml"
+      - ".github/workflows/reusable-docker.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/conversion/**"
+      - "dockerfiles/conversion-webhook/**"
+  release:
+    types:
+      - published
+
+jobs:
+  call-reusable-docker-workflow:
+    uses: ./.github/workflows/reusable-docker.yml
+    with:
+      docker_org: theiacloud
+      docker_image: theia-cloud-conversion-webhook
+      docker_file: dockerfiles/conversion-webhook/Dockerfile
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}

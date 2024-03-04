@@ -50,40 +50,40 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
     public Workspace launch(String correlationId, WorkspaceSpec spec, long timeout, TimeUnit unit) {
 	Workspace workspace = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
 	WorkspaceSpec workspaceSpec = workspace.getSpec();
+	WorkspaceStatus workspaceStatus = workspace.getStatus();
 
 	if (workspaceSpec.hasStorage()) {
 	    return workspace;
 	}
 
-	if (workspaceSpec.hasError()) {
+	if (workspaceStatus.hasError()) {
 	    delete(correlationId, spec.getName());
 	    return workspace;
 	}
 
 	try {
-	    watchUntil(
-		    (action, changedWorkspace) -> isWorkspaceComplete(correlationId, workspaceSpec, changedWorkspace),
+	    watchUntil((action, changedWorkspace) -> isWorkspaceComplete(correlationId, workspace, changedWorkspace),
 		    timeout, unit);
 	} catch (InterruptedException exception) {
 	    error(correlationId, "Timeout while waiting for workspace storage " + workspaceSpec.getName()
 		    + ". Deleting workspace again.", exception);
-	    workspaceSpec.setError(TheiaCloudError.WORKSPACE_LAUNCH_TIMEOUT);
+	    workspaceStatus.setError(TheiaCloudError.WORKSPACE_LAUNCH_TIMEOUT);
 	}
 	return workspace;
     }
 
-    protected boolean isWorkspaceComplete(String correlationId, WorkspaceSpec createdWorkspace,
+    protected boolean isWorkspaceComplete(String correlationId, Workspace createdWorkspace,
 	    Workspace changedWorkspace) {
-	if (createdWorkspace.getName().equals(changedWorkspace.getSpec().getName())) {
+	if (createdWorkspace.getSpec().getName().equals(changedWorkspace.getSpec().getName())) {
 	    if (changedWorkspace.getSpec().hasStorage()) {
 		info(correlationId, "Received URL for " + createdWorkspace);
-		createdWorkspace.setStorage(changedWorkspace.getSpec().getStorage());
+		createdWorkspace.getSpec().setStorage(changedWorkspace.getSpec().getStorage());
 		return true;
 	    }
-	    if (changedWorkspace.getSpec().hasError()) {
+	    if (changedWorkspace.getStatus().hasError()) {
 		info(correlationId, "Received Error for " + changedWorkspace + ". Deleting workspace again.");
-		delete(correlationId, createdWorkspace.getName());
-		createdWorkspace.setError(changedWorkspace.getSpec().getError());
+		delete(correlationId, createdWorkspace.getSpec().getName());
+		createdWorkspace.getStatus().setError(changedWorkspace.getStatus().getError());
 		return true;
 	    }
 	}

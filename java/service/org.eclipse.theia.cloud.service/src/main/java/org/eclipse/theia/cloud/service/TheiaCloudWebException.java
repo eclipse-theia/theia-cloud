@@ -16,9 +16,9 @@
 package org.eclipse.theia.cloud.service;
 
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -29,57 +29,57 @@ public class TheiaCloudWebException extends WebApplicationException {
     private static final long serialVersionUID = -4151261201767478256L;
 
     public TheiaCloudWebException(Response response) {
-	super(response);
+        super(response);
     }
 
     public TheiaCloudWebException(Response.Status status) {
-	super(status);
+        super(status);
     }
 
     public TheiaCloudWebException(Response.Status status, String message) {
-	super(message, status);
+        super(message, status);
     }
 
     public TheiaCloudWebException(TheiaCloudError status) {
-	this(Response.status(status.getCode(), status.getReason()).entity(status).type(MediaType.APPLICATION_JSON_TYPE)
-		.build());
+        this(Response.status(status.getCode(), status.getReason()).entity(status).type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
     }
 
     public TheiaCloudWebException(String error) {
-	this(TheiaCloudError.fromString(error));
+        this(TheiaCloudError.fromString(error));
     }
 
     public static Session throwIfErroneous(Session session) {
-	throwIfErroneous(session.getSpec());
-	return session;
+        throwIfErroneous(session.getStatus());
+        return session;
     }
 
-    public static SessionSpec throwIfErroneous(SessionSpec spec) {
-	if (spec.hasError()) {
-	    throw new TheiaCloudWebException(TheiaCloudError.fromString(spec.getError()));
-	}
-	return spec;
+    public static SessionStatus throwIfErroneous(SessionStatus status) {
+        if (status != null && status.hasError()) {
+            throw new TheiaCloudWebException(TheiaCloudError.fromString(status.getError()));
+        }
+        return status;
     }
 
     public static Workspace throwIfErroneous(Workspace workspace) {
-	throwIfErroneous(workspace.getSpec());
-	return workspace;
+        throwIfErroneous(workspace.getStatus());
+        return workspace;
     }
 
-    public static WorkspaceSpec throwIfErroneous(WorkspaceSpec spec) {
-	if (spec.hasError()) {
-	    throw new TheiaCloudWebException(TheiaCloudError.fromString(spec.getError()));
-	}
-	return spec;
+    public static WorkspaceStatus throwIfErroneous(WorkspaceStatus status) {
+        if (status != null && status.getError() != null) {
+            throw new TheiaCloudWebException(TheiaCloudError.fromString(status.getError()));
+        }
+        return status;
     }
 
     public static void throwIfError(String error) {
-	if (TheiaCloudError.isErrorString(error)) {
-	    throw new TheiaCloudWebException(TheiaCloudError.fromString(error));
-	}
+        if (TheiaCloudError.isErrorString(error)) {
+            throw new TheiaCloudWebException(TheiaCloudError.fromString(error));
+        }
     }
 
     public static void main(String[] args) {
-	throwIfError(TheiaCloudError.INVALID_APP_ID.asString());
+        throwIfError(TheiaCloudError.INVALID_APP_ID.asString());
     }
 }
