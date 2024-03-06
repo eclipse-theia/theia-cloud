@@ -50,7 +50,7 @@ public class TheiaCloudWebException extends WebApplicationException {
     }
 
     public static Session throwIfErroneous(Session session) {
-        throwIfErroneous(session.getStatus());
+        throwIfErroneous(session.getNonNullStatus());
         return session;
     }
 
@@ -62,7 +62,7 @@ public class TheiaCloudWebException extends WebApplicationException {
     }
 
     public static Workspace throwIfErroneous(Workspace workspace) {
-        throwIfErroneous(workspace.getStatus());
+        throwIfErroneous(workspace.getNonNullStatus());
         return workspace;
     }
 

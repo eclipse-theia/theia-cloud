@@ -39,129 +39,129 @@ public class WorkspaceHub {
     final Optional<String> operatorMessage;
 
     public WorkspaceHub(Workspace toHub) {
-	this.metadata = Optional.ofNullable(toHub.getMetadata());
-	this.name = Optional.ofNullable(toHub.getSpec().getName());
-	this.label = Optional.ofNullable(toHub.getSpec().getLabel());
-	this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
-	this.user = Optional.ofNullable(toHub.getSpec().getUser());
-	this.storage = Optional.ofNullable(toHub.getSpec().getStorage());
-	if (toHub.getStatus() != null) {
-	    this.error = Optional.ofNullable(toHub.getStatus().getError());
-	    if (toHub.getStatus().getVolumeClaim() != null) {
-		this.volumeClaimStatus = Optional.ofNullable(toHub.getStatus().getVolumeClaim().getStatus());
-		this.volumeClaimMessage = Optional.ofNullable(toHub.getStatus().getVolumeClaim().getMessage());
-	    } else {
-		this.volumeClaimStatus = Optional.empty();
-		this.volumeClaimMessage = Optional.empty();
-	    }
-	    if (toHub.getStatus().getVolumeAttach() != null) {
-		this.volumeAttachStatus = Optional.ofNullable(toHub.getStatus().getVolumeAttach().getStatus());
-		this.volumeAttachMessage = Optional.ofNullable(toHub.getStatus().getVolumeAttach().getMessage());
-	    } else {
-		this.volumeAttachStatus = Optional.empty();
-		this.volumeAttachMessage = Optional.empty();
-	    }
-	    this.operatorStatus = Optional.ofNullable(toHub.getStatus().getOperatorStatus());
-	    this.operatorMessage = Optional.ofNullable(toHub.getStatus().getOperatorMessage());
-	} else {
-	    this.error = Optional.empty();
-	    this.volumeClaimStatus = Optional.empty();
-	    this.volumeClaimMessage = Optional.empty();
-	    this.volumeAttachStatus = Optional.empty();
-	    this.volumeAttachMessage = Optional.empty();
-	    this.operatorStatus = Optional.empty();
-	    this.operatorMessage = Optional.empty();
+        this.metadata = Optional.ofNullable(toHub.getMetadata());
+        this.name = Optional.ofNullable(toHub.getSpec().getName());
+        this.label = Optional.ofNullable(toHub.getSpec().getLabel());
+        this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
+        this.user = Optional.ofNullable(toHub.getSpec().getUser());
+        this.storage = Optional.ofNullable(toHub.getSpec().getStorage());
+        if (toHub.getStatus() != null) {
+            this.error = Optional.ofNullable(toHub.getNonNullStatus().getError());
+            if (toHub.getNonNullStatus().getVolumeClaim() != null) {
+                this.volumeClaimStatus = Optional.ofNullable(toHub.getNonNullStatus().getVolumeClaim().getStatus());
+                this.volumeClaimMessage = Optional.ofNullable(toHub.getNonNullStatus().getVolumeClaim().getMessage());
+            } else {
+                this.volumeClaimStatus = Optional.empty();
+                this.volumeClaimMessage = Optional.empty();
+            }
+            if (toHub.getNonNullStatus().getVolumeAttach() != null) {
+                this.volumeAttachStatus = Optional.ofNullable(toHub.getNonNullStatus().getVolumeAttach().getStatus());
+                this.volumeAttachMessage = Optional.ofNullable(toHub.getNonNullStatus().getVolumeAttach().getMessage());
+            } else {
+                this.volumeAttachStatus = Optional.empty();
+                this.volumeAttachMessage = Optional.empty();
+            }
+            this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+            this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+        } else {
+            this.error = Optional.empty();
+            this.volumeClaimStatus = Optional.empty();
+            this.volumeClaimMessage = Optional.empty();
+            this.volumeAttachStatus = Optional.empty();
+            this.volumeAttachMessage = Optional.empty();
+            this.operatorStatus = Optional.empty();
+            this.operatorMessage = Optional.empty();
 
-	}
+        }
     }
 
     @SuppressWarnings("deprecation")
     public WorkspaceHub(org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta3.WorkspaceV1beta3 toHub) {
-	this.metadata = Optional.ofNullable(toHub.getMetadata());
-	this.name = Optional.ofNullable(toHub.getSpec().getName());
-	this.label = Optional.ofNullable(toHub.getSpec().getLabel());
-	this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
-	this.user = Optional.ofNullable(toHub.getSpec().getUser());
-	this.storage = Optional.ofNullable(toHub.getSpec().getStorage());
-	this.error = Optional.ofNullable(toHub.getSpec().getError());
-	if (toHub.getStatus() != null) {
-	    if (toHub.getStatus().getVolumeClaim() != null) {
-		this.volumeClaimStatus = Optional.ofNullable(toHub.getStatus().getVolumeClaim().getStatus());
-		this.volumeClaimMessage = Optional.ofNullable(toHub.getStatus().getVolumeClaim().getMessage());
-	    } else {
-		this.volumeClaimStatus = Optional.empty();
-		this.volumeClaimMessage = Optional.empty();
-	    }
-	    if (toHub.getStatus().getVolumeAttach() != null) {
-		this.volumeAttachStatus = Optional.ofNullable(toHub.getStatus().getVolumeAttach().getStatus());
-		this.volumeAttachMessage = Optional.ofNullable(toHub.getStatus().getVolumeAttach().getMessage());
-	    } else {
-		this.volumeAttachStatus = Optional.empty();
-		this.volumeAttachMessage = Optional.empty();
-	    }
-	    this.operatorStatus = Optional.ofNullable(toHub.getStatus().getOperatorStatus());
-	    this.operatorMessage = Optional.ofNullable(toHub.getStatus().getOperatorMessage());
-	} else {
-	    this.volumeClaimStatus = Optional.empty();
-	    this.volumeClaimMessage = Optional.empty();
-	    this.volumeAttachStatus = Optional.empty();
-	    this.volumeAttachMessage = Optional.empty();
-	    this.operatorStatus = Optional.empty();
-	    this.operatorMessage = Optional.empty();
+        this.metadata = Optional.ofNullable(toHub.getMetadata());
+        this.name = Optional.ofNullable(toHub.getSpec().getName());
+        this.label = Optional.ofNullable(toHub.getSpec().getLabel());
+        this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
+        this.user = Optional.ofNullable(toHub.getSpec().getUser());
+        this.storage = Optional.ofNullable(toHub.getSpec().getStorage());
+        this.error = Optional.ofNullable(toHub.getSpec().getError());
+        if (toHub.getStatus() != null) {
+            if (toHub.getNonNullStatus().getVolumeClaim() != null) {
+                this.volumeClaimStatus = Optional.ofNullable(toHub.getNonNullStatus().getVolumeClaim().getStatus());
+                this.volumeClaimMessage = Optional.ofNullable(toHub.getNonNullStatus().getVolumeClaim().getMessage());
+            } else {
+                this.volumeClaimStatus = Optional.empty();
+                this.volumeClaimMessage = Optional.empty();
+            }
+            if (toHub.getNonNullStatus().getVolumeAttach() != null) {
+                this.volumeAttachStatus = Optional.ofNullable(toHub.getNonNullStatus().getVolumeAttach().getStatus());
+                this.volumeAttachMessage = Optional.ofNullable(toHub.getNonNullStatus().getVolumeAttach().getMessage());
+            } else {
+                this.volumeAttachStatus = Optional.empty();
+                this.volumeAttachMessage = Optional.empty();
+            }
+            this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+            this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+        } else {
+            this.volumeClaimStatus = Optional.empty();
+            this.volumeClaimMessage = Optional.empty();
+            this.volumeAttachStatus = Optional.empty();
+            this.volumeAttachMessage = Optional.empty();
+            this.operatorStatus = Optional.empty();
+            this.operatorMessage = Optional.empty();
 
-	}
+        }
     }
 
     public Optional<ObjectMeta> getMetadata() {
-	return metadata;
+        return metadata;
     }
 
     public Optional<String> getName() {
-	return name;
+        return name;
     }
 
     public Optional<String> getLabel() {
-	return label;
+        return label;
     }
 
     public Optional<String> getAppDefinition() {
-	return appDefinition;
+        return appDefinition;
     }
 
     public Optional<String> getUser() {
-	return user;
+        return user;
     }
 
     public Optional<String> getStorage() {
-	return storage;
+        return storage;
     }
 
     public Optional<String> getError() {
-	return error;
+        return error;
     }
 
     public Optional<String> getVolumeClaimStatus() {
-	return volumeClaimStatus;
+        return volumeClaimStatus;
     }
 
     public Optional<String> getVolumeClaimMessage() {
-	return volumeClaimMessage;
+        return volumeClaimMessage;
     }
 
     public Optional<String> getVolumeAttachStatus() {
-	return volumeAttachStatus;
+        return volumeAttachStatus;
     }
 
     public Optional<String> getVolumeAttachMessage() {
-	return volumeAttachMessage;
+        return volumeAttachMessage;
     }
 
     public Optional<String> getOperatorStatus() {
-	return operatorStatus;
+        return operatorStatus;
     }
 
     public Optional<String> getOperatorMessage() {
-	return operatorMessage;
+        return operatorMessage;
     }
 
 }

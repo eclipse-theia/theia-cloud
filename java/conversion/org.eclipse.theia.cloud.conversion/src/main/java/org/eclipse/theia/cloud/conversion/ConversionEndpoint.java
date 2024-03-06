@@ -41,17 +41,17 @@ public class ConversionEndpoint {
     private final ConversionController sessionController;
 
     public ConversionEndpoint() {
-        this.appDefinitionController = new ConversionController();
-        appDefinitionController.registerMapper(new AppDefinitionV1beta8Mapper());
-        appDefinitionController.registerMapper(new AppDefinitionV1beta9Mapper());
+	this.appDefinitionController = new ConversionController();
+	appDefinitionController.registerMapper(new AppDefinitionV1beta8Mapper());
+	appDefinitionController.registerMapper(new AppDefinitionV1beta9Mapper());
 
-        this.workspaceController = new ConversionController();
-        workspaceController.registerMapper(new WorkspaceV1beta3Mapper());
-        workspaceController.registerMapper(new WorkspaceV1beta4Mapper());
+	this.workspaceController = new ConversionController();
+	workspaceController.registerMapper(new WorkspaceV1beta3Mapper());
+	workspaceController.registerMapper(new WorkspaceV1beta4Mapper());
 
-        this.sessionController = new ConversionController();
-        sessionController.registerMapper(new SessionV1beta6Mapper());
-        sessionController.registerMapper(new SessionV1beta7Mapper());
+	this.sessionController = new ConversionController();
+	sessionController.registerMapper(new SessionV1beta6Mapper());
+	sessionController.registerMapper(new SessionV1beta7Mapper());
     }
 
     @POST
@@ -59,12 +59,12 @@ public class ConversionEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ConversionReview convertAppDefinition(ConversionReview conversionReview) {
-        conversionReview.getRequest().getObjects().forEach(obj -> {
-            logger.info("[convert/appdefinition] [" + conversionReview.getRequest().getUid() + "] Converting "
-                    + ((HasMetadata) obj).getKind() + " (version: '" + ((HasMetadata) obj).getApiVersion()
-                    + "') to version '" + conversionReview.getRequest().getDesiredAPIVersion() + "'");
-        });
-        return this.appDefinitionController.handle(conversionReview);
+	conversionReview.getRequest().getObjects().forEach(obj -> {
+	    logger.info("[convert/appdefinition] [" + conversionReview.getRequest().getUid() + "] Converting "
+		    + ((HasMetadata) obj).getKind() + " (version: '" + ((HasMetadata) obj).getApiVersion()
+		    + "') to version '" + conversionReview.getRequest().getDesiredAPIVersion() + "'");
+	});
+	return this.appDefinitionController.handle(conversionReview);
     }
 
     @POST
@@ -72,12 +72,12 @@ public class ConversionEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ConversionReview convertWorkspace(ConversionReview conversionReview) {
-        conversionReview.getRequest().getObjects().forEach(obj -> {
-            logger.info("[convert/workspace] [" + conversionReview.getRequest().getUid() + "] Converting "
-                    + ((HasMetadata) obj).getKind() + " (version: '" + ((HasMetadata) obj).getApiVersion()
-                    + "') to version '" + conversionReview.getRequest().getDesiredAPIVersion() + "'");
-        });
-        return this.workspaceController.handle(conversionReview);
+	conversionReview.getRequest().getObjects().forEach(obj -> {
+	    logger.info("[convert/workspace] [" + conversionReview.getRequest().getUid() + "] Converting "
+		    + ((HasMetadata) obj).getKind() + " (version: '" + ((HasMetadata) obj).getApiVersion()
+		    + "') to version '" + conversionReview.getRequest().getDesiredAPIVersion() + "'");
+	});
+	return this.workspaceController.handle(conversionReview);
     }
 
     @POST
@@ -85,12 +85,12 @@ public class ConversionEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public ConversionReview convertSession(ConversionReview conversionReview) {
-        conversionReview.getRequest().getObjects().forEach(obj -> {
-            logger.info("[convert/session] [" + conversionReview.getRequest().getUid() + "] Converting "
-                    + ((HasMetadata) obj).getKind() + " (version: '" + ((HasMetadata) obj).getApiVersion()
-                    + "') to version '" + conversionReview.getRequest().getDesiredAPIVersion() + "'");
-        });
-        return this.sessionController.handle(conversionReview);
+	conversionReview.getRequest().getObjects().forEach(obj -> {
+	    logger.info("[convert/session] [" + conversionReview.getRequest().getUid() + "] Converting "
+		    + ((HasMetadata) obj).getKind() + " (version: '" + ((HasMetadata) obj).getApiVersion()
+		    + "') to version '" + conversionReview.getRequest().getDesiredAPIVersion() + "'");
+	});
+	return this.sessionController.handle(conversionReview);
     }
 
 }

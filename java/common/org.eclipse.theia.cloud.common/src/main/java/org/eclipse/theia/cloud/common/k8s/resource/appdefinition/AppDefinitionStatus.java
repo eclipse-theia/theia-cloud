@@ -41,4 +41,11 @@ public class AppDefinitionStatus extends ResourceStatus {
 	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
 	}
     }
+
+    @Override
+    public String toString() {
+	return "AppDefinitionStatus [getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()="
+		+ getOperatorMessage() + "]";
+    }
+
 }

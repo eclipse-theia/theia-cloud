@@ -62,7 +62,7 @@ public class RootResource extends BaseResource {
 
 	if (!k8sUtil.hasAppDefinition(request.appDefinition)) {
 	    error(correlationId,
-		    "Failed to lauch session. App Definition '" + request.appDefinition + "' does not exist.");
+		    "Failed to launch session. App Definition '" + request.appDefinition + "' does not exist.");
 	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_DEFINITION_NAME);
 	}
 
@@ -78,7 +78,7 @@ public class RootResource extends BaseResource {
 		String workspaceAppDefinition = workspace.get().getSpec().getAppDefinition();
 		if (!workspaceAppDefinition.equals(request.appDefinition)) {
 		    error(correlationId,
-			    "Failed to lauch session. Workspace App Definition '" + workspaceAppDefinition
+			    "Failed to launch session. Workspace App Definition '" + workspaceAppDefinition
 				    + "' does not match Request App Definition '" + request.appDefinition
 				    + "' does not exist.");
 		    throw new TheiaCloudWebException(TheiaCloudError.APP_DEFINITION_NAME_MISMATCH);

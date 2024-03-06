@@ -92,8 +92,7 @@ public final class TheiaCloudServiceUtil {
 	return replacements;
     }
 
-    private static void putMonitorReplacements(AppDefinitionSpec appDefinitionSpec,
-	    Map<String, String> replacements) {
+    private static void putMonitorReplacements(AppDefinitionSpec appDefinitionSpec, Map<String, String> replacements) {
 	if (appDefinitionSpec.getMonitor() != null && appDefinitionSpec.getMonitor().getPort() > 0) {
 	    String port = String.valueOf(appDefinitionSpec.getMonitor().getPort());
 	    String replacement = "- name: monitor-express\n" + "      port: " + port + "\n" + "      targetPort: "

@@ -47,9 +47,9 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.client.SessionResourceClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
-import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpecResourceList;
 import org.eclipse.theia.cloud.common.util.LogMessageUtil;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -128,7 +128,7 @@ public final class AddedHandlerUtil {
 	configMap.setData(data);
     }
 
-    public static void updateSessionURLAsync(NamespacedKubernetesClient client, Session session, String namespace,
+    public static void updateSessionURLAsync(SessionResourceClient sessions, Session session, String namespace,
 	    String url, String correlationId) {
 	EXECUTOR.execute(() -> {
 	    boolean updateURL = false;
@@ -201,12 +201,7 @@ public final class AddedHandlerUtil {
 
 		if (updateURL) {
 		    LOGGER.info(formatLogMessage(correlationId, url + " is available."));
-		    client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
-			    .withName(session.getMetadata().getName())//
-			    .edit(ws -> {
-				ws.getStatus().setUrl(url);
-				return ws;
-			    });
+		    sessions.updateStatus(correlationId, session, status -> status.setUrl(url));
 		    LOGGER.info(
 			    formatMetric(correlationId, "Running session for " + session.getSpec().getAppDefinition()));
 		    break;

@@ -19,6 +19,8 @@ package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.Group;
@@ -45,7 +47,6 @@ public class AppDefinition extends CustomResource<AppDefinitionSpec, AppDefiniti
     }
 
     public AppDefinition() {
-
     }
 
     public AppDefinition(AppDefinitionHub fromHub) {
@@ -54,6 +55,11 @@ public class AppDefinition extends CustomResource<AppDefinitionSpec, AppDefiniti
 	}
 	this.spec = new AppDefinitionSpec(fromHub);
 	this.status = new AppDefinitionStatus(fromHub);
+    }
+
+    @JsonIgnore
+    public AppDefinitionStatus getNonNullStatus() {
+	return super.getStatus() != null ? super.getStatus() : new AppDefinitionStatus();
     }
 
 }

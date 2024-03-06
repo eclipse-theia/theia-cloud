@@ -93,8 +93,8 @@ public class AppDefinitionHub {
 
         // Status is not a required field
         if (toHub.getStatus() != null) {
-            this.operatorStatus = Optional.ofNullable(toHub.getStatus().getOperatorStatus());
-            this.operatorMessage = Optional.ofNullable(toHub.getStatus().getOperatorMessage());
+            this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+            this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
         } else {
             this.operatorStatus = Optional.empty();
             this.operatorMessage = Optional.empty();
@@ -149,8 +149,8 @@ public class AppDefinitionHub {
 
         // Status is not a required field
         if (toHub.getStatus() != null) {
-            this.operatorStatus = Optional.ofNullable(toHub.getStatus().getOperatorStatus());
-            this.operatorMessage = Optional.ofNullable(toHub.getStatus().getOperatorMessage());
+            this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+            this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
         } else {
             this.operatorStatus = Optional.empty();
             this.operatorMessage = Optional.empty();

@@ -50,7 +50,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
     public Workspace launch(String correlationId, WorkspaceSpec spec, long timeout, TimeUnit unit) {
 	Workspace workspace = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
 	WorkspaceSpec workspaceSpec = workspace.getSpec();
-	WorkspaceStatus workspaceStatus = workspace.getStatus();
+	WorkspaceStatus workspaceStatus = workspace.getNonNullStatus();
 
 	if (workspaceSpec.hasStorage()) {
 	    return workspace;
@@ -67,7 +67,7 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 	} catch (InterruptedException exception) {
 	    error(correlationId, "Timeout while waiting for workspace storage " + workspaceSpec.getName()
 		    + ". Deleting workspace again.", exception);
-	    workspaceStatus.setError(TheiaCloudError.WORKSPACE_LAUNCH_TIMEOUT);
+	    updateStatus(correlationId, workspace, status -> status.setError(TheiaCloudError.WORKSPACE_LAUNCH_TIMEOUT));
 	}
 	return workspace;
     }
@@ -80,10 +80,12 @@ public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace
 		createdWorkspace.getSpec().setStorage(changedWorkspace.getSpec().getStorage());
 		return true;
 	    }
-	    if (changedWorkspace.getStatus().hasError()) {
+	    if (changedWorkspace.getNonNullStatus().hasError()) {
 		info(correlationId, "Received Error for " + changedWorkspace + ". Deleting workspace again.");
 		delete(correlationId, createdWorkspace.getSpec().getName());
-		createdWorkspace.getStatus().setError(changedWorkspace.getStatus().getError());
+		updateStatus(correlationId, createdWorkspace,
+			status -> status.setError(changedWorkspace.getNonNullStatus().getError()));
+
 		return true;
 	    }
 	}
