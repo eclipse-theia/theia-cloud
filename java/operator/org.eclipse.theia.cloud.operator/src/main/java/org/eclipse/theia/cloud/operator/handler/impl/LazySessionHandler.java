@@ -260,8 +260,7 @@ public class LazySessionHandler implements SessionHandler {
 
 	/* Update session resource */
 	try {
-	    AddedHandlerUtil.updateSessionURLAsync(client.kubernetes(), session, client.namespace(), host,
-		    correlationId);
+	    AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), host, correlationId);
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),
@@ -292,8 +291,9 @@ public class LazySessionHandler implements SessionHandler {
 	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), session.getSpec(),
 		appDefinition.getSpec(), correlationId)) {
 	    LOGGER.info(formatMetric(correlationId, "Max instances reached for " + appDefinition.getSpec().getName()));
-	    client.sessions().edit(correlationId, session.getMetadata().getName(),
-		    toEdit -> toEdit.getStatus().setError(TheiaCloudError.SESSION_SERVER_LIMIT_REACHED));
+	    client.sessions().updateStatus(correlationId, session, status -> {
+		status.setError(TheiaCloudError.SESSION_SERVER_LIMIT_REACHED);
+	    });
 	    return true;
 	}
 	return false;
@@ -305,8 +305,9 @@ public class LazySessionHandler implements SessionHandler {
 	    if (arguments.getSessionsPerUser() == 0) {
 		LOGGER.info(formatLogMessage(correlationId,
 			"No sessions allowed for this user. Could not create session " + session.getSpec()));
-		client.sessions().edit(correlationId, session.getMetadata().getName(),
-			ws -> ws.getStatus().setError(TheiaCloudError.SESSION_USER_NO_SESSIONS));
+		client.sessions().updateStatus(correlationId, session, status -> {
+		    status.setError(TheiaCloudError.SESSION_USER_NO_SESSIONS);
+		});
 		return true;
 	    }
 
@@ -314,8 +315,9 @@ public class LazySessionHandler implements SessionHandler {
 	    if (userSessions > arguments.getSessionsPerUser()) {
 		LOGGER.info(formatLogMessage(correlationId,
 			"No more sessions allowed for this user, limit is  " + arguments.getSessionsPerUser()));
-		client.sessions().edit(correlationId, session.getMetadata().getName(),
-			toEdit -> toEdit.getStatus().setError(TheiaCloudError.SESSION_USER_LIMIT_REACHED));
+		client.sessions().updateStatus(correlationId, session, status -> {
+		    status.setError(TheiaCloudError.SESSION_USER_LIMIT_REACHED);
+		});
 		return true;
 	    }
 	}

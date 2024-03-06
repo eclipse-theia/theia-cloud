@@ -18,6 +18,8 @@ package org.eclipse.theia.cloud.common.k8s.resource.workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.Group;
@@ -53,6 +55,11 @@ public class Workspace extends CustomResource<WorkspaceSpec, WorkspaceStatus> im
     @Override
     public String toString() {
 	return CustomResourceUtil.toString(this);
+    }
+
+    @JsonIgnore
+    public WorkspaceStatus getNonNullStatus() {
+	return super.getStatus() != null ? super.getStatus() : new WorkspaceStatus();
     }
 
 }

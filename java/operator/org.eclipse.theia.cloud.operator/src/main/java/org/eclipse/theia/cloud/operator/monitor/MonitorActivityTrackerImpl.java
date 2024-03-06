@@ -71,6 +71,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 
     protected void pingAllSessions() {
 	List<Session> sessions = resourceClient.sessions().list();
+	String correlationId = generateCorrelationId();
 
 	LOGGER.debug("Pinging sessions: " + sessions);
 
@@ -85,7 +86,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 		    int notifyAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getNotifyAfter();
 		    int port = appDefinition.getSpec().getMonitor().getPort();
 
-		    pingSession(session, sessionIP.get(), port, timeoutAfter, notifyAfter);
+		    pingSession(correlationId, session, sessionIP.get(), port, timeoutAfter, notifyAfter);
 		}
 	    } else {
 		LOGGER.error("No ClusterIP found for session " + session.getSpec().getName());
@@ -93,7 +94,8 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	}
     }
 
-    protected void pingSession(Session session, String sessionURL, int port, int shutdownAfter, int notifyAfter) {
+    protected void pingSession(String correlationId, Session session, String sessionURL, int port, int shutdownAfter,
+	    int notifyAfter) {
 	String sessionName = session.getSpec().getName();
 	logInfo(sessionName, "Pinging session at " + sessionURL);
 	OkHttpClient client = new OkHttpClient().newBuilder().build();
@@ -110,7 +112,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	    if (getActivityResponse.code() == 200 && body != null) {
 		long lastReportedMilliseconds = Long.valueOf(body.string());
 
-		updateLastActivity(session, lastReportedMilliseconds);
+		updateLastActivity(correlationId, session, lastReportedMilliseconds);
 	    } else {
 		logInfo(sessionName,
 			"REQUEST FAILED (Returned " + getActivityResponse.code() + ": " + "GET " + getActivityURL);
@@ -119,7 +121,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	    logInfo(sessionName, "REQUEST FAILED: " + "GET " + getActivityURL + ". Error: " + e);
 
 	}
-	Date lastActivityDate = new Date(session.getStatus().getLastActivity());
+	Date lastActivityDate = new Date(session.getNonNullStatus().getLastActivity());
 	Date currentDate = new Date(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
 
 	long minutesPassed = getMinutesPassed(lastActivityDate, currentDate);
@@ -146,15 +148,15 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	    }
 	} else {
 	    // Timeout reached
-	    stopNonActiveSession(session, shutdownAfter);
+	    stopNonActiveSession(correlationId, session, shutdownAfter);
 	}
     }
 
-    protected void updateLastActivity(Session session, long reportedTimestamp) {
-	long currentTimestamp = session.getStatus().getLastActivity();
+    protected void updateLastActivity(String correlationId, Session session, long reportedTimestamp) {
+	long currentTimestamp = session.getNonNullStatus().getLastActivity();
 	if (currentTimestamp < reportedTimestamp) {
-	    logInfo(session.getSpec().getName(), "Update lastActivity in CR");
-	    session.getStatus().setLastActivity(reportedTimestamp);
+	    resourceClient.sessions().updateStatus(correlationId, session,
+		    status -> status.setLastActivity(reportedTimestamp));
 	}
     }
 
@@ -163,9 +165,8 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	return TimeUnit.MILLISECONDS.toMinutes(timePassed);
     }
 
-    protected void stopNonActiveSession(Session session, int shutdownAfter) {
+    protected void stopNonActiveSession(String correlationId, Session session, int shutdownAfter) {
 	String sessionName = session.getSpec().getName();
-	String correlationId = generateCorrelationId();
 	try {
 	    this.messagingService.sendTimeoutMessage(session,
 		    "Timeout of " + shutdownAfter + " minutes of inactivity was reached!");

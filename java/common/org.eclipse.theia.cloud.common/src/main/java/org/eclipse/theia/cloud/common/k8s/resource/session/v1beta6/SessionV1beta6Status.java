@@ -42,4 +42,11 @@ public class SessionV1beta6Status extends ResourceStatus {
 	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
 	}
     }
+
+    @Override
+    public String toString() {
+	return "SessionV1beta6Status [getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()="
+		+ getOperatorMessage() + "]";
+    }
+
 }

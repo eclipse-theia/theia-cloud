@@ -54,11 +54,11 @@ public class SessionHub {
         this.envVarsFromSecrets = Optional.ofNullable(toHub.getSpec().getEnvVarsFromSecrets());
         // Status is not a required field
         if (toHub.getStatus() != null) {
-            this.lastActivity = Optional.ofNullable(toHub.getStatus().getLastActivity());
-            this.url = Optional.ofNullable(toHub.getStatus().getUrl());
-            this.error = Optional.ofNullable(toHub.getStatus().getError());
-            this.operatorStatus = Optional.ofNullable(toHub.getStatus().getOperatorStatus());
-            this.operatorMessage = Optional.ofNullable(toHub.getStatus().getOperatorMessage());
+            this.lastActivity = Optional.ofNullable(toHub.getNonNullStatus().getLastActivity());
+            this.url = Optional.ofNullable(toHub.getNonNullStatus().getUrl());
+            this.error = Optional.ofNullable(toHub.getNonNullStatus().getError());
+            this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+            this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
         } else {
             this.lastActivity = Optional.empty();
             this.url = Optional.empty();
@@ -84,8 +84,8 @@ public class SessionHub {
         this.envVarsFromSecrets = Optional.ofNullable(toHub.getSpec().getEnvVarsFromSecrets());
         // Status is not a required field
         if (toHub.getStatus() != null) {
-            this.operatorStatus = Optional.ofNullable(toHub.getStatus().getOperatorStatus());
-            this.operatorMessage = Optional.ofNullable(toHub.getStatus().getOperatorMessage());
+            this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+            this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
         } else {
             this.operatorStatus = Optional.empty();
             this.operatorMessage = Optional.empty();

@@ -94,7 +94,7 @@ public final class K8sUtil {
     }
 
     private String launchSession(String correlationId, SessionSpec sessionSpec, int timeout) {
-	SessionStatus status = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getStatus();
+	SessionStatus status = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getNonNullStatus();
 	TheiaCloudWebException.throwIfErroneous(status);
 	return status.getUrl();
     }

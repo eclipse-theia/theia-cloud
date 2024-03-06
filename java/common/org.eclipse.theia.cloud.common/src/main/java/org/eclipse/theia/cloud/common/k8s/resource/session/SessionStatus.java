@@ -93,4 +93,11 @@ public class SessionStatus extends ResourceStatus {
 	this.lastActivity = lastActivity;
     }
 
+    @Override
+    public String toString() {
+	return "SessionStatus [url=" + url + ", error=" + error + ", lastActivity=" + lastActivity
+		+ ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
+		+ "]";
+    }
+
 }

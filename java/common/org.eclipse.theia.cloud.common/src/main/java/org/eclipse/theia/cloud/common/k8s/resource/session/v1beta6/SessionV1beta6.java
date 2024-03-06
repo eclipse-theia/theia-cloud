@@ -19,6 +19,8 @@ package org.eclipse.theia.cloud.common.k8s.resource.session.v1beta6;
 import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.Group;
@@ -54,6 +56,11 @@ public class SessionV1beta6 extends CustomResource<SessionV1beta6Spec, SessionV1
     @Override
     public String toString() {
 	return CustomResourceUtil.toString(this);
+    }
+
+    @JsonIgnore
+    public SessionV1beta6Status getNonNullStatus() {
+	return super.getStatus() != null ? super.getStatus() : new SessionV1beta6Status();
     }
 
 }

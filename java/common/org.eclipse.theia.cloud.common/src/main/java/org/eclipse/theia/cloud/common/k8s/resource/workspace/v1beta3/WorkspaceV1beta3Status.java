@@ -72,4 +72,12 @@ public class WorkspaceV1beta3Status extends ResourceStatus {
     public void setVolumeAttach(StatusStep volumeAttach) {
 	this.volumeAttach = volumeAttach;
     }
+
+    @Override
+    public String toString() {
+	return "WorkspaceV1beta3Status [volumeClaim=" + volumeClaim + ", volumeAttach=" + volumeAttach
+		+ ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
+		+ "]";
+    }
+
 }

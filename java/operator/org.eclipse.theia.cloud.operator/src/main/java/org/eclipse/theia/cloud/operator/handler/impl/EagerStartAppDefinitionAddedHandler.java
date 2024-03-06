@@ -171,8 +171,8 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 		    e);
 	    return;
 	}
-	K8sUtil.loadAndCreateServiceWithOwnerReference(client, namespace, correlationId, serviceYaml,
-		AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0);
+	K8sUtil.loadAndCreateServiceWithOwnerReference(client, namespace, correlationId, serviceYaml, AppDefinition.API,
+		AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0);
     }
 
     protected void createAndApplyDeployment(NamespacedKubernetesClient client, String namespace, String correlationId,

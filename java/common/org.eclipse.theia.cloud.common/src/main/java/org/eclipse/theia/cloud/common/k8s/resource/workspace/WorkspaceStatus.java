@@ -92,4 +92,12 @@ public class WorkspaceStatus extends ResourceStatus {
     public boolean hasError() {
 	return TheiaCloudError.isErrorString(getError());
     }
+
+    @Override
+    public String toString() {
+	return "WorkspaceStatus [volumeClaim=" + volumeClaim + ", volumeAttach=" + volumeAttach + ", error=" + error
+		+ ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
+		+ "]";
+    }
+
 }
