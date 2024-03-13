@@ -34,6 +34,9 @@ final class SpecWatch<S extends CustomResource<?, ?>> implements Watcher<S> {
 
     private static final Logger LOGGER = LogManager.getLogger(SpecWatch.class);
 
+    private static int MAX_RECONNECTION_TRIES = 10;
+    private int reconnectionTries = 0;
+
     private final Map<String, S> cache;
     private final TriConsumer<Action, String, String> eventHandler;
     private final String resourceName;
@@ -53,6 +56,11 @@ final class SpecWatch<S extends CustomResource<?, ?>> implements Watcher<S> {
     @Override
     public void eventReceived(Action action, S resource) {
 	lastActive = System.currentTimeMillis();
+	if (reconnectionTries > 0) {
+	    reconnectionTries = 0;
+	    LOGGER.info(formatLogMessage(correlationIdPrefix,
+		    getResourceName() + " did receive event. Resetting retry counter to 0."));
+	}
 	String correlationId = generateCorrelationId();
 	String uid = resource.getMetadata().getUid();
 	try {
@@ -104,8 +112,15 @@ final class SpecWatch<S extends CustomResource<?, ?>> implements Watcher<S> {
 
     @Override
     public boolean reconnecting() {
+	reconnectionTries++;
+	if (reconnectionTries >= MAX_RECONNECTION_TRIES) {
+	    LOGGER.info(formatLogMessage(correlationIdPrefix, getResourceName() + " did not reconnect after "
+		    + MAX_RECONNECTION_TRIES + " tries. Restarting Operator."));
+	    System.exit(-1);
+	}
 	lastActive = System.currentTimeMillis();
-	LOGGER.info(formatLogMessage(correlationIdPrefix, getResourceName() + " reconnecting"));
+	LOGGER.info(
+		formatLogMessage(correlationIdPrefix, getResourceName() + " reconnecting (" + reconnectionTries + ")"));
 	return Watcher.super.reconnecting();
     }
 
