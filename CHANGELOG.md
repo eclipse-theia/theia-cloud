@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.9.2] - 2024-03-22
+
+- [java] Update io.fabric8.kubernetes-client to version 6.10.0. Also update Quarkus platform to 3.8.1. This provides kubernetes 1.29 support [#287](https://github.com/eclipsesource/theia-cloud/pull/287)
+
 ## [0.9.0] - 2024-01-23
 
 - [node/landing-page] Make npm workspace and remove yarn references from repo [#258](https://github.com/eclipsesource/theia-cloud/pull/258) | [#45](https://github.com/eclipsesource/theia-cloud-helm/pull/45) - contributed on behalf of STMicroelectronics
