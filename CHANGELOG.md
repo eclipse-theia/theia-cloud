@@ -12,6 +12,7 @@
     - `Workspace.v1beta4`: Move the `error` field from the spec to the status. Also add the `error` field to `Workspace.v1beta3` as it was missing
   - Remove `timeout.strategy` from AppDefinition
     - `AppDefinition.v1beta9`: Removed `timeout.strategy` and `timeout.limit` is now just `timeout`. This was done, as there is only one Strategy left.
+- [java] Update io.fabric8.kubernetes-client to version 6.10.0. Also update Quarkus platform to 3.8.1. This provides kubernetes 1.29 support [#287](https://github.com/eclipsesource/theia-cloud/pull/287)
 
 ## [0.9.0] - 2024-01-23
 
