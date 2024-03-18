@@ -106,7 +106,7 @@ public class SessionV1beta6Spec implements UserScopedSpec {
 	this.url = fromHub.getUrl().orElse(null);
 	this.error = fromHub.getError().orElse(null);
 	this.workspace = fromHub.getWorkspace().orElse(null);
-	this.lastActivity = fromHub.getLastActivity().orElse(null);
+	this.lastActivity = fromHub.getLastActivity().orElse((long) 0);
 	this.sessionSecret = fromHub.getSessionSecret().orElse(null);
 	this.envVars = fromHub.getEnvVars().orElse(null);
 	this.envVarsFromConfigMaps = fromHub.getEnvVarsFromConfigMaps().orElse(null);

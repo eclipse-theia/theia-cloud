@@ -54,7 +54,7 @@ public class SessionStatus extends ResourceStatus {
 	}
 	this.url = fromHub.getUrl().orElse(null);
 	this.error = fromHub.getError().orElse(null);
-	this.lastActivity = fromHub.getLastActivity().orElse(null);
+	this.lastActivity = fromHub.getLastActivity().orElse((long) 0);
     }
 
     public String getUrl() {
