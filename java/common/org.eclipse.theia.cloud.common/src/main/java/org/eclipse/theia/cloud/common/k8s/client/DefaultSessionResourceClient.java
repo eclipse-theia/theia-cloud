@@ -70,15 +70,18 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
 	}
 	// wait for session url or error to be available
 	try {
-	    watchUntil((action, changedSession) -> isSessionComplete(correlationId, session.getSpec().getName(),
-		    changedSession), timeout, unit);
+	    String sessionName = session.getSpec().getName();
+	    watchUntil((action, changedSession) -> isSessionComplete(correlationId, sessionName, changedSession),
+		    timeout, unit);
+	    // Workaround to get the last changedSession from the watchUntil call above
+	    session = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
 	} catch (InterruptedException exception) {
 	    error(correlationId, "Timeout while waiting for URL for " + session.getSpec().getName(), exception);
-	    updateStatus(correlationId, session, status -> status.setError(TheiaCloudError.SESSION_LAUNCH_TIMEOUT));
+	    session = updateStatus(correlationId, session,
+		    status -> status.setError(TheiaCloudError.SESSION_LAUNCH_TIMEOUT));
 	    return session;
 	}
-	// Get updated session that we received as changedSession during watching
-	return get(spec.getName()).orElseGet(() -> create(correlationId, spec));
+	return session;
     }
 
     protected boolean isSessionComplete(String correlationId, String sessionName, Session changedSession) {
