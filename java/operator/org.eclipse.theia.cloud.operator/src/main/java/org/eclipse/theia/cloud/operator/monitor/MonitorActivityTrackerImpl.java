@@ -112,7 +112,7 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	    if (getActivityResponse.code() == 200 && body != null) {
 		long lastReportedMilliseconds = Long.valueOf(body.string());
 
-		updateLastActivity(correlationId, session, lastReportedMilliseconds);
+		session = updateLastActivity(correlationId, session, lastReportedMilliseconds);
 	    } else {
 		logInfo(sessionName,
 			"REQUEST FAILED (Returned " + getActivityResponse.code() + ": " + "GET " + getActivityURL);
@@ -152,12 +152,13 @@ public class MonitorActivityTrackerImpl implements MonitorActivityTracker {
 	}
     }
 
-    protected void updateLastActivity(String correlationId, Session session, long reportedTimestamp) {
+    protected Session updateLastActivity(String correlationId, Session session, long reportedTimestamp) {
 	long currentTimestamp = session.getNonNullStatus().getLastActivity();
 	if (currentTimestamp < reportedTimestamp) {
-	    resourceClient.sessions().updateStatus(correlationId, session,
+	    session = resourceClient.sessions().updateStatus(correlationId, session,
 		    status -> status.setLastActivity(reportedTimestamp));
 	}
+	return session;
     }
 
     protected long getMinutesPassed(Date lastActivity, Date currentTime) {
