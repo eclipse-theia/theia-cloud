@@ -4,12 +4,14 @@ app:
   id: asdfghjkl
   name: Theia Cloud
 
-image:
+demoApplication:
   name: theiacloud/theia-cloud-demo:0.10.0-next
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
   imagePullPolicy: IfNotPresent
+  # This overrides the default value and does not write the default values to the app definition
+  monitor: null
 
 hosts:
   usePaths: true
@@ -43,6 +45,3 @@ ingress:
 
 monitor:
   enable: false
-  activityTracker:
-    enable: true
-    interval: 1

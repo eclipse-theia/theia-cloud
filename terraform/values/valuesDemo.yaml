@@ -7,12 +7,13 @@ app:
 issuer:
   email: jfaltermeier@eclipsesource.com
 
-image:
+demoApplication:
   name: theiacloud/theia-cloud-demo:0.10.0-next
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
   imagePullPolicy: IfNotPresent
+  monitor: null
 
 hosts:
   usePaths: false
@@ -51,5 +52,3 @@ ingress:
 
 monitor:
   enable: false
-  activityTracker:
-    enable: false
