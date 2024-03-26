@@ -4,12 +4,17 @@ app:
   id: asdfghjkl
   name: Theia Blueprint
 
-image:
+demoApplication:
   name: theiacloud/theia-cloud-activity-demo:0.10.0-next
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "0"
   imagePullPolicy: IfNotPresent
+  monitor:
+    port: 8081
+    activityTracker:
+      timeoutAfter: 4
+      notifyAfter: 2
 
 hosts:
   usePaths: false
@@ -43,9 +48,6 @@ ingress:
 
 monitor:
   enable: true
-  port: 8081
   activityTracker:
     enable: true
     interval: 1
-    timeoutAfter: 4
-    notifyAfter: 2

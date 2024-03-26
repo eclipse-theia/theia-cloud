@@ -13,6 +13,7 @@
   - Remove `timeout.strategy` from AppDefinition
     - `AppDefinition.v1beta9`: Removed `timeout.strategy` and `timeout.limit` is now just `timeout`. This was done, as there is only one Strategy left.
 - [java] Update io.fabric8.kubernetes-client to version 6.10.0. Also update Quarkus platform to 3.8.1. This provides kubernetes 1.29 support [#287](https://github.com/eclipsesource/theia-cloud/pull/287)
+- [terraform] Change terraform values to conform to helm chart changes [#289](https://github.com/eclipsesource/theia-cloud/pull/289) | [#52](https://github.com/eclipsesource/theia-cloud-helm/pull/52) - contributed on behalf of STMicroelectronics
 
 ## [0.9.0] - 2024-01-23
 
@@ -28,5 +29,5 @@
 - [All components] Clean up repository [#275](https://github.com/eclipsesource/theia-cloud/pull/275) - contributed on behalf of STMicroelectronics
 
 ## [0.8.1] - 2023-10-01
-  
+
 - Last Milestone based version. No changelog available due to alpha-phase.

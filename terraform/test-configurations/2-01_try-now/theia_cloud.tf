@@ -30,7 +30,7 @@ resource "helm_release" "theia-cloud" {
   create_namespace = true
 
   values = [
-    "${file("${path.module}/../../../helm/theia.cloud/valuesGKETryNow.yaml")}"
+    "${file("${path.module}/../../values/valuesDemo.yaml")}"
   ]
 
   set {
@@ -100,11 +100,6 @@ resource "kubectl_manifest" "cdt-cloud-demo" {
     uid: 101
     uplinkLimit: 30000
     mountPath: /home/project/persisted
-    monitor:
-      port: 8081
-      activityTracker:
-        timeoutAfter: 30
-        notifyAfter: 25
   EOF
 }
 
@@ -134,10 +129,5 @@ resource "kubectl_manifest" "coffee-editor" {
     uid: 1001
     uplinkLimit: 30000
     mountPath: /home/project/persisted
-    monitor:
-      port: 8081
-      activityTracker:
-        timeoutAfter: 30
-        notifyAfter: 25
   EOF
 }
