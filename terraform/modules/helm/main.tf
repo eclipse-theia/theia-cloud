@@ -142,6 +142,7 @@ resource "helm_release" "theia-cloud-base" {
 
 resource "helm_release" "theia-cloud-crds" {
   count            = var.install_theia_cloud_crds ? 1 : 0
+  depends_on       = [helm_release.theia-cloud-base]
   name             = "theia-cloud-crds"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud-crds"

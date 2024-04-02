@@ -115,3 +115,11 @@ Point your browser to the `try_now` output value URL printed to the console at t
 ```bash
 terraform destroy
 ```
+
+#### GKE Troubleshooting
+
+If you get oauth related errors when using the terraform google provider, although you are sucessfully logged in via the Google Cloud CLI, try to export the `GOOGLE_OAUTH_ACCESS_TOKEN` env variable.
+
+```bash
+GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token) terraform apply
+```
