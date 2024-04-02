@@ -1,3 +1,3 @@
-FROM theiacloud/theia-cloud-demo:0.10.0-next as production-stage
+FROM theiacloud/theia-cloud-demo:0.10.0 as production-stage
 
-COPY --chown=theia:theia theiacloud-monitor-0.10.0-next.vsix /home/theia/plugins
+COPY --chown=theia:theia theiacloud-monitor-0.10.0.vsix /home/theia/plugins

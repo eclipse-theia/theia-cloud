@@ -1,6 +1,8 @@
 # Changelog
 
-## [0.10.0] - estimated 2024-04
+<!--  ## [0.11.0] - estimated 2024-07 -->
+
+## [0.10.0] - 2024-04-02
 
 - [.github/workflows] Improve version detection in workflows (do not build release commits, auto-detect version for demo publishing) [#280](https://github.com/eclipsesource/theia-cloud/pull/280) - contributed on behalf of STMicroelectronics
 - [node] Separate `monitor` package from other workspaces to fix bundling the extension [#280](https://github.com/eclipsesource/theia-cloud/pull/280) - contributed on behalf of STMicroelectronics

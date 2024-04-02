@@ -19,7 +19,7 @@ on:
         required: true
 
 env:
-  VERSION: 0.10.0-next
+  VERSION: 0.10.0
 
 jobs:
   build:
