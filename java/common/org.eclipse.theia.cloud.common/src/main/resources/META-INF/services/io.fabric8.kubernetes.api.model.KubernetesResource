@@ -1,6 +1,9 @@
 org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition
+org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta9.AppDefinitionV1beta9
 org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta8.AppDefinitionV1beta8
 org.eclipse.theia.cloud.common.k8s.resource.session.Session
+org.eclipse.theia.cloud.common.k8s.resource.session.v1beta7.SessionV1beta7
 org.eclipse.theia.cloud.common.k8s.resource.session.v1beta6.SessionV1beta6
 org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace
+org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta4.WorkspaceV1beta4
 org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta3.WorkspaceV1beta3

@@ -1,6 +1,8 @@
 # Changelog
 
-<!--  ## [0.11.0] - estimated 2024-07 -->
+## [0.11.0] - estimated 2024-07
+
+- [common] Add option field to CRDs and increase version to `Session.v1beta8`, `Workspace.v1beta5` and `AppDefinition.v1beta10` [#293](https://github.com/eclipsesource/theia-cloud/pull/293) | [#55](https://github.com/eclipsesource/theia-cloud-helm/pull/55)
 
 ## [0.10.0] - 2024-04-02
 

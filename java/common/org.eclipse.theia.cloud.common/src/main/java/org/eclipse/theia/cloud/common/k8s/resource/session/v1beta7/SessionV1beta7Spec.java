@@ -14,7 +14,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.session;
+package org.eclipse.theia.cloud.common.k8s.resource.session.v1beta7;
 
 import java.util.List;
 import java.util.Map;
@@ -26,8 +26,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@Deprecated
 @JsonDeserialize()
-public class SessionSpec implements UserScopedSpec {
+public class SessionV1beta7Spec implements UserScopedSpec {
 
     @JsonProperty("name")
     private String name;
@@ -44,9 +45,6 @@ public class SessionSpec implements UserScopedSpec {
     @JsonProperty("sessionSecret")
     private String sessionSecret;
 
-    @JsonProperty("options")
-    private Map<String, String> options;
-
     @JsonProperty("envVars")
     private Map<String, String> envVars;
 
@@ -59,28 +57,29 @@ public class SessionSpec implements UserScopedSpec {
     /**
      * Default constructor.
      */
-    public SessionSpec() {
+    public SessionV1beta7Spec() {
     }
 
-    public SessionSpec(String name, String appDefinition, String user) {
+    public SessionV1beta7Spec(String name, String appDefinition, String user) {
 	this(name, appDefinition, user, null);
     }
 
-    public SessionSpec(String name, String appDefinition, String user, String workspace) {
+    public SessionV1beta7Spec(String name, String appDefinition, String user, String workspace) {
 	this(name, appDefinition, user, workspace, Map.of(), List.of(), List.of());
     }
 
-    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars) {
+    public SessionV1beta7Spec(String name, String appDefinition, String user, String workspace,
+	    Map<String, String> envVars) {
 	this(name, appDefinition, user, workspace, envVars, List.of(), List.of());
     }
 
-    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
-	    List<String> envVarsFromConfigMaps) {
+    public SessionV1beta7Spec(String name, String appDefinition, String user, String workspace,
+	    Map<String, String> envVars, List<String> envVarsFromConfigMaps) {
 	this(name, appDefinition, user, workspace, envVars, envVarsFromConfigMaps, List.of());
     }
 
-    public SessionSpec(String name, String appDefinition, String user, String workspace, Map<String, String> envVars,
-	    List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
+    public SessionV1beta7Spec(String name, String appDefinition, String user, String workspace,
+	    Map<String, String> envVars, List<String> envVarsFromConfigMaps, List<String> envVarsFromSecrets) {
 	this.name = name;
 	this.appDefinition = appDefinition;
 	this.user = user;
@@ -90,7 +89,7 @@ public class SessionSpec implements UserScopedSpec {
 	this.envVarsFromSecrets = envVarsFromSecrets;
     }
 
-    public SessionSpec(SessionHub fromHub) {
+    public SessionV1beta7Spec(SessionHub fromHub) {
 	this.name = fromHub.getName().orElse(null);
 	this.appDefinition = fromHub.getAppDefinition().orElse(null);
 	this.user = fromHub.getUser().orElse(null);
@@ -99,7 +98,6 @@ public class SessionSpec implements UserScopedSpec {
 	this.envVars = fromHub.getEnvVars().orElse(null);
 	this.envVarsFromConfigMaps = fromHub.getEnvVarsFromConfigMaps().orElse(null);
 	this.envVarsFromSecrets = fromHub.getEnvVarsFromSecrets().orElse(null);
-	this.options = fromHub.getOptions().orElse(null);
     }
 
     public String getName() {
@@ -148,10 +146,6 @@ public class SessionSpec implements UserScopedSpec {
 	return isEphemeral(workspace);
     }
 
-    public Map<String, String> getOptions() {
-	return options;
-    }
-
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -171,7 +165,7 @@ public class SessionSpec implements UserScopedSpec {
 	    return false;
 	if (getClass() != obj.getClass())
 	    return false;
-	SessionSpec other = (SessionSpec) obj;
+	SessionV1beta7Spec other = (SessionV1beta7Spec) obj;
 	if (appDefinition == null) {
 	    if (other.appDefinition != null)
 		return false;

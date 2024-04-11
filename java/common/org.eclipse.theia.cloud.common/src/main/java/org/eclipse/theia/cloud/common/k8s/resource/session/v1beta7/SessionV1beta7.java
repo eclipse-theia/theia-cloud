@@ -14,9 +14,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
+package org.eclipse.theia.cloud.common.k8s.resource.session.v1beta7;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
+import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,37 +29,37 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v1beta10")
+@Deprecated
+@Version("v1beta7")
 @Group("theia.cloud")
-@Kind("AppDefinition")
-@Singular("appdefinition")
-@Plural("appdefinitions")
-public class AppDefinition extends CustomResource<AppDefinitionSpec, AppDefinitionStatus> implements Namespaced {
+@Kind("Session")
+@Singular("session")
+@Plural("sessions")
+public class SessionV1beta7 extends CustomResource<SessionV1beta7Spec, SessionV1beta7Status> implements Namespaced {
 
-    private static final long serialVersionUID = 8749670583218521755L;
-    public static final String API = "theia.cloud/v1beta10";
-    public static final String KIND = "AppDefinition";
-    public static final String CRD_NAME = "appdefinitions.theia.cloud";
+    private static final long serialVersionUID = 4518092300237069237L;
+    public static final String API = "theia.cloud/v1beta7";
+    public static final String KIND = "Session";
+    public static final String CRD_NAME = "sessions.theia.cloud";
+
+    public SessionV1beta7() {
+    }
+
+    public SessionV1beta7(SessionHub fromHub) {
+	if (fromHub.getMetadata().isPresent()) {
+	    this.setMetadata(fromHub.getMetadata().get());
+	}
+	this.spec = new SessionV1beta7Spec(fromHub);
+	this.status = new SessionV1beta7Status(fromHub);
+    }
 
     @Override
     public String toString() {
 	return CustomResourceUtil.toString(this);
     }
 
-    public AppDefinition() {
-    }
-
-    public AppDefinition(AppDefinitionHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new AppDefinitionSpec(fromHub);
-	this.status = new AppDefinitionStatus(fromHub);
-    }
-
     @JsonIgnore
-    public AppDefinitionStatus getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new AppDefinitionStatus();
+    public SessionV1beta7Status getNonNullStatus() {
+	return super.getStatus() != null ? super.getStatus() : new SessionV1beta7Status();
     }
-
 }

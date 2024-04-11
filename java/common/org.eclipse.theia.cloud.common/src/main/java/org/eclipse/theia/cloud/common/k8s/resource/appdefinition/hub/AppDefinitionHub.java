@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -53,6 +54,8 @@ public class AppDefinitionHub {
     final Optional<String> operatorStatus;
     final Optional<String> operatorMessage;
 
+    final Optional<Map<String, String>> options;
+
     public AppDefinitionHub(AppDefinition toHub) {
 	this.metadata = Optional.ofNullable(toHub.getMetadata());
 	this.name = Optional.ofNullable(toHub.getSpec().getName());
@@ -71,6 +74,58 @@ public class AppDefinitionHub {
 	this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
 	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
 	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+	this.options = Optional.ofNullable(toHub.getSpec().getOptions());
+
+	this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout());
+
+	if (toHub.getSpec().getMonitor() != null) {
+	    this.monitorPort = OptionalInt.of(toHub.getSpec().getMonitor().getPort());
+	    if (toHub.getSpec().getMonitor().getActivityTracker() != null) {
+		this.monitorActivityTrackerNotifyAfter = OptionalInt
+			.of(toHub.getSpec().getMonitor().getActivityTracker().getNotifyAfter());
+		this.monitorActivityTrackerTimeoutAfter = OptionalInt
+			.of(toHub.getSpec().getMonitor().getActivityTracker().getTimeoutAfter());
+	    } else {
+		this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+		this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+	    }
+	} else {
+	    this.monitorPort = OptionalInt.empty();
+	    this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+	    this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+	}
+
+	// Status is not a required field
+	if (toHub.getStatus() != null) {
+	    this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+	    this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+	} else {
+	    this.operatorStatus = Optional.empty();
+	    this.operatorMessage = Optional.empty();
+	}
+    }
+
+    @SuppressWarnings("deprecation")
+    public AppDefinitionHub(
+	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta9.AppDefinitionV1beta9 toHub) {
+	this.metadata = Optional.ofNullable(toHub.getMetadata());
+	this.name = Optional.ofNullable(toHub.getSpec().getName());
+	this.image = Optional.ofNullable(toHub.getSpec().getImage());
+	this.imagePullPolicy = Optional.ofNullable(toHub.getSpec().getImagePullPolicy());
+	this.pullSecret = Optional.ofNullable(toHub.getSpec().getPullSecret());
+	this.uid = OptionalInt.of(toHub.getSpec().getUid());
+	this.port = OptionalInt.of(toHub.getSpec().getPort());
+	this.ingressname = Optional.ofNullable(toHub.getSpec().getIngressname());
+	this.minInstances = OptionalInt.of(toHub.getSpec().getMinInstances());
+	this.maxInstances = OptionalInt.of(toHub.getSpec().getMaxInstances());
+	this.requestsMemory = Optional.ofNullable(toHub.getSpec().getRequestsMemory());
+	this.requestsCpu = Optional.ofNullable(toHub.getSpec().getRequestsCpu());
+	this.limitsMemory = Optional.ofNullable(toHub.getSpec().getLimitsMemory());
+	this.limitsCpu = Optional.ofNullable(toHub.getSpec().getLimitsCpu());
+	this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
+	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
+	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+	this.options = Optional.empty();
 
 	this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout());
 
@@ -121,6 +176,7 @@ public class AppDefinitionHub {
 	this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
 	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
 	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+	this.options = Optional.empty();
 
 	if (toHub.getSpec().getTimeout() != null) {
 	    this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout().getLimit());
@@ -251,6 +307,10 @@ public class AppDefinitionHub {
 
     public Optional<String> getOperatorMessage() {
 	return operatorMessage;
+    }
+
+    public Optional<Map<String, String>> getOptions() {
+	return options;
     }
 
 }
