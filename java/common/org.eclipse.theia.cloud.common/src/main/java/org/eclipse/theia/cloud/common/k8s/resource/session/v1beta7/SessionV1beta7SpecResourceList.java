@@ -1,5 +1,6 @@
 /********************************************************************************
- * Copyright (C) 2023 EclipseSource and others.
+ * Copyright (C) 2022 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
+ * others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,26 +14,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.conversion.mappers.session;
+package org.eclipse.theia.cloud.common.k8s.resource.session.v1beta7;
 
-import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
-import org.eclipse.theia.cloud.common.k8s.resource.session.v1beta7.SessionV1beta7;
+import io.fabric8.kubernetes.api.model.DefaultKubernetesResourceList;
 
-import io.javaoperatorsdk.webhook.conversion.Mapper;
-import io.javaoperatorsdk.webhook.conversion.TargetVersion;
+@Deprecated
+public class SessionV1beta7SpecResourceList extends DefaultKubernetesResourceList<SessionV1beta7> {
 
-@SuppressWarnings("deprecation")
-@TargetVersion("v1beta7")
-public class SessionV1beta7Mapper implements Mapper<SessionV1beta7, SessionHub> {
-
-    @Override
-    public SessionHub toHub(SessionV1beta7 resource) {
-	return new SessionHub(resource);
-    }
-
-    @Override
-    public SessionV1beta7 fromHub(SessionHub hub) {
-	return new SessionV1beta7(hub);
-    }
+    private static final long serialVersionUID = -4808662679268313876L;
 
 }

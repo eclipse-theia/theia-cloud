@@ -15,23 +15,24 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.conversion.mappers.workspace;
 
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta4.WorkspaceV1beta4;
 
 import io.javaoperatorsdk.webhook.conversion.Mapper;
 import io.javaoperatorsdk.webhook.conversion.TargetVersion;
 
+@SuppressWarnings("deprecation")
 @TargetVersion("v1beta4")
-public class WorkspaceV1beta4Mapper implements Mapper<Workspace, WorkspaceHub> {
+public class WorkspaceV1beta4Mapper implements Mapper<WorkspaceV1beta4, WorkspaceHub> {
 
     @Override
-    public WorkspaceHub toHub(Workspace resource) {
+    public WorkspaceHub toHub(WorkspaceV1beta4 resource) {
 	return new WorkspaceHub(resource);
     }
 
     @Override
-    public Workspace fromHub(WorkspaceHub hub) {
-	return new Workspace(hub);
+    public WorkspaceV1beta4 fromHub(WorkspaceHub hub) {
+	return new WorkspaceV1beta4(hub);
     }
 
 }

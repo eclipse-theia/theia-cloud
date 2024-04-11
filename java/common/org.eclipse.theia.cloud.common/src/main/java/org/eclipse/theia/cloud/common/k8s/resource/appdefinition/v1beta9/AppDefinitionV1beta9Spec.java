@@ -14,17 +14,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
-
-import java.util.Map;
+package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta9;
 
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@Deprecated
 @JsonDeserialize()
-public class AppDefinitionSpec {
+public class AppDefinitionV1beta9Spec {
 
     @JsonProperty("name")
     private String name;
@@ -80,16 +79,13 @@ public class AppDefinitionSpec {
     @JsonProperty("monitor")
     private Monitor monitor;
 
-    @JsonProperty("options")
-    private Map<String, String> options;
-
     /**
      * Default constructor.
      */
-    public AppDefinitionSpec() {
+    public AppDefinitionV1beta9Spec() {
     }
 
-    public AppDefinitionSpec(AppDefinitionHub fromHub) {
+    public AppDefinitionV1beta9Spec(AppDefinitionHub fromHub) {
 	this.name = fromHub.getName().orElse(null); // required
 	this.image = fromHub.getImage().orElse(null); // required
 	this.imagePullPolicy = fromHub.getImagePullPolicy().orElse(null);
@@ -108,8 +104,6 @@ public class AppDefinitionSpec {
 	this.mountPath = fromHub.getMountPath().orElse(null);
 
 	this.timeout = fromHub.getTimeoutLimit().orElse(0);
-
-	this.options = fromHub.getOptions().orElse(null);
 
 	int monitorPort = fromHub.getMonitorPort().orElse(0);
 	if (monitorPort > 0) {
@@ -195,10 +189,6 @@ public class AppDefinitionSpec {
 
     public Monitor getMonitor() {
 	return monitor;
-    }
-
-    public Map<String, String> getOptions() {
-	return options;
     }
 
     @Override

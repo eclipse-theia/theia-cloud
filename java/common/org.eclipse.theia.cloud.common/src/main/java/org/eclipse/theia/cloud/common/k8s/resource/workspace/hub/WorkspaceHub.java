@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.workspace.hub;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
@@ -38,6 +39,8 @@ public class WorkspaceHub {
     final Optional<String> operatorStatus;
     final Optional<String> operatorMessage;
 
+    final Optional<Map<String, String>> options;
+
     public WorkspaceHub(Workspace toHub) {
 	this.metadata = Optional.ofNullable(toHub.getMetadata());
 	this.name = Optional.ofNullable(toHub.getSpec().getName());
@@ -45,6 +48,46 @@ public class WorkspaceHub {
 	this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
 	this.user = Optional.ofNullable(toHub.getSpec().getUser());
 	this.storage = Optional.ofNullable(toHub.getSpec().getStorage());
+	this.options = Optional.ofNullable(toHub.getSpec().getOptions());
+	if (toHub.getStatus() != null) {
+	    this.error = Optional.ofNullable(toHub.getNonNullStatus().getError());
+	    if (toHub.getNonNullStatus().getVolumeClaim() != null) {
+		this.volumeClaimStatus = Optional.ofNullable(toHub.getNonNullStatus().getVolumeClaim().getStatus());
+		this.volumeClaimMessage = Optional.ofNullable(toHub.getNonNullStatus().getVolumeClaim().getMessage());
+	    } else {
+		this.volumeClaimStatus = Optional.empty();
+		this.volumeClaimMessage = Optional.empty();
+	    }
+	    if (toHub.getNonNullStatus().getVolumeAttach() != null) {
+		this.volumeAttachStatus = Optional.ofNullable(toHub.getNonNullStatus().getVolumeAttach().getStatus());
+		this.volumeAttachMessage = Optional.ofNullable(toHub.getNonNullStatus().getVolumeAttach().getMessage());
+	    } else {
+		this.volumeAttachStatus = Optional.empty();
+		this.volumeAttachMessage = Optional.empty();
+	    }
+	    this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+	    this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+	} else {
+	    this.error = Optional.empty();
+	    this.volumeClaimStatus = Optional.empty();
+	    this.volumeClaimMessage = Optional.empty();
+	    this.volumeAttachStatus = Optional.empty();
+	    this.volumeAttachMessage = Optional.empty();
+	    this.operatorStatus = Optional.empty();
+	    this.operatorMessage = Optional.empty();
+
+	}
+    }
+
+    @SuppressWarnings("deprecation")
+    public WorkspaceHub(org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta4.WorkspaceV1beta4 toHub) {
+	this.metadata = Optional.ofNullable(toHub.getMetadata());
+	this.name = Optional.ofNullable(toHub.getSpec().getName());
+	this.label = Optional.ofNullable(toHub.getSpec().getLabel());
+	this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
+	this.user = Optional.ofNullable(toHub.getSpec().getUser());
+	this.storage = Optional.ofNullable(toHub.getSpec().getStorage());
+	this.options = Optional.empty();
 	if (toHub.getStatus() != null) {
 	    this.error = Optional.ofNullable(toHub.getNonNullStatus().getError());
 	    if (toHub.getNonNullStatus().getVolumeClaim() != null) {
@@ -84,6 +127,7 @@ public class WorkspaceHub {
 	this.user = Optional.ofNullable(toHub.getSpec().getUser());
 	this.storage = Optional.ofNullable(toHub.getSpec().getStorage());
 	this.error = Optional.ofNullable(toHub.getSpec().getError());
+	this.options = Optional.empty();
 	if (toHub.getStatus() != null) {
 	    if (toHub.getNonNullStatus().getVolumeClaim() != null) {
 		this.volumeClaimStatus = Optional.ofNullable(toHub.getNonNullStatus().getVolumeClaim().getStatus());
@@ -162,6 +206,10 @@ public class WorkspaceHub {
 
     public Optional<String> getOperatorMessage() {
 	return operatorMessage;
+    }
+
+    public Optional<Map<String, String>> getOptions() {
+	return options;
     }
 
 }

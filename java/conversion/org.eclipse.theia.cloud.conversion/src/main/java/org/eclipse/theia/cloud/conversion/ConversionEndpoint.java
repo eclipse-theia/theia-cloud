@@ -15,12 +15,15 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.conversion;
 
+import org.eclipse.theia.cloud.conversion.mappers.appdefinition.AppDefinitionV1beta10Mapper;
 import org.eclipse.theia.cloud.conversion.mappers.appdefinition.AppDefinitionV1beta8Mapper;
 import org.eclipse.theia.cloud.conversion.mappers.appdefinition.AppDefinitionV1beta9Mapper;
 import org.eclipse.theia.cloud.conversion.mappers.session.SessionV1beta6Mapper;
 import org.eclipse.theia.cloud.conversion.mappers.session.SessionV1beta7Mapper;
+import org.eclipse.theia.cloud.conversion.mappers.session.SessionV1beta8Mapper;
 import org.eclipse.theia.cloud.conversion.mappers.workspace.WorkspaceV1beta3Mapper;
 import org.eclipse.theia.cloud.conversion.mappers.workspace.WorkspaceV1beta4Mapper;
+import org.eclipse.theia.cloud.conversion.mappers.workspace.WorkspaceV1beta5Mapper;
 import org.jboss.logging.Logger;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -44,14 +47,17 @@ public class ConversionEndpoint {
 	this.appDefinitionController = new ConversionController();
 	appDefinitionController.registerMapper(new AppDefinitionV1beta8Mapper());
 	appDefinitionController.registerMapper(new AppDefinitionV1beta9Mapper());
+	appDefinitionController.registerMapper(new AppDefinitionV1beta10Mapper());
 
 	this.workspaceController = new ConversionController();
 	workspaceController.registerMapper(new WorkspaceV1beta3Mapper());
 	workspaceController.registerMapper(new WorkspaceV1beta4Mapper());
+	workspaceController.registerMapper(new WorkspaceV1beta5Mapper());
 
 	this.sessionController = new ConversionController();
 	sessionController.registerMapper(new SessionV1beta6Mapper());
 	sessionController.registerMapper(new SessionV1beta7Mapper());
+	sessionController.registerMapper(new SessionV1beta8Mapper());
     }
 
     @POST

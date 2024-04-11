@@ -14,9 +14,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.workspace;
-
-import java.util.Map;
+package org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta4;
 
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
@@ -24,8 +22,9 @@ import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+@Deprecated
 @JsonDeserialize()
-public class WorkspaceSpec implements UserScopedSpec {
+public class WorkspaceV1beta4Spec implements UserScopedSpec {
 
     @JsonProperty("name")
     private String name;
@@ -42,29 +41,25 @@ public class WorkspaceSpec implements UserScopedSpec {
     @JsonProperty("storage")
     private String storage;
 
-    @JsonProperty("options")
-    private Map<String, String> options;
-
     /**
      * Default constructor.
      */
-    public WorkspaceSpec() {
+    public WorkspaceV1beta4Spec() {
     }
 
-    public WorkspaceSpec(String name, String label, String appDefinition, String user) {
+    public WorkspaceV1beta4Spec(String name, String label, String appDefinition, String user) {
 	this.name = name;
 	this.appDefinition = appDefinition;
 	this.user = user;
 	this.label = label;
     }
 
-    public WorkspaceSpec(WorkspaceHub fromHub) {
-	this.name = fromHub.getName().orElse(null); // required
-	this.label = fromHub.getLabel().orElse(null);
-	this.appDefinition = fromHub.getAppDefinition().orElse(null);
-	this.user = fromHub.getUser().orElse(null); // required
-	this.storage = fromHub.getStorage().orElse(null);
-	this.options = fromHub.getOptions().orElse(null);
+    public WorkspaceV1beta4Spec(WorkspaceHub spec) {
+	this.name = spec.getName().orElse(null); // required
+	this.label = spec.getLabel().orElse(null);
+	this.appDefinition = spec.getAppDefinition().orElse(null);
+	this.user = spec.getUser().orElse(null); // required
+	this.storage = spec.getStorage().orElse(null);
     }
 
     public String getName() {
@@ -98,10 +93,6 @@ public class WorkspaceSpec implements UserScopedSpec {
 
     public String getStorage() {
 	return storage;
-    }
-
-    public Map<String, String> getOptions() {
-	return options;
     }
 
     public void setStorage(String storage) {

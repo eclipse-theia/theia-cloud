@@ -1,6 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022-2023 EclipseSource, Lockular, Ericsson, STMicroelectronics and 
- * others.
+ * Copyright (C) 2022-2023 EclipseSource and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,9 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
+package org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta4;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,37 +28,40 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v1beta10")
+@Deprecated
+@Version("v1beta4")
 @Group("theia.cloud")
-@Kind("AppDefinition")
-@Singular("appdefinition")
-@Plural("appdefinitions")
-public class AppDefinition extends CustomResource<AppDefinitionSpec, AppDefinitionStatus> implements Namespaced {
+@Kind("Workspace")
+@Singular("workspace")
+@Plural("workspaces")
+public class WorkspaceV1beta4 extends CustomResource<WorkspaceV1beta4Spec, WorkspaceV1beta4Status>
+	implements Namespaced {
 
-    private static final long serialVersionUID = 8749670583218521755L;
-    public static final String API = "theia.cloud/v1beta10";
-    public static final String KIND = "AppDefinition";
-    public static final String CRD_NAME = "appdefinitions.theia.cloud";
+    public static final String API = "theia.cloud/v1beta4";
+    public static final String CRD_NAME = "workspaces.theia.cloud";
+    public static final String KIND = "Workspace";
+
+    private static final long serialVersionUID = 6437279756051357397L;
+
+    public WorkspaceV1beta4() {
+    }
+
+    public WorkspaceV1beta4(WorkspaceHub fromHub) {
+	if (fromHub.getMetadata().isPresent()) {
+	    this.setMetadata(fromHub.getMetadata().get());
+	}
+	this.spec = new WorkspaceV1beta4Spec(fromHub);
+	this.status = new WorkspaceV1beta4Status(fromHub);
+    }
 
     @Override
     public String toString() {
 	return CustomResourceUtil.toString(this);
     }
 
-    public AppDefinition() {
-    }
-
-    public AppDefinition(AppDefinitionHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new AppDefinitionSpec(fromHub);
-	this.status = new AppDefinitionStatus(fromHub);
-    }
-
     @JsonIgnore
-    public AppDefinitionStatus getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new AppDefinitionStatus();
+    public WorkspaceV1beta4Status getNonNullStatus() {
+	return super.getStatus() != null ? super.getStatus() : new WorkspaceV1beta4Status();
     }
 
 }

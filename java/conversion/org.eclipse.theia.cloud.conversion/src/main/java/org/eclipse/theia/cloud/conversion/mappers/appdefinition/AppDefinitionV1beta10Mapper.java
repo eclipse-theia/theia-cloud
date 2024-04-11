@@ -13,26 +13,25 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-package org.eclipse.theia.cloud.conversion.mappers.session;
+package org.eclipse.theia.cloud.conversion.mappers.appdefinition;
 
-import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
-import org.eclipse.theia.cloud.common.k8s.resource.session.v1beta7.SessionV1beta7;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 
 import io.javaoperatorsdk.webhook.conversion.Mapper;
 import io.javaoperatorsdk.webhook.conversion.TargetVersion;
 
-@SuppressWarnings("deprecation")
-@TargetVersion("v1beta7")
-public class SessionV1beta7Mapper implements Mapper<SessionV1beta7, SessionHub> {
+@TargetVersion("v1beta10")
+public class AppDefinitionV1beta10Mapper implements Mapper<AppDefinition, AppDefinitionHub> {
 
     @Override
-    public SessionHub toHub(SessionV1beta7 resource) {
-	return new SessionHub(resource);
+    public AppDefinitionHub toHub(AppDefinition resource) {
+	return new AppDefinitionHub(resource);
     }
 
     @Override
-    public SessionV1beta7 fromHub(SessionHub hub) {
-	return new SessionV1beta7(hub);
+    public AppDefinition fromHub(AppDefinitionHub hub) {
+	return new AppDefinition(hub);
     }
 
 }
