@@ -23,7 +23,9 @@ RUN yarn --pure-lockfile && \
     yarn cache clean
 
 FROM node:20-bookworm-slim as production-stage
-RUN adduser --system --group theia
+
+# Use fixed user id 101 to guarantee it matches the app definition
+RUN adduser --system --group --uid 101 theia
 RUN chmod g+rw /home && \
     mkdir -p /home/project && \
     mkdir -p /home/theia && \
