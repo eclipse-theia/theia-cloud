@@ -9,6 +9,7 @@
   - Extend configuration options for the new landing page for texts and logo file type
   - Removed terms and conditions
   - Build the common package as ESM and CJS bundles for extended compatibility
+- [common] Add `ingressHostnamePrefixes` list to `AppDefinition.v1beta10` [#298](https://github.com/eclipsesource/theia-cloud/pull/298) | [#57](https://github.com/eclipsesource/theia-cloud-helm/pull/57)
 
 ## [0.10.0] - 2024-04-02
 

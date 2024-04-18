@@ -16,6 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
@@ -83,6 +84,9 @@ public class AppDefinitionSpec {
     @JsonProperty("options")
     private Map<String, String> options;
 
+    @JsonProperty("ingressHostnamePrefixes")
+    private List<String> ingressHostnamePrefixes;
+
     /**
      * Default constructor.
      */
@@ -110,6 +114,7 @@ public class AppDefinitionSpec {
 	this.timeout = fromHub.getTimeoutLimit().orElse(0);
 
 	this.options = fromHub.getOptions().orElse(null);
+	this.ingressHostnamePrefixes = fromHub.getIngressHostnamePrefixes().orElse(null);
 
 	int monitorPort = fromHub.getMonitorPort().orElse(0);
 	if (monitorPort > 0) {
@@ -199,6 +204,10 @@ public class AppDefinitionSpec {
 
     public Map<String, String> getOptions() {
 	return options;
+    }
+
+    public List<String> getIngressHostnamePrefixes() {
+	return ingressHostnamePrefixes;
     }
 
     @Override

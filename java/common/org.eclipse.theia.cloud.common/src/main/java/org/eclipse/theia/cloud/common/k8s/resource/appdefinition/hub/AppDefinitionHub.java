@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -42,6 +43,7 @@ public class AppDefinitionHub {
     final OptionalInt downlinkLimit;// kilobits per second
     final OptionalInt uplinkLimit;// kilobits per second
     final Optional<String> mountPath;
+    final Optional<List<String>> ingressHostnamePrefixes;
 
     final OptionalInt timeoutLimit;
     @Deprecated
@@ -75,6 +77,7 @@ public class AppDefinitionHub {
 	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
 	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
 	this.options = Optional.ofNullable(toHub.getSpec().getOptions());
+	this.ingressHostnamePrefixes = Optional.ofNullable(toHub.getSpec().getIngressHostnamePrefixes());
 
 	this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout());
 
@@ -126,6 +129,7 @@ public class AppDefinitionHub {
 	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
 	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
 	this.options = Optional.empty();
+	this.ingressHostnamePrefixes = Optional.empty();
 
 	this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout());
 
@@ -177,6 +181,7 @@ public class AppDefinitionHub {
 	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
 	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
 	this.options = Optional.empty();
+	this.ingressHostnamePrefixes = Optional.empty();
 
 	if (toHub.getSpec().getTimeout() != null) {
 	    this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout().getLimit());
@@ -311,6 +316,10 @@ public class AppDefinitionHub {
 
     public Optional<Map<String, String>> getOptions() {
 	return options;
+    }
+
+    public Optional<List<String>> getIngressHostnamePrefixes() {
+	return ingressHostnamePrefixes;
     }
 
 }
