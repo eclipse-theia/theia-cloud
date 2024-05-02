@@ -4,6 +4,7 @@
     "src"
   ],
   "compilerOptions": {
-    "outDir": "lib/cjs",
+    "module": "ES2020",
+    "outDir": "lib/esm",
   }
 }
