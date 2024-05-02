@@ -1,0 +1,35 @@
+.spinner-container {
+  display: flex;
+  flex-direction: center;
+  align-self: center;
+  justify-content: center;
+}
+
+.custom-spinner {
+  align-self: center;
+}
+
+.custom-spinner img {
+  animation-delay: 0;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-name: blueprint-spinner;
+  animation-timing-function: ease;
+}
+
+@keyframes blueprint-spinner {
+  0% {
+    filter: hue-rotate(15deg) brightness(103%) contrast(101%);
+    transform: scale(1.0);
+  }
+
+  50% {
+    filter: hue-rotate(-15deg) brightness(100%) contrast(102%);
+    transform: scale(0.8);
+  }
+
+  100% {
+    filter: hue-rotate(15deg) brightness(103%) contrast(101%);
+    transform: scale(1.0);
+  }
+}

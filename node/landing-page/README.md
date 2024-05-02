@@ -1,29 +1,18 @@
-# landing-page
+# Theia Cloud - Landing Page
 
-## Project setup
+This folder contains a sample landing page to launch a user session.
 
-```sh
-npm install
-```
+It provides support for authentication via Keycloak and selecting a which app definition to start.
 
-### Compiles and hot-reloads for development
+The page is based on [ViteJS](https://vitejs.dev/) with React and Typescript.
 
-```sh
-npm run serve
-```
+## Development
 
-### Compiles and minifies for production
+Install dependencies in the parent directory defining the monorepo.
+Also, build the monorepo to build and link the common package
 
-```sh
+```bash
+cd ..
+npm ci
 npm run build
 ```
-
-### Lints and fixes files
-
-```sh
-npm run lint
-```
-
-### Customize configuration
-
-See [Configuration Reference](https://cli.vuejs.org/config/).
