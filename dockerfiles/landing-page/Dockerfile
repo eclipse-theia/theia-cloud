@@ -4,7 +4,7 @@
 FROM node:20-alpine as build-stage
 WORKDIR /app
 COPY node/common/src ./common/src
-COPY node/common/package.json node/common/tsconfig.json ./common/
+COPY node/common/package.json node/common/tsconfig*.json ./common/
 COPY node/configs ./configs/
 COPY node/tsconfig.json node/package*.json ./
 COPY node/landing-page/. ./landing-page/
