@@ -8,10 +8,10 @@ import { AppLogo } from './components/AppLogo';
 import { ErrorComponent } from './components/ErrorComponent';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
+import { Info } from './components/Info';
 import { LaunchApp } from './components/LaunchApp';
 import { Loading } from './components/Loading';
 import { LoginButton } from './components/LoginButton';
-import { LoginInfo } from './components/LoginInfo';
 
 // global state to be kept between render calls
 let initialized = false;
@@ -105,7 +105,7 @@ function App(): JSX.Element {
           });
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   /* eslint-enable react-hooks/rules-of-hooks */
 
@@ -180,6 +180,7 @@ function App(): JSX.Element {
   };
 
   const needsLogin = config.useKeycloak && !token;
+  const logoFileExtension = config.logoFileExtension ?? 'svg';
 
   return (
     <div className='App'>
@@ -190,29 +191,34 @@ function App(): JSX.Element {
       )}
       <div className='body'>
         {loading ? (
-          <Loading />
+          <Loading logoFileExtension={logoFileExtension} text={config.loadingText} />
         ) : (
           <div>
             <div>
-              <AppLogo />
+              <AppLogo fileExtension={logoFileExtension} />
               <p>
-                {
-                  needsLogin
-                    ? <LoginButton login={authenticate} />
-                    : <LaunchApp
-                      appName={selectedAppName}
-                      appDefinition={selectedAppDefinition}
-                      onStartSession={handleStartSession}
-                    />
-                }
+                {needsLogin ? (
+                  <LoginButton login={authenticate} />
+                ) : (
+                  <LaunchApp
+                    appName={selectedAppName}
+                    appDefinition={selectedAppDefinition}
+                    onStartSession={handleStartSession}
+                  />
+                )}
               </p>
             </div>
           </div>
         )}
         <ErrorComponent message={error} />
-        {
-          needsLogin && <LoginInfo />
-        }
+        {!error && (
+          <Info
+            usesLogin={config.useKeycloak}
+            disable={config.disableInfo}
+            text={config.infoText}
+            title={config.infoTitle}
+          />
+        )}
         <Footer
           appDefinition={config.appDefinition}
           appName={config.appName}

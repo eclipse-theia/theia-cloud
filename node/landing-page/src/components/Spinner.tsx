@@ -4,10 +4,14 @@ import React from 'react';
 
 import { AppLogo } from './AppLogo';
 
-export const Spinner: React.FC = () => (
+interface SpinnerProps {
+  logoFileExtension: string;
+}
+
+export const Spinner: React.FC<SpinnerProps> = ({ logoFileExtension }: SpinnerProps) => (
   <div className='spinner-container'>
     <div className='custom-spinner'>
-      <AppLogo />
+      <AppLogo fileExtension={logoFileExtension}/>
     </div>
   </div>
 );
