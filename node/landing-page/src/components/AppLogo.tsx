@@ -2,6 +2,9 @@ import './AppLogo.css';
 
 import React from 'react';
 
-export const AppLogo: React.FC = () => (
-  <img className='logo' src='/logo.svg'></img>
+interface AppLogoProps {
+  fileExtension: string;
+}
+export const AppLogo: React.FC<AppLogoProps> = ({ fileExtension }: AppLogoProps) => (
+  <img className='logo' src={`logo.${fileExtension}`}></img>
 );

@@ -30,7 +30,6 @@ interface BaseTheiaCloudConfig {
   serviceUrl: string;
   appDefinition: string;
   useEphemeralStorage: boolean;
-  additionalApps?: AppDefinition[]
 }
 export interface AppDefinition {
   appId: string;
@@ -43,7 +42,20 @@ export interface KeycloakConfig {
   keycloakClientId: string;
 }
 
-export type TheiaCloudConfig = AppDefinition & BaseTheiaCloudConfig & Partial<KeycloakConfig>;
+/** Configures additional, optional properties for the landing page. */
+export interface LandingPageConfig {
+  additionalApps: AppDefinition[];
+  disableInfo: boolean;
+  infoTitle: string;
+  infoText: string;
+  loadingText: string;
+  logoFileExtension: string;
+}
+
+export type TheiaCloudConfig = AppDefinition &
+  BaseTheiaCloudConfig &
+  Partial<KeycloakConfig> &
+  Partial<LandingPageConfig>;
 
 declare global {
   interface Window {
