@@ -41,12 +41,14 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
     public Session create(String correlationId, SessionSpec spec) {
 	Session session = new Session();
 	session.setSpec(spec);
-	spec.setLastActivity(Instant.now().toEpochMilli());
+
 	spec.setSessionSecret(UUID.randomUUID().toString());
 
 	ObjectMeta metadata = new ObjectMeta();
 	metadata.setName(spec.getName());
 	session.setMetadata(metadata);
+
+	updateStatus(correlationId, session, status -> status.setLastActivity(Instant.now().toEpochMilli()));
 
 	info(correlationId, "Create Session " + session.getSpec());
 	return operation().resource(session).create();
@@ -56,40 +58,41 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
     public Session launch(String correlationId, SessionSpec spec, long timeout, TimeUnit unit) {
 	// get or create session
 	Session session = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
-	SessionSpec sessionSpec = session.getSpec();
+	SessionStatus sessionStatus = session.getNonNullStatus();
 
 	// if session is available and has already an url or error, return that session
-	if (sessionSpec.hasUrl()) {
+	if (sessionStatus.hasUrl()) {
 	    return session;
 	}
-	if (sessionSpec.hasError()) {
-	    delete(correlationId, spec.getName());
+	if (sessionStatus.hasError()) {
+	    delete(correlationId, session.getSpec().getName());
 	    return session;
 	}
-
 	// wait for session url or error to be available
 	try {
-	    watchUntil((action, changedSession) -> isSessionComplete(correlationId, sessionSpec, changedSession),
+	    String sessionName = session.getSpec().getName();
+	    watchUntil((action, changedSession) -> isSessionComplete(correlationId, sessionName, changedSession),
 		    timeout, unit);
+	    // Workaround to get the last changedSession from the watchUntil call above
+	    session = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
 	} catch (InterruptedException exception) {
-	    error(correlationId, "Timeout while waiting for URL for " + spec.getName(), exception);
-	    sessionSpec.setError(TheiaCloudError.SESSION_LAUNCH_TIMEOUT);
+	    error(correlationId, "Timeout while waiting for URL for " + session.getSpec().getName(), exception);
+	    session = updateStatus(correlationId, session,
+		    status -> status.setError(TheiaCloudError.SESSION_LAUNCH_TIMEOUT));
+	    return session;
 	}
 	return session;
     }
 
-    protected boolean isSessionComplete(String correlationId, SessionSpec sessionSpec,
-	    Session changedSession) {
-	if (sessionSpec.getName().equals(changedSession.getSpec().getName())) {
-	    if (changedSession.getSpec().hasUrl()) {
+    protected boolean isSessionComplete(String correlationId, String sessionName, Session changedSession) {
+	if (sessionName.equals(changedSession.getSpec().getName())) {
+	    if (changedSession.getNonNullStatus().hasUrl()) {
 		info(correlationId, "Received URL for " + changedSession);
-		sessionSpec.setUrl(changedSession.getSpec().getUrl());
 		return true;
 	    }
-	    if (changedSession.getSpec().hasError()) {
+	    if (changedSession.getNonNullStatus().hasError()) {
 		info(correlationId, "Received Error for " + changedSession + ". Deleting session again.");
-		delete(correlationId, sessionSpec.getName());
-		sessionSpec.setError(changedSession.getSpec().getError());
+		delete(correlationId, sessionName);
 		return true;
 	    }
 	}
@@ -100,7 +103,7 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
     public boolean reportActivity(String correlationId, String name) {
 	return edit(correlationId, name, session -> {
 	    trace(correlationId, "Updating activity for session {" + name + "}");
-	    session.getSpec().setLastActivity(Instant.now().toEpochMilli());
+	    updateStatus(correlationId, session, status -> status.setLastActivity(Instant.now().toEpochMilli()));
 	}) != null;
     }
 

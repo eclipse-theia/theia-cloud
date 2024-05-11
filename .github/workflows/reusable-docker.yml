@@ -19,7 +19,7 @@ on:
         required: true
 
 env:
-  VERSION: 0.10.0-next
+  VERSION: 0.11.0-next
 
 jobs:
   build:
@@ -41,21 +41,22 @@ jobs:
 
   check-version:
     runs-on: ubuntu-latest
-    if: github.event_name == 'next'
+    if: github.event_name == 'push'
     outputs:
       is_next_version: ${{ steps.version_check.outputs.is_next_version }}
     steps:
       - id: version_check
         run: |
           if [[ $VERSION == *"-next" ]]; then
-            echo "::set-output name=is_next_version::true"
+            echo "is_next_version=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=is_next_version::false"
+            echo "is_next_version=false" >> $GITHUB_OUTPUT
           fi
 
   publish-next:
     runs-on: ubuntu-latest
-    if: github.event_name == 'next' && needs.check-version.outputs.is_next_version == 'true'
+    needs: check-version
+    if: github.event_name == 'push' && needs.check-version.outputs.is_next_version == 'true'
 
     steps:
       - name: Checkout Repository
@@ -71,7 +72,7 @@ jobs:
         run: docker build -t ${{ steps.get_tags.outputs.version_tag }} -f ${{ inputs.docker_file }} .
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.dockerhub_username }}
           password: ${{ secrets.dockerhub_token }}
@@ -102,7 +103,7 @@ jobs:
         run: docker build -t ${{ steps.get_tags.outputs.version_tag }} -f ${{ inputs.docker_file }} .
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.dockerhub_username }}
           password: ${{ secrets.dockerhub_token }}

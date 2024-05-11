@@ -53,7 +53,7 @@ NAMESPACE       NAME                                 TYPE           CLUSTER-IP  
 ingress-nginx   ingress-nginx-controller             LoadBalancer   10.52.4.129    34.141.62.32   80:32507/TCP,443:32114/TCP   11m
 ```
 
-Open `./helm/theia.cloud/valuesGKETryNow.yaml` and update the host section to use `subdomain.34.141.62.32.nip.io`:
+Open `./terraform/values/valuesDemo.yaml` and update the host section to use `subdomain.34.141.62.32.nip.io`:
 
 ```yaml
 hosts:

@@ -166,8 +166,7 @@ public class EagerStartSessionHandler implements SessionHandler {
 
 	/* Update session resource */
 	try {
-	    AddedHandlerUtil.updateSessionURLAsync(client.kubernetes(), session, client.namespace(), host,
-		    correlationId);
+	    AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), host, correlationId);
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),

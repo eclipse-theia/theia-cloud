@@ -130,7 +130,7 @@ resource "helm_release" "theia-cloud-base" {
   name             = "theia-cloud-base"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud-base"
-  version          = "0.9.1"
+  version          = "0.10.0"
   namespace        = "theiacloud"
   create_namespace = true
 
@@ -142,10 +142,11 @@ resource "helm_release" "theia-cloud-base" {
 
 resource "helm_release" "theia-cloud-crds" {
   count            = var.install_theia_cloud_crds ? 1 : 0
+  depends_on       = [helm_release.theia-cloud-base]
   name             = "theia-cloud-crds"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud-crds"
-  version          = "0.9.1"
+  version          = "0.10.0"
   namespace        = "theiacloud"
   create_namespace = true
 }
@@ -229,7 +230,7 @@ resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
   repository       = "https://github.eclipsesource.com/theia-cloud-helm"
   chart            = "theia-cloud"
-  version          = "0.9.1"
+  version          = "0.10.0"
   namespace        = "theiacloud"
   create_namespace = true
 

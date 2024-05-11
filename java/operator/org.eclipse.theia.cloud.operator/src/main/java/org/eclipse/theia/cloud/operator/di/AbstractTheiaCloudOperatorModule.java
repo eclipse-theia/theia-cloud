@@ -33,7 +33,6 @@ import org.eclipse.theia.cloud.operator.handler.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.handler.PersistentVolumeTemplateReplacements;
 import org.eclipse.theia.cloud.operator.handler.SessionHandler;
-import org.eclipse.theia.cloud.operator.handler.TimeoutStrategy;
 import org.eclipse.theia.cloud.operator.handler.WorkspaceHandler;
 import org.eclipse.theia.cloud.operator.handler.impl.BandwidthLimiterImpl;
 import org.eclipse.theia.cloud.operator.handler.impl.DefaultDeploymentTemplateReplacements;
@@ -69,8 +68,6 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
 	bind(MonitorActivityTracker.class).to(bindMonitorActivityTracker()).in(Singleton.class);
 	bind(MonitorMessagingService.class).to(bindMonitorMessagingService()).in(Singleton.class);
-
-	configure(MultiBinding.create(TimeoutStrategy.class), this::configureTimeoutStrategies);
     }
 
     protected <T> void configure(final MultiBinding<T> binding, final Consumer<MultiBinding<T>> configurator) {
@@ -115,10 +112,6 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
     protected abstract Class<? extends AppDefinitionHandler> bindAppDefinitionHandler();
 
     protected abstract Class<? extends SessionHandler> bindSessionHandler();
-
-    protected void configureTimeoutStrategies(final MultiBinding<TimeoutStrategy> binding) {
-	binding.add(TimeoutStrategy.FixedTime.class);
-    }
 
     @Provides
     @Singleton

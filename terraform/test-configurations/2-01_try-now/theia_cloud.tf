@@ -30,7 +30,7 @@ resource "helm_release" "theia-cloud" {
   create_namespace = true
 
   values = [
-    "${file("${path.module}/../../../helm/theia.cloud/valuesGKETryNow.yaml")}"
+    "${file("${path.module}/../../values/valuesDemo.yaml")}"
   ]
 
   set {
@@ -78,7 +78,7 @@ resource "helm_release" "theia-cloud" {
 resource "kubectl_manifest" "cdt-cloud-demo" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
-  apiVersion: theia.cloud/v1beta8
+  apiVersion: theia.cloud/v1beta9
   kind: AppDefinition
   metadata:
     name: cdt-cloud-demo
@@ -96,17 +96,10 @@ resource "kubectl_manifest" "cdt-cloud-demo" {
     port: 3000
     requestsCpu: 100m
     requestsMemory: 1000M
-    timeout:
-      limit: 30
-      strategy: FIXEDTIME
+    timeout: 30
     uid: 101
     uplinkLimit: 30000
     mountPath: /home/project/persisted
-    monitor:
-      port: 8081
-      activityTracker:
-        timeoutAfter: 30
-        notifyAfter: 25
   EOF
 }
 
@@ -114,7 +107,7 @@ resource "kubectl_manifest" "cdt-cloud-demo" {
 resource "kubectl_manifest" "coffee-editor" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
-  apiVersion: theia.cloud/v1beta8
+  apiVersion: theia.cloud/v1beta9
   kind: AppDefinition
   metadata:
     name: coffee-editor
@@ -132,16 +125,9 @@ resource "kubectl_manifest" "coffee-editor" {
     port: 3000
     requestsCpu: 100m
     requestsMemory: 1000M
-    timeout:
-      limit: 30
-      strategy: FIXEDTIME
+    timeout: 30
     uid: 1001
     uplinkLimit: 30000
     mountPath: /home/project/persisted
-    monitor:
-      port: 8081
-      activityTracker:
-        timeoutAfter: 30
-        notifyAfter: 25
   EOF
 }

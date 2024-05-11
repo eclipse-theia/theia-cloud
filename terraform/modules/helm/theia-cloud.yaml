@@ -4,12 +4,14 @@ app:
   id: asdfghjkl
   name: Theia Cloud
 
-image:
-  name: theiacloud/theia-cloud-demo:0.10.0-next
+demoApplication:
+  name: theiacloud/theia-cloud-demo:0.11.0-next
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
   imagePullPolicy: IfNotPresent
+  # This overrides the default value and does not write the default values to the app definition
+  monitor: null
 
 hosts:
   usePaths: true
@@ -19,7 +21,7 @@ hosts:
     instance: instances
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.10.0-next
+  image: theiacloud/theia-cloud-landing-page:0.11.0-next
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: false
 
@@ -43,6 +45,3 @@ ingress:
 
 monitor:
   enable: false
-  activityTracker:
-    enable: true
-    interval: 1

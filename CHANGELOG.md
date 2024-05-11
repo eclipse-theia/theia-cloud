@@ -1,9 +1,23 @@
 # Changelog
 
-## [0.10.0] - estimated 2024-04
+## [0.11.0] - estimated 2024-07
+
+- [common] Add option field to CRDs and increase version to `Session.v1beta8`, `Workspace.v1beta5` and `AppDefinition.v1beta10` [#293](https://github.com/eclipsesource/theia-cloud/pull/293) | [#55](https://github.com/eclipsesource/theia-cloud-helm/pull/55)
+
+## [0.10.0] - 2024-04-02
 
 - [.github/workflows] Improve version detection in workflows (do not build release commits, auto-detect version for demo publishing) [#280](https://github.com/eclipsesource/theia-cloud/pull/280) - contributed on behalf of STMicroelectronics
 - [node] Separate `monitor` package from other workspaces to fix bundling the extension [#280](https://github.com/eclipsesource/theia-cloud/pull/280) - contributed on behalf of STMicroelectronics
+- [conversion] Provide java conversion webhook for CRD updates [#283](https://github.com/eclipsesource/theia-cloud/pull/283) | [#49](https://github.com/eclipsesource/theia-cloud-helm/pull/49) - contributed on behalf of STMicroelectronics
+- [.github/workflows] Add ci for `conversion-webhook` and fix typo to build on version bumps [#283](https://github.com/eclipsesource/theia-cloud/pull/283) | [#49](https://github.com/eclipsesource/theia-cloud-helm/pull/49) - contributed on behalf of STMicroelectronics
+- [common] Update CRs, keep previous version and offer Hub (used by conversion-webhook) [#283](https://github.com/eclipsesource/theia-cloud/pull/283) | [#49](https://github.com/eclipsesource/theia-cloud-helm/pull/49) - contributed on behalf of STMicroelectronics
+  - Move status like fields to status
+    - `Session.v1beta7`: Move `url`, `lastActivity` and `error` fields from the spec to the status.
+    - `Workspace.v1beta4`: Move the `error` field from the spec to the status. Also add the `error` field to `Workspace.v1beta3` as it was missing
+  - Remove `timeout.strategy` from AppDefinition
+    - `AppDefinition.v1beta9`: Removed `timeout.strategy` and `timeout.limit` is now just `timeout`. This was done, as there is only one Strategy left.
+- [java] Update io.fabric8.kubernetes-client to version 6.10.0. Also update Quarkus platform to 3.8.1. This provides kubernetes 1.29 support [#287](https://github.com/eclipsesource/theia-cloud/pull/287)
+- [terraform] Change terraform values to conform to helm chart changes [#289](https://github.com/eclipsesource/theia-cloud/pull/289) | [#52](https://github.com/eclipsesource/theia-cloud-helm/pull/52) - contributed on behalf of STMicroelectronics
 
 ## [0.9.0] - 2024-01-23
 
@@ -19,5 +33,5 @@
 - [All components] Clean up repository [#275](https://github.com/eclipsesource/theia-cloud/pull/275) - contributed on behalf of STMicroelectronics
 
 ## [0.8.1] - 2023-10-01
-  
+
 - Last Milestone based version. No changelog available due to alpha-phase.

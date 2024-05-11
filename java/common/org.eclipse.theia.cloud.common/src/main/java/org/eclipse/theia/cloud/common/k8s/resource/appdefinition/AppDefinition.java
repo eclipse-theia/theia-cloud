@@ -19,6 +19,8 @@ package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.Group;
@@ -27,7 +29,7 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v1beta8")
+@Version("v1beta10")
 @Group("theia.cloud")
 @Kind("AppDefinition")
 @Singular("appdefinition")
@@ -35,7 +37,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 public class AppDefinition extends CustomResource<AppDefinitionSpec, AppDefinitionStatus> implements Namespaced {
 
     private static final long serialVersionUID = 8749670583218521755L;
-    public static final String API = "theia.cloud/v1beta8";
+    public static final String API = "theia.cloud/v1beta10";
     public static final String KIND = "AppDefinition";
     public static final String CRD_NAME = "appdefinitions.theia.cloud";
 
@@ -45,15 +47,19 @@ public class AppDefinition extends CustomResource<AppDefinitionSpec, AppDefiniti
     }
 
     public AppDefinition() {
-
     }
 
     public AppDefinition(AppDefinitionHub fromHub) {
-	this.setMetadata(fromHub.getMetadata());
-	this.spec = new AppDefinitionSpec(fromHub.getSpec());
-	if (fromHub.getStatus() != null) {
-	    this.status = new AppDefinitionStatus(fromHub.getStatus());
+	if (fromHub.getMetadata().isPresent()) {
+	    this.setMetadata(fromHub.getMetadata().get());
 	}
+	this.spec = new AppDefinitionSpec(fromHub);
+	this.status = new AppDefinitionStatus(fromHub);
+    }
+
+    @JsonIgnore
+    public AppDefinitionStatus getNonNullStatus() {
+	return super.getStatus() != null ? super.getStatus() : new AppDefinitionStatus();
     }
 
 }

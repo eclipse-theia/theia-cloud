@@ -19,6 +19,8 @@ package org.eclipse.theia.cloud.common.k8s.resource.session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.model.annotation.Group;
@@ -27,7 +29,7 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v1beta6")
+@Version("v1beta8")
 @Group("theia.cloud")
 @Kind("Session")
 @Singular("session")
@@ -35,7 +37,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 public class Session extends CustomResource<SessionSpec, SessionStatus> implements Namespaced {
 
     private static final long serialVersionUID = 4518092300237069237L;
-    public static final String API = "theia.cloud/v1beta6";
+    public static final String API = "theia.cloud/v1beta8";
     public static final String KIND = "Session";
     public static final String CRD_NAME = "sessions.theia.cloud";
 
@@ -43,11 +45,11 @@ public class Session extends CustomResource<SessionSpec, SessionStatus> implemen
     }
 
     public Session(SessionHub fromHub) {
-	this.setMetadata(fromHub.getMetadata());
-	this.spec = new SessionSpec(fromHub.getSpec());
-	if (fromHub.getStatus() != null) {
-	    this.status = new SessionStatus(fromHub.getStatus());
+	if (fromHub.getMetadata().isPresent()) {
+	    this.setMetadata(fromHub.getMetadata().get());
 	}
+	this.spec = new SessionSpec(fromHub);
+	this.status = new SessionStatus(fromHub);
     }
 
     @Override
@@ -55,4 +57,8 @@ public class Session extends CustomResource<SessionSpec, SessionStatus> implemen
 	return CustomResourceUtil.toString(this);
     }
 
+    @JsonIgnore
+    public SessionStatus getNonNullStatus() {
+	return super.getStatus() != null ? super.getStatus() : new SessionStatus();
+    }
 }

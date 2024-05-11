@@ -27,6 +27,7 @@ import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
@@ -93,9 +94,9 @@ public final class K8sUtil {
     }
 
     private String launchSession(String correlationId, SessionSpec sessionSpec, int timeout) {
-	SessionSpec spec = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getSpec();
-	TheiaCloudWebException.throwIfErroneous(spec);
-	return spec.getUrl();
+	SessionStatus status = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getNonNullStatus();
+	TheiaCloudWebException.throwIfErroneous(status);
+	return status.getUrl();
     }
 
     private SessionSpec sessionSpecWithEnv(SessionSpec spec, EnvironmentVars env) {

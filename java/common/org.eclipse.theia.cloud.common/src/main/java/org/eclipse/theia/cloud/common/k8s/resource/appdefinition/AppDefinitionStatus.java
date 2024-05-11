@@ -16,7 +16,7 @@
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHubStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -33,12 +33,19 @@ public class AppDefinitionStatus extends ResourceStatus {
     public AppDefinitionStatus() {
     }
 
-    public AppDefinitionStatus(AppDefinitionHubStatus fromHub) {
-	if (fromHub.getOperatorMessage() != null) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage());
+    public AppDefinitionStatus(AppDefinitionHub fromHub) {
+	if (fromHub.getOperatorMessage().isPresent()) {
+	    this.setOperatorMessage(fromHub.getOperatorMessage().get());
 	}
-	if (fromHub.getOperatorStatus() != null) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus());
+	if (fromHub.getOperatorMessage().isPresent()) {
+	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
 	}
     }
+
+    @Override
+    public String toString() {
+	return "AppDefinitionStatus [getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()="
+		+ getOperatorMessage() + "]";
+    }
+
 }

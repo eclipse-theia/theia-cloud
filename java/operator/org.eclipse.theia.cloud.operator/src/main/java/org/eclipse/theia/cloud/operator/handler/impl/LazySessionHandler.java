@@ -260,8 +260,7 @@ public class LazySessionHandler implements SessionHandler {
 
 	/* Update session resource */
 	try {
-	    AddedHandlerUtil.updateSessionURLAsync(client.kubernetes(), session, client.namespace(), host,
-		    correlationId);
+	    AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), host, correlationId);
 	} catch (KubernetesClientException e) {
 	    LOGGER.error(
 		    formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),
@@ -288,13 +287,13 @@ public class LazySessionHandler implements SessionHandler {
 	}
     }
 
-    protected boolean hasMaxInstancesReached(AppDefinition appDefinition, Session session,
-	    String correlationId) {
+    protected boolean hasMaxInstancesReached(AppDefinition appDefinition, Session session, String correlationId) {
 	if (TheiaCloudK8sUtil.checkIfMaxInstancesReached(client.kubernetes(), client.namespace(), session.getSpec(),
 		appDefinition.getSpec(), correlationId)) {
 	    LOGGER.info(formatMetric(correlationId, "Max instances reached for " + appDefinition.getSpec().getName()));
-	    client.sessions().edit(correlationId, session.getMetadata().getName(),
-		    toEdit -> toEdit.getSpec().setError(TheiaCloudError.SESSION_SERVER_LIMIT_REACHED));
+	    client.sessions().updateStatus(correlationId, session, status -> {
+		status.setError(TheiaCloudError.SESSION_SERVER_LIMIT_REACHED);
+	    });
 	    return true;
 	}
 	return false;
@@ -306,8 +305,9 @@ public class LazySessionHandler implements SessionHandler {
 	    if (arguments.getSessionsPerUser() == 0) {
 		LOGGER.info(formatLogMessage(correlationId,
 			"No sessions allowed for this user. Could not create session " + session.getSpec()));
-		client.sessions().edit(correlationId, session.getMetadata().getName(),
-			ws -> ws.getSpec().setError(TheiaCloudError.SESSION_USER_NO_SESSIONS));
+		client.sessions().updateStatus(correlationId, session, status -> {
+		    status.setError(TheiaCloudError.SESSION_USER_NO_SESSIONS);
+		});
 		return true;
 	    }
 
@@ -315,8 +315,9 @@ public class LazySessionHandler implements SessionHandler {
 	    if (userSessions > arguments.getSessionsPerUser()) {
 		LOGGER.info(formatLogMessage(correlationId,
 			"No more sessions allowed for this user, limit is  " + arguments.getSessionsPerUser()));
-		client.sessions().edit(correlationId, session.getMetadata().getName(),
-			toEdit -> toEdit.getSpec().setError(TheiaCloudError.SESSION_USER_LIMIT_REACHED));
+		client.sessions().updateStatus(correlationId, session, status -> {
+		    status.setError(TheiaCloudError.SESSION_USER_LIMIT_REACHED);
+		});
 		return true;
 	    }
 	}
@@ -356,8 +357,7 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected Optional<Service> createAndApplyService(String correlationId, String sessionResourceName,
-	    String sessionResourceUID, Session session, AppDefinitionSpec appDefinitionSpec,
-	    boolean useOAuth2Proxy) {
+	    String sessionResourceUID, Session session, AppDefinitionSpec appDefinitionSpec, boolean useOAuth2Proxy) {
 	Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(client.namespace(), session,
 		appDefinitionSpec);
 	String templateYaml = useOAuth2Proxy ? AddedHandlerUtil.TEMPLATE_SERVICE_YAML
@@ -387,8 +387,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
-		configmap -> {
+		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, configmap -> {
 		    configmap.setData(Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST,
 			    session.getSpec().getUser()));
 		});
@@ -407,8 +406,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
-		configMap -> {
+		configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, configMap -> {
 		    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, session);
 		    int port = appDefinition.getSpec().getPort();
 		    AddedHandlerUtil.updateProxyConfigMap(client.kubernetes(), client.namespace(), configMap, host,
@@ -431,8 +429,7 @@ public class LazySessionHandler implements SessionHandler {
 	    return;
 	}
 	K8sUtil.loadAndCreateDeploymentWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-		deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
-		deployment -> {
+		deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, deployment -> {
 		    pvName.ifPresent(name -> addVolumeClaim(deployment, name, appDefinition.getSpec()));
 		    bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
 			    appDefinition.getSpec().getUplinkLimit(), correlationId);

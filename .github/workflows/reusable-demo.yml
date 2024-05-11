@@ -15,30 +15,20 @@ on:
       docker_location:
         required: true
         type: string
+      publish_next:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
     secrets:
       dockerhub_username:
         required: true
       dockerhub_token:
         required: true
 
-env:
-  VERSION: 0.10.0-next
-
 jobs:
-  check-version:
-    runs-on: ubuntu-latest
-    outputs:
-      is_next_version: ${{ steps.version_check.outputs.is_next_version }}
-    steps:
-      - id: version_check
-        run: |
-          if [[ $VERSION == *"-next" ]]; then
-            echo "::set-output name=is_next_version::true"
-          else
-            echo "::set-output name=is_next_version::false"
-          fi
-
-  publish-next:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -48,23 +38,23 @@ jobs:
       - name: Create docker tags
         id: get_tags
         run: |
-          echo "version_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
-          echo "next_sha_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}.$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
-          echo "next_tag_for_release=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}-next" >> $GITHUB_OUTPUT
+          echo "version_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ inputs.version }}" >> $GITHUB_OUTPUT
+          echo "next_sha_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ inputs.version }}.$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
+          echo "next_tag_for_release=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ inputs.version }}-next" >> $GITHUB_OUTPUT
           echo "latest_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:latest" >> $GITHUB_OUTPUT
 
       - name: Build Docker image
         run: docker build -t ${{ steps.get_tags.outputs.version_tag }} -f ${{ inputs.docker_file }} ${{ inputs.docker_location }}
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.dockerhub_username }}
           password: ${{ secrets.dockerhub_token }}
 
       # Push version and SHA tag (for next versions)
       - name: Push version and SHA tag
-        if: needs.check-version.outputs.is_next_version == 'true'
+        if: inputs.publish_next == 'true'
         run: |
           docker push ${{ steps.get_tags.outputs.version_tag }}
           docker tag ${{ steps.get_tags.outputs.version_tag }} ${{ steps.get_tags.outputs.next_sha_tag }}
@@ -72,7 +62,7 @@ jobs:
 
       # Push version, next and latest tag for releases (for valid semver versions)
       - name: Push version and latest tag
-        if: needs.check-version.outputs.is_next_version == 'false'
+        if: inputs.publish_next == 'false'
         run: |
           docker push ${{ steps.get_tags.outputs.version_tag }}
           docker tag ${{ steps.get_tags.outputs.version_tag }} ${{ steps.get_tags.outputs.latest_tag }}

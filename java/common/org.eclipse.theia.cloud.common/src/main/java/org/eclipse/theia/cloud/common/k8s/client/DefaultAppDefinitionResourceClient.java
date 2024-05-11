@@ -23,8 +23,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSt
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
-public class DefaultAppDefinitionResourceClient
-	extends BaseResourceClient<AppDefinition, AppDefinitionSpecResourceList>
+public class DefaultAppDefinitionResourceClient extends BaseResourceClient<AppDefinition, AppDefinitionSpecResourceList>
 	implements AppDefinitionResourceClient {
 
     public DefaultAppDefinitionResourceClient(NamespacedKubernetesClient client) {

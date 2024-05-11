@@ -16,9 +16,10 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.workspace;
 
+import java.util.Map;
+
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
-import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHubSpec;
-import org.eclipse.theia.cloud.common.util.TheiaCloudError;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -41,8 +42,8 @@ public class WorkspaceSpec implements UserScopedSpec {
     @JsonProperty("storage")
     private String storage;
 
-    @JsonProperty("error")
-    private String error;
+    @JsonProperty("options")
+    private Map<String, String> options;
 
     /**
      * Default constructor.
@@ -57,13 +58,13 @@ public class WorkspaceSpec implements UserScopedSpec {
 	this.label = label;
     }
 
-    public WorkspaceSpec(WorkspaceHubSpec spec) {
-	this.name = spec.getName();
-	this.label = spec.getLabel();
-	this.appDefinition = spec.getAppDefinition();
-	this.user = spec.getUser();
-	this.storage = spec.getStorage();
-	this.error = spec.getError();
+    public WorkspaceSpec(WorkspaceHub fromHub) {
+	this.name = fromHub.getName().orElse(null); // required
+	this.label = fromHub.getLabel().orElse(null);
+	this.appDefinition = fromHub.getAppDefinition().orElse(null);
+	this.user = fromHub.getUser().orElse(null); // required
+	this.storage = fromHub.getStorage().orElse(null);
+	this.options = fromHub.getOptions().orElse(null);
     }
 
     public String getName() {
@@ -99,34 +100,22 @@ public class WorkspaceSpec implements UserScopedSpec {
 	return storage;
     }
 
+    public Map<String, String> getOptions() {
+	return options;
+    }
+
     public void setStorage(String storage) {
 	this.storage = storage;
-    }
-
-    public String getError() {
-	return error;
-    }
-
-    public void setError(TheiaCloudError error) {
-	setError(error.asString());
-    }
-
-    public void setError(String error) {
-	this.error = error;
     }
 
     public boolean hasStorage() {
 	return getStorage() != null && !getStorage().isBlank();
     }
 
-    public boolean hasError() {
-	return TheiaCloudError.isErrorString(getError());
-    }
-
     @Override
     public String toString() {
 	return "WorkspaceSpec [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
-		+ user + ", storage=" + storage + ", error=" + error + "]";
+		+ user + ", storage=" + storage + "]";
     }
 
 }

@@ -52,14 +52,15 @@ public interface CustomResourceClient<SPEC, STATUS, T extends CustomResource<SPE
 	return list(user).stream().map(item -> item.getSpec()).collect(Collectors.toList());
     }
 
-    default boolean updateStatus(String correlationId, T resource, Consumer<STATUS> editOperation) {
+    default T updateStatus(String correlationId, T resource, Consumer<STATUS> editOperation) {
 	trace(correlationId, "Update Status of " + resource);
 	final String name = resource.getMetadata().getName();
-	return (editStatus(correlationId, name, res -> {
+	T updatedResource = editStatus(correlationId, name, res -> {
 	    STATUS status = Optional.ofNullable(res.getStatus()).orElse(createDefaultStatus());
 	    res.setStatus(status);
 	    editOperation.accept(status);
-	}) != null);
+	});
+	return (updatedResource != null) ? updatedResource : resource;
     }
 
     STATUS createDefaultStatus();

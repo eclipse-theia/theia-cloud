@@ -15,55 +15,302 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
+
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 public class AppDefinitionHub {
 
-    private ObjectMeta metadata = new ObjectMeta();
-    private AppDefinitionHubSpec spec;
-    private AppDefinitionHubStatus status;
+    final Optional<ObjectMeta> metadata;
+    final Optional<String> name;
+    final Optional<String> image;
+    final Optional<String> imagePullPolicy;
+    final Optional<String> pullSecret;
+    final OptionalInt uid;
+    final OptionalInt port;
+    final Optional<String> ingressname;
+    final OptionalInt minInstances;
+    final OptionalInt maxInstances;
+    final Optional<String> requestsMemory;
+    final Optional<String> requestsCpu;
+    final Optional<String> limitsMemory;
+    final Optional<String> limitsCpu;
+    final OptionalInt downlinkLimit;// kilobits per second
+    final OptionalInt uplinkLimit;// kilobits per second
+    final Optional<String> mountPath;
 
-    public ObjectMeta getMetadata() {
-	return metadata;
-    }
+    final OptionalInt timeoutLimit;
+    @Deprecated
+    Optional<String> timeoutStrategy = Optional.empty();
 
-    public void setMetadata(ObjectMeta metadata) {
-	this.metadata = metadata;
-    }
+    final OptionalInt monitorPort;
+    final OptionalInt monitorActivityTrackerTimeoutAfter;
+    final OptionalInt monitorActivityTrackerNotifyAfter;
 
-    public AppDefinitionHubSpec getSpec() {
-	return spec;
-    }
+    final Optional<String> operatorStatus;
+    final Optional<String> operatorMessage;
 
-    public void setSpec(AppDefinitionHubSpec spec) {
-	this.spec = spec;
-    }
-
-    public AppDefinitionHubStatus getStatus() {
-	return status;
-    }
-
-    public void setStatus(AppDefinitionHubStatus status) {
-	this.status = status;
-    }
+    final Optional<Map<String, String>> options;
 
     public AppDefinitionHub(AppDefinition toHub) {
-	this.setMetadata(toHub.getMetadata());
-	this.spec = new AppDefinitionHubSpec(toHub.getSpec());
+	this.metadata = Optional.ofNullable(toHub.getMetadata());
+	this.name = Optional.ofNullable(toHub.getSpec().getName());
+	this.image = Optional.ofNullable(toHub.getSpec().getImage());
+	this.imagePullPolicy = Optional.ofNullable(toHub.getSpec().getImagePullPolicy());
+	this.pullSecret = Optional.ofNullable(toHub.getSpec().getPullSecret());
+	this.uid = OptionalInt.of(toHub.getSpec().getUid());
+	this.port = OptionalInt.of(toHub.getSpec().getPort());
+	this.ingressname = Optional.ofNullable(toHub.getSpec().getIngressname());
+	this.minInstances = OptionalInt.of(toHub.getSpec().getMinInstances());
+	this.maxInstances = OptionalInt.of(toHub.getSpec().getMaxInstances());
+	this.requestsMemory = Optional.ofNullable(toHub.getSpec().getRequestsMemory());
+	this.requestsCpu = Optional.ofNullable(toHub.getSpec().getRequestsCpu());
+	this.limitsMemory = Optional.ofNullable(toHub.getSpec().getLimitsMemory());
+	this.limitsCpu = Optional.ofNullable(toHub.getSpec().getLimitsCpu());
+	this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
+	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
+	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+	this.options = Optional.ofNullable(toHub.getSpec().getOptions());
+
+	this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout());
+
+	if (toHub.getSpec().getMonitor() != null) {
+	    this.monitorPort = OptionalInt.of(toHub.getSpec().getMonitor().getPort());
+	    if (toHub.getSpec().getMonitor().getActivityTracker() != null) {
+		this.monitorActivityTrackerNotifyAfter = OptionalInt
+			.of(toHub.getSpec().getMonitor().getActivityTracker().getNotifyAfter());
+		this.monitorActivityTrackerTimeoutAfter = OptionalInt
+			.of(toHub.getSpec().getMonitor().getActivityTracker().getTimeoutAfter());
+	    } else {
+		this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+		this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+	    }
+	} else {
+	    this.monitorPort = OptionalInt.empty();
+	    this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+	    this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+	}
+
+	// Status is not a required field
 	if (toHub.getStatus() != null) {
-	    this.status = new AppDefinitionHubStatus(toHub.getStatus());
+	    this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+	    this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+	} else {
+	    this.operatorStatus = Optional.empty();
+	    this.operatorMessage = Optional.empty();
 	}
     }
 
     @SuppressWarnings("deprecation")
     public AppDefinitionHub(
-	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta7.AppDefinitionV1beta7 toHub) {
-	this.setMetadata(toHub.getMetadata());
-	this.spec = new AppDefinitionHubSpec(toHub.getSpec());
+	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta9.AppDefinitionV1beta9 toHub) {
+	this.metadata = Optional.ofNullable(toHub.getMetadata());
+	this.name = Optional.ofNullable(toHub.getSpec().getName());
+	this.image = Optional.ofNullable(toHub.getSpec().getImage());
+	this.imagePullPolicy = Optional.ofNullable(toHub.getSpec().getImagePullPolicy());
+	this.pullSecret = Optional.ofNullable(toHub.getSpec().getPullSecret());
+	this.uid = OptionalInt.of(toHub.getSpec().getUid());
+	this.port = OptionalInt.of(toHub.getSpec().getPort());
+	this.ingressname = Optional.ofNullable(toHub.getSpec().getIngressname());
+	this.minInstances = OptionalInt.of(toHub.getSpec().getMinInstances());
+	this.maxInstances = OptionalInt.of(toHub.getSpec().getMaxInstances());
+	this.requestsMemory = Optional.ofNullable(toHub.getSpec().getRequestsMemory());
+	this.requestsCpu = Optional.ofNullable(toHub.getSpec().getRequestsCpu());
+	this.limitsMemory = Optional.ofNullable(toHub.getSpec().getLimitsMemory());
+	this.limitsCpu = Optional.ofNullable(toHub.getSpec().getLimitsCpu());
+	this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
+	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
+	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+	this.options = Optional.empty();
+
+	this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout());
+
+	if (toHub.getSpec().getMonitor() != null) {
+	    this.monitorPort = OptionalInt.of(toHub.getSpec().getMonitor().getPort());
+	    if (toHub.getSpec().getMonitor().getActivityTracker() != null) {
+		this.monitorActivityTrackerNotifyAfter = OptionalInt
+			.of(toHub.getSpec().getMonitor().getActivityTracker().getNotifyAfter());
+		this.monitorActivityTrackerTimeoutAfter = OptionalInt
+			.of(toHub.getSpec().getMonitor().getActivityTracker().getTimeoutAfter());
+	    } else {
+		this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+		this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+	    }
+	} else {
+	    this.monitorPort = OptionalInt.empty();
+	    this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+	    this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+	}
+
+	// Status is not a required field
 	if (toHub.getStatus() != null) {
-	    this.status = new AppDefinitionHubStatus(toHub.getStatus());
+	    this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+	    this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+	} else {
+	    this.operatorStatus = Optional.empty();
+	    this.operatorMessage = Optional.empty();
 	}
     }
+
+    @SuppressWarnings("deprecation")
+    public AppDefinitionHub(
+	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta8.AppDefinitionV1beta8 toHub) {
+	this.metadata = Optional.ofNullable(toHub.getMetadata());
+	this.name = Optional.ofNullable(toHub.getSpec().getName());
+	this.image = Optional.ofNullable(toHub.getSpec().getImage());
+	this.imagePullPolicy = Optional.ofNullable(toHub.getSpec().getImagePullPolicy());
+	this.pullSecret = Optional.ofNullable(toHub.getSpec().getPullSecret());
+	this.uid = OptionalInt.of(toHub.getSpec().getUid());
+	this.port = OptionalInt.of(toHub.getSpec().getPort());
+	this.ingressname = Optional.ofNullable(toHub.getSpec().getIngressname());
+	this.minInstances = OptionalInt.of(toHub.getSpec().getMinInstances());
+	this.maxInstances = OptionalInt.of(toHub.getSpec().getMaxInstances());
+	this.requestsMemory = Optional.ofNullable(toHub.getSpec().getRequestsMemory());
+	this.requestsCpu = Optional.ofNullable(toHub.getSpec().getRequestsCpu());
+	this.limitsMemory = Optional.ofNullable(toHub.getSpec().getLimitsMemory());
+	this.limitsCpu = Optional.ofNullable(toHub.getSpec().getLimitsCpu());
+	this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
+	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
+	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+	this.options = Optional.empty();
+
+	if (toHub.getSpec().getTimeout() != null) {
+	    this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout().getLimit());
+	    this.timeoutStrategy = Optional.of(toHub.getSpec().getTimeout().getStrategy());
+	} else {
+	    this.timeoutLimit = OptionalInt.empty();
+	    this.timeoutStrategy = Optional.empty();
+	}
+
+	if (toHub.getSpec().getMonitor() != null) {
+	    this.monitorPort = OptionalInt.of(toHub.getSpec().getMonitor().getPort());
+	    if (toHub.getSpec().getMonitor().getActivityTracker() != null) {
+		this.monitorActivityTrackerNotifyAfter = OptionalInt
+			.of(toHub.getSpec().getMonitor().getActivityTracker().getNotifyAfter());
+		this.monitorActivityTrackerTimeoutAfter = OptionalInt
+			.of(toHub.getSpec().getMonitor().getActivityTracker().getTimeoutAfter());
+	    } else {
+		this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+		this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+	    }
+	} else {
+	    this.monitorPort = OptionalInt.empty();
+	    this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+	    this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+	}
+
+	// Status is not a required field
+	if (toHub.getStatus() != null) {
+	    this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+	    this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+	} else {
+	    this.operatorStatus = Optional.empty();
+	    this.operatorMessage = Optional.empty();
+	}
+    }
+
+    public Optional<ObjectMeta> getMetadata() {
+	return metadata;
+    }
+
+    public Optional<String> getName() {
+	return name;
+    }
+
+    public Optional<String> getImage() {
+	return image;
+    }
+
+    public Optional<String> getImagePullPolicy() {
+	return imagePullPolicy;
+    }
+
+    public Optional<String> getPullSecret() {
+	return pullSecret;
+    }
+
+    public OptionalInt getUid() {
+	return uid;
+    }
+
+    public OptionalInt getPort() {
+	return port;
+    }
+
+    public Optional<String> getIngressname() {
+	return ingressname;
+    }
+
+    public OptionalInt getMinInstances() {
+	return minInstances;
+    }
+
+    public OptionalInt getMaxInstances() {
+	return maxInstances;
+    }
+
+    public Optional<String> getRequestsMemory() {
+	return requestsMemory;
+    }
+
+    public Optional<String> getRequestsCpu() {
+	return requestsCpu;
+    }
+
+    public Optional<String> getLimitsMemory() {
+	return limitsMemory;
+    }
+
+    public Optional<String> getLimitsCpu() {
+	return limitsCpu;
+    }
+
+    public OptionalInt getDownlinkLimit() {
+	return downlinkLimit;
+    }
+
+    public OptionalInt getUplinkLimit() {
+	return uplinkLimit;
+    }
+
+    public Optional<String> getMountPath() {
+	return mountPath;
+    }
+
+    public OptionalInt getTimeoutLimit() {
+	return timeoutLimit;
+    }
+
+    public Optional<String> getTimeoutStrategy() {
+	return timeoutStrategy;
+    }
+
+    public OptionalInt getMonitorPort() {
+	return monitorPort;
+    }
+
+    public OptionalInt getMonitorActivityTrackerTimeoutAfter() {
+	return monitorActivityTrackerTimeoutAfter;
+    }
+
+    public OptionalInt getMonitorActivityTrackerNotifyAfter() {
+	return monitorActivityTrackerNotifyAfter;
+    }
+
+    public Optional<String> getOperatorStatus() {
+	return operatorStatus;
+    }
+
+    public Optional<String> getOperatorMessage() {
+	return operatorMessage;
+    }
+
+    public Optional<Map<String, String>> getOptions() {
+	return options;
+    }
+
 }

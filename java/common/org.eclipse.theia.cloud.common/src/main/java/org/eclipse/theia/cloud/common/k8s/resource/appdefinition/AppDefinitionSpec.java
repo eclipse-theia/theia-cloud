@@ -16,7 +16,9 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHubSpec;
+import java.util.Map;
+
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -52,7 +54,7 @@ public class AppDefinitionSpec {
     private Integer maxInstances;
 
     @JsonProperty("timeout")
-    private Timeout timeout;
+    private Integer timeout;
 
     @JsonProperty("requestsMemory")
     private String requestsMemory;
@@ -78,44 +80,47 @@ public class AppDefinitionSpec {
     @JsonProperty("monitor")
     private Monitor monitor;
 
+    @JsonProperty("options")
+    private Map<String, String> options;
+
     /**
      * Default constructor.
      */
     public AppDefinitionSpec() {
     }
 
-    public AppDefinitionSpec(AppDefinitionHubSpec fromHub) {
-	this.name = fromHub.getName();
-	this.image = fromHub.getImage();
-	this.imagePullPolicy = fromHub.getImagePullPolicy();
-	this.pullSecret = fromHub.getPullSecret();
-	this.uid = fromHub.getUid();
-	this.port = fromHub.getPort();
-	this.ingressname = fromHub.getIngressname();
-	this.minInstances = fromHub.getMinInstances();
-	this.maxInstances = fromHub.getMaxInstances();
-	this.requestsMemory = fromHub.getRequestsMemory();
-	this.requestsCpu = fromHub.getRequestsCpu();
-	this.limitsMemory = fromHub.getLimitsMemory();
-	this.limitsCpu = fromHub.getLimitsCpu();
-	this.downlinkLimit = fromHub.getDownlinkLimit();
-	this.uplinkLimit = fromHub.getUplinkLimit();
-	this.mountPath = fromHub.getMountPath();
+    public AppDefinitionSpec(AppDefinitionHub fromHub) {
+	this.name = fromHub.getName().orElse(null); // required
+	this.image = fromHub.getImage().orElse(null); // required
+	this.imagePullPolicy = fromHub.getImagePullPolicy().orElse(null);
+	this.pullSecret = fromHub.getPullSecret().orElse(null);
+	this.uid = fromHub.getUid().orElse(0); // required
+	this.port = fromHub.getPort().orElse(0); // required
+	this.ingressname = fromHub.getIngressname().orElse(null); // required
+	this.minInstances = fromHub.getMinInstances().orElse(0); // required
+	this.maxInstances = fromHub.getMaxInstances().orElse(0); // required
+	this.requestsMemory = fromHub.getRequestsMemory().orElse(null); // required
+	this.requestsCpu = fromHub.getRequestsCpu().orElse(null); // required
+	this.limitsMemory = fromHub.getLimitsMemory().orElse(null); // required
+	this.limitsCpu = fromHub.getLimitsCpu().orElse(null); // required
+	this.downlinkLimit = fromHub.getDownlinkLimit().orElse(0);
+	this.uplinkLimit = fromHub.getUplinkLimit().orElse(0);
+	this.mountPath = fromHub.getMountPath().orElse(null);
 
-	this.timeout = new Timeout();
-	if (fromHub.getTimeout() != null) {
-	    this.timeout.limit = fromHub.getTimeout().getLimit();
-	    this.timeout.strategy = fromHub.getTimeout().getStrategy();
-	}
+	this.timeout = fromHub.getTimeoutLimit().orElse(0);
 
-	this.monitor = new Monitor();
-	if (fromHub.getMonitor() != null) {
-	    this.monitor.port = fromHub.getMonitor().getPort();
+	this.options = fromHub.getOptions().orElse(null);
 
-	    this.monitor.activityTracker = new Monitor.ActivityTracker();
-	    if (fromHub.getMonitor().getActivityTracker() != null) {
-		this.monitor.activityTracker.timeoutAfter = fromHub.getMonitor().getActivityTracker().getTimeoutAfter();
-		this.monitor.activityTracker.notifyAfter = fromHub.getMonitor().getActivityTracker().getNotifyAfter();
+	int monitorPort = fromHub.getMonitorPort().orElse(0);
+	if (monitorPort > 0) {
+	    this.monitor = new Monitor();
+	    this.monitor.port = monitorPort;
+
+	    int timeoutAfter = fromHub.getMonitorActivityTrackerTimeoutAfter().orElse(0);
+	    if (timeoutAfter > 0) {
+		this.monitor.activityTracker = new Monitor.ActivityTracker();
+		this.monitor.activityTracker.timeoutAfter = timeoutAfter;
+		this.monitor.activityTracker.notifyAfter = fromHub.getMonitorActivityTrackerNotifyAfter().orElse(0);
 	    }
 	}
     }
@@ -156,7 +161,7 @@ public class AppDefinitionSpec {
 	return maxInstances;
     }
 
-    public Timeout getTimeout() {
+    public Integer getTimeout() {
 	return timeout;
     }
 
@@ -192,6 +197,10 @@ public class AppDefinitionSpec {
 	return monitor;
     }
 
+    public Map<String, String> getOptions() {
+	return options;
+    }
+
     @Override
     public String toString() {
 	return "AppDefinitionSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
@@ -200,35 +209,6 @@ public class AppDefinitionSpec {
 		+ ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="
 		+ limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit="
 		+ uplinkLimit + ", mountPath=" + mountPath + "]";
-    }
-
-    public static class Timeout {
-	@JsonProperty("limit")
-	private int limit;
-
-	@JsonProperty("strategy")
-	private String strategy;
-
-	public Timeout() {
-	}
-
-	public Timeout(String strategy, int limit) {
-	    this.strategy = strategy;
-	    this.limit = limit;
-	}
-
-	public int getLimit() {
-	    return limit;
-	}
-
-	public String getStrategy() {
-	    return strategy;
-	}
-
-	@Override
-	public String toString() {
-	    return "Timeout [limit=" + limit + ", strategy=" + strategy + "]";
-	}
     }
 
     public static class Monitor {

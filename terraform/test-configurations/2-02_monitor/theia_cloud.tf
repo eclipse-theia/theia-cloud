@@ -32,7 +32,7 @@ resource "helm_release" "theia-cloud" {
   create_namespace = true
 
   values = [
-    "${file("${path.module}/../../../helm/theia.cloud/valuesMonitor.yaml")}"
+    "${file("${path.module}/../../values/valuesMonitor.yaml")}"
   ]
 
   set {
@@ -76,12 +76,12 @@ resource "helm_release" "theia-cloud" {
   }
 
   set {
-    name  = "image.name"
-    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:0.10.0-next" : "theiacloud/theia-cloud-activity-demo-theia:0.10.0-next"
+    name  = "demoApplication.name"
+    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:0.11.0-next" : "theiacloud/theia-cloud-activity-demo-theia:0.11.0-next"
   }
 
   set {
-    name  = "monitor.port"
+    name  = "demoApplication.monitor.port"
     value = var.use_vscode_extension ? 8081 : 3000
   }
 

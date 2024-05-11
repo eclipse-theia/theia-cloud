@@ -16,8 +16,10 @@
 package org.eclipse.theia.cloud.common.k8s.resource.session;
 
 import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
-import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHubStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
+import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize
@@ -30,15 +32,72 @@ public class SessionStatus extends ResourceStatus {
     /**
      * Default constructor.
      */
+
+    @JsonProperty("url")
+    private String url;
+
+    @JsonProperty("error")
+    private String error;
+
+    @JsonProperty("lastActivity")
+    private long lastActivity;
+
     public SessionStatus() {
     }
 
-    public SessionStatus(SessionHubStatus fromHub) {
-	if (fromHub.getOperatorMessage() != null) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage());
+    public SessionStatus(SessionHub fromHub) {
+	if (fromHub.getOperatorMessage().isPresent()) {
+	    this.setOperatorMessage(fromHub.getOperatorMessage().get());
 	}
-	if (fromHub.getOperatorStatus() != null) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus());
+	if (fromHub.getOperatorStatus().isPresent()) {
+	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
 	}
+	this.url = fromHub.getUrl().orElse(null);
+	this.error = fromHub.getError().orElse(null);
+	this.lastActivity = fromHub.getLastActivity().orElse((long) 0);
     }
+
+    public String getUrl() {
+	return url;
+    }
+
+    public boolean hasUrl() {
+	return getUrl() != null && !getUrl().isBlank();
+    }
+
+    public String getError() {
+	return error;
+    }
+
+    public boolean hasError() {
+	return TheiaCloudError.isErrorString(getError());
+    }
+
+    public long getLastActivity() {
+	return lastActivity;
+    }
+
+    public void setUrl(String url) {
+	this.url = url;
+    }
+
+    public void setError(TheiaCloudError error) {
+	setError(error.asString());
+    }
+
+    public void setError(String error) {
+	this.error = error;
+    }
+
+    public void setLastActivity(long lastActivity) {
+	this.lastActivity = lastActivity;
+    }
+
+    @Override
+    public String toString() {
+	return "SessionStatus [url=" + url + ", error=" + error + ", lastActivity=" + lastActivity
+		+ ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
+		+ "]";
+    }
+
 }
