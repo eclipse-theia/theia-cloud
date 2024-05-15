@@ -68,6 +68,7 @@ public final class JavaResourceUtil {
 	}
 
 	LOGGER.trace(formatLogMessage(correlationId, "Updating template read with classloader from " + resourceName));
+	// Make own method
 	return JavaResourceUtil.class.getResourceAsStream(resourceName);
     }
 
