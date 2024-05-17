@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>operator</artifactId>
 	<packaging>jar</packaging>
-	<name>Theia.Cloud Operator Library</name>
+	<name>Theia Cloud Operator Library</name>
 	<description>The library for Theia Cloud k8s operators</description>
 
 	<parent>

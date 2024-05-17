@@ -5,8 +5,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>common</artifactId>
 	<packaging>jar</packaging>
-	<name>Theia.Cloud Common</name>
-	<description>Common components of Theia.Cloud</description>
+	<name>Theia Cloud Common</name>
+	<description>Common components of Theia Cloud</description>
 
 	<parent>
 		<groupId>org.eclipse.theia.cloud</groupId>

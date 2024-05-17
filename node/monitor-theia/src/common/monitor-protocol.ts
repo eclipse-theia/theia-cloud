@@ -10,7 +10,7 @@ export const TheiaCloudBackendMonitorService = Symbol('TheiaCloudBackendMonitorS
 
 export interface TheiaCloudBackendMonitorService {
   /**
-   * Returns true if we are running in the Theia.cloud environment.
+   * Returns true if we are running in the Theia Cloud environment.
    */
   isRunningOnTheiaCloud(): boolean;
 

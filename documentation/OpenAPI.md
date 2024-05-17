@@ -2,7 +2,7 @@
 
 ## Generate and Update
 
-Start Theia.cloud service from IDE (which starts quarkus in dev mode).
+Start Theia Cloud service from IDE (which starts quarkus in dev mode).
 
 Access generated specs at <http://localhost:8081/q/openapi?format=json>
 

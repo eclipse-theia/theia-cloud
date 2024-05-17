@@ -68,7 +68,7 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-smallrye-openapi</artifactId>
 		</dependency>
-		<!-- Theia.cloud Dependencies -->
+		<!-- Theia Cloud Dependencies -->
 		<dependency>
 			<groupId>org.eclipse.theia.cloud</groupId>
 			<artifactId>common</artifactId>

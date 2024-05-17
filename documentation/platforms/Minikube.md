@@ -1,8 +1,8 @@
 # Getting started with Minikube
 
 Minikube is a local Kubernetes that allows you to test and develop for Kubernetes.\
-In this guide we will show you how to install minikube and helm 3 as well as cert-manager, the cloud native certificate management, the NginX Ingress Controller and Keycloak. We will use existing installation methods for all of the Theia.Cloud preqrequisites.\
-Finally we will install and try Theia.Cloud using helm.
+In this guide we will show you how to install minikube and helm 3 as well as cert-manager, the cloud native certificate management, the NginX Ingress Controller and Keycloak. We will use existing installation methods for all of the Theia Cloud preqrequisites.\
+Finally we will install and try Theia Cloud using helm.
 
 If you have no experience with Kubernetes/Minikube yet, we encourage you to check out some basic tutorials first, e.g. <https://kubernetes.io/docs/tutorials/hello-minikube/> and <https://kubernetes.io/docs/tutorials/kubernetes-basics/>
 

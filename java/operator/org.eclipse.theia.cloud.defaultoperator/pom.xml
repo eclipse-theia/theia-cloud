@@ -6,7 +6,7 @@
 	<artifactId>defaultoperator</artifactId>
 	<packaging>jar</packaging>
 	<name>Default Theia Cloud Operator</name>
-	<description>The default k8s operator for Theia.Cloud</description>
+	<description>The default k8s operator for Theia Cloud</description>
 
 	<parent>
 		<groupId>org.eclipse.theia.cloud</groupId>

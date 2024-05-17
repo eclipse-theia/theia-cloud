@@ -26,7 +26,7 @@ import jakarta.inject.Inject;
 
 /**
  * Custom {@link io.quarkus.security.identity.IdentityProvider IdentityProvider}
- * that authenticates anonymous users if the Theia.Cloud service's usage of
+ * that authenticates anonymous users if the Theia Cloud service's usage of
  * keycloak was disabled. This facilitates configuring resources as generally
  * requiring authentication while still being able to use the service without
  * any authentication by setting the {@value #THEIA_CLOUD_USE_KEYCLOAK} system
