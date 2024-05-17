@@ -92,7 +92,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>org.eclipse.theia.cloud.defaultoperator.DefaultOperatorLauncher</mainClass>
+							<mainClass>org.eclipse.theia.cloud.defaultoperator.DefaultTheiaCloudOperatorLauncher</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

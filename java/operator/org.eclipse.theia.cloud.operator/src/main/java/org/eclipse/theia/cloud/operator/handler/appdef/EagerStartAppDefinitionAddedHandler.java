@@ -30,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
 import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
@@ -65,7 +65,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
     protected TheiaCloudClient client;
 
     @Inject
-    protected OperatorArguments arguments;
+    protected TheiaCloudOperatorArguments arguments;
 
     @Inject
     protected IngressPathProvider ingressPathProvider;

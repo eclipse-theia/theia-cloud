@@ -22,9 +22,9 @@ import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.theia.cloud.operator.AbstractOperator;
-import org.eclipse.theia.cloud.operator.AbstractOperatorLauncher;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperator;
+import org.eclipse.theia.cloud.operator.AbstractTheiaCloudOperatorLauncher;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 
 import com.google.inject.Guice;
@@ -41,19 +41,19 @@ import io.fabric8.kubernetes.client.extended.leaderelection.LeaderElector;
 import io.fabric8.kubernetes.client.extended.leaderelection.resourcelock.LeaseLock;
 import picocli.CommandLine;
 
-public class DefaultOperatorLauncher extends AbstractOperatorLauncher {
+public class DefaultTheiaCloudOperatorLauncher extends AbstractTheiaCloudOperatorLauncher {
 
-    private static final Logger LOGGER = LogManager.getLogger(DefaultOperatorLauncher.class);
+    private static final Logger LOGGER = LogManager.getLogger(DefaultTheiaCloudOperatorLauncher.class);
 
     protected static final String LEASE_LOCK_NAME = "theia-cloud-operator-leaders";
 
     static final String COR_ID_INIT = "init";
 
     public static void main(String[] args) throws InterruptedException {
-	new DefaultOperatorLauncher().runMain(args);
+	new DefaultTheiaCloudOperatorLauncher().runMain(args);
     }
 
-    private OperatorArguments args;
+    private TheiaCloudOperatorArguments args;
 
     @Override
     public void runMain(String[] args) throws InterruptedException {
@@ -86,8 +86,8 @@ public class DefaultOperatorLauncher extends AbstractOperatorLauncher {
 		    .withRetryPeriod(Duration.ofSeconds(retryPeriodInSeconds))//
 
 		    .withLock(new LeaseLock(leaseLockNamespace, LEASE_LOCK_NAME, lockIdentity))//
-		    .withLeaderCallbacks(new LeaderCallbacks(DefaultOperatorLauncher.this::onStartLeading,
-			    DefaultOperatorLauncher.this::onStopLeading, DefaultOperatorLauncher.this::onNewLeader))//
+		    .withLeaderCallbacks(new LeaderCallbacks(DefaultTheiaCloudOperatorLauncher.this::onStartLeading,
+			    DefaultTheiaCloudOperatorLauncher.this::onStopLeading, DefaultTheiaCloudOperatorLauncher.this::onNewLeader))//
 		    .build();
 	    LeaderElector leaderElector = k8sClient.leaderElector().withConfig(leaderElectionConfig).build();
 	    leaderElector.run();
@@ -110,20 +110,20 @@ public class DefaultOperatorLauncher extends AbstractOperatorLauncher {
 	LOGGER.info(formatLogMessage(COR_ID_INIT, newLeader + " is the new leader."));
     }
 
-    protected void startOperatorAsLeader(OperatorArguments arguments) {
+    protected void startOperatorAsLeader(TheiaCloudOperatorArguments arguments) {
 	AbstractTheiaCloudOperatorModule module = createModule(arguments);
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
 
 	Injector injector = Guice.createInjector(module);
-	AbstractOperator theiaCloud = injector.getInstance(AbstractOperator.class);
+	TheiaCloudOperator theiaCloud = injector.getInstance(TheiaCloudOperator.class);
 
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Launching Theia Cloud Now"));
 	theiaCloud.start();
     }
 
     @Override
-    protected OperatorArguments createArguments(String[] args) {
-	OperatorArguments arguments = new OperatorArguments();
+    protected TheiaCloudOperatorArguments createArguments(String[] args) {
+	TheiaCloudOperatorArguments arguments = new TheiaCloudOperatorArguments();
 	CommandLine commandLine = new CommandLine(arguments).setTrimQuotes(true);
 	commandLine.parseArgs(args);
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsed args: " + arguments));
@@ -131,7 +131,7 @@ public class DefaultOperatorLauncher extends AbstractOperatorLauncher {
     }
 
     @Override
-    protected AbstractTheiaCloudOperatorModule createModule(OperatorArguments arguments) {
+    protected AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments) {
 	return new DefaultTheiaCloudOperatorModule(arguments);
     }
 

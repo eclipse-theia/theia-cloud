@@ -39,7 +39,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
 import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
@@ -79,7 +79,7 @@ public class LazySessionHandler implements SessionHandler {
     @Inject
     protected IngressPathProvider ingressPathProvider;
     @Inject
-    protected OperatorArguments arguments;
+    protected TheiaCloudOperatorArguments arguments;
     @Inject
     protected BandwidthLimiter bandwidthLimiter;
     @Inject

@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudHandlerUtil;
 
 import com.google.inject.Inject;
@@ -35,7 +35,7 @@ public class DefaultPersistentVolumeTemplateReplacements implements PersistentVo
     public static final String DEFAULT_REQUESTED_STORAGE = "250Mi";
 
     @Inject
-    OperatorArguments arguments;
+    TheiaCloudOperatorArguments arguments;
 
     @Override
     public Map<String, String> getPersistentVolumeReplacements(String namespace, Workspace workspace) {

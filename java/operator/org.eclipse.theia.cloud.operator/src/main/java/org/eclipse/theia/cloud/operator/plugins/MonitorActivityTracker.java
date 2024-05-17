@@ -35,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.messaging.MonitorMessagingService;
 
 import com.google.inject.Inject;
@@ -66,7 +66,7 @@ public class MonitorActivityTracker implements OperatorPlugin {
     private MonitorMessagingService messagingService;
 
     @Inject
-    private OperatorArguments arguments;
+    private TheiaCloudOperatorArguments arguments;
 
     @Override
     public void start() {

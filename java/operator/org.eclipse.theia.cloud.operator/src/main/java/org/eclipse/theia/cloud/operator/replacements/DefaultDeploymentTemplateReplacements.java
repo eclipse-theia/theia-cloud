@@ -27,7 +27,7 @@ import java.util.Optional;
 
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil;
@@ -68,7 +68,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     protected static final String DEFAULT_UID = "1000";
 
     @Inject
-    protected OperatorArguments arguments;
+    protected TheiaCloudOperatorArguments arguments;
 
     @Inject
     protected IngressPathProvider ingressPathProvider;
