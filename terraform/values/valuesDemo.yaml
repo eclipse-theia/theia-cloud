@@ -23,7 +23,7 @@ hosts:
   instance: ws.theia-cloud.io
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.11.0-next
+  image: theiacloud/theia-cloud-landing-page:0.11.0-next
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
   additionalApps:

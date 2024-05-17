@@ -33,8 +33,8 @@ or build only a single package
 npm run build -w <folder>
 ```
 
-## Run Try Now Page
+## Run Landing Page
 
 ```bash
-npm run start -w try-now-page
+npm run start -w landing-page
 ```
