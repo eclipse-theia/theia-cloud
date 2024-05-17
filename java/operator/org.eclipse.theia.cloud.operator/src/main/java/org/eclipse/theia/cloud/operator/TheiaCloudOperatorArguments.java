@@ -18,7 +18,7 @@ package org.eclipse.theia.cloud.operator;
 
 import picocli.CommandLine.Option;
 
-public class OperatorArguments {
+public class TheiaCloudOperatorArguments {
 
     public enum CloudProvider {
 	K8S, MINIKUBE
@@ -262,7 +262,7 @@ public class OperatorArguments {
 	    return false;
 	if (getClass() != obj.getClass())
 	    return false;
-	OperatorArguments other = (OperatorArguments) obj;
+	TheiaCloudOperatorArguments other = (TheiaCloudOperatorArguments) obj;
 	if (appId == null) {
 	    if (other.appId != null)
 		return false;

@@ -36,8 +36,8 @@ import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
-import org.eclipse.theia.cloud.operator.AbstractOperator;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperator;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.handler.appdef.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.session.SessionHandler;
 import org.eclipse.theia.cloud.operator.handler.ws.WorkspaceHandler;
@@ -48,12 +48,12 @@ import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.client.Watcher;
 
-public class DefaultOperator implements AbstractOperator {
+public class DefaultTheiaCloudOperator implements TheiaCloudOperator {
 
     private static final ScheduledExecutorService STOP_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private static final ScheduledExecutorService WATCH_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
-    private static final Logger LOGGER = LogManager.getLogger(DefaultOperator.class);
+    private static final Logger LOGGER = LogManager.getLogger(DefaultTheiaCloudOperator.class);
 
     private static final String COR_ID_APPDEFINITIONPREFIX = "appdefinition-watch-";
     private static final String COR_ID_WORKSPACEPREFIX = "workspace-watch-";
@@ -76,7 +76,7 @@ public class DefaultOperator implements AbstractOperator {
     private SessionHandler sessionHandler;
 
     @Inject
-    private OperatorArguments arguments;
+    private TheiaCloudOperatorArguments arguments;
 
     private final Map<String, AppDefinition> appDefinitionCache = new ConcurrentHashMap<>();
     private final Map<String, Workspace> workspaceCache = new ConcurrentHashMap<>();
@@ -102,7 +102,7 @@ public class DefaultOperator implements AbstractOperator {
 	    resourceClient.appDefinitions().operation().watch(watcher);
 	    return watcher;
 	} catch (Exception e) {
-	    LOGGER.error(formatLogMessage(DefaultOperatorLauncher.COR_ID_INIT,
+	    LOGGER.error(formatLogMessage(DefaultTheiaCloudOperatorLauncher.COR_ID_INIT,
 		    "Error while initializing app definitions watch"), e);
 	    System.exit(-1);
 	    throw new IllegalStateException();
@@ -118,7 +118,7 @@ public class DefaultOperator implements AbstractOperator {
 	    return watcher;
 	} catch (Exception e) {
 	    LOGGER.error(
-		    formatLogMessage(DefaultOperatorLauncher.COR_ID_INIT, "Error while initializing workspace watch"),
+		    formatLogMessage(DefaultTheiaCloudOperatorLauncher.COR_ID_INIT, "Error while initializing workspace watch"),
 		    e);
 	    System.exit(-1);
 	    throw new IllegalStateException();
@@ -134,7 +134,7 @@ public class DefaultOperator implements AbstractOperator {
 	    return watcher;
 	} catch (Exception e) {
 	    LOGGER.error(
-		    formatLogMessage(DefaultOperatorLauncher.COR_ID_INIT, "Error while initializing session watch"), e);
+		    formatLogMessage(DefaultTheiaCloudOperatorLauncher.COR_ID_INIT, "Error while initializing session watch"), e);
 	    System.exit(-1);
 	    throw new IllegalStateException();
 	}
@@ -143,19 +143,19 @@ public class DefaultOperator implements AbstractOperator {
     protected void initAppDefinition(AppDefinition resource) {
 	appDefinitionCache.put(resource.getMetadata().getUid(), resource);
 	String uid = resource.getMetadata().getUid();
-	handleAppDefnitionEvent(Watcher.Action.ADDED, uid, DefaultOperatorLauncher.COR_ID_INIT);
+	handleAppDefnitionEvent(Watcher.Action.ADDED, uid, DefaultTheiaCloudOperatorLauncher.COR_ID_INIT);
     }
 
     protected void initWorkspace(Workspace resource) {
 	workspaceCache.put(resource.getMetadata().getUid(), resource);
 	String uid = resource.getMetadata().getUid();
-	handleWorkspaceEvent(Watcher.Action.ADDED, uid, DefaultOperatorLauncher.COR_ID_INIT);
+	handleWorkspaceEvent(Watcher.Action.ADDED, uid, DefaultTheiaCloudOperatorLauncher.COR_ID_INIT);
     }
 
     protected void initSession(Session resource) {
 	sessionCache.put(resource.getMetadata().getUid(), resource);
 	String uid = resource.getMetadata().getUid();
-	handleSessionEvent(Watcher.Action.ADDED, uid, DefaultOperatorLauncher.COR_ID_INIT);
+	handleSessionEvent(Watcher.Action.ADDED, uid, DefaultTheiaCloudOperatorLauncher.COR_ID_INIT);
     }
 
     protected void handleAppDefnitionEvent(Watcher.Action action, String uid, String correlationId) {

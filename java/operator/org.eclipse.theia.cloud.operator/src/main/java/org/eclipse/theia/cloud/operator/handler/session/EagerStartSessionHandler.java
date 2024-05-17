@@ -30,7 +30,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.util.JavaUtil;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
 import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.util.K8sUtil;
@@ -67,7 +67,7 @@ public class EagerStartSessionHandler implements SessionHandler {
     protected IngressPathProvider ingressPathProvider;
 
     @Inject
-    protected OperatorArguments arguments;
+    protected TheiaCloudOperatorArguments arguments;
 
     @Override
     public boolean sessionAdded(Session session, String correlationId) {

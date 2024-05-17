@@ -20,7 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 
 import com.google.inject.Inject;
 
@@ -29,7 +29,7 @@ public class IngressPathProviderImpl implements IngressPathProvider {
     private static final Logger LOGGER = LogManager.getLogger(IngressPathProviderImpl.class);
 
     @Inject
-    OperatorArguments arguments;
+    TheiaCloudOperatorArguments arguments;
 
     @Override
     public String getPath(AppDefinition appDefinition, int instance) {

@@ -2,7 +2,7 @@
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
     <booleanAttribute key="org.eclipse.debug.core.ATTR_FORCE_SYSTEM_CONSOLE_ENCODING" value="false"/>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-        <listEntry value="/operator/src/main/java/org/eclipse/theia/cloud/operator/DefaultOperatorLauncher.java"/>
+        <listEntry value="/defaultoperator/src/main/java/org/eclipse/theia/cloud/defaultoperator/DefaultTheiaCloudOperatorLauncher.java"/>
     </listAttribute>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="1"/>
@@ -12,10 +12,10 @@
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_SHOW_CODEDETAILS_IN_EXCEPTION_MESSAGES" value="true"/>
     <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_CLASSPATH_ONLY_JAR" value="false"/>
     <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="org.eclipse.m2e.launchconfig.classpathProvider"/>
-    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.theia.cloud.operator.DefaultOperatorLauncher"/>
-    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="operator"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.theia.cloud.defaultoperator.DefaultTheiaCloudOperatorLauncher"/>
+    <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="defaultoperator"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--instancesHost&#10;ws.${minikube ip}.nip.io&#10;--cloudProvider&#10;MINIKUBE&#10;--sessionsPerUser&#10;3&#10;--appId&#10;asdfghjkl&#10;--storageClassName&#10;default&#10;--requestedStorage&#10;250Mi"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="operator"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="defaultoperator"/>
     <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.m2e.launchconfig.sourcepathProvider"/>
     <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dlog4j2.configurationFile=log4j2.xml"/>
 </launchConfiguration>

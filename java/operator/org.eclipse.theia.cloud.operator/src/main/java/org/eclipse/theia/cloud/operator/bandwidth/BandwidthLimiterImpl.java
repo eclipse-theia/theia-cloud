@@ -21,7 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 
 import com.google.inject.Inject;
 
@@ -37,16 +37,16 @@ public class BandwidthLimiterImpl implements BandwidthLimiter {
     private static final String KUBERNETES_IO_EGRESS_BANDWIDTH = "kubernetes.io/egress-bandwidth";
     private static final String KUBERNETES_IO_INGRESS_BANDWIDTH = "kubernetes.io/ingress-bandwidth";
 
-    private OperatorArguments arguments;
+    private TheiaCloudOperatorArguments arguments;
 
     @Inject
-    public BandwidthLimiterImpl(OperatorArguments arguments) {
+    public BandwidthLimiterImpl(TheiaCloudOperatorArguments arguments) {
 	this.arguments = arguments;
     }
 
     @Override
     public void limit(Deployment deployment, int downlinkLimit, int uplinkLimit, String correlationId) {
-	org.eclipse.theia.cloud.operator.OperatorArguments.BandwidthLimiter limiter = arguments.getBandwidthLimiter();
+	org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments.BandwidthLimiter limiter = arguments.getBandwidthLimiter();
 	if (limiter == null) {
 	    return;
 	}

@@ -24,7 +24,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
-import org.eclipse.theia.cloud.operator.AbstractOperator;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperator;
 import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiterImpl;
 import org.eclipse.theia.cloud.operator.handler.appdef.AppDefinitionHandler;
@@ -34,6 +34,7 @@ import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.ingress.IngressPathProviderImpl;
 import org.eclipse.theia.cloud.operator.messaging.MonitorMessagingService;
 import org.eclipse.theia.cloud.operator.messaging.MonitorMessagingServiceImpl;
+import org.eclipse.theia.cloud.operator.plugins.MonitorActivityTracker;
 import org.eclipse.theia.cloud.operator.plugins.OperatorPlugin;
 import org.eclipse.theia.cloud.operator.pv.DefaultPersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.pv.PersistentVolumeCreator;
@@ -51,7 +52,7 @@ import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
     @Override
     protected void configure() {
-	bind(AbstractOperator.class).to(bindTheiaCloud()).in(Singleton.class);
+	bind(TheiaCloudOperator.class).to(bindTheiaCloudOperator()).in(Singleton.class);
 
 	bind(BandwidthLimiter.class).to(bindBandwidthLimiter()).in(Singleton.class);
 	bind(PersistentVolumeCreator.class).to(bindPersistentVolumeHandler()).in(Singleton.class);
@@ -73,7 +74,7 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 	binding.applyBinding(binder());
     }
 
-    protected abstract Class<? extends AbstractOperator> bindTheiaCloud();
+    protected abstract Class<? extends TheiaCloudOperator> bindTheiaCloudOperator();
 
     protected Class<? extends BandwidthLimiter> bindBandwidthLimiter() {
 	return BandwidthLimiterImpl.class;
@@ -91,7 +92,13 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 	return DefaultDeploymentTemplateReplacements.class;
     }
 
-    protected abstract void bindOperatorPlugins(final MultiBinding<OperatorPlugin> binding);
+    protected void bindOperatorPlugins(final MultiBinding<OperatorPlugin> binding) {
+	bindMonitorActivityTracker(binding);
+    }
+
+    protected void bindMonitorActivityTracker(final MultiBinding<OperatorPlugin> binding) {
+	binding.add(MonitorActivityTracker.class);
+    }
 
     protected Class<? extends MonitorMessagingService> bindMonitorMessagingService() {
 	return MonitorMessagingServiceImpl.class;

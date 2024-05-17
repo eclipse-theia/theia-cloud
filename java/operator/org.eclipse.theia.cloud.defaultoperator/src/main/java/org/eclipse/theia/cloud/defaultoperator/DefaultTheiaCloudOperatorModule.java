@@ -16,10 +16,9 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.defaultoperator;
 
-import org.eclipse.theia.cloud.operator.AbstractOperator;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperator;
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
-import org.eclipse.theia.cloud.operator.di.MultiBinding;
 import org.eclipse.theia.cloud.operator.handler.appdef.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.appdef.EagerStartAppDefinitionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.appdef.LazyStartAppDefinitionHandler;
@@ -28,22 +27,20 @@ import org.eclipse.theia.cloud.operator.handler.session.LazySessionHandler;
 import org.eclipse.theia.cloud.operator.handler.session.SessionHandler;
 import org.eclipse.theia.cloud.operator.handler.ws.LazyWorkspaceHandler;
 import org.eclipse.theia.cloud.operator.handler.ws.WorkspaceHandler;
-import org.eclipse.theia.cloud.operator.plugins.MonitorActivityTracker;
-import org.eclipse.theia.cloud.operator.plugins.OperatorPlugin;
 import org.eclipse.theia.cloud.operator.pv.MinikubePersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.pv.PersistentVolumeCreator;
 
 public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorModule {
 
-    private OperatorArguments arguments;
+    private TheiaCloudOperatorArguments arguments;
 
-    public DefaultTheiaCloudOperatorModule(OperatorArguments arguments) {
+    public DefaultTheiaCloudOperatorModule(TheiaCloudOperatorArguments arguments) {
 	this.arguments = arguments;
     }
 
     @Override
     protected void configure() {
-	bind(OperatorArguments.class).toInstance(arguments);
+	bind(TheiaCloudOperatorArguments.class).toInstance(arguments);
 	super.configure();
     }
 
@@ -82,13 +79,8 @@ public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorM
     }
 
     @Override
-    protected Class<? extends AbstractOperator> bindTheiaCloud() {
-	return DefaultOperator.class;
-    }
-
-    @Override
-    protected void bindOperatorPlugins(final MultiBinding<OperatorPlugin> binding) {
-	binding.add(MonitorActivityTracker.class);
+    protected Class<? extends TheiaCloudOperator> bindTheiaCloudOperator() {
+	return DefaultTheiaCloudOperator.class;
     }
 
 }

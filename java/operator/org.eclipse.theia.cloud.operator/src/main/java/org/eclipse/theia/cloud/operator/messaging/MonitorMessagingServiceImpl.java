@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
-import org.eclipse.theia.cloud.operator.OperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.json.JSONObject;
 
 import com.google.inject.Inject;
@@ -44,7 +44,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
     private TheiaCloudClient resourceClient;
 
     @Inject
-    private OperatorArguments arguments;
+    private TheiaCloudOperatorArguments arguments;
 
     @Override
     public void sendMessage(Session session, String level, String message) {
