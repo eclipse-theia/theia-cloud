@@ -1,6 +1,6 @@
 # Monitor
 
-VSCode extension to monitor Theia.cloud hosted VSCode/Theia products.
+VSCode extension to monitor Theia Cloud hosted VSCode/Theia products.
 The extension will expose a rest service, where an external service can ping the extension to get information about the pod.
 
 The extension is designed to facilitate the addition of further modules in the future.

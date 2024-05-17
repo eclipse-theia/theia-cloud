@@ -29,7 +29,7 @@ function App(): JSX.Element {
   if (config === undefined) {
     return (
       <div className='App'>
-        <strong>FATAL: Theia.Cloud configuration could not be found.</strong>
+        <strong>FATAL: Theia Cloud configuration could not be found.</strong>
       </div>
     );
   }

@@ -1,7 +1,7 @@
 {
   "name": "theiacloud-monitor",
-  "displayName": "Theia.cloud Monitor extension",
-  "description": "Monitor for Theia.cloud hosted tools",
+  "displayName": "Theia Cloud Monitor extension",
+  "description": "Monitor for Theia Cloud hosted tools",
   "version": "0.11.0-next",
   "license": "EPL-2.0",
   "author": {
@@ -10,7 +10,7 @@
   "bugs": "https://github.com/eclipsesource/theia-cloud/issues",
   "contributors": [
     {
-      "name": "Theia.cloud Project",
+      "name": "Theia Cloud Project",
       "url": "http://theia-cloud.io"
     }
   ],

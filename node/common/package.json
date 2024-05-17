@@ -1,7 +1,7 @@
 {
   "name": "@eclipse-theiacloud/common",
   "version": "0.11.0-next",
-  "description": "Common functionality for Theia.cloud",
+  "description": "Common functionality for Theia Cloud",
   "license": "EPL-2.0",
   "keywords": [
     "theia",

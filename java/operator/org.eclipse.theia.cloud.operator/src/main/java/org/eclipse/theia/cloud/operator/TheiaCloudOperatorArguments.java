@@ -47,7 +47,7 @@ public class TheiaCloudOperatorArguments {
     private Integer monitorInterval;
 
     @Option(names = {
-	    "--cloudProvider" }, description = "The cloud provider where Theia.Cloud is deployed", required = false)
+	    "--cloudProvider" }, description = "The cloud provider where Theia Cloud is deployed", required = false)
     private CloudProvider cloudProvider;
 
     @Option(names = {

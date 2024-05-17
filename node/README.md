@@ -1,4 +1,4 @@
-# Theia.Cloud Web Packages
+# Theia Cloud Web Packages
 
 This folder is a monorepo containing a common web api and UIs.
 It is based on [npm workspaces](https://docs.npmjs.com/cli/v8/using-npm/workspaces#running-commands-in-the-context-of-workspaces).
