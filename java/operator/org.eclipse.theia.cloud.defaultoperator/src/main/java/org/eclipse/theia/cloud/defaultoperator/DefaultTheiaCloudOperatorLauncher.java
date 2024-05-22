@@ -23,8 +23,8 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperator;
-import org.eclipse.theia.cloud.operator.AbstractTheiaCloudOperatorLauncher;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorLauncher;
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 
 import com.google.inject.Guice;
@@ -41,7 +41,7 @@ import io.fabric8.kubernetes.client.extended.leaderelection.LeaderElector;
 import io.fabric8.kubernetes.client.extended.leaderelection.resourcelock.LeaseLock;
 import picocli.CommandLine;
 
-public class DefaultTheiaCloudOperatorLauncher extends AbstractTheiaCloudOperatorLauncher {
+public class DefaultTheiaCloudOperatorLauncher implements TheiaCloudOperatorLauncher {
 
     private static final Logger LOGGER = LogManager.getLogger(DefaultTheiaCloudOperatorLauncher.class);
 
@@ -87,7 +87,8 @@ public class DefaultTheiaCloudOperatorLauncher extends AbstractTheiaCloudOperato
 
 		    .withLock(new LeaseLock(leaseLockNamespace, LEASE_LOCK_NAME, lockIdentity))//
 		    .withLeaderCallbacks(new LeaderCallbacks(DefaultTheiaCloudOperatorLauncher.this::onStartLeading,
-			    DefaultTheiaCloudOperatorLauncher.this::onStopLeading, DefaultTheiaCloudOperatorLauncher.this::onNewLeader))//
+			    DefaultTheiaCloudOperatorLauncher.this::onStopLeading,
+			    DefaultTheiaCloudOperatorLauncher.this::onNewLeader))//
 		    .build();
 	    LeaderElector leaderElector = k8sClient.leaderElector().withConfig(leaderElectionConfig).build();
 	    leaderElector.run();
@@ -122,7 +123,7 @@ public class DefaultTheiaCloudOperatorLauncher extends AbstractTheiaCloudOperato
     }
 
     @Override
-    protected TheiaCloudOperatorArguments createArguments(String[] args) {
+    public TheiaCloudOperatorArguments createArguments(String[] args) {
 	TheiaCloudOperatorArguments arguments = new TheiaCloudOperatorArguments();
 	CommandLine commandLine = new CommandLine(arguments).setTrimQuotes(true);
 	commandLine.parseArgs(args);
@@ -131,7 +132,7 @@ public class DefaultTheiaCloudOperatorLauncher extends AbstractTheiaCloudOperato
     }
 
     @Override
-    protected AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments) {
+    public AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments) {
 	return new DefaultTheiaCloudOperatorModule(arguments);
     }
 

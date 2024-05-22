@@ -8,7 +8,7 @@ The Theia Cloud Operator listens for changes to custom resources inside the clus
 
 The Java operator is created via a dependency injection module.
 We provide a library (`org.eclipse.theia.cloud.operator`), as well as a default implementation (`org.eclipse.theia.cloud.defaultoperator`) for the operator.
-The library can be used to create a operator customized to your use cases.
+The library can be used to create an operator customized to your use cases.
 The default implementation is a production-ready operator that handles most use cases on most cloud providers out of the box and is used in our demos.
 If customization is needed, it also serves as an example of how to utilize the operator library.
 

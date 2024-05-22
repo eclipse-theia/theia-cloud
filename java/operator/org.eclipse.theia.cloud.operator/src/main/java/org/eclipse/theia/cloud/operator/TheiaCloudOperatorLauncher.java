@@ -18,12 +18,12 @@ package org.eclipse.theia.cloud.operator;
 
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 
-public abstract class AbstractTheiaCloudOperatorLauncher {
+public interface TheiaCloudOperatorLauncher {
 
     public abstract void runMain(String[] args) throws InterruptedException;
 
-    protected abstract TheiaCloudOperatorArguments createArguments(String[] args);
+    public abstract TheiaCloudOperatorArguments createArguments(String[] args);
 
-    protected abstract AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments);
+    public abstract AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments);
 
 }
