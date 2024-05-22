@@ -20,10 +20,10 @@ import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 
 public interface TheiaCloudOperatorLauncher {
 
-    public abstract void runMain(String[] args) throws InterruptedException;
+    abstract void runMain(String[] args) throws InterruptedException;
 
-    public abstract TheiaCloudOperatorArguments createArguments(String[] args);
+    abstract TheiaCloudOperatorArguments createArguments(String[] args);
 
-    public abstract AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments);
+    abstract AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments);
 
 }
