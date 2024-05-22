@@ -4,6 +4,11 @@
 
 - [common] Add option field to CRDs and increase version to `Session.v1beta8`, `Workspace.v1beta5` and `AppDefinition.v1beta10` [#293](https://github.com/eclipsesource/theia-cloud/pull/293) | [#55](https://github.com/eclipsesource/theia-cloud-helm/pull/55)
 - [java] Separate operator default implementation from library to allow for easier customization [#303](https://github.com/eclipsesource/theia-cloud/pull/303)
+- [node] Unify the existing landing and try now pages to a new ViteJS based landing page [#304](https://github.com/eclipsesource/theia-cloud/pull/304) | [#58](https://github.com/eclipsesource/theia-cloud-helm/pull/58) - contributed on behalf of STMicroelectronics
+  - The new page is based on the old try now page but uses ViteJS instead of the deprecated Create React App
+  - Extend configuration options for the new landing page for texts and logo file type
+  - Removed terms and conditions
+  - Build the common package as ESM and CJS bundles for extended compatibility
 
 ## [0.10.0] - 2024-04-02
 
