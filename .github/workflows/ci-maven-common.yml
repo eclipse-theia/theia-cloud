@@ -1,0 +1,24 @@
+name: Maven org.eclipse.theia.cloud.common CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+  release:
+    types:
+      - published
+
+jobs:
+  call-reusable-maven-workflow:
+    permissions:
+      packages: write
+    uses: ./.github/workflows/reusable-maven.yml
+    with:
+      path_to_package: common/org.eclipse.theia.cloud.common/
