@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       dependencies:
-        description: "Array of paths to dependencies"
+        description: "List of paths to dependencies. Entries are relative to the java directory and separated by comma (no whitespaces)."
         required: false
         type: string
 
@@ -44,7 +44,7 @@ jobs:
       - name: Verify package
         run: |
           cd ${{ inputs.path_to_package }}
-          mvn verify
+          mvn verify -fae --no-transfer-progress
 
   check-version:
     runs-on: ubuntu-latest
