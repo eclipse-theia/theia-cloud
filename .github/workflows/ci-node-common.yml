@@ -21,6 +21,9 @@ on:
 jobs:
   run:
     uses: ./.github/workflows/reusable-npm.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       package_workspace: common
     secrets:
