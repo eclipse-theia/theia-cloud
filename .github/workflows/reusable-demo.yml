@@ -1,4 +1,4 @@
-name: Reusable workflow publishing demo applications
+name: Reusable workflow for demo applications
 
 on:
   workflow_call:

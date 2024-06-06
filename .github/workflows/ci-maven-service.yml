@@ -1,4 +1,4 @@
-name: Maven org.eclipse.theia.cloud.service CI
+name: "[MAVEN] service"
 on:
   push:
     branches:
@@ -17,7 +17,7 @@ on:
       - published
 
 jobs:
-  call-reusable-maven-workflow:
+  run:
     permissions:
       packages: write
     uses: ./.github/workflows/reusable-maven.yml
