@@ -1,4 +1,4 @@
-name: Monitor Theia extension CI
+name: "[NPM] monitor-theia"
 
 on:
   push:
@@ -19,7 +19,7 @@ on:
       - published
 
 jobs:
-  call-reusable-npm-workflow:
+  run:
     uses: ./.github/workflows/reusable-npm.yml
     with:
       package_workspace: monitor-theia

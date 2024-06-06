@@ -1,4 +1,4 @@
-name: Publish Demos CI
+name: "[DOCKER] demos"
 
 on:
   workflow_dispatch:

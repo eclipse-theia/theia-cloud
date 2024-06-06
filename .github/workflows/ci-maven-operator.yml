@@ -1,4 +1,4 @@
-name: Maven org.eclipse.theia.cloud.operator CI
+name: "[MAVEN] operator"
 
 on:
   push:
@@ -18,7 +18,7 @@ on:
       - published
 
 jobs:
-  call-reusable-maven-workflow:
+  run:
     permissions:
       packages: write
     uses: ./.github/workflows/reusable-maven.yml

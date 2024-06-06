@@ -39,80 +39,65 @@ jobs:
         run: |
           docker build -t ${{ steps.get_tags.outputs.version_tag }} -f ${{ inputs.docker_file }} .
 
-  check-version:
+  publish:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    outputs:
-      is_next_version: ${{ steps.version_check.outputs.is_next_version }}
+    if: github.event_name == 'push' || github.event_name == 'release'
     steps:
-      - id: version_check
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Check if we have a valid *-next version for merges on main
+      - name: Check version (only for push events)
+        if: github.event_name == 'push'
+        id: version_check
         run: |
           if [[ $VERSION == *"-next" ]]; then
             echo "is_next_version=true" >> $GITHUB_OUTPUT
           else
             echo "is_next_version=false" >> $GITHUB_OUTPUT
-          fi
 
-  publish-next:
-    runs-on: ubuntu-latest
-    needs: check-version
-    if: github.event_name == 'push' && needs.check-version.outputs.is_next_version == 'true'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
+      # Create tags according to the state to be published:
+      # - next version on main merge: create `*-next` and `*-next.<git_sha>` tags
+      # - release version: create version, `*-next` and `latest` tags
       - name: Create docker tags
         id: get_tags
+        if: github.event_name == 'push' && steps.version_check.outputs.is_next_version == 'true' || github.event_name == 'release'
         run: |
-          echo "sha_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}.$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
-          echo "version_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
+          if [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+            echo "sha_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}.$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
+            echo "version_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
+          else
+            echo "version_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
+            echo "next_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}-next" >> $GITHUB_OUTPUT
+            echo "latest_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:latest" >> $GITHUB_OUTPUT
 
+      # Only build when we will publish, so either a main merge with next-version or a release
       - name: Build Docker image
+        if: github.event_name == 'push' && steps.version_check.outputs.is_next_version == 'true' || github.event_name == 'release'
         run: docker build -t ${{ steps.get_tags.outputs.version_tag }} -f ${{ inputs.docker_file }} .
 
+      # Only log in to dockerhub when we will publish, so either a main merge with next-version or a release
       - name: Login to DockerHub
+        if: github.event_name == 'push' && steps.version_check.outputs.is_next_version == 'true' || github.event_name == 'release'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.dockerhub_username }}
           password: ${{ secrets.dockerhub_token }}
 
-      # Push version and SHA tag for main pushes of next versions (This avoids duplicate pushes for release commits on main)
-      - name: Push version and SHA tag
+      # Push for main merges with next version
+      - name: Push Docker tags (for push events with next version)
+        if: github.event_name == 'push' && steps.version_check.outputs.is_next_version == 'true'
         run: |
           docker push ${{ steps.get_tags.outputs.version_tag }}
           docker tag ${{ steps.get_tags.outputs.version_tag }} ${{ steps.get_tags.outputs.sha_tag }}
           docker push ${{ steps.get_tags.outputs.sha_tag }}
 
-  publish-latest:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Create docker tags
-        id: get_tags
-        run: |
-          echo "version_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
-          echo "next_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}-next" >> $GITHUB_OUTPUT
-          echo "latest_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:latest" >> $GITHUB_OUTPUT
-
-      - name: Build Docker image
-        run: docker build -t ${{ steps.get_tags.outputs.version_tag }} -f ${{ inputs.docker_file }} .
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.dockerhub_username }}
-          password: ${{ secrets.dockerhub_token }}
-
-      # Push version, next and latest tag for releases (version should be valid semver)
-      - name: Push version and latest tag
+      # Push for releases
+      - name: Push Docker tags (for release events)
+        if: github.event_name == 'release'
         run: |
           docker push ${{ steps.get_tags.outputs.version_tag }}
           docker tag ${{ steps.get_tags.outputs.version_tag }} ${{ steps.get_tags.outputs.latest_tag }}
           docker push ${{ steps.get_tags.outputs.latest_tag }}
-          docker tag ${{ steps.get_tags.outputs.version_tag }} ${{ steps.get_tags.outputs.next_tag }} 
+          docker tag ${{ steps.get_tags.outputs.version_tag }} ${{ steps.get_tags.outputs.next_tag }}
           docker push ${{ steps.get_tags.outputs.next_tag }}

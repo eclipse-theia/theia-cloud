@@ -1,4 +1,4 @@
-name: Service CI
+name: "[DOCKER] service"
 
 on:
   push:
@@ -23,7 +23,7 @@ on:
       - published
 
 jobs:
-  call-reusable-docker-workflow:
+  run:
     uses: ./.github/workflows/reusable-docker.yml
     with:
       docker_org: theiacloud
