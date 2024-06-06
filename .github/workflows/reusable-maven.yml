@@ -61,6 +61,7 @@ jobs:
             echo "is_snapshot_version=true" >> $GITHUB_OUTPUT
           else
             echo "is_snapshot_version=false" >> $GITHUB_OUTPUT
+          fi
 
       # Only continue from here when the version matches the event, so either:
       # - main merge with snapshot version
