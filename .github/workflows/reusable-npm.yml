@@ -10,8 +10,9 @@ on:
       npm-token:
         required: true
 
-env:
-  VERSION: 0.11.0-next
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   build:
@@ -25,9 +26,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20.10.0"
+          node-version: 20
 
       - name: Install dependencies
         run: npm ci
@@ -49,6 +50,8 @@ jobs:
         if: github.event_name == 'push'
         id: version_check
         run: |
+          VERSION=$(node --print "require('./package.json').version")
+          echo "Package version: ${VERSION}"
           if [[ $VERSION == *"-next" ]]; then
             echo "is_next_version=true" >> $GITHUB_OUTPUT
           else
@@ -56,9 +59,9 @@ jobs:
           fi
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "20.10.0"
+          node-version: 20
           registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
@@ -69,9 +72,11 @@ jobs:
         run: npm run publish:next -w ${{ inputs.package_workspace }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
+          NPM_CONFIG_PROVENANCE: true
 
       - name: Publish latest version
         if: github.event_name == 'release'
         run: npm run publish:latest -w ${{ inputs.package_workspace }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
+          NPM_CONFIG_PROVENANCE: true
