@@ -15,6 +15,10 @@ defaults:
   run:
     working-directory: java
 
+permissions:
+  contents: none
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
