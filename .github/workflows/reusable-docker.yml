@@ -55,6 +55,7 @@ jobs:
             echo "is_next_version=true" >> $GITHUB_OUTPUT
           else
             echo "is_next_version=false" >> $GITHUB_OUTPUT
+          fi
 
       # Create tags according to the state to be published:
       # - next version on main merge: create `*-next` and `*-next.<git_sha>` tags
@@ -70,6 +71,7 @@ jobs:
             echo "version_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}" >> $GITHUB_OUTPUT
             echo "next_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:${{ env.VERSION }}-next" >> $GITHUB_OUTPUT
             echo "latest_tag=${{ inputs.docker_org }}/${{ inputs.docker_image }}:latest" >> $GITHUB_OUTPUT
+          fi
 
       # Only build when we will publish, so either a main merge with next-version or a release
       - name: Build Docker image
