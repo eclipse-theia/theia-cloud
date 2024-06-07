@@ -6,6 +6,7 @@ on:
       package_workspace:
         required: true
         type: string
+        description: The package's workspace path relative to the node directory.
     secrets:
       npm-token:
         required: true
@@ -50,7 +51,7 @@ jobs:
         if: github.event_name == 'push'
         id: version_check
         run: |
-          VERSION=$(node --print "require('./package.json').version")
+          VERSION=$(cd ${{ inputs.package_workspace }} && node --print "require('./package.json').version")
           echo "Package version: ${VERSION}"
           if [[ $VERSION == *"-next" ]]; then
             echo "is_next_version=true" >> $GITHUB_OUTPUT
