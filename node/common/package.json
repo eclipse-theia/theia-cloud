@@ -10,7 +10,7 @@
     "k8s"
   ],
   "author": {
-    "name": "Theia.cloud"
+    "name": "Theia Cloud"
   },
   "homepage": "http://theia-cloud.io",
   "repository": {
@@ -20,7 +20,7 @@
   "bugs": "https://github.com/eclipsesource/theia-cloud/issues",
   "contributors": [
     {
-      "name": "Theia.cloud Project",
+      "name": "Theia Cloud Project",
       "url": "http://theia-cloud.io"
     }
   ],

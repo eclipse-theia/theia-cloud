@@ -4,6 +4,21 @@
   "keywords": [
     "theia-extension"
   ],
+  "author": {
+    "name": "Theia Cloud"
+  },
+  "homepage": "http://theia-cloud.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipsesource/theia-cloud.git"
+  },
+  "bugs": "https://github.com/eclipsesource/theia-cloud/issues",
+  "contributors": [
+    {
+      "name": "Theia Cloud Project",
+      "url": "http://theia-cloud.io"
+    }
+  ],
   "files": [
     "lib",
     "src"
