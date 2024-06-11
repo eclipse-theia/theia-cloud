@@ -22,7 +22,7 @@ In Chrome:
 In Firefox:
 `Warning: Potential Security Risk Ahead -> Advanced... -> Accept the Risk and Continue`
 
-## Testing local Theia.cloud images
+## Testing local Theia Cloud images
 
 You can test locally build images (e.g. of the landing page, service, or operator) by building them in Minikube and then using them in the Minikube Helm chart.
 
