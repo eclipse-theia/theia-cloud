@@ -21,6 +21,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatMetric;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -465,34 +466,45 @@ public class LazySessionHandler implements SessionHandler {
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
 	    Session session, AppDefinition appDefinition, String correlationId) {
-	final String host = arguments.getInstancesHost();
+	List<String> hostsToAdd = new ArrayList<>();
+	final String instancesHost = arguments.getInstancesHost();
+	hostsToAdd.add(instancesHost);
+	List<String> ingressHostnamePrefixes = appDefinition.getSpec().getIngressHostnamePrefixes() != null
+		? appDefinition.getSpec().getIngressHostnamePrefixes()
+		: Collections.emptyList();
+	for (String prefix : ingressHostnamePrefixes) {
+	    hostsToAdd.add(prefix + instancesHost);
+	}
 	String path = ingressPathProvider.getPath(appDefinition, session);
 	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(), ingressToUpdate -> {
-	    IngressRule ingressRule = new IngressRule();
-	    ingressToUpdate.getSpec().getRules().add(ingressRule);
+	    for (String host : hostsToAdd) {
+		IngressRule ingressRule = new IngressRule();
+		ingressToUpdate.getSpec().getRules().add(ingressRule);
 
-	    ingressRule.setHost(host);
+		ingressRule.setHost(host);
 
-	    HTTPIngressRuleValue http = new HTTPIngressRuleValue();
-	    ingressRule.setHttp(http);
+		HTTPIngressRuleValue http = new HTTPIngressRuleValue();
+		ingressRule.setHttp(http);
 
-	    HTTPIngressPath httpIngressPath = new HTTPIngressPath();
-	    http.getPaths().add(httpIngressPath);
-	    httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
-	    httpIngressPath.setPathType("Prefix");
+		HTTPIngressPath httpIngressPath = new HTTPIngressPath();
+		http.getPaths().add(httpIngressPath);
+		httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
+		httpIngressPath.setPathType("Prefix");
 
-	    IngressBackend ingressBackend = new IngressBackend();
-	    httpIngressPath.setBackend(ingressBackend);
+		IngressBackend ingressBackend = new IngressBackend();
+		httpIngressPath.setBackend(ingressBackend);
 
-	    IngressServiceBackend ingressServiceBackend = new IngressServiceBackend();
-	    ingressBackend.setService(ingressServiceBackend);
-	    ingressServiceBackend.setName(serviceToUse.get().getMetadata().getName());
+		IngressServiceBackend ingressServiceBackend = new IngressServiceBackend();
+		ingressBackend.setService(ingressServiceBackend);
+		ingressServiceBackend.setName(serviceToUse.get().getMetadata().getName());
 
-	    ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
-	    ingressServiceBackend.setPort(serviceBackendPort);
-	    serviceBackendPort.setNumber(appDefinition.getSpec().getPort());
+		ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
+		ingressServiceBackend.setPort(serviceBackendPort);
+		serviceBackendPort.setNumber(appDefinition.getSpec().getPort());
+	    }
+
 	});
-	return host + path + "/";
+	return instancesHost + path + "/";
     }
 
     @Override
