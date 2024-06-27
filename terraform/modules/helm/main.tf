@@ -239,7 +239,7 @@ resource "helm_release" "theia-cloud" {
   ]
 
   set {
-    name  = "hosts.paths.baseHost"
+    name  = "hosts.configuration.baseHost"
     value = var.hostname
   }
 

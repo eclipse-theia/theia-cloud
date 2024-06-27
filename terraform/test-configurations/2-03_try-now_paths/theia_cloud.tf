@@ -41,23 +41,28 @@ resource "helm_release" "theia-cloud" {
   }
 
   set {
-    name  = "hosts.paths.service"
+    name  = "ingress.addTLSSecretName"
+    value = "true"
+  }
+
+  set {
+    name  = "hosts.configuration.service"
     value = "service"
   }
 
   set {
-    name  = "hosts.paths.landing"
+    name  = "hosts.configuration.landing"
     value = "try"
   }
 
   set {
-    name  = "hosts.paths.instance"
+    name  = "hosts.configuration.instance"
     value = "instances"
   }
 
 
   set {
-    name  = "hosts.paths.baseHost"
+    name  = "hosts.configuration.baseHost"
     value = data.terraform_remote_state.minikube.outputs.hostname
   }
 

@@ -15,7 +15,7 @@ demoApplication:
 
 hosts:
   usePaths: true
-  paths:
+  configuration:
     service: servicex
     landing: trynow
     instance: instances
@@ -42,6 +42,7 @@ ingress:
   instanceName: "theia-cloud-demo-ws-ingress"
   clusterIssuer: letsencrypt-prod
   theiaCloudCommonName: false
+  addTLSSecretName: false
 
 monitor:
   enable: false

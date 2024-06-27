@@ -11,6 +11,10 @@
   - Build the common package as ESM and CJS bundles for extended compatibility
 - [common] Add `ingressHostnamePrefixes` list to `AppDefinition.v1beta10` [#298](https://github.com/eclipsesource/theia-cloud/pull/298) | [#57](https://github.com/eclipsesource/theia-cloud-helm/pull/57)
 
+### Breaking Changes in 0.11.0
+
+See the helm chart Changelog for [more details](https://github.com/eclipsesource/theia-cloud-helm/blob/main/CHANGELOG.md).
+
 ## [0.10.0] - 2024-04-02
 
 - [.github/workflows] Improve version detection in workflows (do not build release commits, auto-detect version for demo publishing) [#280](https://github.com/eclipsesource/theia-cloud/pull/280) - contributed on behalf of STMicroelectronics
