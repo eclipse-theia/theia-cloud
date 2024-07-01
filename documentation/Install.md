@@ -57,9 +57,11 @@ Open `./terraform/values/valuesDemo.yaml` and update the host section to use `su
 
 ```yaml
 hosts:
-  service: service.34.141.62.32.nip.io
-  landing: theia.cloud.34.141.62.32.nip.io
-  instance: ws.34.141.62.32.nip.io
+  configuration:
+    baseHost: 34.141.62.32.nip.io
+    service: service
+    landing: theia-cloud
+    instance: ws
 ```
 
 ### Add & update Theia Cloud helm repo

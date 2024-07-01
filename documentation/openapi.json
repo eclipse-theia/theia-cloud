@@ -1,8 +1,8 @@
 {
   "openapi" : "3.0.3",
   "info" : {
-    "title" : "Theia.cloud API",
-    "version" : "0.9.0"
+    "title" : "Theia Cloud API",
+    "version" : "0.11.0"
   },
   "paths" : {
     "/service" : {
@@ -23,7 +23,7 @@
           "200" : {
             "description" : "OK",
             "content" : {
-              "application/json" : {
+              "text/plain" : {
                 "schema" : {
                   "type" : "string"
                 }
@@ -60,7 +60,7 @@
           "200" : {
             "description" : "OK",
             "content" : {
-              "application/json" : {
+              "text/plain" : {
                 "schema" : {
                   "type" : "string"
                 }
@@ -95,7 +95,7 @@
           "200" : {
             "description" : "OK",
             "content" : {
-              "application/json" : {
+              "text/plain" : {
                 "schema" : {
                   "type" : "boolean"
                 }
@@ -130,7 +130,7 @@
           "200" : {
             "description" : "OK",
             "content" : {
-              "application/json" : {
+              "text/plain" : {
                 "schema" : {
                   "type" : "boolean"
                 }
@@ -291,7 +291,7 @@
           "200" : {
             "description" : "OK",
             "content" : {
-              "application/json" : {
+              "text/plain" : {
                 "schema" : {
                   "type" : "boolean"
                 }
@@ -373,7 +373,7 @@
           "200" : {
             "description" : "OK",
             "content" : {
-              "application/json" : {
+              "text/plain" : {
                 "schema" : {
                   "type" : "boolean"
                 }
@@ -428,7 +428,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
@@ -471,7 +471,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           }
         }
@@ -482,7 +482,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "sessionName" : {
@@ -497,7 +497,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
@@ -535,7 +535,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "sessionName" : {
@@ -556,21 +556,17 @@
           "user" : {
             "type" : "string"
           },
-          "url" : {
-            "type" : "string"
-          },
-          "error" : {
-            "type" : "string"
-          },
           "workspace" : {
             "type" : "string"
           },
-          "lastActivity" : {
-            "format" : "int64",
-            "type" : "integer"
-          },
           "sessionSecret" : {
             "type" : "string"
+          },
+          "options" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
           },
           "envVars" : {
             "type" : "object",
@@ -598,7 +594,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
@@ -633,7 +629,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
@@ -679,7 +675,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
@@ -702,7 +698,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {
@@ -721,7 +717,7 @@
         "type" : "object",
         "properties" : {
           "appId" : {
-            "description" : "The App Id of this Theia.cloud instance. Request without a matching Id will be denied.",
+            "description" : "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
             "type" : "string"
           },
           "user" : {

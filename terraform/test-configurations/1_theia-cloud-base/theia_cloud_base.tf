@@ -29,7 +29,7 @@ resource "helm_release" "theia-cloud-crds" {
 
 resource "helm_release" "theia-cloud-base" {
   name             = "theia-cloud-base"
-  chart            = "../../../../theia-cloud-helm/charts/theia.cloud-base"
+  chart            = "../../../../theia-cloud-helm/charts/theia-cloud-base"
   namespace        = "theiacloud"
   create_namespace = true
 

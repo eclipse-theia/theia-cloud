@@ -17,10 +17,11 @@ demoApplication:
 
 hosts:
   usePaths: false
-  service: service.theia-cloud.io
-  serviceProtocol: https
-  landing: try.theia-cloud.io
-  instance: ws.theia-cloud.io
+  configuration:
+    baseHost: theia-cloud.io
+    service: service
+    landing: try
+    instance: ws
 
 landingPage:
   image: theiacloud/theia-cloud-landing-page:0.11.0-next
@@ -39,6 +40,9 @@ keycloak:
   keycloakClientId: "theia-cloud"
   clientSecret: "publicbutoauth2proxywantsasecret"
   cookieSecret: "s-p4GxfRlPa_BI1XsLuvE2ihNOqYD1vmewWcXcpYjr0="
+
+service:
+  protocol: https
 
 operator:
   eagerStart: false
