@@ -60,7 +60,7 @@ hosts:
   configuration:
     baseHost: 34.141.62.32.nip.io
     service: service
-    landing: theia.cloud
+    landing: theia-cloud
     instance: ws
 ```
 
