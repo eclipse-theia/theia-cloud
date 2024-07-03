@@ -47,12 +47,13 @@ public final class JavaResourceUtil {
 	try (InputStream inputStream = getInputStream(resourceName, correlationId)) {
 	    String template = new BufferedReader(new InputStreamReader(inputStream)).lines().parallel()
 		    .collect(Collectors.joining("\n"));
+	    LOGGER.trace(formatLogMessage(correlationId, "Replacing placeholders. Starting template:\n" + template));
 	    for (Entry<String, String> replacement : replacements.entrySet()) {
 		String value = replacement.getValue() != null ? replacement.getValue() : "";
 		template = template.replace(replacement.getKey(), value);
-		LOGGER.trace(formatLogMessage(correlationId,
-			"Replaced " + replacement.getKey() + " with " + value + " :\n" + template));
+		LOGGER.trace(formatLogMessage(correlationId, "Replaced " + replacement.getKey() + " with " + value));
 	    }
+	    LOGGER.trace(formatLogMessage(correlationId, "Replacement finished. Result:\n" + template));
 	    return template;
 	}
     }
