@@ -27,12 +27,52 @@
 		<webhooks.framework.core.version>1.1.2</webhooks.framework.core.version>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-		<id>github</id>
-		<name>GitHub Packages</name>
-		<url>https://maven.pkg.github.com/eclipsesource/theia-cloud</url>
-		</repository>
-	</distributionManagement>
+	<profiles>
+		<profile>
+			<id>github</id>
+			<distributionManagement>
+				<repository>
+				<id>github</id>
+				<name>GitHub Packages</name>
+				<url>https://maven.pkg.github.com/eclipsesource/theia-cloud</url>
+				</repository>
+			</distributionManagement>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
 
+		<profile>
+			<id>artifact-registry</id>
+			<distributionManagement>
+				<snapshotRepository>
+				<id>artifact-registry</id>
+				<name>Google Artifact Registry</name>
+				<url>artifactregistry://europe-west3-maven.pkg.dev/kubernetes-238012/theia-cloud</url>
+				</snapshotRepository>
+			</distributionManagement>
+			<repositories>
+				<repository>
+				<id>artifact-registry</id>
+				<url>artifactregistry://europe-west3-maven.pkg.dev/kubernetes-238012/theia-cloud</url>
+				<releases>
+					<enabled>true</enabled>
+				</releases>
+				<snapshots>
+					<enabled>true</enabled>
+				</snapshots>
+				</repository>
+			</repositories>
+			<build>
+			<plugins>
+				<plugin>
+				<groupId>com.google.cloud.artifactregistry</groupId>
+				<artifactId>artifactregistry-maven-wagon</artifactId>
+				<version>2.2.0</version>
+				<extensions>true</extensions>
+				</plugin>
+			</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
