@@ -24,9 +24,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Only continue from here when the version matches the event, so either:
-      # - main merge with snapshot version
-      # - release with proper version
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -66,6 +63,9 @@ jobs:
             echo "is_snapshot_version=false" >> $GITHUB_OUTPUT
           fi
 
+      # Only continue from here when the version matches the event, so either:
+      # - main merge with snapshot version
+      # - release with proper version
       - name: Set up JDK 17
         if: |
           (github.event_name == 'push' && steps.version_check.outputs.is_snapshot_version == 'true') || 
