@@ -24,3 +24,4 @@ jobs:
     with:
       path_to_package: service/org.eclipse.theia.cloud.service/
       dependencies: common/maven-conf/,common/org.eclipse.theia.cloud.common/
+    secrets: inherit

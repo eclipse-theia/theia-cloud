@@ -89,7 +89,7 @@ jobs:
             cd -
           done
 
-      - name: Publish package
+      - name: Publish package to GitHub Packages
         if: |
           (github.event_name == 'push' && steps.version_check.outputs.is_snapshot_version == 'true') || 
           (github.event_name == 'release' && steps.version_check.outputs.is_snapshot_version == 'false')
@@ -98,3 +98,21 @@ jobs:
           mvn --batch-mode deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Authenticate to Google Cloud
+        if: |
+          (github.event_name == 'push' && steps.version_check.outputs.is_snapshot_version == 'true') || 
+          (github.event_name == 'release' && steps.version_check.outputs.is_snapshot_version == 'false')
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Publish package to Google Artifact Registry
+        if: |
+          (github.event_name == 'push' && steps.version_check.outputs.is_snapshot_version == 'true') || 
+          (github.event_name == 'release' && steps.version_check.outputs.is_snapshot_version == 'false')
+        run: |
+          cd ${{ inputs.path_to_package }}
+          mvn --batch-mode deploy -Partifact-registry
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}

@@ -25,3 +25,4 @@ jobs:
     with:
       path_to_package: operator/org.eclipse.theia.cloud.operator/
       dependencies: common/maven-conf/,common/org.eclipse.theia.cloud.common/
+    secrets: inherit
