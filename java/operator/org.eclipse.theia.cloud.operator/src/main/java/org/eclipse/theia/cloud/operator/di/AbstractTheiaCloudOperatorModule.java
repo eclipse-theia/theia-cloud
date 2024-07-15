@@ -25,10 +25,16 @@ import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperator;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiterImpl;
 import org.eclipse.theia.cloud.operator.handler.appdef.AppDefinitionHandler;
+import org.eclipse.theia.cloud.operator.handler.appdef.EagerStartAppDefinitionAddedHandler;
+import org.eclipse.theia.cloud.operator.handler.appdef.LazyStartAppDefinitionHandler;
+import org.eclipse.theia.cloud.operator.handler.session.EagerStartSessionHandler;
+import org.eclipse.theia.cloud.operator.handler.session.LazySessionHandler;
 import org.eclipse.theia.cloud.operator.handler.session.SessionHandler;
+import org.eclipse.theia.cloud.operator.handler.ws.LazyWorkspaceHandler;
 import org.eclipse.theia.cloud.operator.handler.ws.WorkspaceHandler;
 import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.ingress.IngressPathProviderImpl;
@@ -37,6 +43,7 @@ import org.eclipse.theia.cloud.operator.messaging.MonitorMessagingServiceImpl;
 import org.eclipse.theia.cloud.operator.plugins.MonitorActivityTracker;
 import org.eclipse.theia.cloud.operator.plugins.OperatorPlugin;
 import org.eclipse.theia.cloud.operator.pv.DefaultPersistentVolumeCreator;
+import org.eclipse.theia.cloud.operator.pv.MinikubePersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.pv.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.replacements.DefaultDeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.replacements.DefaultPersistentVolumeTemplateReplacements;
@@ -50,6 +57,13 @@ import com.google.inject.Singleton;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
+
+    protected TheiaCloudOperatorArguments arguments;
+
+    public AbstractTheiaCloudOperatorModule(TheiaCloudOperatorArguments arguments) {
+	this.arguments = arguments;
+    }
+
     @Override
     protected void configure() {
 	bind(TheiaCloudOperator.class).to(bindTheiaCloudOperator()).in(Singleton.class);
@@ -67,6 +81,7 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
 	configure(MultiBinding.create(OperatorPlugin.class), this::bindOperatorPlugins);
 	bind(MonitorMessagingService.class).to(bindMonitorMessagingService()).in(Singleton.class);
+	bind(TheiaCloudOperatorArguments.class).toInstance(arguments);
     }
 
     protected <T> void configure(final MultiBinding<T> binding, final Consumer<MultiBinding<T>> configurator) {
@@ -81,7 +96,13 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
     }
 
     protected Class<? extends PersistentVolumeCreator> bindPersistentVolumeHandler() {
-	return DefaultPersistentVolumeCreator.class;
+	switch (arguments.getCloudProvider()) {
+	case MINIKUBE:
+	    return MinikubePersistentVolumeCreator.class;
+	case K8S:
+	default:
+	    return DefaultPersistentVolumeCreator.class;
+	}
     }
 
     protected Class<? extends IngressPathProvider> bindIngressPathProvider() {
@@ -108,11 +129,25 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 	return DefaultPersistentVolumeTemplateReplacements.class;
     }
 
-    protected abstract Class<? extends WorkspaceHandler> bindWorkspaceHandler();
+    protected Class<? extends AppDefinitionHandler> bindAppDefinitionHandler() {
+	if (arguments.isEagerStart()) {
+	    return EagerStartAppDefinitionAddedHandler.class;
+	} else {
+	    return LazyStartAppDefinitionHandler.class;
+	}
+    }
 
-    protected abstract Class<? extends AppDefinitionHandler> bindAppDefinitionHandler();
+    protected Class<? extends WorkspaceHandler> bindWorkspaceHandler() {
+	return LazyWorkspaceHandler.class;
+    }
 
-    protected abstract Class<? extends SessionHandler> bindSessionHandler();
+    protected Class<? extends SessionHandler> bindSessionHandler() {
+	if (arguments.isEagerStart()) {
+	    return EagerStartSessionHandler.class;
+	} else {
+	    return LazySessionHandler.class;
+	}
+    }
 
     @Provides
     @Singleton
