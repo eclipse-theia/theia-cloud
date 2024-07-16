@@ -16,6 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.defaultoperator;
 
+import org.eclipse.theia.cloud.operator.BasicTheiaCloudOperator;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperator;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
@@ -28,7 +29,7 @@ public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorM
 
     @Override
     protected Class<? extends TheiaCloudOperator> bindTheiaCloudOperator() {
-	return DefaultTheiaCloudOperator.class;
+	return BasicTheiaCloudOperator.class;
     }
 
 }

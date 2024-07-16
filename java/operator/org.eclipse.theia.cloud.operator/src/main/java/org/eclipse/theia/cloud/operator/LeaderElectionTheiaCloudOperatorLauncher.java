@@ -47,17 +47,26 @@ public abstract class LeaderElectionTheiaCloudOperatorLauncher extends TheiaClou
     public void runMain(String[] args) throws InterruptedException {
 	this.args = createArguments(args);
 
-	long leaseDurationInSeconds = this.args.getLeaderLeaseDuration();
-	long renewDeadlineInSeconds = this.args.getLeaderRenewDeadline();
-	long retryPeriodInSeconds = this.args.getLeaderRetryPeriod();
-
-	final String lockIdentity = UUID.randomUUID().toString();
-
 	LOGGER.info(formatLogMessage(COR_ID_INIT,
-		"Launching Theia Cloud Leader Election now. Own lock identity is " + lockIdentity));
-	Config k8sConfig = new ConfigBuilder().build();
+		"Launching Theia Cloud Leader Election now"));
 
-	try (KubernetesClient k8sClient = new KubernetesClientBuilder().withConfig(k8sConfig).build()) {
+    this.runLeaderElection(this.args);
+
+	LOGGER.info(formatLogMessage(COR_ID_INIT, "Theia Cloud Leader Election Loop Ended"));
+    }
+
+    protected void runLeaderElection(TheiaCloudOperatorArguments args) {
+        final String lockIdentity = UUID.randomUUID().toString();
+        LOGGER.info(formatLogMessage(COR_ID_INIT,
+                "Own lock identity is " + lockIdentity));
+
+        long leaseDurationInSeconds = this.args.getLeaderLeaseDuration();
+        long renewDeadlineInSeconds = this.args.getLeaderRenewDeadline();
+        long retryPeriodInSeconds = this.args.getLeaderRetryPeriod();
+
+        Config k8sConfig = new ConfigBuilder().build();
+
+        try (KubernetesClient k8sClient = new KubernetesClientBuilder().withConfig(k8sConfig).build()) {
 	    String leaseLockNamespace = k8sClient.getNamespace();
 
 	    LeaderElectionConfig leaderElectionConfig = new LeaderElectionConfigBuilder()//
@@ -82,21 +91,19 @@ public abstract class LeaderElectionTheiaCloudOperatorLauncher extends TheiaClou
 	    LeaderElector leaderElector = k8sClient.leaderElector().withConfig(leaderElectionConfig).build();
 	    leaderElector.run();
 	}
-
-	LOGGER.info(formatLogMessage(COR_ID_INIT, "Theia Cloud Leader Election Loop Ended"));
     }
 
-    private void onStartLeading() {
+    protected void onStartLeading() {
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Elected as new leader!"));
 	startOperatorAsLeader(args);
     }
 
-    private void onStopLeading() {
+    protected void onStopLeading() {
 	LOGGER.info(formatLogMessage(COR_ID_INIT, "Removed as leader!"));
 	System.exit(0);
     }
 
-    private void onNewLeader(String newLeader) {
+    protected void onNewLeader(String newLeader) {
 	LOGGER.info(formatLogMessage(COR_ID_INIT, newLeader + " is the new leader."));
     }
 
