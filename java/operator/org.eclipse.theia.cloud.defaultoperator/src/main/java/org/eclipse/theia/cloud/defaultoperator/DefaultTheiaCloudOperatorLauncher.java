@@ -21,8 +21,6 @@ import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 
 public class DefaultTheiaCloudOperatorLauncher extends LeaderElectionTheiaCloudOperatorLauncher {
 
-    static final String COR_ID_INIT = "init";
-
     public static void main(String[] args) throws InterruptedException {
 	new DefaultTheiaCloudOperatorLauncher().runMain(args);
     }
