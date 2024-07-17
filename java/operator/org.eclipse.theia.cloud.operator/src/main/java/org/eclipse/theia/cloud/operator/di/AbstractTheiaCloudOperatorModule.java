@@ -61,107 +61,107 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
     protected TheiaCloudOperatorArguments arguments;
 
     public AbstractTheiaCloudOperatorModule(TheiaCloudOperatorArguments arguments) {
-	this.arguments = arguments;
+        this.arguments = arguments;
     }
 
     @Override
     protected void configure() {
-	bind(TheiaCloudOperator.class).to(bindTheiaCloudOperator()).in(Singleton.class);
+        bind(TheiaCloudOperator.class).to(bindTheiaCloudOperator()).in(Singleton.class);
 
-	bind(BandwidthLimiter.class).to(bindBandwidthLimiter()).in(Singleton.class);
-	bind(PersistentVolumeCreator.class).to(bindPersistentVolumeHandler()).in(Singleton.class);
-	bind(IngressPathProvider.class).to(bindIngressPathProvider()).in(Singleton.class);
-	bind(DeploymentTemplateReplacements.class).to(bindDeploymentTemplateReplacements()).in(Singleton.class);
-	bind(PersistentVolumeTemplateReplacements.class).to(bindPersistentVolumeTemplateReplacements())
-		.in(Singleton.class);
+        bind(BandwidthLimiter.class).to(bindBandwidthLimiter()).in(Singleton.class);
+        bind(PersistentVolumeCreator.class).to(bindPersistentVolumeHandler()).in(Singleton.class);
+        bind(IngressPathProvider.class).to(bindIngressPathProvider()).in(Singleton.class);
+        bind(DeploymentTemplateReplacements.class).to(bindDeploymentTemplateReplacements()).in(Singleton.class);
+        bind(PersistentVolumeTemplateReplacements.class).to(bindPersistentVolumeTemplateReplacements())
+                .in(Singleton.class);
 
-	bind(AppDefinitionHandler.class).to(bindAppDefinitionHandler()).in(Singleton.class);
-	bind(SessionHandler.class).to(bindSessionHandler()).in(Singleton.class);
-	bind(WorkspaceHandler.class).to(bindWorkspaceHandler()).in(Singleton.class);
+        bind(AppDefinitionHandler.class).to(bindAppDefinitionHandler()).in(Singleton.class);
+        bind(SessionHandler.class).to(bindSessionHandler()).in(Singleton.class);
+        bind(WorkspaceHandler.class).to(bindWorkspaceHandler()).in(Singleton.class);
 
-	configure(MultiBinding.create(OperatorPlugin.class), this::bindOperatorPlugins);
-	bind(MonitorMessagingService.class).to(bindMonitorMessagingService()).in(Singleton.class);
-	bind(TheiaCloudOperatorArguments.class).toInstance(arguments);
+        configure(MultiBinding.create(OperatorPlugin.class), this::bindOperatorPlugins);
+        bind(MonitorMessagingService.class).to(bindMonitorMessagingService()).in(Singleton.class);
+        bind(TheiaCloudOperatorArguments.class).toInstance(arguments);
     }
 
     protected <T> void configure(final MultiBinding<T> binding, final Consumer<MultiBinding<T>> configurator) {
-	configurator.accept(binding);
-	binding.applyBinding(binder());
+        configurator.accept(binding);
+        binding.applyBinding(binder());
     }
 
     protected abstract Class<? extends TheiaCloudOperator> bindTheiaCloudOperator();
 
     protected Class<? extends BandwidthLimiter> bindBandwidthLimiter() {
-	return BandwidthLimiterImpl.class;
+        return BandwidthLimiterImpl.class;
     }
 
     protected Class<? extends PersistentVolumeCreator> bindPersistentVolumeHandler() {
-	switch (arguments.getCloudProvider()) {
-	case MINIKUBE:
-	    return MinikubePersistentVolumeCreator.class;
-	case K8S:
-	default:
-	    return DefaultPersistentVolumeCreator.class;
-	}
+        switch (arguments.getCloudProvider()) {
+        case MINIKUBE:
+            return MinikubePersistentVolumeCreator.class;
+        case K8S:
+        default:
+            return DefaultPersistentVolumeCreator.class;
+        }
     }
 
     protected Class<? extends IngressPathProvider> bindIngressPathProvider() {
-	return IngressPathProviderImpl.class;
+        return IngressPathProviderImpl.class;
     }
 
     protected Class<? extends DeploymentTemplateReplacements> bindDeploymentTemplateReplacements() {
-	return DefaultDeploymentTemplateReplacements.class;
+        return DefaultDeploymentTemplateReplacements.class;
     }
 
     protected void bindOperatorPlugins(final MultiBinding<OperatorPlugin> binding) {
-	bindMonitorActivityTracker(binding);
+        bindMonitorActivityTracker(binding);
     }
 
     protected void bindMonitorActivityTracker(final MultiBinding<OperatorPlugin> binding) {
-	binding.add(MonitorActivityTracker.class);
+        binding.add(MonitorActivityTracker.class);
     }
 
     protected Class<? extends MonitorMessagingService> bindMonitorMessagingService() {
-	return MonitorMessagingServiceImpl.class;
+        return MonitorMessagingServiceImpl.class;
     }
 
     protected Class<? extends PersistentVolumeTemplateReplacements> bindPersistentVolumeTemplateReplacements() {
-	return DefaultPersistentVolumeTemplateReplacements.class;
+        return DefaultPersistentVolumeTemplateReplacements.class;
     }
 
     protected Class<? extends AppDefinitionHandler> bindAppDefinitionHandler() {
-	if (arguments.isEagerStart()) {
-	    return EagerStartAppDefinitionAddedHandler.class;
-	} else {
-	    return LazyStartAppDefinitionHandler.class;
-	}
+        if (arguments.isEagerStart()) {
+            return EagerStartAppDefinitionAddedHandler.class;
+        } else {
+            return LazyStartAppDefinitionHandler.class;
+        }
     }
 
     protected Class<? extends WorkspaceHandler> bindWorkspaceHandler() {
-	return LazyWorkspaceHandler.class;
+        return LazyWorkspaceHandler.class;
     }
 
     protected Class<? extends SessionHandler> bindSessionHandler() {
-	if (arguments.isEagerStart()) {
-	    return EagerStartSessionHandler.class;
-	} else {
-	    return LazySessionHandler.class;
-	}
+        if (arguments.isEagerStart()) {
+            return EagerStartSessionHandler.class;
+        } else {
+            return LazySessionHandler.class;
+        }
     }
 
     @Provides
     @Singleton
     protected NamespacedKubernetesClient provideKubernetesClient() {
-	NamespacedKubernetesClient client = CustomResourceUtil.createClient();
-	CustomResourceUtil.validateCustomResource(client, Session.CRD_NAME);
-	CustomResourceUtil.validateCustomResource(client, Workspace.CRD_NAME);
-	CustomResourceUtil.validateCustomResource(client, AppDefinition.CRD_NAME);
-	return client;
+        NamespacedKubernetesClient client = CustomResourceUtil.createClient();
+        CustomResourceUtil.validateCustomResource(client, Session.CRD_NAME);
+        CustomResourceUtil.validateCustomResource(client, Workspace.CRD_NAME);
+        CustomResourceUtil.validateCustomResource(client, AppDefinition.CRD_NAME);
+        return client;
     }
 
     @Provides
     @Singleton
     protected TheiaCloudClient provideTheiaCloudClient(final NamespacedKubernetesClient client) {
-	return new DefaultTheiaCloudClient(client);
+        return new DefaultTheiaCloudClient(client);
     }
 }

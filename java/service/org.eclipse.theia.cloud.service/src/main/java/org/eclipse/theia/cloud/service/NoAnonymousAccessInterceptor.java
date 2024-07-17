@@ -29,7 +29,6 @@ import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Interceptor handling the {@link NoAnonymousAccess} annotation.
- *
  */
 @Interceptor
 @NoAnonymousAccess
@@ -46,32 +45,32 @@ public class NoAnonymousAccessInterceptor {
     TheiaCloudUser user;
 
     /**
-     * Verifies that the user is not anonymous and Theia Cloud does not run in
-     * anonymous mode. Throws an exception for anonymous access.
+     * Verifies that the user is not anonymous and Theia Cloud does not run in anonymous mode. Throws an exception for
+     * anonymous access.
      * 
      * @throws Exception              if following interceptors fail
      * @throws TheiaCloudWebException on anonymous access
      */
     @AroundInvoke
     public Object intercept(InvocationContext ctx) throws Exception {
-	if (!applicationProperties.isUseKeycloak()) {
-	    logger.infov("Blocked anonymous access to method {0}#{1}", ctx.getMethod().getDeclaringClass().getName(),
-		    ctx.getMethod().getName());
-	    // Note: Another possibility is to throw a 401 (Unauthorized) because the user
-	    // is not authenticated.
-	    // However, there is also no possible user account in anonymous mode to achieve
-	    // this.
-	    throw new TheiaCloudWebException(Status.FORBIDDEN);
-	} else if (user.isAnonymous()) {
-	    // Authentication is used and succeeded but the user is considered anonymous for
-	    // other reasons such as not having a user identifier
-	    final Optional<Method> method = Optional.ofNullable(ctx.getMethod());
-	    logger.infov("Blocked authenticated access with anonymous user profile to method {0}#{1}",
-		    method.map(m -> m.getDeclaringClass().getName()).orElse("<unknown>"),
-		    method.map(Method::getName).orElse("<unknown>"));
-	    throw new TheiaCloudWebException(Status.FORBIDDEN);
-	}
+        if (!applicationProperties.isUseKeycloak()) {
+            logger.infov("Blocked anonymous access to method {0}#{1}", ctx.getMethod().getDeclaringClass().getName(),
+                    ctx.getMethod().getName());
+            // Note: Another possibility is to throw a 401 (Unauthorized) because the user
+            // is not authenticated.
+            // However, there is also no possible user account in anonymous mode to achieve
+            // this.
+            throw new TheiaCloudWebException(Status.FORBIDDEN);
+        } else if (user.isAnonymous()) {
+            // Authentication is used and succeeded but the user is considered anonymous for
+            // other reasons such as not having a user identifier
+            final Optional<Method> method = Optional.ofNullable(ctx.getMethod());
+            logger.infov("Blocked authenticated access with anonymous user profile to method {0}#{1}",
+                    method.map(m -> m.getDeclaringClass().getName()).orElse("<unknown>"),
+                    method.map(Method::getName).orElse("<unknown>"));
+            throw new TheiaCloudWebException(Status.FORBIDDEN);
+        }
 
-	return ctx.proceed();
+        return ctx.proceed();
     }
 }

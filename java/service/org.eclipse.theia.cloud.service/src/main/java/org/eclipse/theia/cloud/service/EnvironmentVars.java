@@ -27,20 +27,20 @@ public class EnvironmentVars {
     }
 
     @Schema(description = "Map of environment variables to be passed to Deployment. "
-	    + " Ignored if Theia applications are started eagerly.  Empty by default.", required = false)
+            + " Ignored if Theia applications are started eagerly.  Empty by default.", required = false)
     public Map<String, String> fromMap = Map.of();
 
     @Schema(description = "List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef. "
-	    + " Ignored if Theia applications are started eagerly.  Empty by default.", required = false)
+            + " Ignored if Theia applications are started eagerly.  Empty by default.", required = false)
     public List<String> fromConfigMaps = List.of();
 
     @Schema(description = "List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef. "
-	    + " Ignored if Theia applications are started eagerly.  Empty by default.", required = false)
+            + " Ignored if Theia applications are started eagerly.  Empty by default.", required = false)
     public List<String> fromSecrets = List.of();
 
     @Override
     public String toString() {
-	return "LaunchRequest.Env[fromMap=" + fromMap.toString() + ", fromConfigMaps=" + fromConfigMaps.toString()
-		+ ", fromSecrets=" + fromSecrets.toString() + "]";
+        return "LaunchRequest.Env[fromMap=" + fromMap.toString() + ", fromConfigMaps=" + fromConfigMaps.toString()
+                + ", fromSecrets=" + fromSecrets.toString() + "]";
     }
 }

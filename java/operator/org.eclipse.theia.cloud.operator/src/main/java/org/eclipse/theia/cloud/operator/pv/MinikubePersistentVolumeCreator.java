@@ -35,8 +35,8 @@ import io.fabric8.kubernetes.api.model.PersistentVolume;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 
 /**
- * Provides persistent volumes on Minikube. Therefore, a persistent volume is
- * created directly on the node before the persistent volume claim is issued.
+ * Provides persistent volumes on Minikube. Therefore, a persistent volume is created directly on the node before the
+ * persistent volume claim is issued.
  */
 public class MinikubePersistentVolumeCreator implements PersistentVolumeCreator {
 
@@ -53,37 +53,37 @@ public class MinikubePersistentVolumeCreator implements PersistentVolumeCreator 
 
     @Override
     public Optional<PersistentVolume> createAndApplyPersistentVolume(String correlationId, Workspace workspace) {
-	Map<String, String> replacements = replacementsProvider.getPersistentVolumeReplacements(client.namespace(),
-		workspace);
-	String persistentVolumeYaml;
-	try {
-	    persistentVolumeYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(TEMPLATE_PERSISTENTVOLUME_YAML,
-		    replacements, correlationId);
-	} catch (IOException | URISyntaxException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for workspace " + workspace),
-		    e);
-	    return Optional.empty();
-	}
-	return client.persistentVolumesClient().loadAndCreate(correlationId, persistentVolumeYaml,
-		volume -> volume.addOwnerReference(workspace));
+        Map<String, String> replacements = replacementsProvider.getPersistentVolumeReplacements(client.namespace(),
+                workspace);
+        String persistentVolumeYaml;
+        try {
+            persistentVolumeYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(TEMPLATE_PERSISTENTVOLUME_YAML,
+                    replacements, correlationId);
+        } catch (IOException | URISyntaxException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for workspace " + workspace),
+                    e);
+            return Optional.empty();
+        }
+        return client.persistentVolumesClient().loadAndCreate(correlationId, persistentVolumeYaml,
+                volume -> volume.addOwnerReference(workspace));
     }
 
     @Override
     public Optional<PersistentVolumeClaim> createAndApplyPersistentVolumeClaim(String correlationId,
-	    Workspace workspace) {
-	Map<String, String> replacements = replacementsProvider.getPersistentVolumeClaimReplacements(client.namespace(),
-		workspace);
-	String persistentVolumeClaimYaml;
-	try {
-	    persistentVolumeClaimYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
-		    TEMPLATE_PERSISTENTVOLUMECLAIM_YAML, replacements, correlationId);
-	} catch (IOException | URISyntaxException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for workspace " + workspace),
-		    e);
-	    return Optional.empty();
-	}
-	return client.persistentVolumeClaimsClient().loadAndCreate(correlationId, persistentVolumeClaimYaml,
-		claim -> claim.addOwnerReference(workspace));
+            Workspace workspace) {
+        Map<String, String> replacements = replacementsProvider.getPersistentVolumeClaimReplacements(client.namespace(),
+                workspace);
+        String persistentVolumeClaimYaml;
+        try {
+            persistentVolumeClaimYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
+                    TEMPLATE_PERSISTENTVOLUMECLAIM_YAML, replacements, correlationId);
+        } catch (IOException | URISyntaxException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while adjusting template for workspace " + workspace),
+                    e);
+            return Optional.empty();
+        }
+        return client.persistentVolumeClaimsClient().loadAndCreate(correlationId, persistentVolumeClaimYaml,
+                claim -> claim.addOwnerReference(workspace));
     }
 
 }

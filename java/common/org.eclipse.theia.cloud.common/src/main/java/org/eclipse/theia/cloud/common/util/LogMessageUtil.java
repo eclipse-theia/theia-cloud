@@ -29,19 +29,19 @@ public final class LogMessageUtil {
     }
 
     public static String generateCorrelationId() {
-	return UUID.randomUUID().toString();
+        return UUID.randomUUID().toString();
     }
 
     public static String formatLogMessage(String prefix, String correlationID, String message) {
-	return MessageFormat.format(LOG_MSG_PATTERN, (prefix + correlationID), message);
+        return MessageFormat.format(LOG_MSG_PATTERN, (prefix + correlationID), message);
     }
 
     public static String formatLogMessage(String correlationID, String message) {
-	return MessageFormat.format(LOG_MSG_PATTERN, correlationID, message);
+        return MessageFormat.format(LOG_MSG_PATTERN, correlationID, message);
     }
 
     public static String formatMetric(String correlationID, String message) {
-	return MessageFormat.format(METRIC_PATTERN, correlationID, message);
+        return MessageFormat.format(METRIC_PATTERN, correlationID, message);
     }
 
 }

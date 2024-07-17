@@ -26,17 +26,17 @@ public class ServiceRequest {
     public String kind;
 
     public ServiceRequest(String kind) {
-	this.kind = kind;
+        this.kind = kind;
     }
 
     public ServiceRequest(String kind, String appId) {
-	this.appId = appId;
-	this.kind = kind;
+        this.appId = appId;
+        this.kind = kind;
     }
 
     @Override
     public String toString() {
-	return "ServiceRequest [appId=" + appId + ", kind=" + kind + "]";
+        return "ServiceRequest [appId=" + appId + ", kind=" + kind + "]";
     }
 
 }

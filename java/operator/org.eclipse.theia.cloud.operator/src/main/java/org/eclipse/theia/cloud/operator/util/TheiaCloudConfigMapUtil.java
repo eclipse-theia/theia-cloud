@@ -42,82 +42,82 @@ public final class TheiaCloudConfigMapUtil {
     }
 
     public static String getProxyConfigName(AppDefinition appDefinition, int instance) {
-	return NamingUtil.createName(appDefinition, instance, CONFIGMAP_PROXY_NAME);
+        return NamingUtil.createName(appDefinition, instance, CONFIGMAP_PROXY_NAME);
     }
 
     public static String getProxyConfigName(Session session) {
-	return NamingUtil.createName(session, CONFIGMAP_PROXY_NAME);
+        return NamingUtil.createName(session, CONFIGMAP_PROXY_NAME);
     }
 
     public static String getEmailConfigName(AppDefinition appDefinition, int instance) {
-	return NamingUtil.createName(appDefinition, instance, CONFIGMAP_EMAIL_NAME);
+        return NamingUtil.createName(appDefinition, instance, CONFIGMAP_EMAIL_NAME);
     }
 
     public static String getEmailConfigName(Session session) {
-	return NamingUtil.createName(session, CONFIGMAP_EMAIL_NAME);
+        return NamingUtil.createName(session, CONFIGMAP_EMAIL_NAME);
     }
 
     public static Integer getProxyId(String correlationId, AppDefinition appDefinition, ConfigMap item) {
-	String instance = TheiaCloudK8sUtil.extractIdFromName(item.getMetadata());
-	try {
-	    return Integer.valueOf(instance);
-	} catch (NumberFormatException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while getting integer value of " + instance), e);
-	}
-	return null;
+        String instance = TheiaCloudK8sUtil.extractIdFromName(item.getMetadata());
+        try {
+            return Integer.valueOf(instance);
+        } catch (NumberFormatException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while getting integer value of " + instance), e);
+        }
+        return null;
     }
 
     public static Integer getEmailId(String correlationId, AppDefinition appDefinition, ConfigMap item) {
-	String instance = TheiaCloudK8sUtil.extractIdFromName(item.getMetadata());
-	try {
-	    return Integer.valueOf(instance);
-	} catch (NumberFormatException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while getting integer value of " + instance), e);
-	}
-	return null;
+        String instance = TheiaCloudK8sUtil.extractIdFromName(item.getMetadata());
+        try {
+            return Integer.valueOf(instance);
+        } catch (NumberFormatException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while getting integer value of " + instance), e);
+        }
+        return null;
     }
 
     public static Set<Integer> computeIdsOfMissingProxyConfigMaps(AppDefinition appDefinition, String correlationId,
-	    int instances, List<ConfigMap> existingItems) {
-	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
-		service -> getProxyId(correlationId, appDefinition, service));
+            int instances, List<ConfigMap> existingItems) {
+        return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
+                service -> getProxyId(correlationId, appDefinition, service));
     }
 
     public static Set<Integer> computeIdsOfMissingEmailConfigMaps(AppDefinition appDefinition, String correlationId,
-	    int instances, List<ConfigMap> existingItems) {
-	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
-		service -> getEmailId(correlationId, appDefinition, service));
+            int instances, List<ConfigMap> existingItems) {
+        return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
+                service -> getEmailId(correlationId, appDefinition, service));
     }
 
     public static Map<String, String> getProxyConfigMapReplacements(String namespace, AppDefinition appDefinition,
-	    int instance) {
-	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(appDefinition, instance));
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	return replacements;
+            int instance) {
+        Map<String, String> replacements = new LinkedHashMap<String, String>();
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(appDefinition, instance));
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+        return replacements;
     }
 
     public static Map<String, String> getProxyConfigMapReplacements(String namespace, Session session) {
-	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(session));
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	return replacements;
+        Map<String, String> replacements = new LinkedHashMap<String, String>();
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_CONFIGNAME, getProxyConfigName(session));
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+        return replacements;
     }
 
     public static Map<String, String> getEmailConfigMapReplacements(String namespace, AppDefinition appDefinition,
-	    int instance) {
-	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
-		getEmailConfigName(appDefinition, instance));
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	return replacements;
+            int instance) {
+        Map<String, String> replacements = new LinkedHashMap<String, String>();
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME,
+                getEmailConfigName(appDefinition, instance));
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+        return replacements;
     }
 
     public static Map<String, String> getEmailConfigMapReplacements(String namespace, Session session) {
-	Map<String, String> replacements = new LinkedHashMap<String, String>();
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(session));
-	replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
-	return replacements;
+        Map<String, String> replacements = new LinkedHashMap<String, String>();
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_EMAILSCONFIGNAME, getEmailConfigName(session));
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+        return replacements;
     }
 
 }

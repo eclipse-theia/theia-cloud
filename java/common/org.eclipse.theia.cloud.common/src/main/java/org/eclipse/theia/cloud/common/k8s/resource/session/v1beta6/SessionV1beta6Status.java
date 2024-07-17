@@ -35,18 +35,18 @@ public class SessionV1beta6Status extends ResourceStatus {
     }
 
     public SessionV1beta6Status(SessionHub fromHub) {
-	if (fromHub.getOperatorMessage().isPresent()) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage().get());
-	}
-	if (fromHub.getOperatorStatus().isPresent()) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
-	}
+        if (fromHub.getOperatorMessage().isPresent()) {
+            this.setOperatorMessage(fromHub.getOperatorMessage().get());
+        }
+        if (fromHub.getOperatorStatus().isPresent()) {
+            this.setOperatorStatus(fromHub.getOperatorStatus().get());
+        }
     }
 
     @Override
     public String toString() {
-	return "SessionV1beta6Status [getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()="
-		+ getOperatorMessage() + "]";
+        return "SessionV1beta6Status [getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()="
+                + getOperatorMessage() + "]";
     }
 
 }

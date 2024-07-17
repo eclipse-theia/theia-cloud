@@ -30,20 +30,20 @@ public class WorkspaceCreationRequest extends UserScopedServiceRequest {
     public String label;
 
     public WorkspaceCreationRequest() {
-	super(KIND);
+        super(KIND);
     }
 
     public WorkspaceCreationRequest(String appId, String appDefinition, String user, String label) {
-	super(KIND, appId);
-	this.appDefinition = appDefinition;
-	this.user = user;
-	this.label = label;
+        super(KIND, appId);
+        this.appDefinition = appDefinition;
+        this.user = user;
+        this.label = label;
     }
 
     @Override
     public String toString() {
-	return "WorkspaceCreationRequest [user=" + user + ", appDefinition=" + appDefinition + ", label=" + label
-		+ ", appId=" + appId + ", kind=" + kind + "]";
+        return "WorkspaceCreationRequest [user=" + user + ", appDefinition=" + appDefinition + ", label=" + label
+                + ", appId=" + appId + ", kind=" + kind + "]";
     }
 
 }

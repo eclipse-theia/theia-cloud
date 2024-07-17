@@ -27,18 +27,17 @@ import jakarta.interceptor.InterceptorBinding;
 
 /**
  * <p>
- * Specifies that an annotated resource or method must never be accessed
- * anonymously — even if TheiaCloud runs in anonymous mode.
+ * Specifies that an annotated resource or method must never be accessed anonymously — even if TheiaCloud runs in
+ * anonymous mode.
  * </p>
  * <p>
- * As this only makes sense with authentication, this annotation should be used
- * in combination with {@link io.quarkus.security.Authenticated @Authenticated}
- * or {@link javax.annotation.security.RolesAllowed @RolesAllowed}.
+ * As this only makes sense with authentication, this annotation should be used in combination with
+ * {@link io.quarkus.security.Authenticated @Authenticated} or
+ * {@link javax.annotation.security.RolesAllowed @RolesAllowed}.
  * </p>
  * <p>
- * Can be applied to a method or a resource class. In the latter case, the
- * behavior applies to all its methods. This is the default behavior for all CDI
- * interceptor bindings.
+ * Can be applied to a method or a resource class. In the latter case, the behavior applies to all its methods. This is
+ * the default behavior for all CDI interceptor bindings.
  * </p>
  * 
  * @see ApplicationProperties#isUseKeycloak()

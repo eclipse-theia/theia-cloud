@@ -21,22 +21,22 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 public interface AppDefinitionHandler {
 
     default boolean appDefinitionAdded(AppDefinition appDefinition, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean appDefinitionDeleted(AppDefinition appDefinition, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean appDefinitionModified(AppDefinition appDefinition, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean appDefinitionErrored(AppDefinition appDefinition, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean appDefinitionBookmarked(AppDefinition appDefinition, String correlationId) {
-	return true;
+        return true;
     }
 }

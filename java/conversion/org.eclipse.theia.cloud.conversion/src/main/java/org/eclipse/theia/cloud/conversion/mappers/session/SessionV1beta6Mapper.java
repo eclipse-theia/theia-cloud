@@ -27,12 +27,12 @@ public class SessionV1beta6Mapper implements Mapper<SessionV1beta6, SessionHub> 
 
     @Override
     public SessionHub toHub(SessionV1beta6 resource) {
-	return new SessionHub(resource);
+        return new SessionHub(resource);
     }
 
     @Override
     public SessionV1beta6 fromHub(SessionHub hub) {
-	return new SessionV1beta6(hub);
+        return new SessionV1beta6(hub);
     }
 
 }

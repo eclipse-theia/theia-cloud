@@ -53,8 +53,8 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 /**
- * A {@link SessionAddedHandler} that relies on the fact that the app definition
- * handler created spare deployments to use.
+ * A {@link SessionAddedHandler} that relies on the fact that the app definition handler created spare deployments to
+ * use.
  */
 public class EagerStartSessionHandler implements SessionHandler {
 
@@ -71,177 +71,177 @@ public class EagerStartSessionHandler implements SessionHandler {
 
     @Override
     public boolean sessionAdded(Session session, String correlationId) {
-	SessionSpec spec = session.getSpec();
-	LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));
+        SessionSpec spec = session.getSpec();
+        LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));
 
-	String sessionResourceName = session.getMetadata().getName();
-	String sessionResourceUID = session.getMetadata().getUid();
+        String sessionResourceName = session.getMetadata().getName();
+        String sessionResourceUID = session.getMetadata().getUid();
 
-	String appDefinitionID = spec.getAppDefinition();
-	String userEmail = spec.getUser();
+        String appDefinitionID = spec.getAppDefinition();
+        String userEmail = spec.getUser();
 
-	/* find app definition for session */
-	Optional<AppDefinition> appDefinition = client.appDefinitions().get(appDefinitionID);
-	if (appDefinition.isEmpty()) {
-	    LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
-	    return false;
-	}
+        /* find app definition for session */
+        Optional<AppDefinition> appDefinition = client.appDefinitions().get(appDefinitionID);
+        if (appDefinition.isEmpty()) {
+            LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
+            return false;
+        }
 
-	String appDefinitionResourceName = appDefinition.get().getMetadata().getName();
-	String appDefinitionResourceUID = appDefinition.get().getMetadata().getUid();
-	int port = appDefinition.get().getSpec().getPort();
+        String appDefinitionResourceName = appDefinition.get().getMetadata().getName();
+        String appDefinitionResourceUID = appDefinition.get().getMetadata().getUid();
+        int port = appDefinition.get().getSpec().getPort();
 
-	/* find ingress */
-	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client.kubernetes(), client.namespace(),
-		appDefinitionResourceName, appDefinitionResourceUID);
-	if (ingress.isEmpty()) {
-	    LOGGER.error(
-		    formatLogMessage(correlationId, "No Ingress for app definition " + appDefinitionID + " found."));
-	    return false;
-	}
+        /* find ingress */
+        Optional<Ingress> ingress = K8sUtil.getExistingIngress(client.kubernetes(), client.namespace(),
+                appDefinitionResourceName, appDefinitionResourceUID);
+        if (ingress.isEmpty()) {
+            LOGGER.error(
+                    formatLogMessage(correlationId, "No Ingress for app definition " + appDefinitionID + " found."));
+            return false;
+        }
 
-	/* get a service to use */
-	Entry<Optional<Service>, Boolean> reserveServiceResult = reserveService(client.kubernetes(), client.namespace(),
-		appDefinitionResourceName, appDefinitionResourceUID, appDefinitionID, sessionResourceName,
-		sessionResourceUID, correlationId);
-	if (reserveServiceResult.getValue()) {
-	    LOGGER.info(formatLogMessage(correlationId, "Found an already reserved service"));
-	    return true;
-	}
-	Optional<Service> serviceToUse = reserveServiceResult.getKey();
-	if (serviceToUse.isEmpty()) {
-	    LOGGER.error(
-		    formatLogMessage(correlationId, "No Service for app definition " + appDefinitionID + " found."));
-	    return false;
-	}
+        /* get a service to use */
+        Entry<Optional<Service>, Boolean> reserveServiceResult = reserveService(client.kubernetes(), client.namespace(),
+                appDefinitionResourceName, appDefinitionResourceUID, appDefinitionID, sessionResourceName,
+                sessionResourceUID, correlationId);
+        if (reserveServiceResult.getValue()) {
+            LOGGER.info(formatLogMessage(correlationId, "Found an already reserved service"));
+            return true;
+        }
+        Optional<Service> serviceToUse = reserveServiceResult.getKey();
+        if (serviceToUse.isEmpty()) {
+            LOGGER.error(
+                    formatLogMessage(correlationId, "No Service for app definition " + appDefinitionID + " found."));
+            return false;
+        }
 
-	/* get the deployment for the service and add as owner */
-	Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition.get(), serviceToUse.get());
-	if (instance == null) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while getting instance from Service"));
-	    return false;
-	}
+        /* get the deployment for the service and add as owner */
+        Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition.get(), serviceToUse.get());
+        if (instance == null) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while getting instance from Service"));
+            return false;
+        }
 
-	try {
-	    client.kubernetes().apps().deployments()
-		    .withName(TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance))
-		    .edit(deployment -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId,
-			    sessionResourceName, sessionResourceUID, deployment));
-	} catch (KubernetesClientException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
-		    + (appDefinitionID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
-	    return false;
-	}
+        try {
+            client.kubernetes().apps().deployments()
+                    .withName(TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance))
+                    .edit(deployment -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId,
+                            sessionResourceName, sessionResourceUID, deployment));
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
+                    + (appDefinitionID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
+            return false;
+        }
 
-	if (arguments.isUseKeycloak()) {
-	    /* add user to allowed emails */
-	    try {
-		client.kubernetes().configMaps()
-			.withName(TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition.get(), instance))
-			.edit(configmap -> {
-			    configmap.setData(Collections
-				    .singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST, userEmail));
-			    return configmap;
-			});
-	    } catch (KubernetesClientException e) {
-		LOGGER.error(
-			formatLogMessage(correlationId,
-				"Error while editing email configmap "
-					+ (appDefinitionID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)),
-			e);
-		return false;
-	    }
-	}
+        if (arguments.isUseKeycloak()) {
+            /* add user to allowed emails */
+            try {
+                client.kubernetes().configMaps()
+                        .withName(TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition.get(), instance))
+                        .edit(configmap -> {
+                            configmap.setData(Collections
+                                    .singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST, userEmail));
+                            return configmap;
+                        });
+            } catch (KubernetesClientException e) {
+                LOGGER.error(
+                        formatLogMessage(correlationId,
+                                "Error while editing email configmap "
+                                        + (appDefinitionID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)),
+                        e);
+                return false;
+            }
+        }
 
-	/* adjust the ingress */
-	String host;
-	try {
-	    host = updateIngress(ingress, serviceToUse, appDefinitionID, instance, port, appDefinition.get(),
-		    correlationId);
-	} catch (KubernetesClientException e) {
-	    LOGGER.error(formatLogMessage(correlationId,
-		    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
-	    return false;
-	}
+        /* adjust the ingress */
+        String host;
+        try {
+            host = updateIngress(ingress, serviceToUse, appDefinitionID, instance, port, appDefinition.get(),
+                    correlationId);
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
+            return false;
+        }
 
-	/* Update session resource */
-	try {
-	    AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), host, correlationId);
-	} catch (KubernetesClientException e) {
-	    LOGGER.error(
-		    formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),
-		    e);
-	    return false;
-	}
+        /* Update session resource */
+        try {
+            AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), host, correlationId);
+        } catch (KubernetesClientException e) {
+            LOGGER.error(
+                    formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),
+                    e);
+            return false;
+        }
 
-	return true;
+        return true;
     }
 
     protected synchronized Entry<Optional<Service>, Boolean> reserveService(NamespacedKubernetesClient client,
-	    String namespace, String appDefinitionResourceName, String appDefinitionResourceUID, String appDefinitionID,
-	    String sessionResourceName, String sessionResourceUID, String correlationId) {
-	List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
-		appDefinitionResourceUID);
+            String namespace, String appDefinitionResourceName, String appDefinitionResourceUID, String appDefinitionID,
+            String sessionResourceName, String sessionResourceUID, String correlationId) {
+        List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
+                appDefinitionResourceUID);
 
-	Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
-		sessionResourceUID, existingServices);
-	if (alreadyReservedService.isPresent()) {
-	    return JavaUtil.tuple(alreadyReservedService, true);
-	}
+        Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
+                sessionResourceUID, existingServices);
+        if (alreadyReservedService.isPresent()) {
+            return JavaUtil.tuple(alreadyReservedService, true);
+        }
 
-	Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingServices);
-	if (serviceToUse.isEmpty()) {
-	    return JavaUtil.tuple(serviceToUse, false);
-	}
+        Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingServices);
+        if (serviceToUse.isEmpty()) {
+            return JavaUtil.tuple(serviceToUse, false);
+        }
 
-	/* add our session as owner to the service */
-	try {
-	    client.services().inNamespace(namespace).withName(serviceToUse.get().getMetadata().getName())
-		    .edit(service -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, sessionResourceName,
-			    sessionResourceUID, service));
-	} catch (KubernetesClientException e) {
-	    LOGGER.error(formatLogMessage(correlationId,
-		    "Error while editing service " + (serviceToUse.get().getMetadata().getName())), e);
-	    return JavaUtil.tuple(Optional.empty(), false);
-	}
-	return JavaUtil.tuple(serviceToUse, false);
+        /* add our session as owner to the service */
+        try {
+            client.services().inNamespace(namespace).withName(serviceToUse.get().getMetadata().getName())
+                    .edit(service -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, sessionResourceName,
+                            sessionResourceUID, service));
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Error while editing service " + (serviceToUse.get().getMetadata().getName())), e);
+            return JavaUtil.tuple(Optional.empty(), false);
+        }
+        return JavaUtil.tuple(serviceToUse, false);
     }
 
     protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
-	    String appDefinitionID, int instance, int port, AppDefinition appDefinition, String correlationId) {
-	final String host = arguments.getInstancesHost();
-	String path = ingressPathProvider.getPath(appDefinition, instance);
-	client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(),
-		ingressToUpdate -> addIngressRule(ingressToUpdate, serviceToUse.get(), host, port, path));
-	return host + path + "/";
+            String appDefinitionID, int instance, int port, AppDefinition appDefinition, String correlationId) {
+        final String host = arguments.getInstancesHost();
+        String path = ingressPathProvider.getPath(appDefinition, instance);
+        client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(),
+                ingressToUpdate -> addIngressRule(ingressToUpdate, serviceToUse.get(), host, port, path));
+        return host + path + "/";
     }
 
     protected Ingress addIngressRule(Ingress ingress, Service serviceToUse, String host, int port, String path) {
-	IngressRule ingressRule = new IngressRule();
-	ingress.getSpec().getRules().add(ingressRule);
+        IngressRule ingressRule = new IngressRule();
+        ingress.getSpec().getRules().add(ingressRule);
 
-	ingressRule.setHost(host);
+        ingressRule.setHost(host);
 
-	HTTPIngressRuleValue http = new HTTPIngressRuleValue();
-	ingressRule.setHttp(http);
+        HTTPIngressRuleValue http = new HTTPIngressRuleValue();
+        ingressRule.setHttp(http);
 
-	HTTPIngressPath httpIngressPath = new HTTPIngressPath();
-	http.getPaths().add(httpIngressPath);
-	httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
-	httpIngressPath.setPathType("Prefix");
+        HTTPIngressPath httpIngressPath = new HTTPIngressPath();
+        http.getPaths().add(httpIngressPath);
+        httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
+        httpIngressPath.setPathType("Prefix");
 
-	IngressBackend ingressBackend = new IngressBackend();
-	httpIngressPath.setBackend(ingressBackend);
+        IngressBackend ingressBackend = new IngressBackend();
+        httpIngressPath.setBackend(ingressBackend);
 
-	IngressServiceBackend ingressServiceBackend = new IngressServiceBackend();
-	ingressBackend.setService(ingressServiceBackend);
-	ingressServiceBackend.setName(serviceToUse.getMetadata().getName());
+        IngressServiceBackend ingressServiceBackend = new IngressServiceBackend();
+        ingressBackend.setService(ingressServiceBackend);
+        ingressServiceBackend.setName(serviceToUse.getMetadata().getName());
 
-	ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
-	ingressServiceBackend.setPort(serviceBackendPort);
-	serviceBackendPort.setNumber(port);
+        ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
+        ingressServiceBackend.setPort(serviceBackendPort);
+        serviceBackendPort.setNumber(port);
 
-	return ingress;
+        return ingress;
     }
 
 }

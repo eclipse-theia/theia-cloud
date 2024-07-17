@@ -39,45 +39,45 @@ public class WorkspaceV1beta3Status extends ResourceStatus {
     }
 
     public WorkspaceV1beta3Status(WorkspaceHub fromHub) {
-	if (fromHub.getOperatorMessage().isPresent()) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage().get());
-	}
-	if (fromHub.getOperatorStatus().isPresent()) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
-	}
-	if (fromHub.getVolumeAttachMessage().isPresent() && fromHub.getVolumeAttachStatus().isPresent()) {
-	    this.volumeAttach = new StatusStep();
-	    this.volumeAttach.setStatus(fromHub.getVolumeAttachStatus().get());
-	    this.volumeAttach.setMessage(fromHub.getVolumeAttachMessage().get());
-	}
-	if (fromHub.getVolumeClaimMessage().isPresent() && fromHub.getVolumeClaimStatus().isPresent()) {
-	    this.volumeClaim = new StatusStep();
-	    this.volumeClaim.setStatus(fromHub.getVolumeClaimStatus().get());
-	    this.volumeClaim.setMessage(fromHub.getVolumeClaimMessage().get());
-	}
+        if (fromHub.getOperatorMessage().isPresent()) {
+            this.setOperatorMessage(fromHub.getOperatorMessage().get());
+        }
+        if (fromHub.getOperatorStatus().isPresent()) {
+            this.setOperatorStatus(fromHub.getOperatorStatus().get());
+        }
+        if (fromHub.getVolumeAttachMessage().isPresent() && fromHub.getVolumeAttachStatus().isPresent()) {
+            this.volumeAttach = new StatusStep();
+            this.volumeAttach.setStatus(fromHub.getVolumeAttachStatus().get());
+            this.volumeAttach.setMessage(fromHub.getVolumeAttachMessage().get());
+        }
+        if (fromHub.getVolumeClaimMessage().isPresent() && fromHub.getVolumeClaimStatus().isPresent()) {
+            this.volumeClaim = new StatusStep();
+            this.volumeClaim.setStatus(fromHub.getVolumeClaimStatus().get());
+            this.volumeClaim.setMessage(fromHub.getVolumeClaimMessage().get());
+        }
     }
 
     public StatusStep getVolumeClaim() {
-	return volumeClaim;
+        return volumeClaim;
     }
 
     public void setVolumeClaim(StatusStep volumeClaim) {
-	this.volumeClaim = volumeClaim;
+        this.volumeClaim = volumeClaim;
     }
 
     public StatusStep getVolumeAttach() {
-	return volumeAttach;
+        return volumeAttach;
     }
 
     public void setVolumeAttach(StatusStep volumeAttach) {
-	this.volumeAttach = volumeAttach;
+        this.volumeAttach = volumeAttach;
     }
 
     @Override
     public String toString() {
-	return "WorkspaceV1beta3Status [volumeClaim=" + volumeClaim + ", volumeAttach=" + volumeAttach
-		+ ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
-		+ "]";
+        return "WorkspaceV1beta3Status [volumeClaim=" + volumeClaim + ", volumeAttach=" + volumeAttach
+                + ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
+                + "]";
     }
 
 }

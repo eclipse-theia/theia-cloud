@@ -260,10 +260,9 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
     }
 
     /**
-     * If watches have not been called at all (neither reconnecting calls or actual
-     * actions), this might mean that the watch can't communicate with the kube API
-     * anymore. In this case we want to hand over to a different operator which will
-     * start up fresh watches.
+     * If watches have not been called at all (neither reconnecting calls or actual actions), this might mean that the
+     * watch can't communicate with the kube API anymore. In this case we want to hand over to a different operator
+     * which will start up fresh watches.
      */
     protected void lookForIdleWatches() {
         String correlationId = generateCorrelationId();

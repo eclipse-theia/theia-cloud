@@ -36,22 +36,22 @@ public abstract class TheiaCloudOperatorLauncher {
     protected TheiaCloudOperatorArguments args;
 
     public void runMain(String[] args) throws InterruptedException {
-	this.args = createArguments(args);
-	AbstractTheiaCloudOperatorModule module = createModule(this.args);
-	LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
+        this.args = createArguments(args);
+        AbstractTheiaCloudOperatorModule module = createModule(this.args);
+        LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
 
-	Injector injector = Guice.createInjector(module);
-	TheiaCloudOperator theiaCloud = injector.getInstance(TheiaCloudOperator.class);
-	LOGGER.info(formatLogMessage(COR_ID_INIT, "Launching Theia Cloud Now"));
-	theiaCloud.start();
+        Injector injector = Guice.createInjector(module);
+        TheiaCloudOperator theiaCloud = injector.getInstance(TheiaCloudOperator.class);
+        LOGGER.info(formatLogMessage(COR_ID_INIT, "Launching Theia Cloud Now"));
+        theiaCloud.start();
     }
 
     public TheiaCloudOperatorArguments createArguments(String[] args) {
-	TheiaCloudOperatorArguments arguments = new TheiaCloudOperatorArguments();
-	CommandLine commandLine = new CommandLine(arguments).setTrimQuotes(true);
-	commandLine.parseArgs(args);
-	LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsed args: " + arguments));
-	return arguments;
+        TheiaCloudOperatorArguments arguments = new TheiaCloudOperatorArguments();
+        CommandLine commandLine = new CommandLine(arguments).setTrimQuotes(true);
+        commandLine.parseArgs(args);
+        LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsed args: " + arguments));
+        return arguments;
     }
 
     abstract AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments);

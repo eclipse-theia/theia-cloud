@@ -24,18 +24,18 @@ public class EvaluatedRequest {
     private String user;
 
     public EvaluatedRequest(String correlationId, String user) {
-	this.correlationId = correlationId;
-	this.user = user;
+        this.correlationId = correlationId;
+        this.user = user;
     }
 
     public String getCorrelationId() {
-	return correlationId;
+        return correlationId;
     }
 
     /**
      * @return The resolved user identifier for the request
      */
     public String getUser() {
-	return user;
+        return user;
     }
 }

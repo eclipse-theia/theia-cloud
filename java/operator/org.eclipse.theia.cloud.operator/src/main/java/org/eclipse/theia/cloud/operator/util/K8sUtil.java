@@ -54,135 +54,135 @@ public final class K8sUtil {
     }
 
     public static Optional<Ingress> getExistingIngress(NamespacedKubernetesClient client, String namespace,
-	    String ingressName) {
-	return client.network().v1().ingresses().inNamespace(namespace).list().getItems().stream()//
-		.filter(ingress -> ingressName.equals(ingress.getMetadata().getName()))//
-		.findAny();
+            String ingressName) {
+        return client.network().v1().ingresses().inNamespace(namespace).list().getItems().stream()//
+                .filter(ingress -> ingressName.equals(ingress.getMetadata().getName()))//
+                .findAny();
     }
 
     public static Optional<Ingress> getExistingIngress(NamespacedKubernetesClient client, String namespace,
-	    String ownerName, String ownerUid) {
-	return getExistingTypesStream(client, namespace, ownerName, ownerUid,
-		client.network().v1().ingresses().list().getItems())//
-			.findAny();
+            String ownerName, String ownerUid) {
+        return getExistingTypesStream(client, namespace, ownerName, ownerUid,
+                client.network().v1().ingresses().list().getItems())//
+                        .findAny();
     }
 
     public static List<Service> getExistingServices(NamespacedKubernetesClient client, String namespace,
-	    String ownerName, String ownerUid) {
-	return getExistingTypes(client, namespace, ownerName, ownerUid,
-		client.services().inNamespace(namespace).list().getItems());
+            String ownerName, String ownerUid) {
+        return getExistingTypes(client, namespace, ownerName, ownerUid,
+                client.services().inNamespace(namespace).list().getItems());
     }
 
     public static List<Deployment> getExistingDeployments(NamespacedKubernetesClient client, String namespace,
-	    String ownerName, String ownerUid) {
-	return getExistingTypes(client, namespace, ownerName, ownerUid,
-		client.apps().deployments().inNamespace(namespace).list().getItems());
+            String ownerName, String ownerUid) {
+        return getExistingTypes(client, namespace, ownerName, ownerUid,
+                client.apps().deployments().inNamespace(namespace).list().getItems());
     }
 
     public static List<ConfigMap> getExistingConfigMaps(NamespacedKubernetesClient client, String namespace,
-	    String ownerName, String ownerUid) {
-	return getExistingTypes(client, namespace, ownerName, ownerUid,
-		client.configMaps().inNamespace(namespace).list().getItems());
+            String ownerName, String ownerUid) {
+        return getExistingTypes(client, namespace, ownerName, ownerUid,
+                client.configMaps().inNamespace(namespace).list().getItems());
     }
 
     private static <T extends HasMetadata> List<T> getExistingTypes(NamespacedKubernetesClient client, String namespace,
-	    String ownerName, String ownerUid, List<T> items) {
-	return getExistingTypesStream(client, namespace, ownerName, ownerUid, items)//
-		.collect(Collectors.toList());
+            String ownerName, String ownerUid, List<T> items) {
+        return getExistingTypesStream(client, namespace, ownerName, ownerUid, items)//
+                .collect(Collectors.toList());
     }
 
     private static <T extends HasMetadata> Stream<T> getExistingTypesStream(NamespacedKubernetesClient client,
-	    String namespace, String ownerName, String ownerUid, List<T> items) {
-	return items.stream()//
-		.filter(item -> hasThisTemplateOwnerReference(item.getMetadata().getOwnerReferences(), ownerUid,
-			ownerName));
+            String namespace, String ownerName, String ownerUid, List<T> items) {
+        return items.stream()//
+                .filter(item -> hasThisTemplateOwnerReference(item.getMetadata().getOwnerReferences(), ownerUid,
+                        ownerName));
     }
 
     private static boolean hasThisTemplateOwnerReference(List<OwnerReference> ownerReferences, String ownerUid,
-	    String ownerName) {
-	for (OwnerReference ownerReference : ownerReferences) {
-	    if (ownerUid.equals(ownerReference.getUid()) && ownerName.equals(ownerReference.getName())) {
-		return true;
-	    }
-	}
-	return false;
+            String ownerName) {
+        for (OwnerReference ownerReference : ownerReferences) {
+            if (ownerUid.equals(ownerReference.getUid()) && ownerName.equals(ownerReference.getName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static Optional<Ingress> loadAndCreateIngressWithOwnerReference(NamespacedKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-	    String ownerName, String ownerUid, int ownerReferenceIndex) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
-		ownerName, ownerUid, ownerReferenceIndex, INGRESS,
-		client.network().v1().ingresses().inNamespace(namespace), item -> {
-		});
+            String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+            String ownerName, String ownerUid, int ownerReferenceIndex) {
+        return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+                ownerName, ownerUid, ownerReferenceIndex, INGRESS,
+                client.network().v1().ingresses().inNamespace(namespace), item -> {
+                });
     }
 
     public static Optional<Service> loadAndCreateServiceWithOwnerReference(NamespacedKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-	    String ownerName, String ownerUid, int ownerReferenceIndex) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
-		ownerName, ownerUid, ownerReferenceIndex, SERVICE, client.services().inNamespace(namespace), item -> {
-		});
+            String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+            String ownerName, String ownerUid, int ownerReferenceIndex) {
+        return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+                ownerName, ownerUid, ownerReferenceIndex, SERVICE, client.services().inNamespace(namespace), item -> {
+                });
     }
 
     public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(NamespacedKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-	    String ownerName, String ownerUid, int ownerReferenceIndex) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
-		ownerName, ownerUid, ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace),
-		item -> {
-		});
+            String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+            String ownerName, String ownerUid, int ownerReferenceIndex) {
+        return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+                ownerName, ownerUid, ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace),
+                item -> {
+                });
     }
 
     public static Optional<Deployment> loadAndCreateDeploymentWithOwnerReference(NamespacedKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-	    String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<Deployment> additionalModification) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
-		ownerName, ownerUid, ownerReferenceIndex, DEPLOYMENT,
-		client.apps().deployments().inNamespace(namespace), additionalModification);
+            String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+            String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<Deployment> additionalModification) {
+        return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+                ownerName, ownerUid, ownerReferenceIndex, DEPLOYMENT,
+                client.apps().deployments().inNamespace(namespace), additionalModification);
     }
 
     public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(NamespacedKubernetesClient client,
-	    String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-	    String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<ConfigMap> additionalModification) {
-	return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
-		ownerName, ownerUid, ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace),
-		additionalModification);
+            String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
+            String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<ConfigMap> additionalModification) {
+        return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
+                ownerName, ownerUid, ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace),
+                additionalModification);
     }
 
     private static <T extends HasMetadata, U, V extends Resource<T>> Optional<T> loadAndCreateTypeWithOwnerReference(
-	    NamespacedKubernetesClient client, String namespace, String correlationId, String yaml,
-	    String ownerAPIVersion, String ownerKind, String ownerName, String ownerUid, int ownerReferenceIndex,
-	    String typeName, NonNamespaceOperation<T, U, V> items, Consumer<T> additionalModification) {
+            NamespacedKubernetesClient client, String namespace, String correlationId, String yaml,
+            String ownerAPIVersion, String ownerKind, String ownerName, String ownerUid, int ownerReferenceIndex,
+            String typeName, NonNamespaceOperation<T, U, V> items, Consumer<T> additionalModification) {
 
-	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
 
-	    LOGGER.trace(formatLogMessage(correlationId, "Loading new " + typeName + ":\n" + yaml));
-	    T newItem = items.load(inputStream).item();
-	    if (newItem == null) {
-		LOGGER.error(formatLogMessage(correlationId, "Loading new " + typeName + " resulted in null object"));
-		return Optional.empty();
-	    }
+            LOGGER.trace(formatLogMessage(correlationId, "Loading new " + typeName + ":\n" + yaml));
+            T newItem = items.load(inputStream).item();
+            if (newItem == null) {
+                LOGGER.error(formatLogMessage(correlationId, "Loading new " + typeName + " resulted in null object"));
+                return Optional.empty();
+            }
 
-	    ResourceEdit.<T>updateOwnerReference(ownerReferenceIndex, ownerAPIVersion, ownerKind, ownerName, ownerUid,
-		    correlationId).andThen(additionalModification).accept(newItem);
+            ResourceEdit.<T> updateOwnerReference(ownerReferenceIndex, ownerAPIVersion, ownerKind, ownerName, ownerUid,
+                    correlationId).andThen(additionalModification).accept(newItem);
 
-	    String resultingYaml;
-	    try {
-		resultingYaml = Serialization.asYaml(newItem);
-	    } catch (Exception e) {
-		resultingYaml = "Serializing " + typeName + " to Yaml failed.";
-	    }
+            String resultingYaml;
+            try {
+                resultingYaml = Serialization.asYaml(newItem);
+            } catch (Exception e) {
+                resultingYaml = "Serializing " + typeName + " to Yaml failed.";
+            }
 
-	    LOGGER.trace(formatLogMessage(correlationId, "Creating new " + typeName + ":\n" + resultingYaml));
-	    items.resource(newItem).create();
-	    LOGGER.info(formatLogMessage(correlationId, "Created a new " + typeName));
+            LOGGER.trace(formatLogMessage(correlationId, "Creating new " + typeName + ":\n" + resultingYaml));
+            items.resource(newItem).create();
+            LOGGER.info(formatLogMessage(correlationId, "Created a new " + typeName));
 
-	    return Optional.of(newItem);
-	} catch (IOException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while reading yaml byte stream"), e);
-	}
-	return Optional.empty();
+            return Optional.of(newItem);
+        } catch (IOException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while reading yaml byte stream"), e);
+        }
+        return Optional.empty();
     }
 
 }

@@ -45,21 +45,21 @@ public class Workspace extends CustomResource<WorkspaceSpec, WorkspaceStatus> im
     }
 
     public Workspace(WorkspaceHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new WorkspaceSpec(fromHub);
-	this.status = new WorkspaceStatus(fromHub);
+        if (fromHub.getMetadata().isPresent()) {
+            this.setMetadata(fromHub.getMetadata().get());
+        }
+        this.spec = new WorkspaceSpec(fromHub);
+        this.status = new WorkspaceStatus(fromHub);
     }
 
     @Override
     public String toString() {
-	return CustomResourceUtil.toString(this);
+        return CustomResourceUtil.toString(this);
     }
 
     @JsonIgnore
     public WorkspaceStatus getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new WorkspaceStatus();
+        return super.getStatus() != null ? super.getStatus() : new WorkspaceStatus();
     }
 
 }

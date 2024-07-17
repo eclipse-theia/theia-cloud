@@ -35,7 +35,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Singular("workspace")
 @Plural("workspaces")
 public class WorkspaceV1beta3 extends CustomResource<WorkspaceV1beta3Spec, WorkspaceV1beta3Status>
-	implements Namespaced {
+        implements Namespaced {
 
     public static final String API = "theia.cloud/v1beta3";
     public static final String CRD_NAME = "workspaces.theia.cloud";
@@ -47,21 +47,21 @@ public class WorkspaceV1beta3 extends CustomResource<WorkspaceV1beta3Spec, Works
     }
 
     public WorkspaceV1beta3(WorkspaceHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new WorkspaceV1beta3Spec(fromHub);
-	this.status = new WorkspaceV1beta3Status(fromHub);
+        if (fromHub.getMetadata().isPresent()) {
+            this.setMetadata(fromHub.getMetadata().get());
+        }
+        this.spec = new WorkspaceV1beta3Spec(fromHub);
+        this.status = new WorkspaceV1beta3Status(fromHub);
     }
 
     @Override
     public String toString() {
-	return CustomResourceUtil.toString(this);
+        return CustomResourceUtil.toString(this);
     }
 
     @JsonIgnore
     public WorkspaceV1beta3Status getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new WorkspaceV1beta3Status();
+        return super.getStatus() != null ? super.getStatus() : new WorkspaceV1beta3Status();
     }
 
 }

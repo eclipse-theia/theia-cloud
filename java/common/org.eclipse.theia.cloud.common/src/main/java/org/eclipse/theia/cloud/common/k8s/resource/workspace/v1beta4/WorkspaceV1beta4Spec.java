@@ -48,30 +48,30 @@ public class WorkspaceV1beta4Spec implements UserScopedSpec {
     }
 
     public WorkspaceV1beta4Spec(String name, String label, String appDefinition, String user) {
-	this.name = name;
-	this.appDefinition = appDefinition;
-	this.user = user;
-	this.label = label;
+        this.name = name;
+        this.appDefinition = appDefinition;
+        this.user = user;
+        this.label = label;
     }
 
     public WorkspaceV1beta4Spec(WorkspaceHub spec) {
-	this.name = spec.getName().orElse(null); // required
-	this.label = spec.getLabel().orElse(null);
-	this.appDefinition = spec.getAppDefinition().orElse(null);
-	this.user = spec.getUser().orElse(null); // required
-	this.storage = spec.getStorage().orElse(null);
+        this.name = spec.getName().orElse(null); // required
+        this.label = spec.getLabel().orElse(null);
+        this.appDefinition = spec.getAppDefinition().orElse(null);
+        this.user = spec.getUser().orElse(null); // required
+        this.storage = spec.getStorage().orElse(null);
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public String getLabel() {
-	return label;
+        return label;
     }
 
     public void setAppDefinition(String appDefinition) {
-	this.appDefinition = appDefinition;
+        this.appDefinition = appDefinition;
     }
 
     /**
@@ -80,7 +80,7 @@ public class WorkspaceV1beta4Spec implements UserScopedSpec {
      * @return last app definition
      */
     public String getAppDefinition() {
-	return appDefinition;
+        return appDefinition;
     }
 
     /**
@@ -88,25 +88,25 @@ public class WorkspaceV1beta4Spec implements UserScopedSpec {
      */
     @Override
     public String getUser() {
-	return user;
+        return user;
     }
 
     public String getStorage() {
-	return storage;
+        return storage;
     }
 
     public void setStorage(String storage) {
-	this.storage = storage;
+        this.storage = storage;
     }
 
     public boolean hasStorage() {
-	return getStorage() != null && !getStorage().isBlank();
+        return getStorage() != null && !getStorage().isBlank();
     }
 
     @Override
     public String toString() {
-	return "WorkspaceSpec [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
-		+ user + ", storage=" + storage + "]";
+        return "WorkspaceSpec [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
+                + user + ", storage=" + storage + "]";
     }
 
 }

@@ -33,21 +33,21 @@ public class IngressPathProviderImpl implements IngressPathProvider {
 
     @Override
     public String getPath(AppDefinition appDefinition, int instance) {
-	return getBasePath() + appDefinition.getSpec().getName() + "-" + instance;
+        return getBasePath() + appDefinition.getSpec().getName() + "-" + instance;
     }
 
     @Override
     public String getPath(AppDefinition appDefinition, Session session) {
-	return getBasePath() + session.getMetadata().getUid();
+        return getBasePath() + session.getMetadata().getUid();
     }
 
     protected String getBasePath() {
-	if (arguments.isUsePaths() && arguments.getInstancesPath() != null && !arguments.getInstancesPath().isBlank()) {
-	    return "/" + arguments.getInstancesPath().trim() + "/";
-	} else if (arguments.isUsePaths()) {
-	    LOGGER.warn(
-		    "Theia cloud is configured to use paths instead of subdomains but no instace subpath was provided");
-	}
-	return "/";
+        if (arguments.isUsePaths() && arguments.getInstancesPath() != null && !arguments.getInstancesPath().isBlank()) {
+            return "/" + arguments.getInstancesPath().trim() + "/";
+        } else if (arguments.isUsePaths()) {
+            LOGGER.warn(
+                    "Theia cloud is configured to use paths instead of subdomains but no instace subpath was provided");
+        }
+        return "/";
     }
 }

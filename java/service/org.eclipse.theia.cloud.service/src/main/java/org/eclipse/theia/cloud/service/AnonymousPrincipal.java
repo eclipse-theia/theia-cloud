@@ -18,21 +18,21 @@ package org.eclipse.theia.cloud.service;
 import io.quarkus.security.runtime.QuarkusPrincipal;
 
 /**
- * Anonymous principal to be used when users are anonymous but still
- * authenticated, i.e. when TheiaCloud is used without any Auth provider.
+ * Anonymous principal to be used when users are anonymous but still authenticated, i.e. when TheiaCloud is used without
+ * any Auth provider.
  */
 class AnonymousPrincipal extends QuarkusPrincipal {
 
     private static AnonymousPrincipal instance = new AnonymousPrincipal();
 
     private AnonymousPrincipal() {
-	super("anonymous");
+        super("anonymous");
     }
 
     static AnonymousPrincipal getInstance() {
-	if (instance == null) {
-	    instance = new AnonymousPrincipal();
-	}
-	return AnonymousPrincipal.instance;
+        if (instance == null) {
+            instance = new AnonymousPrincipal();
+        }
+        return AnonymousPrincipal.instance;
     }
 }

@@ -38,68 +38,68 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
     NonNamespaceOperation<T, L, Resource<T>> operation();
 
     default Resource<T> resource(String name) {
-	return operation().withName(name);
+        return operation().withName(name);
     }
 
     default Optional<T> get(String name) {
-	return Optional.ofNullable(resource(name).get());
+        return Optional.ofNullable(resource(name).get());
     }
 
     default boolean has(String name) {
-	return get(name).isPresent();
+        return get(name).isPresent();
     }
 
     default List<StatusDetails> delete(String correlationId, String name) {
-	info(correlationId, "Delete " + name);
-	return resource(name).delete();
+        info(correlationId, "Delete " + name);
+        return resource(name).delete();
     }
 
     default T edit(String correlationId, String name, Consumer<T> consumer) {
-	info(correlationId, "Edit " + name);
-	Resource<T> resource = resource(name);
-	if (resource.get() == null) {
-	    return null;
-	}
-	return resource.edit(JavaUtil.toUnary(consumer));
+        info(correlationId, "Edit " + name);
+        Resource<T> resource = resource(name);
+        if (resource.get() == null) {
+            return null;
+        }
+        return resource.edit(JavaUtil.toUnary(consumer));
     }
 
     default T editStatus(String correlationId, String name, Consumer<T> consumer) {
-	trace(correlationId, "Edit status of " + name);
-	Resource<T> resource = resource(name);
-	if (resource.get() == null) {
-	    return null;
-	}
-	return resource.editStatus(JavaUtil.toUnary(consumer));
+        trace(correlationId, "Edit status of " + name);
+        Resource<T> resource = resource(name);
+        if (resource.get() == null) {
+            return null;
+        }
+        return resource.editStatus(JavaUtil.toUnary(consumer));
     }
 
     Optional<T> loadAndCreate(String correlationId, String yaml, Consumer<T> customization);
 
     default Optional<T> loadAndCreate(String correlationId, String yaml) {
-	return loadAndCreate(correlationId, yaml, item -> {
-	});
+        return loadAndCreate(correlationId, yaml, item -> {
+        });
     }
 
     default List<T> list() {
-	return operation().list().getItems();
+        return operation().list().getItems();
     }
 
     default void watchUntil(BiFunction<Action, T, Boolean> eventHandler, long timeout, TimeUnit unit)
-	    throws InterruptedException {
-	CountDownLatch latch = new CountDownLatch(1);
+            throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
 
-	Watch watch = operation().watch(WatcherAdapter.eventReceived((action, item) -> {
-	    if (eventHandler.apply(action, item)) {
-		latch.countDown();
-	    }
-	}));
+        Watch watch = operation().watch(WatcherAdapter.eventReceived((action, item) -> {
+            if (eventHandler.apply(action, item)) {
+                latch.countDown();
+            }
+        }));
 
-	try {
-	    if (!latch.await(timeout, unit)) {
-		throw new InterruptedException("Timeout reached. Interrupt Watch.");
-	    }
-	} finally {
-	    watch.close();
-	}
+        try {
+            if (!latch.await(timeout, unit)) {
+                throw new InterruptedException("Timeout reached. Interrupt Watch.");
+            }
+        } finally {
+            watch.close();
+        }
     }
 
     // Logging API

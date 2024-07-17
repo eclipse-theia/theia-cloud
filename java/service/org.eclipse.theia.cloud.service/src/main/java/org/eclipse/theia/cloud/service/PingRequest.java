@@ -23,16 +23,16 @@ public class PingRequest extends ServiceRequest {
     public static final String KIND = "pingRequest";
 
     public PingRequest() {
-	super(KIND);
+        super(KIND);
     }
 
     public PingRequest(String appId) {
-	super(KIND, appId);
+        super(KIND, appId);
     }
 
     @Override
     public String toString() {
-	return "PingRequest [appId=" + appId + ", kind=" + kind + "]";
+        return "PingRequest [appId=" + appId + ", kind=" + kind + "]";
     }
 
 }

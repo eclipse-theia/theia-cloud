@@ -27,12 +27,12 @@ public class AppDefinitionV1beta9Mapper implements Mapper<AppDefinitionV1beta9, 
 
     @Override
     public AppDefinitionHub toHub(AppDefinitionV1beta9 resource) {
-	return new AppDefinitionHub(resource);
+        return new AppDefinitionHub(resource);
     }
 
     @Override
     public AppDefinitionV1beta9 fromHub(AppDefinitionHub hub) {
-	return new AppDefinitionV1beta9(hub);
+        return new AppDefinitionV1beta9(hub);
     }
 
 }

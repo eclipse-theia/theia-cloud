@@ -31,7 +31,7 @@ import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class BaseResourceClient<T extends HasMetadata, L extends KubernetesResourceList<T>>
-	implements ResourceClient<T, L> {
+        implements ResourceClient<T, L> {
 
     protected static Logger LOGGER = LogManager.getLogger(CustomResourceClient.class);
 
@@ -40,68 +40,68 @@ public class BaseResourceClient<T extends HasMetadata, L extends KubernetesResou
     private Class<T> typeClass;
 
     public BaseResourceClient(NamespacedKubernetesClient client, Class<T> typeClass, Class<L> listClass) {
-	this(client, client.resources(typeClass, listClass), typeClass);
+        this(client, client.resources(typeClass, listClass), typeClass);
     }
 
     public BaseResourceClient(NamespacedKubernetesClient client, NonNamespaceOperation<T, L, Resource<T>> operation,
-	    Class<T> typeClass) {
-	this.client = client;
-	this.operation = operation;
-	this.typeClass = typeClass;
+            Class<T> typeClass) {
+        this.client = client;
+        this.operation = operation;
+        this.typeClass = typeClass;
     }
 
     @Override
     public String getTypeName() {
-	return typeClass.getSimpleName();
+        return typeClass.getSimpleName();
     }
 
     @Override
     public NonNamespaceOperation<T, L, Resource<T>> operation() {
-	return this.operation;
+        return this.operation;
     }
 
     @Override
     public void info(String correlationId, String message) {
-	LOGGER.info(LogMessageUtil.formatLogMessage(correlationId, message));
+        LOGGER.info(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     @Override
     public void warn(String correlationId, String message) {
-	LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, message));
+        LOGGER.warn(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     @Override
     public void error(String correlationId, String message) {
-	LOGGER.error(LogMessageUtil.formatLogMessage(correlationId, message));
+        LOGGER.error(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     @Override
     public void error(String correlationId, String message, Throwable throwable) {
-	LOGGER.error(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
+        LOGGER.error(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
     }
 
     @Override
     public void trace(String correlationId, String message) {
-	LOGGER.trace(LogMessageUtil.formatLogMessage(correlationId, message));
+        LOGGER.trace(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     @Override
     public Optional<T> loadAndCreate(String correlationId, String yaml, Consumer<T> customization) {
-	try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
-	    trace(correlationId, "Loading new " + getTypeName() + ":\n" + yaml);
-	    T newItem = operation().load(inputStream).item();
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
+            trace(correlationId, "Loading new " + getTypeName() + ":\n" + yaml);
+            T newItem = operation().load(inputStream).item();
 
-	    trace(correlationId, "Customizing new " + getTypeName());
-	    customization.accept(newItem);
+            trace(correlationId, "Customizing new " + getTypeName());
+            customization.accept(newItem);
 
-	    trace(correlationId, "Creating new " + getTypeName());
-	    operation().resource(newItem).create();
-	    info(correlationId, "Created a new " + getTypeName());
+            trace(correlationId, "Creating new " + getTypeName());
+            operation().resource(newItem).create();
+            info(correlationId, "Created a new " + getTypeName());
 
-	    return Optional.of(newItem);
-	} catch (IOException exception) {
-	    error(correlationId, "Error while reading yaml byte stream", exception);
-	}
-	return Optional.empty();
+            return Optional.of(newItem);
+        } catch (IOException exception) {
+            error(correlationId, "Error while reading yaml byte stream", exception);
+        }
+        return Optional.empty();
     }
 }

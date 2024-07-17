@@ -34,18 +34,18 @@ public class AppDefinitionStatus extends ResourceStatus {
     }
 
     public AppDefinitionStatus(AppDefinitionHub fromHub) {
-	if (fromHub.getOperatorMessage().isPresent()) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage().get());
-	}
-	if (fromHub.getOperatorMessage().isPresent()) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
-	}
+        if (fromHub.getOperatorMessage().isPresent()) {
+            this.setOperatorMessage(fromHub.getOperatorMessage().get());
+        }
+        if (fromHub.getOperatorMessage().isPresent()) {
+            this.setOperatorStatus(fromHub.getOperatorStatus().get());
+        }
     }
 
     @Override
     public String toString() {
-	return "AppDefinitionStatus [getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()="
-		+ getOperatorMessage() + "]";
+        return "AppDefinitionStatus [getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()="
+                + getOperatorMessage() + "]";
     }
 
 }

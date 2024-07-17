@@ -23,11 +23,11 @@ import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpecResour
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 
 public interface WorkspaceResourceClient
-	extends CustomResourceClient<WorkspaceSpec, WorkspaceStatus, Workspace, WorkspaceSpecResourceList> {
+        extends CustomResourceClient<WorkspaceSpec, WorkspaceStatus, Workspace, WorkspaceSpecResourceList> {
 
     Workspace launch(String correlationId, WorkspaceSpec spec, long timeout, TimeUnit unit);
 
     default Workspace launch(String correlationId, WorkspaceSpec spec) {
-	return launch(correlationId, spec, 1, TimeUnit.MINUTES);
+        return launch(correlationId, spec, 1, TimeUnit.MINUTES);
     }
 }

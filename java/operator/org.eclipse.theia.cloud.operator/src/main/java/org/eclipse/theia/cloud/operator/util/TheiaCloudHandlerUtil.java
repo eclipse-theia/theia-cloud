@@ -49,37 +49,37 @@ public final class TheiaCloudHandlerUtil {
     }
 
     public static <T extends HasMetadata> Set<Integer> computeIdsOfMissingItems(int instances, List<T> existingItems,
-	    Function<T, Integer> getId) {
-	Set<Integer> missing = IntStream.rangeClosed(1, instances).boxed().collect(Collectors.toSet());
-	existingItems.stream()//
-		.map(getId)//
-		.forEach(missing::remove);
-	return missing;
+            Function<T, Integer> getId) {
+        Set<Integer> missing = IntStream.rangeClosed(1, instances).boxed().collect(Collectors.toSet());
+        existingItems.stream()//
+                .map(getId)//
+                .forEach(missing::remove);
+        return missing;
     }
 
     public static String getAppSelector(AppDefinition appDefinition, int instance) {
-	return asValidName(appDefinition.getSpec().getName() + "-" + instance);
+        return asValidName(appDefinition.getSpec().getName() + "-" + instance);
     }
 
     public static String getAppSelector(Session session) {
-	return asValidName(session.getSpec().getName() + "-" + session.getMetadata().getUid());
+        return asValidName(session.getSpec().getName() + "-" + session.getMetadata().getUid());
     }
 
     public static <T extends HasMetadata> T addOwnerReferenceToItem(String correlationId, String sessionResourceName,
-	    String sessionResourceUID, T item) {
-	OwnerReference serviceOwnerReference = createOwnerReference(sessionResourceName, sessionResourceUID);
-	LOGGER.info(formatLogMessage(correlationId, "Adding a new owner reference to " + item.getMetadata().getName()));
-	item.getMetadata().getOwnerReferences().add(serviceOwnerReference);
-	return item;
+            String sessionResourceUID, T item) {
+        OwnerReference serviceOwnerReference = createOwnerReference(sessionResourceName, sessionResourceUID);
+        LOGGER.info(formatLogMessage(correlationId, "Adding a new owner reference to " + item.getMetadata().getName()));
+        item.getMetadata().getOwnerReferences().add(serviceOwnerReference);
+        return item;
     }
 
     public static OwnerReference createOwnerReference(String sessionResourceName, String sessionResourceUID) {
-	OwnerReference ownerReference = new OwnerReference();
-	ownerReference.setApiVersion(HasMetadata.getApiVersion(Session.class));
-	ownerReference.setKind(Session.KIND);
-	ownerReference.setName(sessionResourceName);
-	ownerReference.setUid(sessionResourceUID);
-	return ownerReference;
+        OwnerReference ownerReference = new OwnerReference();
+        ownerReference.setApiVersion(HasMetadata.getApiVersion(Session.class));
+        ownerReference.setKind(Session.KIND);
+        ownerReference.setName(sessionResourceName);
+        ownerReference.setUid(sessionResourceUID);
+        return ownerReference;
     }
 
 }

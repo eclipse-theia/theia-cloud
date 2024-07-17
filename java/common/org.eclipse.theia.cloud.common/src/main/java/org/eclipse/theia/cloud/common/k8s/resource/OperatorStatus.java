@@ -21,8 +21,7 @@ package org.eclipse.theia.cloud.common.k8s.resource;
 public interface OperatorStatus {
 
     /**
-     * The default status describing that the resource is new and was not handled
-     * before.
+     * The default status describing that the resource is new and was not handled before.
      */
     String NEW = "NEW";
 

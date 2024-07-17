@@ -41,78 +41,79 @@ public class BandwidthLimiterImpl implements BandwidthLimiter {
 
     @Inject
     public BandwidthLimiterImpl(TheiaCloudOperatorArguments arguments) {
-	this.arguments = arguments;
+        this.arguments = arguments;
     }
 
     @Override
     public void limit(Deployment deployment, int downlinkLimit, int uplinkLimit, String correlationId) {
-	org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments.BandwidthLimiter limiter = arguments.getBandwidthLimiter();
-	if (limiter == null) {
-	    return;
-	}
-	switch (limiter) {
-	case K8SANNOTATION:
-	    addAnnotations(deployment, downlinkLimit, uplinkLimit);
-	    break;
-	case K8SANNOTATIONANDWONDERSHAPER:
-	    addAnnotations(deployment, downlinkLimit, uplinkLimit);
-	    addWondershaperInitContainer(deployment, downlinkLimit, uplinkLimit);
-	    break;
-	case WONDERSHAPER:
-	    addWondershaperInitContainer(deployment, downlinkLimit, uplinkLimit);
-	    break;
-	default:
-	    break;
-	}
+        org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments.BandwidthLimiter limiter = arguments
+                .getBandwidthLimiter();
+        if (limiter == null) {
+            return;
+        }
+        switch (limiter) {
+        case K8SANNOTATION:
+            addAnnotations(deployment, downlinkLimit, uplinkLimit);
+            break;
+        case K8SANNOTATIONANDWONDERSHAPER:
+            addAnnotations(deployment, downlinkLimit, uplinkLimit);
+            addWondershaperInitContainer(deployment, downlinkLimit, uplinkLimit);
+            break;
+        case WONDERSHAPER:
+            addWondershaperInitContainer(deployment, downlinkLimit, uplinkLimit);
+            break;
+        default:
+            break;
+        }
     }
 
     private void addAnnotations(Deployment deployment, int downlinkLimit, int uplinkLimit) {
-	Map<String, String> annotations = deployment.getSpec().getTemplate().getMetadata().getAnnotations();
-	if (annotations == null) {
-	    annotations = new LinkedHashMap<>();
-	    deployment.getSpec().getTemplate().getMetadata().setAnnotations(annotations);
-	}
-	if (downlinkLimit > 0) {
-	    annotations.put(KUBERNETES_IO_INGRESS_BANDWIDTH, downlinkLimit + K);
-	}
-	if (uplinkLimit > 0) {
-	    annotations.put(KUBERNETES_IO_EGRESS_BANDWIDTH, uplinkLimit + K);
-	}
+        Map<String, String> annotations = deployment.getSpec().getTemplate().getMetadata().getAnnotations();
+        if (annotations == null) {
+            annotations = new LinkedHashMap<>();
+            deployment.getSpec().getTemplate().getMetadata().setAnnotations(annotations);
+        }
+        if (downlinkLimit > 0) {
+            annotations.put(KUBERNETES_IO_INGRESS_BANDWIDTH, downlinkLimit + K);
+        }
+        if (uplinkLimit > 0) {
+            annotations.put(KUBERNETES_IO_EGRESS_BANDWIDTH, uplinkLimit + K);
+        }
     }
 
     private void addWondershaperInitContainer(Deployment deployment, int downlinkLimit, int uplinkLimit) {
-	if (downlinkLimit > 0 && uplinkLimit > 0) {
-	    List<Container> initContainers = deployment.getSpec().getTemplate().getSpec().getInitContainers();
+        if (downlinkLimit > 0 && uplinkLimit > 0) {
+            List<Container> initContainers = deployment.getSpec().getTemplate().getSpec().getInitContainers();
 
-	    Container wondershaperInitContainer = new Container();
-	    initContainers.add(wondershaperInitContainer);
+            Container wondershaperInitContainer = new Container();
+            initContainers.add(wondershaperInitContainer);
 
-	    wondershaperInitContainer.setName("wondershaper-init");
-	    wondershaperInitContainer.setImage(arguments.getWondershaperImage());
+            wondershaperInitContainer.setName("wondershaper-init");
+            wondershaperInitContainer.setImage(arguments.getWondershaperImage());
 
-	    SecurityContext securityContext = new SecurityContext();
-	    wondershaperInitContainer.setSecurityContext(securityContext);
+            SecurityContext securityContext = new SecurityContext();
+            wondershaperInitContainer.setSecurityContext(securityContext);
 
-	    Capabilities capabilities = new Capabilities();
-	    securityContext.setCapabilities(capabilities);
+            Capabilities capabilities = new Capabilities();
+            securityContext.setCapabilities(capabilities);
 
-	    List<String> add = new ArrayList<>();
-	    capabilities.setAdd(add);
-	    capabilities.getAdd().add("NET_ADMIN");
+            List<String> add = new ArrayList<>();
+            capabilities.setAdd(add);
+            capabilities.getAdd().add("NET_ADMIN");
 
-	    List<EnvVar> env = new ArrayList<>();
-	    wondershaperInitContainer.setEnv(env);
-	    EnvVar down = new EnvVar();
-	    env.add(down);
-	    EnvVar up = new EnvVar();
-	    env.add(up);
+            List<EnvVar> env = new ArrayList<>();
+            wondershaperInitContainer.setEnv(env);
+            EnvVar down = new EnvVar();
+            env.add(down);
+            EnvVar up = new EnvVar();
+            env.add(up);
 
-	    down.setName("DOWNLINK");
-	    down.setValue(String.valueOf(downlinkLimit));
+            down.setName("DOWNLINK");
+            down.setValue(String.valueOf(downlinkLimit));
 
-	    up.setName("UPLINK");
-	    up.setValue(String.valueOf(uplinkLimit));
-	}
+            up.setName("UPLINK");
+            up.setValue(String.valueOf(uplinkLimit));
+        }
     }
 
 }

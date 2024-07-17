@@ -28,32 +28,32 @@ public class StatusStep {
     }
 
     public StatusStep(String status) {
-	this(status, "");
+        this(status, "");
     }
 
     public StatusStep(String status, String message) {
-	this.status = status;
-	this.message = message;
+        this.status = status;
+        this.message = message;
     }
 
     public String getStatus() {
-	return status;
+        return status;
     }
 
     public void setStatus(String status) {
-	this.status = status;
+        this.status = status;
     }
 
     public String getMessage() {
-	return message;
+        return message;
     }
 
     public void setMessage(String message) {
-	this.message = message;
+        this.message = message;
     }
 
     @Override
     public String toString() {
-	return "StatusStep [status=" + status + ", message=" + message + "]";
+        return "StatusStep [status=" + status + ", message=" + message + "]";
     }
 }

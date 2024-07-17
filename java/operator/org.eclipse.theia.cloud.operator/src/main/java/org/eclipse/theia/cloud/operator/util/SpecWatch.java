@@ -44,94 +44,93 @@ public final class SpecWatch<S extends CustomResource<?, ?>> implements Watcher<
     private long lastActive;
 
     public SpecWatch(Map<String, S> cache, TriConsumer<Action, String, String> eventHandler, String resourceName,
-	    String correlationIdPrefix) {
-	this.lastActive = System.currentTimeMillis();
-	this.cache = cache;
-	this.eventHandler = eventHandler;
-	this.resourceName = resourceName;
-	this.correlationIdPrefix = correlationIdPrefix;
+            String correlationIdPrefix) {
+        this.lastActive = System.currentTimeMillis();
+        this.cache = cache;
+        this.eventHandler = eventHandler;
+        this.resourceName = resourceName;
+        this.correlationIdPrefix = correlationIdPrefix;
     }
 
     @Override
     public void eventReceived(Action action, S resource) {
-	lastActive = System.currentTimeMillis();
-	if (reconnectionTries > 0) {
-	    reconnectionTries = 0;
-	    LOGGER.info(formatLogMessage(correlationIdPrefix,
-		    getResourceName() + " did receive event. Resetting retry counter to 0."));
-	}
-	String correlationId = generateCorrelationId();
-	String uid = resource.getMetadata().getUid();
-	try {
-	    LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
-		    getResourceName() + " " + uid + " : received an event: " + action));
-	    if (cache.containsKey(uid)) {
-		LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
-			getResourceName() + " " + uid + " : already known. Check if outdated event"));
-		BigInteger knownResourceVersion = new BigInteger(cache.get(uid).getMetadata().getResourceVersion());
-		BigInteger receivedResourceVersion = new BigInteger(resource.getMetadata().getResourceVersion());
-		if (knownResourceVersion.compareTo(receivedResourceVersion) >= 1) {
-		    LOGGER.info(formatLogMessage(correlationIdPrefix, correlationId,
-			    getResourceName() + " " + uid + " : event is outdated"));
-		    return;
-		} else {
-		    LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
-			    getResourceName() + " " + uid + " : event is NOT outdated. Handle event"));
-		}
-	    }
+        lastActive = System.currentTimeMillis();
+        if (reconnectionTries > 0) {
+            reconnectionTries = 0;
+            LOGGER.info(formatLogMessage(correlationIdPrefix,
+                    getResourceName() + " did receive event. Resetting retry counter to 0."));
+        }
+        String correlationId = generateCorrelationId();
+        String uid = resource.getMetadata().getUid();
+        try {
+            LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
+                    getResourceName() + " " + uid + " : received an event: " + action));
+            if (cache.containsKey(uid)) {
+                LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
+                        getResourceName() + " " + uid + " : already known. Check if outdated event"));
+                BigInteger knownResourceVersion = new BigInteger(cache.get(uid).getMetadata().getResourceVersion());
+                BigInteger receivedResourceVersion = new BigInteger(resource.getMetadata().getResourceVersion());
+                if (knownResourceVersion.compareTo(receivedResourceVersion) >= 1) {
+                    LOGGER.info(formatLogMessage(correlationIdPrefix, correlationId,
+                            getResourceName() + " " + uid + " : event is outdated"));
+                    return;
+                } else {
+                    LOGGER.trace(formatLogMessage(correlationIdPrefix, correlationId,
+                            getResourceName() + " " + uid + " : event is NOT outdated. Handle event"));
+                }
+            }
 
-	    if (action == Action.ADDED || action == Action.MODIFIED) {
-		cache.put(uid, resource);
-	    }
-	    eventHandler.accept(action, uid, correlationId);
-	    if (action == Action.DELETED) {
-		cache.remove(uid);
-	    }
-	} catch (Exception e) {
-	    LOGGER.error(formatLogMessage(correlationIdPrefix,
-		    getResourceName() + " " + uid + " : error while handling event"), e);
-	    System.exit(-1);
-	}
+            if (action == Action.ADDED || action == Action.MODIFIED) {
+                cache.put(uid, resource);
+            }
+            eventHandler.accept(action, uid, correlationId);
+            if (action == Action.DELETED) {
+                cache.remove(uid);
+            }
+        } catch (Exception e) {
+            LOGGER.error(formatLogMessage(correlationIdPrefix,
+                    getResourceName() + " " + uid + " : error while handling event"), e);
+            System.exit(-1);
+        }
     }
 
     @Override
     public void onClose(WatcherException cause) {
-	lastActive = System.currentTimeMillis();
-	LOGGER.error(formatLogMessage(correlationIdPrefix, getResourceName() + " watch closed because of an exception"),
-		cause);
-	System.exit(-1);
+        lastActive = System.currentTimeMillis();
+        LOGGER.error(formatLogMessage(correlationIdPrefix, getResourceName() + " watch closed because of an exception"),
+                cause);
+        System.exit(-1);
     }
 
     @Override
     public void onClose() {
-	lastActive = System.currentTimeMillis();
-	LOGGER.info(formatLogMessage(correlationIdPrefix, getResourceName() + " watch closed"));
-	Watcher.super.onClose();
+        lastActive = System.currentTimeMillis();
+        LOGGER.info(formatLogMessage(correlationIdPrefix, getResourceName() + " watch closed"));
+        Watcher.super.onClose();
     }
 
     @Override
     public boolean reconnecting() {
-	reconnectionTries++;
-	if (reconnectionTries >= MAX_RECONNECTION_TRIES) {
-	    LOGGER.info(formatLogMessage(correlationIdPrefix, getResourceName() + " did not reconnect after "
-		    + MAX_RECONNECTION_TRIES + " tries. Restarting Operator."));
-	    System.exit(-1);
-	}
-	lastActive = System.currentTimeMillis();
-	LOGGER.info(
-		formatLogMessage(correlationIdPrefix, getResourceName() + " reconnecting (" + reconnectionTries + ")"));
-	return Watcher.super.reconnecting();
+        reconnectionTries++;
+        if (reconnectionTries >= MAX_RECONNECTION_TRIES) {
+            LOGGER.info(formatLogMessage(correlationIdPrefix, getResourceName() + " did not reconnect after "
+                    + MAX_RECONNECTION_TRIES + " tries. Restarting Operator."));
+            System.exit(-1);
+        }
+        lastActive = System.currentTimeMillis();
+        LOGGER.info(
+                formatLogMessage(correlationIdPrefix, getResourceName() + " reconnecting (" + reconnectionTries + ")"));
+        return Watcher.super.reconnecting();
     }
 
     public String getResourceName() {
-	return resourceName;
+        return resourceName;
     }
 
     /**
-     * @return the last timestamp when one of the {@link Watcher} actions was
-     *         invoked
+     * @return the last timestamp when one of the {@link Watcher} actions was invoked
      */
     public long getLastActive() {
-	return lastActive;
+        return lastActive;
     }
 }

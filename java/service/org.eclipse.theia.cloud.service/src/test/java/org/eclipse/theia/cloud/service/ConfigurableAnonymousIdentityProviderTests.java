@@ -33,8 +33,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 
 /**
- * Unit tests for
- * {@link org.eclipse.theia.cloud.service.ConfigurableAnonymousIdentityProvider}
+ * Unit tests for {@link org.eclipse.theia.cloud.service.ConfigurableAnonymousIdentityProvider}
  */
 @QuarkusTest
 class ConfigurableAnonymousIdentityProviderTests {
@@ -47,34 +46,34 @@ class ConfigurableAnonymousIdentityProviderTests {
 
     @Test
     void authenticate_useKeycloak_anonymousIdentity() {
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
 
-	Uni<SecurityIdentity> result = fixture.authenticate(AnonymousAuthenticationRequest.INSTANCE,
-		new TestAuthenticationRequestContext());
-	SecurityIdentity securityIdentity = result.await().indefinitely();
+        Uni<SecurityIdentity> result = fixture.authenticate(AnonymousAuthenticationRequest.INSTANCE,
+                new TestAuthenticationRequestContext());
+        SecurityIdentity securityIdentity = result.await().indefinitely();
 
-	assertTrue(securityIdentity.isAnonymous());
+        assertTrue(securityIdentity.isAnonymous());
     }
 
     @Test
     void authenticate_noKeycloak_authenticatedIdentity() {
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
 
-	Uni<SecurityIdentity> result = fixture.authenticate(AnonymousAuthenticationRequest.INSTANCE,
-		new TestAuthenticationRequestContext());
-	SecurityIdentity securityIdentity = result.await().indefinitely();
+        Uni<SecurityIdentity> result = fixture.authenticate(AnonymousAuthenticationRequest.INSTANCE,
+                new TestAuthenticationRequestContext());
+        SecurityIdentity securityIdentity = result.await().indefinitely();
 
-	assertFalse(securityIdentity.isAnonymous());
-	assertNotNull(securityIdentity.getPrincipal());
-	assertTrue(securityIdentity.getRoles().isEmpty());
+        assertFalse(securityIdentity.isAnonymous());
+        assertNotNull(securityIdentity.getPrincipal());
+        assertTrue(securityIdentity.getRoles().isEmpty());
     }
 
     class TestAuthenticationRequestContext implements AuthenticationRequestContext {
 
-	@Override
-	public Uni<SecurityIdentity> runBlocking(Supplier<SecurityIdentity> function) {
-	    return Uni.createFrom().item(function);
-	}
+        @Override
+        public Uni<SecurityIdentity> runBlocking(Supplier<SecurityIdentity> function) {
+            return Uni.createFrom().item(function);
+        }
 
     }
 }

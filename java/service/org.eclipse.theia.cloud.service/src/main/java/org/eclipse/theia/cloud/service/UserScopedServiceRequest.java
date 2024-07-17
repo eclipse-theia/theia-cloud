@@ -26,10 +26,10 @@ public class UserScopedServiceRequest extends ServiceRequest {
     public String user;
 
     public UserScopedServiceRequest(String kind) {
-	super(kind);
+        super(kind);
     }
 
     public UserScopedServiceRequest(String kind, String appId) {
-	super(kind, appId);
+        super(kind, appId);
     }
 }
