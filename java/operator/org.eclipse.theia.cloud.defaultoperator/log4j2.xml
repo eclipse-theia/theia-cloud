@@ -1,66 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="warn">
-	<Appenders>
-		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout
-				pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
-		</Console>
-	</Appenders>
-	<Loggers>
-		<Logger name="org.eclipse.theia.cloud.defaultoperator" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.bandwidth" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.di" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.handler" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.ingress" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.messaging" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.plugins" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.pv" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.replacements" level="trace"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.util.ResourceUtil" level="warn"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.KillAfterRunnable" level="warn"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Logger name="org.eclipse.theia.cloud.operator.TheiaCloudImpl" level="info"
-			additivity="false">
-			<AppenderRef ref="Console" />
-		</Logger>
-		<Root level="warn">
-			<AppenderRef ref="Console" />
-		</Root>
-	</Loggers>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.eclipse.theia.cloud.defaultoperator" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.bandwidth" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.di" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.handler" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.ingress" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.messaging" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.plugins" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.pv" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.replacements" level="trace"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.util.ResourceUtil" level="warn"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.KillAfterRunnable" level="warn"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Logger name="org.eclipse.theia.cloud.operator.TheiaCloudImpl" level="info"
+            additivity="false">
+            <AppenderRef ref="Console" />
+        </Logger>
+        <Root level="warn">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
 </Configuration>
