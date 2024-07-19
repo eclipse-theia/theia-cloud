@@ -55,11 +55,11 @@ public final class TheiaCloudDeploymentUtil {
     }
 
     public static String getDeploymentName(AppDefinition appDefinition, int instance) {
-        return NamingUtil.createName(appDefinition, instance, DEPLOYMENT_NAME);
+        return NamingUtil.createName(appDefinition, instance);
     }
 
     public static String getDeploymentName(Session session) {
-        return NamingUtil.createName(session, DEPLOYMENT_NAME);
+        return NamingUtil.createName(session);
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Deployment deployment) {

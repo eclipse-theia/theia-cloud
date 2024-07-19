@@ -46,11 +46,11 @@ public final class TheiaCloudServiceUtil {
     }
 
     public static String getServiceName(AppDefinition appDefinition, int instance) {
-        return NamingUtil.createName(appDefinition, instance, SERVICE_NAME);
+        return NamingUtil.createName(appDefinition, instance);
     }
 
     public static String getServiceName(Session session) {
-        return NamingUtil.createName(session, SERVICE_NAME);
+        return NamingUtil.createName(session);
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Service service) {
