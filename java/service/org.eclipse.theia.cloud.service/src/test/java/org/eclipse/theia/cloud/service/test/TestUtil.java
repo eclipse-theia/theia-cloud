@@ -28,7 +28,6 @@ import io.quarkus.security.Authenticated;
 
 /**
  * Utility methods for testing service functionality.
- *
  */
 public final class TestUtil {
 
@@ -36,32 +35,29 @@ public final class TestUtil {
     }
 
     /**
-     * Verifies that the given method does not allow any anonymous access by
-     * checking:
+     * Verifies that the given method does not allow any anonymous access by checking:
      * <ul>
-     * <li>That either the class or the method require authentication and do not
-     * permit all access
-     * <li>The method and/or its class declare the {@link NoAnonymousAccess}
-     * annotation
+     * <li>That either the class or the method require authentication and do not permit all access
+     * <li>The method and/or its class declare the {@link NoAnonymousAccess} annotation
      * </ul>
      * 
      * @param method The method to verify
      */
     public static void assertNoAnonymousAccessAnnotations(Method method) {
-	Class<?> clazz = method.getDeclaringClass();
+        Class<?> clazz = method.getDeclaringClass();
 
-	boolean classHasAccessControl = ((clazz.getDeclaredAnnotation(Authenticated.class) != null
-		|| clazz.getDeclaredAnnotation(RolesAllowed.class) != null))
-		&& clazz.getDeclaredAnnotation(PermitAll.class) == null;
-	boolean methodHasAccessControl = (method.getDeclaredAnnotation(Authenticated.class) != null
-		|| method.getDeclaredAnnotation(RolesAllowed.class) != null);
-	boolean methodNoPermitAll = method.getDeclaredAnnotation(PermitAll.class) == null;
-	assertTrue((classHasAccessControl || methodHasAccessControl) && methodNoPermitAll,
-		"The method and/or its class have declared restricting access control annotations.");
+        boolean classHasAccessControl = ((clazz.getDeclaredAnnotation(Authenticated.class) != null
+                || clazz.getDeclaredAnnotation(RolesAllowed.class) != null))
+                && clazz.getDeclaredAnnotation(PermitAll.class) == null;
+        boolean methodHasAccessControl = (method.getDeclaredAnnotation(Authenticated.class) != null
+                || method.getDeclaredAnnotation(RolesAllowed.class) != null);
+        boolean methodNoPermitAll = method.getDeclaredAnnotation(PermitAll.class) == null;
+        assertTrue((classHasAccessControl || methodHasAccessControl) && methodNoPermitAll,
+                "The method and/or its class have declared restricting access control annotations.");
 
-	boolean hasNoAnonymousAccessAnnotation = method.getDeclaredAnnotation(NoAnonymousAccess.class) != null
-		|| clazz.getDeclaredAnnotation(NoAnonymousAccess.class) != null;
-	assertTrue(hasNoAnonymousAccessAnnotation,
-		"The method and/or its class declare the annotation to forbid any anonymous access.");
+        boolean hasNoAnonymousAccessAnnotation = method.getDeclaredAnnotation(NoAnonymousAccess.class) != null
+                || clazz.getDeclaredAnnotation(NoAnonymousAccess.class) != null;
+        assertTrue(hasNoAnonymousAccessAnnotation,
+                "The method and/or its class declare the annotation to forbid any anonymous access.");
     }
 }

@@ -51,142 +51,142 @@ public final class K8sUtil {
     private TheiaCloudClient CLIENT = new DefaultTheiaCloudClient(KUBERNETES);
 
     public Workspace createWorkspace(String correlationId, UserWorkspace data) {
-	WorkspaceSpec spec = new WorkspaceSpec(data.name, data.label, data.appDefinition, data.user);
-	return CLIENT.workspaces().launch(correlationId, spec);
+        WorkspaceSpec spec = new WorkspaceSpec(data.name, data.label, data.appDefinition, data.user);
+        return CLIENT.workspaces().launch(correlationId, spec);
     }
 
     public boolean deleteWorkspace(String correlationId, String workspaceName) {
-	try {
-	    CLIENT.workspaces().delete(correlationId, workspaceName);
-	} catch (KubernetesClientException e) {
-	    return false;
-	}
-	return true;
+        try {
+            CLIENT.workspaces().delete(correlationId, workspaceName);
+        } catch (KubernetesClientException e) {
+            return false;
+        }
+        return true;
     }
 
     public List<SessionSpec> listSessions(String user) {
-	return CLIENT.sessions().specs(user);
+        return CLIENT.sessions().specs(user);
     }
 
     public Optional<SessionSpec> findExistingSession(SessionSpec spec) {
-	return CLIENT.sessions().specs().stream().filter(sessionSpec -> sessionSpec.equals(spec)).findAny();
+        return CLIENT.sessions().specs().stream().filter(sessionSpec -> sessionSpec.equals(spec)).findAny();
     }
 
     public Optional<SessionSpec> findSession(String sessionName) {
-	return CLIENT.sessions().get(sessionName).map(Session::getSpec);
+        return CLIENT.sessions().get(sessionName).map(Session::getSpec);
     }
 
     public String launchEphemeralSession(String correlationId, String appDefinition, String user, int timeout,
-	    EnvironmentVars env) {
-	SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition, false), appDefinition, user);
-	sessionSpec = sessionSpecWithEnv(sessionSpec, env);
+            EnvironmentVars env) {
+        SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition, false), appDefinition, user);
+        sessionSpec = sessionSpecWithEnv(sessionSpec, env);
 
-	return launchSession(correlationId, sessionSpec, timeout);
+        return launchSession(correlationId, sessionSpec, timeout);
     }
 
     public String launchWorkspaceSession(String correlationId, UserWorkspace workspace, int timeout,
-	    EnvironmentVars env) {
-	SessionSpec sessionSpec = new SessionSpec(getSessionName(workspace.name), workspace.appDefinition,
-		workspace.user, workspace.name);
-	sessionSpec = sessionSpecWithEnv(sessionSpec, env);
+            EnvironmentVars env) {
+        SessionSpec sessionSpec = new SessionSpec(getSessionName(workspace.name), workspace.appDefinition,
+                workspace.user, workspace.name);
+        sessionSpec = sessionSpecWithEnv(sessionSpec, env);
 
-	return launchSession(correlationId, sessionSpec, timeout);
+        return launchSession(correlationId, sessionSpec, timeout);
     }
 
     private String launchSession(String correlationId, SessionSpec sessionSpec, int timeout) {
-	SessionStatus status = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getNonNullStatus();
-	TheiaCloudWebException.throwIfErroneous(status);
-	return status.getUrl();
+        SessionStatus status = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getNonNullStatus();
+        TheiaCloudWebException.throwIfErroneous(status);
+        return status.getUrl();
     }
 
     private SessionSpec sessionSpecWithEnv(SessionSpec spec, EnvironmentVars env) {
-	if (env == null)
-	    return spec;
+        if (env == null)
+            return spec;
 
-	return new SessionSpec(spec.getName(), spec.getAppDefinition(), spec.getUser(), spec.getWorkspace(),
-		env.fromMap, env.fromConfigMaps, env.fromSecrets);
+        return new SessionSpec(spec.getName(), spec.getAppDefinition(), spec.getUser(), spec.getWorkspace(),
+                env.fromMap, env.fromConfigMaps, env.fromSecrets);
     }
 
     public boolean reportSessionActivity(String correlationId, String sessionName) {
-	return CLIENT.sessions().reportActivity(correlationId, sessionName);
+        return CLIENT.sessions().reportActivity(correlationId, sessionName);
     }
 
     public boolean stopSession(String correlationId, String sessionName, String user) {
-	try {
-	    CLIENT.sessions().delete(correlationId, sessionName);
-	} catch (KubernetesClientException e) {
-	    return false;
-	}
-	return true;
+        try {
+            CLIENT.sessions().delete(correlationId, sessionName);
+        } catch (KubernetesClientException e) {
+            return false;
+        }
+        return true;
     }
 
     public Optional<WorkspaceSpec> findWorkspace(String workspaceName) {
-	return CLIENT.workspaces().get(workspaceName).map(Workspace::getSpec);
+        return CLIENT.workspaces().get(workspaceName).map(Workspace::getSpec);
     }
 
     public Optional<Workspace> getWorkspace(String user, String workspaceName) {
-	return CLIENT.workspaces().get(workspaceName)
-		.filter(workspace -> Objects.equals(workspace.getSpec().getUser(), user));
+        return CLIENT.workspaces().get(workspaceName)
+                .filter(workspace -> Objects.equals(workspace.getSpec().getUser(), user));
     }
 
     public List<UserWorkspace> listWorkspaces(String user) {
-	List<Workspace> workspaces = CLIENT.workspaces().list(user);
+        List<Workspace> workspaces = CLIENT.workspaces().list(user);
 
-	List<UserWorkspace> userWorkspaces = workspaces.stream()
-		.map(workspace -> new UserWorkspace(workspace.getSpec())).collect(Collectors.toList());
+        List<UserWorkspace> userWorkspaces = workspaces.stream()
+                .map(workspace -> new UserWorkspace(workspace.getSpec())).collect(Collectors.toList());
 
-	for (UserWorkspace userWorkspace : userWorkspaces) {
-	    String sessionName = getSessionName(userWorkspace.name);
-	    userWorkspace.active = CLIENT.sessions().has(sessionName);
-	}
-	return userWorkspaces;
+        for (UserWorkspace userWorkspace : userWorkspaces) {
+            String sessionName = getSessionName(userWorkspace.name);
+            userWorkspace.active = CLIENT.sessions().has(sessionName);
+        }
+        return userWorkspaces;
     }
 
     public SessionPerformance reportPerformance(String sessionName) {
-	Optional<Session> optionalSession = CLIENT.sessions().get(sessionName);
-	if (optionalSession.isEmpty()) {
-	    return null;
-	}
-	Session session = optionalSession.get();
-	Optional<Pod> optionalPod = getPodForSession(session);
-	if (optionalPod.isEmpty()) {
-	    return null;
-	}
-	PodMetrics test = CLIENT.kubernetes().top().pods().metrics(CLIENT.namespace(),
-		optionalPod.get().getMetadata().getName());
-	Optional<ContainerMetrics> optionalContainer = test.getContainers().stream()
-		.filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
-	if (optionalContainer.isEmpty()) {
-	    return null;
-	}
-	ContainerMetrics container = optionalContainer.get();
-	return new SessionPerformance(container.getUsage().get("cpu").getAmount(),
-		container.getUsage().get("cpu").getFormat(),
-		String.valueOf(Quantity.getAmountInBytes(container.getUsage().get("memory"))), "B");
+        Optional<Session> optionalSession = CLIENT.sessions().get(sessionName);
+        if (optionalSession.isEmpty()) {
+            return null;
+        }
+        Session session = optionalSession.get();
+        Optional<Pod> optionalPod = getPodForSession(session);
+        if (optionalPod.isEmpty()) {
+            return null;
+        }
+        PodMetrics test = CLIENT.kubernetes().top().pods().metrics(CLIENT.namespace(),
+                optionalPod.get().getMetadata().getName());
+        Optional<ContainerMetrics> optionalContainer = test.getContainers().stream()
+                .filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
+        if (optionalContainer.isEmpty()) {
+            return null;
+        }
+        ContainerMetrics container = optionalContainer.get();
+        return new SessionPerformance(container.getUsage().get("cpu").getAmount(),
+                container.getUsage().get("cpu").getFormat(),
+                String.valueOf(Quantity.getAmountInBytes(container.getUsage().get("memory"))), "B");
     }
 
     public Optional<Pod> getPodForSession(Session session) {
-	PodList podlist = CLIENT.kubernetes().pods().list();
-	return podlist.getItems().stream().filter(pod -> isPodFromSession(pod, session)).findFirst();
+        PodList podlist = CLIENT.kubernetes().pods().list();
+        return podlist.getItems().stream().filter(pod -> isPodFromSession(pod, session)).findFirst();
     }
 
     private boolean isPodFromSession(Pod pod, Session session) {
-	Optional<Container> optionalContainer = pod.getSpec().getContainers().stream()
-		.filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
-	if (optionalContainer.isEmpty()) {
-	    return false;
-	}
-	Container container = optionalContainer.get();
-	Optional<EnvVar> optionalEnv = container.getEnv().stream()
-		.filter(env -> env.getName().equals("THEIA_CLOUD_SESSION_NAME")).findFirst();
-	if (optionalEnv.isEmpty()) {
-	    return false;
-	}
-	EnvVar env = optionalEnv.get();
-	return env.getValue().equals(session.getSpec().getName()) ? true : false;
+        Optional<Container> optionalContainer = pod.getSpec().getContainers().stream()
+                .filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
+        if (optionalContainer.isEmpty()) {
+            return false;
+        }
+        Container container = optionalContainer.get();
+        Optional<EnvVar> optionalEnv = container.getEnv().stream()
+                .filter(env -> env.getName().equals("THEIA_CLOUD_SESSION_NAME")).findFirst();
+        if (optionalEnv.isEmpty()) {
+            return false;
+        }
+        EnvVar env = optionalEnv.get();
+        return env.getValue().equals(session.getSpec().getName()) ? true : false;
     }
 
     public boolean hasAppDefinition(String appDefinition) {
-	return CLIENT.appDefinitions().get(appDefinition).isPresent();
+        return CLIENT.appDefinitions().get(appDefinition).isPresent();
     }
 }

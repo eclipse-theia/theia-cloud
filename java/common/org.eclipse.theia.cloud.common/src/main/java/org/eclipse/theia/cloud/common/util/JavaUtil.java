@@ -27,13 +27,13 @@ public final class JavaUtil {
     }
 
     public static <T, V> Entry<T, V> tuple(T a, V b) {
-	return new AbstractMap.SimpleEntry<T, V>(a, b);
+        return new AbstractMap.SimpleEntry<T, V>(a, b);
     }
 
     public static <T> UnaryOperator<T> toUnary(Consumer<T> consumer) {
-	return item -> {
-	    consumer.accept(item);
-	    return item;
-	};
+        return item -> {
+            consumer.accept(item);
+            return item;
+        };
     }
 }

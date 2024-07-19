@@ -42,62 +42,62 @@ public final class TheiaCloudIngressUtil {
     }
 
     public static boolean checkForExistingIngressAndAddOwnerReferencesIfMissing(NamespacedKubernetesClient client,
-	    String namespace, AppDefinition appDefinition, String correlationId) {
-	Optional<Ingress> existingIngressWithParentAppDefinition = K8sUtil.getExistingIngress(client, namespace,
-		appDefinition.getMetadata().getName(), appDefinition.getMetadata().getUid());
-	if (existingIngressWithParentAppDefinition.isPresent()) {
-	    return true;
-	}
-	Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace,
-		appDefinition.getSpec().getIngressname());
-	if (ingress.isPresent()) {
-	    OwnerReference ownerReference = new OwnerReference();
-	    ownerReference.setApiVersion(HasMetadata.getApiVersion(AppDefinition.class));
-	    ownerReference.setKind(AppDefinition.KIND);
-	    ownerReference.setName(appDefinition.getMetadata().getName());
-	    ownerReference.setUid(appDefinition.getMetadata().getUid());
-	    addOwnerReferenceToIngress(client, namespace, ingress.get(), ownerReference);
-	}
-	return ingress.isPresent();
+            String namespace, AppDefinition appDefinition, String correlationId) {
+        Optional<Ingress> existingIngressWithParentAppDefinition = K8sUtil.getExistingIngress(client, namespace,
+                appDefinition.getMetadata().getName(), appDefinition.getMetadata().getUid());
+        if (existingIngressWithParentAppDefinition.isPresent()) {
+            return true;
+        }
+        Optional<Ingress> ingress = K8sUtil.getExistingIngress(client, namespace,
+                appDefinition.getSpec().getIngressname());
+        if (ingress.isPresent()) {
+            OwnerReference ownerReference = new OwnerReference();
+            ownerReference.setApiVersion(HasMetadata.getApiVersion(AppDefinition.class));
+            ownerReference.setKind(AppDefinition.KIND);
+            ownerReference.setName(appDefinition.getMetadata().getName());
+            ownerReference.setUid(appDefinition.getMetadata().getUid());
+            addOwnerReferenceToIngress(client, namespace, ingress.get(), ownerReference);
+        }
+        return ingress.isPresent();
     }
 
     public static String getIngressName(AppDefinition appDefinition) {
-	return appDefinition.getSpec().getIngressname();
+        return appDefinition.getSpec().getIngressname();
     }
 
     public static void addOwnerReferenceToIngress(NamespacedKubernetesClient client, String namespace, Ingress ingress,
-	    OwnerReference ownerReference) {
-	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName()).edit(JavaUtil
-		.toUnary(ingressToEdit -> ingressToEdit.getMetadata().getOwnerReferences().add(ownerReference)));
+            OwnerReference ownerReference) {
+        client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName()).edit(JavaUtil
+                .toUnary(ingressToEdit -> ingressToEdit.getMetadata().getOwnerReferences().add(ownerReference)));
     }
 
     public static void removeIngressRule(NamespacedKubernetesClient client, String namespace, Ingress ingress,
-	    String path, String correlationId) {
-	client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName())
-		.edit(JavaUtil.toUnary(ingressToEdit -> removeIngressRule(ingressToEdit, path, correlationId)));
+            String path, String correlationId) {
+        client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName())
+                .edit(JavaUtil.toUnary(ingressToEdit -> removeIngressRule(ingressToEdit, path, correlationId)));
     }
 
     private static void removeIngressRule(Ingress ingressToEdit, String path, String correlationId) {
-	String ingressPath = path + AddedHandlerUtil.INGRESS_REWRITE_PATH;
-	IngressRule ruleToDelete = null;
-	for (IngressRule rule : ingressToEdit.getSpec().getRules()) {
-	    HTTPIngressRuleValue ingressRuleValue = rule.getHttp();
-	    if (ingressRuleValue == null) {
-		continue;
-	    }
-	    for (HTTPIngressPath httpIngressPath : ingressRuleValue.getPaths()) {
-		if (ingressPath.equals(httpIngressPath.getPath())) {
-		    ruleToDelete = rule;
-		    break;
-		} else {
-		    LOGGER.trace(formatLogMessage(correlationId, httpIngressPath.getPath() + " is NOT " + ingressPath));
-		}
-	    }
-	}
-	if (ruleToDelete != null) {
-	    LOGGER.info(formatLogMessage(correlationId, "Removing ingress rule for path " + path));
-	    ingressToEdit.getSpec().getRules().remove(ruleToDelete);
-	}
+        String ingressPath = path + AddedHandlerUtil.INGRESS_REWRITE_PATH;
+        IngressRule ruleToDelete = null;
+        for (IngressRule rule : ingressToEdit.getSpec().getRules()) {
+            HTTPIngressRuleValue ingressRuleValue = rule.getHttp();
+            if (ingressRuleValue == null) {
+                continue;
+            }
+            for (HTTPIngressPath httpIngressPath : ingressRuleValue.getPaths()) {
+                if (ingressPath.equals(httpIngressPath.getPath())) {
+                    ruleToDelete = rule;
+                    break;
+                } else {
+                    LOGGER.trace(formatLogMessage(correlationId, httpIngressPath.getPath() + " is NOT " + ingressPath));
+                }
+            }
+        }
+        if (ruleToDelete != null) {
+            LOGGER.info(formatLogMessage(correlationId, "Removing ingress rule for path " + path));
+            ingressToEdit.getSpec().getRules().remove(ruleToDelete);
+        }
     }
 
 }

@@ -26,19 +26,19 @@ public abstract class ResourceStatus {
     private String operatorMessage;
 
     public String getOperatorStatus() {
-	return operatorStatus;
+        return operatorStatus;
     }
 
     public void setOperatorStatus(String operatorStatus) {
-	this.operatorStatus = operatorStatus;
+        this.operatorStatus = operatorStatus;
     }
 
     public String getOperatorMessage() {
-	return operatorMessage;
+        return operatorMessage;
     }
 
     public void setOperatorMessage(String operatorMessage) {
-	this.operatorMessage = operatorMessage;
+        this.operatorMessage = operatorMessage;
     }
 
 }

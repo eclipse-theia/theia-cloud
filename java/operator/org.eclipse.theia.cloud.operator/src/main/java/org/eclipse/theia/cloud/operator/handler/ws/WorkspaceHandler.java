@@ -19,22 +19,22 @@ import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 
 public interface WorkspaceHandler {
     default boolean workspaceAdded(Workspace workspace, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean workspaceDeleted(Workspace workspace, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean workspaceModified(Workspace workspace, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean workspaceErrored(Workspace workspace, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean workspaceBookmarked(Workspace workspace, String correlationId) {
-	return true;
+        return true;
     }
 }

@@ -46,39 +46,39 @@ public class UserWorkspace {
     }
 
     public UserWorkspace(String appDefinition, String user) {
-	this(appDefinition, user, null);
+        this(appDefinition, user, null);
     }
 
     public UserWorkspace(String appDefinition, String user, String label) {
-	this(appDefinition, user, null, label);
+        this(appDefinition, user, null, label);
     }
 
     public UserWorkspace(String appDefinition, String user, String name, String label) {
-	this.name = Optional.ofNullable(asValidName(name))
-		.orElseGet(() -> generateUniqueWorkspaceName(user, appDefinition));
-	this.label = Optional.ofNullable(label).orElseGet(() -> generateWorkspaceLabel(user, appDefinition));
-	this.appDefinition = appDefinition;
-	this.user = user;
+        this.name = Optional.ofNullable(asValidName(name))
+                .orElseGet(() -> generateUniqueWorkspaceName(user, appDefinition));
+        this.label = Optional.ofNullable(label).orElseGet(() -> generateWorkspaceLabel(user, appDefinition));
+        this.appDefinition = appDefinition;
+        this.user = user;
     }
 
     public UserWorkspace(WorkspaceSpec data) {
-	this(data.getAppDefinition(), data.getUser(), data.getName(), data.getLabel());
+        this(data.getAppDefinition(), data.getUser(), data.getName(), data.getLabel());
     }
 
     @Schema(hidden = true)
     public void setActive(boolean active) {
-	this.active = active;
+        this.active = active;
     }
 
     @Schema(hidden = true)
     public boolean isActive() {
-	return active;
+        return active;
     }
 
     @Override
     public String toString() {
-	return "UserWorkspace [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
-		+ user + ", active=" + active + "]";
+        return "UserWorkspace [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
+                + user + ", active=" + active + "]";
     }
 
 }

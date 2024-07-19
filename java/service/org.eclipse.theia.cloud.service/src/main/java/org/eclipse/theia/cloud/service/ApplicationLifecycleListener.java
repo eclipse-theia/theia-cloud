@@ -36,34 +36,34 @@ public class ApplicationLifecycleListener {
     protected Logger logger;
 
     protected void onStart(@Observes StartupEvent event) {
-	logger = Logger.getLogger(getClass());
-	logConfiguration();
+        logger = Logger.getLogger(getClass());
+        logConfiguration();
     }
 
     private void logConfiguration() {
-	logConfigurationSources();
-	logQuarkusConfiguration();
+        logConfigurationSources();
+        logQuarkusConfiguration();
     }
 
     private void logConfigurationSources() {
-	for (ConfigSource configSource : ConfigProvider.getConfig().getConfigSources()) {
-	    logger.info(configSource.getName() + " (" + configSource.getOrdinal() + ")");
-	    logger.info(new JsonObject(new HashMap<String, Object>(configSource.getProperties())).encodePrettily());
-	}
+        for (ConfigSource configSource : ConfigProvider.getConfig().getConfigSources()) {
+            logger.info(configSource.getName() + " (" + configSource.getOrdinal() + ")");
+            logger.info(new JsonObject(new HashMap<String, Object>(configSource.getProperties())).encodePrettily());
+        }
     }
 
     private void logQuarkusConfiguration() {
-	Config configuration = ConfigProvider.getConfig();
-	Map<String, Object> quarkusProperties = StreamSupport
-		.stream(configuration.getPropertyNames().spliterator(), false).filter(this::isQuarkusProperty) //
-		.collect(Collectors.toMap(Function.identity(),
-			property -> configuration.getValue(property, String.class)));
-	logger.info("Resulting Quarkus Configuration");
-	logger.info(new JsonObject(quarkusProperties).encodePrettily());
+        Config configuration = ConfigProvider.getConfig();
+        Map<String, Object> quarkusProperties = StreamSupport
+                .stream(configuration.getPropertyNames().spliterator(), false).filter(this::isQuarkusProperty) //
+                .collect(Collectors.toMap(Function.identity(),
+                        property -> configuration.getValue(property, String.class)));
+        logger.info("Resulting Quarkus Configuration");
+        logger.info(new JsonObject(quarkusProperties).encodePrettily());
     }
 
     private boolean isQuarkusProperty(Object name) {
-	return name.toString().startsWith("quarkus.");
+        return name.toString().startsWith("quarkus.");
     }
 
 }

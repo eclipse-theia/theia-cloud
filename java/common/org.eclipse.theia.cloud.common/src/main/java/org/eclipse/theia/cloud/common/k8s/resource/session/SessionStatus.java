@@ -46,58 +46,58 @@ public class SessionStatus extends ResourceStatus {
     }
 
     public SessionStatus(SessionHub fromHub) {
-	if (fromHub.getOperatorMessage().isPresent()) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage().get());
-	}
-	if (fromHub.getOperatorStatus().isPresent()) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
-	}
-	this.url = fromHub.getUrl().orElse(null);
-	this.error = fromHub.getError().orElse(null);
-	this.lastActivity = fromHub.getLastActivity().orElse((long) 0);
+        if (fromHub.getOperatorMessage().isPresent()) {
+            this.setOperatorMessage(fromHub.getOperatorMessage().get());
+        }
+        if (fromHub.getOperatorStatus().isPresent()) {
+            this.setOperatorStatus(fromHub.getOperatorStatus().get());
+        }
+        this.url = fromHub.getUrl().orElse(null);
+        this.error = fromHub.getError().orElse(null);
+        this.lastActivity = fromHub.getLastActivity().orElse((long) 0);
     }
 
     public String getUrl() {
-	return url;
+        return url;
     }
 
     public boolean hasUrl() {
-	return getUrl() != null && !getUrl().isBlank();
+        return getUrl() != null && !getUrl().isBlank();
     }
 
     public String getError() {
-	return error;
+        return error;
     }
 
     public boolean hasError() {
-	return TheiaCloudError.isErrorString(getError());
+        return TheiaCloudError.isErrorString(getError());
     }
 
     public long getLastActivity() {
-	return lastActivity;
+        return lastActivity;
     }
 
     public void setUrl(String url) {
-	this.url = url;
+        this.url = url;
     }
 
     public void setError(TheiaCloudError error) {
-	setError(error.asString());
+        setError(error.asString());
     }
 
     public void setError(String error) {
-	this.error = error;
+        this.error = error;
     }
 
     public void setLastActivity(long lastActivity) {
-	this.lastActivity = lastActivity;
+        this.lastActivity = lastActivity;
     }
 
     @Override
     public String toString() {
-	return "SessionStatus [url=" + url + ", error=" + error + ", lastActivity=" + lastActivity
-		+ ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
-		+ "]";
+        return "SessionStatus [url=" + url + ", error=" + error + ", lastActivity=" + lastActivity
+                + ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
+                + "]";
     }
 
 }

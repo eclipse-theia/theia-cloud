@@ -22,12 +22,12 @@ import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 public class DefaultTheiaCloudOperatorLauncher extends LeaderElectionTheiaCloudOperatorLauncher {
 
     public static void main(String[] args) throws InterruptedException {
-	new DefaultTheiaCloudOperatorLauncher().runMain(args);
+        new DefaultTheiaCloudOperatorLauncher().runMain(args);
     }
 
     @Override
     public AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments) {
-	return new DefaultTheiaCloudOperatorModule(arguments);
+        return new DefaultTheiaCloudOperatorModule(arguments);
     }
 
 }

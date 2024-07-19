@@ -43,97 +43,97 @@ public class LazyWorkspaceHandler implements WorkspaceHandler {
 
     @Override
     public boolean workspaceAdded(Workspace workspace, String correlationId) {
-	try {
-	    return doWorkspaceAdded(workspace, correlationId);
-	} catch (Throwable ex) {
-	    LOGGER.error(formatLogMessage(correlationId,
-		    "An unexpected exception occurred while adding Workspace: " + workspace), ex);
-	    client.workspaces().updateStatus(correlationId, workspace, status -> {
-		status.setOperatorStatus(OperatorStatus.ERROR);
-		status.setOperatorMessage(
-			"Unexpected error. Please check the logs for correlationId: " + correlationId);
-	    });
-	    return false;
-	}
+        try {
+            return doWorkspaceAdded(workspace, correlationId);
+        } catch (Throwable ex) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "An unexpected exception occurred while adding Workspace: " + workspace), ex);
+            client.workspaces().updateStatus(correlationId, workspace, status -> {
+                status.setOperatorStatus(OperatorStatus.ERROR);
+                status.setOperatorMessage(
+                        "Unexpected error. Please check the logs for correlationId: " + correlationId);
+            });
+            return false;
+        }
     }
 
     protected boolean doWorkspaceAdded(Workspace workspace, String correlationId) {
-	LOGGER.info(formatLogMessage(correlationId, "Handling " + workspace));
+        LOGGER.info(formatLogMessage(correlationId, "Handling " + workspace));
 
-	// Check current session status and ignore if handling failed or finished before
-	Optional<WorkspaceStatus> status = Optional.ofNullable(workspace.getStatus());
-	String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
-	if (OperatorStatus.HANDLED.equals(operatorStatus)) {
-	    LOGGER.trace(formatLogMessage(correlationId,
-		    "Workspace was successfully handled before and is skipped now. Workspace: " + workspace));
-	    return true;
-	}
-	if (OperatorStatus.HANDLING.equals(operatorStatus)) {
-	    // TODO We should not return but continue where we left off.
-	    LOGGER.warn(formatLogMessage(correlationId,
-		    "Workspace handling was unexpectedly interrupted before. Workspace is skipped now and its status is set to ERROR. Workspace: "
-			    + workspace));
-	    client.workspaces().updateStatus(correlationId, workspace, s -> {
-		s.setOperatorStatus(OperatorStatus.ERROR);
-		s.setOperatorMessage("Handling was unexpectedly interrupted before. CorrelationId: " + correlationId);
-	    });
-	    return false;
-	}
-	if (OperatorStatus.ERROR.equals(operatorStatus)) {
-	    LOGGER.warn(formatLogMessage(correlationId,
-		    "Workspace could not be handled before and is skipped now. Workspace: " + workspace));
-	    return false;
-	}
+        // Check current session status and ignore if handling failed or finished before
+        Optional<WorkspaceStatus> status = Optional.ofNullable(workspace.getStatus());
+        String operatorStatus = status.map(ResourceStatus::getOperatorStatus).orElse(OperatorStatus.NEW);
+        if (OperatorStatus.HANDLED.equals(operatorStatus)) {
+            LOGGER.trace(formatLogMessage(correlationId,
+                    "Workspace was successfully handled before and is skipped now. Workspace: " + workspace));
+            return true;
+        }
+        if (OperatorStatus.HANDLING.equals(operatorStatus)) {
+            // TODO We should not return but continue where we left off.
+            LOGGER.warn(formatLogMessage(correlationId,
+                    "Workspace handling was unexpectedly interrupted before. Workspace is skipped now and its status is set to ERROR. Workspace: "
+                            + workspace));
+            client.workspaces().updateStatus(correlationId, workspace, s -> {
+                s.setOperatorStatus(OperatorStatus.ERROR);
+                s.setOperatorMessage("Handling was unexpectedly interrupted before. CorrelationId: " + correlationId);
+            });
+            return false;
+        }
+        if (OperatorStatus.ERROR.equals(operatorStatus)) {
+            LOGGER.warn(formatLogMessage(correlationId,
+                    "Workspace could not be handled before and is skipped now. Workspace: " + workspace));
+            return false;
+        }
 
-	// Set workspace status to being handled
-	client.workspaces().updateStatus(correlationId, workspace, s -> {
-	    s.setOperatorStatus(OperatorStatus.HANDLING);
-	});
+        // Set workspace status to being handled
+        client.workspaces().updateStatus(correlationId, workspace, s -> {
+            s.setOperatorStatus(OperatorStatus.HANDLING);
+        });
 
-	String storageName = WorkspaceUtil.getStorageName(workspace);
-	client.workspaces().updateStatus(correlationId, workspace, s -> s.setVolumeClaim(new StatusStep("started")));
+        String storageName = WorkspaceUtil.getStorageName(workspace);
+        client.workspaces().updateStatus(correlationId, workspace, s -> s.setVolumeClaim(new StatusStep("started")));
 
-	if (!client.persistentVolumesClient().has(storageName)) {
-	    LOGGER.trace(formatLogMessage(correlationId, "Creating new persistent volume named " + storageName));
-	    persistentVolumeHandler.createAndApplyPersistentVolume(correlationId, workspace);
-	}
+        if (!client.persistentVolumesClient().has(storageName)) {
+            LOGGER.trace(formatLogMessage(correlationId, "Creating new persistent volume named " + storageName));
+            persistentVolumeHandler.createAndApplyPersistentVolume(correlationId, workspace);
+        }
 
-	client.workspaces().updateStatus(correlationId, workspace, s -> {
-	    s.setVolumeClaim(new StatusStep("finished"));
-	    s.setVolumeAttach(new StatusStep("started"));
-	});
+        client.workspaces().updateStatus(correlationId, workspace, s -> {
+            s.setVolumeClaim(new StatusStep("finished"));
+            s.setVolumeAttach(new StatusStep("started"));
+        });
 
-	if (!client.persistentVolumeClaimsClient().has(storageName)) {
-	    LOGGER.trace(formatLogMessage(correlationId, "Creating new persistent volume claim named " + storageName));
-	    persistentVolumeHandler.createAndApplyPersistentVolumeClaim(correlationId, workspace);
-	}
+        if (!client.persistentVolumeClaimsClient().has(storageName)) {
+            LOGGER.trace(formatLogMessage(correlationId, "Creating new persistent volume claim named " + storageName));
+            persistentVolumeHandler.createAndApplyPersistentVolumeClaim(correlationId, workspace);
+        }
 
-	client.workspaces().updateStatus(correlationId, workspace, s -> {
-	    s.setVolumeAttach(new StatusStep("claimed"));
-	});
+        client.workspaces().updateStatus(correlationId, workspace, s -> {
+            s.setVolumeAttach(new StatusStep("claimed"));
+        });
 
-	LOGGER.trace(formatLogMessage(correlationId, "Set workspace storage " + storageName));
-	client.workspaces().edit(correlationId, workspace.getSpec().getName(),
-		toEdit -> toEdit.getSpec().setStorage(storageName));
+        LOGGER.trace(formatLogMessage(correlationId, "Set workspace storage " + storageName));
+        client.workspaces().edit(correlationId, workspace.getSpec().getName(),
+                toEdit -> toEdit.getSpec().setStorage(storageName));
 
-	client.workspaces().updateStatus(correlationId, workspace, s -> {
-	    s.setVolumeAttach(new StatusStep("finished"));
-	});
+        client.workspaces().updateStatus(correlationId, workspace, s -> {
+            s.setVolumeAttach(new StatusStep("finished"));
+        });
 
-	client.workspaces().updateStatus(correlationId, workspace, s -> {
-	    s.setOperatorStatus(OperatorStatus.HANDLED);
-	});
-	return true;
+        client.workspaces().updateStatus(correlationId, workspace, s -> {
+            s.setOperatorStatus(OperatorStatus.HANDLED);
+        });
+        return true;
     }
 
     @Override
     public boolean workspaceDeleted(Workspace workspace, String correlationId) {
-	String sessionName = WorkspaceUtil.getSessionName(workspace.getSpec().getName());
-	client.sessions().delete(correlationId, sessionName);
+        String sessionName = WorkspaceUtil.getSessionName(workspace.getSpec().getName());
+        client.sessions().delete(correlationId, sessionName);
 
-	String storageName = WorkspaceUtil.getStorageName(workspace);
-	client.persistentVolumeClaimsClient().delete(correlationId, storageName);
-	client.persistentVolumesClient().delete(correlationId, storageName);
-	return true;
+        String storageName = WorkspaceUtil.getStorageName(workspace);
+        client.persistentVolumeClaimsClient().delete(correlationId, storageName);
+        client.persistentVolumesClient().delete(correlationId, storageName);
+        return true;
     }
 }

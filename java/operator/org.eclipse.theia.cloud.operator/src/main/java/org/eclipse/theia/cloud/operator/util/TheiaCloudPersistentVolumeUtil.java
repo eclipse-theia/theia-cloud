@@ -29,24 +29,24 @@ public final class TheiaCloudPersistentVolumeUtil {
     }
 
     public static String getMountPath(AppDefinitionSpec appDefinition) {
-	String mountPath = appDefinition.getMountPath();
-	if (mountPath == null || mountPath.isEmpty()) {
-	    return MOUNT_PATH;
-	}
-	return mountPath;
+        String mountPath = appDefinition.getMountPath();
+        if (mountPath == null || mountPath.isEmpty()) {
+            return MOUNT_PATH;
+        }
+        return mountPath;
     }
 
     public static Container getTheiaContainer(PodSpec podSpec, AppDefinitionSpec appDefinition) {
-	String image = appDefinition.getImage();
-	for (Container container : podSpec.getContainers()) {
-	    if (container.getImage().startsWith(image)) {
-		return container;
-	    }
-	}
-	if (podSpec.getContainers().size() == 1) {
-	    return podSpec.getContainers().get(0);
-	}
-	return podSpec.getContainers().get(1);
+        String image = appDefinition.getImage();
+        for (Container container : podSpec.getContainers()) {
+            if (container.getImage().startsWith(image)) {
+                return container;
+            }
+        }
+        if (podSpec.getContainers().size() == 1) {
+            return podSpec.getContainers().get(0);
+        }
+        return podSpec.getContainers().get(1);
     }
 
 }

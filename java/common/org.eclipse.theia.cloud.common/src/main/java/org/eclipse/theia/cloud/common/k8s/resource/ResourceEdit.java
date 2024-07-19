@@ -31,17 +31,17 @@ public final class ResourceEdit {
     }
 
     public static <T extends HasMetadata> Consumer<T> updateOwnerReference(int index, String apiVersion, String kind,
-	    String name, String uid, String correlationId) {
-	return item -> {
-	    if (item.getMetadata().getOwnerReferences().size() > index && index >= 0) {
-		LOGGER.trace(formatLogMessage(correlationId, "Updating owner reference at index " + index));
-		item.getMetadata().getOwnerReferences().get(index).setApiVersion(apiVersion);
-		item.getMetadata().getOwnerReferences().get(index).setKind(kind);
-		item.getMetadata().getOwnerReferences().get(index).setName(name);
-		item.getMetadata().getOwnerReferences().get(index).setUid(uid);
-	    } else {
-		LOGGER.trace(formatLogMessage(correlationId, "No owner reference at index " + index));
-	    }
-	};
+            String name, String uid, String correlationId) {
+        return item -> {
+            if (item.getMetadata().getOwnerReferences().size() > index && index >= 0) {
+                LOGGER.trace(formatLogMessage(correlationId, "Updating owner reference at index " + index));
+                item.getMetadata().getOwnerReferences().get(index).setApiVersion(apiVersion);
+                item.getMetadata().getOwnerReferences().get(index).setKind(kind);
+                item.getMetadata().getOwnerReferences().get(index).setName(name);
+                item.getMetadata().getOwnerReferences().get(index).setUid(uid);
+            } else {
+                LOGGER.trace(formatLogMessage(correlationId, "No owner reference at index " + index));
+            }
+        };
     }
 }

@@ -47,70 +47,69 @@ public class NoAnonymousAccessInterceptorTests {
 
     @Test
     void intercept_useKeyloakWithIdentifiedUser_proceed() {
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
-	mockUser("someuser");
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
+        mockUser("someuser");
 
-	methodFixture.execute();
-	clazzFixture.execute();
+        methodFixture.execute();
+        clazzFixture.execute();
     }
 
     @Test
     void intercept_useKeyloakWithoutIdentifiedUser_throwForbidden() throws Exception {
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
-	mockUser(null);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
+        mockUser(null);
 
-	TheiaCloudWebException methodException = assertThrows(TheiaCloudWebException.class, () -> {
-	    methodFixture.execute();
-	});
-	assertEquals(Status.FORBIDDEN.getStatusCode(), methodException.getResponse().getStatus());
+        TheiaCloudWebException methodException = assertThrows(TheiaCloudWebException.class, () -> {
+            methodFixture.execute();
+        });
+        assertEquals(Status.FORBIDDEN.getStatusCode(), methodException.getResponse().getStatus());
 
-	TheiaCloudWebException clazzException = assertThrows(TheiaCloudWebException.class, () -> {
-	    clazzFixture.execute();
-	});
-	assertEquals(Status.FORBIDDEN.getStatusCode(), clazzException.getResponse().getStatus());
+        TheiaCloudWebException clazzException = assertThrows(TheiaCloudWebException.class, () -> {
+            clazzFixture.execute();
+        });
+        assertEquals(Status.FORBIDDEN.getStatusCode(), clazzException.getResponse().getStatus());
     }
 
     @Test
     void intercept_noKeyloak_throwForbidden() {
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
-	mockUser(null);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+        mockUser(null);
 
-	TheiaCloudWebException methodException = assertThrows(TheiaCloudWebException.class, () -> {
-	    methodFixture.execute();
-	});
-	assertEquals(Status.FORBIDDEN.getStatusCode(), methodException.getResponse().getStatus());
+        TheiaCloudWebException methodException = assertThrows(TheiaCloudWebException.class, () -> {
+            methodFixture.execute();
+        });
+        assertEquals(Status.FORBIDDEN.getStatusCode(), methodException.getResponse().getStatus());
 
-	TheiaCloudWebException clazzException = assertThrows(TheiaCloudWebException.class, () -> {
-	    clazzFixture.execute();
-	});
-	assertEquals(Status.FORBIDDEN.getStatusCode(), clazzException.getResponse().getStatus());
+        TheiaCloudWebException clazzException = assertThrows(TheiaCloudWebException.class, () -> {
+            clazzFixture.execute();
+        });
+        assertEquals(Status.FORBIDDEN.getStatusCode(), clazzException.getResponse().getStatus());
     }
 
     private void mockUser(String name) {
-	Mockito.when(user.getIdentifier()).thenReturn(name);
-	Mockito.when(user.isAnonymous()).thenReturn(name == null || name.isBlank());
+        Mockito.when(user.getIdentifier()).thenReturn(name);
+        Mockito.when(user.isAnonymous()).thenReturn(name == null || name.isBlank());
     }
 
     /*
-     * Configure a test bean like a resource that uses the @NoAnonymousAccess
-     * annotation: With a Path annotation and an annotated method.
+     * Configure a test bean like a resource that uses the @NoAnonymousAccess annotation: With a Path annotation and an
+     * annotated method.
      */
     @Path("/some/path")
     static class NoAnonymousAccessWithMethodAnnotationTestResource {
-	@NoAnonymousAccess
-	void execute() {
-	}
+        @NoAnonymousAccess
+        void execute() {
+        }
     }
 
     /*
-     * Configure a test bean like a resource that uses the @NoAnonymousAccess
-     * annotation: With a Path annotation and the annotation placed on the resource
-     * class.
+     * Configure a test bean like a resource that uses the @NoAnonymousAccess annotation: With a Path annotation and the
+     * annotation placed on the resource class.
      */
     @Path("/someother/path")
     @NoAnonymousAccess
     static class NoAnonymousAccessWithClassAnnotationTestResource {
-	void execute() {
-	}
+        void execute() {
+        }
     }
 }

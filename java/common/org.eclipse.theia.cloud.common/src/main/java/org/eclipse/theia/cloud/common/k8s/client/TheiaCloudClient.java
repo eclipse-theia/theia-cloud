@@ -50,44 +50,44 @@ public interface TheiaCloudClient extends NamespacedKubernetesClient {
     AppDefinitionResourceClient appDefinitions();
 
     default ResourceClient<PersistentVolumeClaim, PersistentVolumeClaimList> persistentVolumeClaimsClient() {
-	return client(PersistentVolumeClaim.class, PersistentVolumeClaimList.class);
+        return client(PersistentVolumeClaim.class, PersistentVolumeClaimList.class);
     }
 
     default ResourceClient<PersistentVolume, PersistentVolumeList> persistentVolumesClient() {
-	return client(PersistentVolume.class, PersistentVolumeList.class);
+        return client(PersistentVolume.class, PersistentVolumeList.class);
     }
 
     default ResourceClient<Ingress, IngressList> ingresses() {
-	return client(kubernetes().network().v1().ingresses(), Ingress.class);
+        return client(kubernetes().network().v1().ingresses(), Ingress.class);
     }
 
     @SuppressWarnings("unchecked")
     default <T extends HasMetadata> ResourceClient<T, ? extends KubernetesResourceList<T>> client(Class<T> typeClass) {
-	return client(typeClass,
-		(Class<? extends KubernetesResourceList<T>>) KubernetesResourceUtil.inferListType(typeClass));
+        return client(typeClass,
+                (Class<? extends KubernetesResourceList<T>>) KubernetesResourceUtil.inferListType(typeClass));
     }
 
     default <T extends HasMetadata, L extends KubernetesResourceList<T>> ResourceClient<T, L> client(Class<T> typeClass,
-	    Class<L> listClass) {
-	return new BaseResourceClient<T, L>(kubernetes(), typeClass, listClass);
+            Class<L> listClass) {
+        return new BaseResourceClient<T, L>(kubernetes(), typeClass, listClass);
     }
 
     default <T extends HasMetadata, L extends KubernetesResourceList<T>> ResourceClient<T, L> client(
-	    NonNamespaceOperation<T, L, Resource<T>> operation, Class<T> typeClass) {
-	return new BaseResourceClient<T, L>(kubernetes(), operation, typeClass);
+            NonNamespaceOperation<T, L, Resource<T>> operation, Class<T> typeClass) {
+        return new BaseResourceClient<T, L>(kubernetes(), operation, typeClass);
     }
 
     default Optional<String> getClusterIPFromSessionName(String sessionName) {
-	try (final KubernetesClient client = new KubernetesClientBuilder().build()) {
-	    ServiceList svcList = client.services().inNamespace(namespace()).list();
-	    for (Service svc : svcList.getItems()) {
-		for (OwnerReference ownerReference : svc.getMetadata().getOwnerReferences()) {
-		    if (sessionName.equals(ownerReference.getName()) && "Session".equals(ownerReference.getKind())) {
-			return Optional.of(svc.getSpec().getClusterIP());
-		    }
-		}
-	    }
-	}
-	return Optional.empty();
+        try (final KubernetesClient client = new KubernetesClientBuilder().build()) {
+            ServiceList svcList = client.services().inNamespace(namespace()).list();
+            for (Service svc : svcList.getItems()) {
+                for (OwnerReference ownerReference : svc.getMetadata().getOwnerReferences()) {
+                    if (sessionName.equals(ownerReference.getName()) && "Session".equals(ownerReference.getKind())) {
+                        return Optional.of(svc.getSpec().getClusterIP());
+                    }
+                }
+            }
+        }
+        return Optional.empty();
     }
 }

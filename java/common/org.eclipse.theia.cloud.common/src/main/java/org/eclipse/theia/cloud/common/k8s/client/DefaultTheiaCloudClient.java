@@ -26,44 +26,44 @@ public class DefaultTheiaCloudClient extends KubernetesClientImpl implements The
     private NamespacedKubernetesClient client;
 
     public DefaultTheiaCloudClient(Client client) {
-	super(client.adapt(KubernetesClientImpl.class));
-	this.client = client.adapt(NamespacedKubernetesClient.class);
+        super(client.adapt(KubernetesClientImpl.class));
+        this.client = client.adapt(NamespacedKubernetesClient.class);
     }
 
     @Override
     public TheiaCloudClient inNamespace(String namespace) {
-	this.client = this.client.inNamespace(namespace);
-	return this;
+        this.client = this.client.inNamespace(namespace);
+        return this;
     }
 
     @Override
     public String namespace() {
-	return this.client.getNamespace();
+        return this.client.getNamespace();
     }
 
     @Override
     public NamespacedKubernetesClient kubernetes() {
-	return client;
+        return client;
     }
 
     @Override
     public <T extends HasMetadata, L extends KubernetesResourceList<T>> ResourceClient<T, L> client(Class<T> typeClass,
-	    Class<L> listClass) {
-	return new BaseResourceClient<T, L>(this.client, typeClass, listClass);
+            Class<L> listClass) {
+        return new BaseResourceClient<T, L>(this.client, typeClass, listClass);
     }
 
     @Override
     public WorkspaceResourceClient workspaces() {
-	return new DefaultWorkspaceResourceClient(kubernetes());
+        return new DefaultWorkspaceResourceClient(kubernetes());
     }
 
     @Override
     public SessionResourceClient sessions() {
-	return new DefaultSessionResourceClient(kubernetes());
+        return new DefaultSessionResourceClient(kubernetes());
     }
 
     @Override
     public AppDefinitionResourceClient appDefinitions() {
-	return new DefaultAppDefinitionResourceClient(kubernetes());
+        return new DefaultAppDefinitionResourceClient(kubernetes());
     }
 }

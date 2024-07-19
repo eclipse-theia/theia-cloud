@@ -24,11 +24,11 @@ import io.fabric8.kubernetes.client.extension.ExtensionAdapter;
 public class TheiaCloudExtensionAdapter implements ExtensionAdapter<TheiaCloudClient> {
     @Override
     public Class<TheiaCloudClient> getExtensionType() {
-	return TheiaCloudClient.class;
+        return TheiaCloudClient.class;
     }
 
     @Override
     public TheiaCloudClient adapt(Client client) {
-	return new DefaultTheiaCloudClient(client);
+        return new DefaultTheiaCloudClient(client);
     }
 }

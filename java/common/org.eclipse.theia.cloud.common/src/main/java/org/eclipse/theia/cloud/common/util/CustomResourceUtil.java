@@ -31,25 +31,25 @@ public final class CustomResourceUtil {
     }
 
     public static NamespacedKubernetesClient createClient() {
-	return createClient(new ConfigBuilder().build());
+        return createClient(new ConfigBuilder().build());
     }
 
     public static NamespacedKubernetesClient createClient(Config config) {
-	KubernetesClient client = new KubernetesClientBuilder().withConfig(config).build();
-	return client.adapt(NamespacedKubernetesClient.class);
+        KubernetesClient client = new KubernetesClientBuilder().withConfig(config).build();
+        return client.adapt(NamespacedKubernetesClient.class);
     }
 
     public static void validateCustomResource(NamespacedKubernetesClient client, String crdName) {
-	client.apiextensions().v1().customResourceDefinitions().list().getItems().stream()
-		.filter(crd -> Objects.equals(crd.getMetadata().getName(), crdName)).findAny()
-		.orElseThrow(() -> new RuntimeException(
-			"Deployment error: Custom resource definition " + crdName + " not found."));
+        client.apiextensions().v1().customResourceDefinitions().list().getItems().stream()
+                .filter(crd -> Objects.equals(crd.getMetadata().getName(), crdName)).findAny()
+                .orElseThrow(() -> new RuntimeException(
+                        "Deployment error: Custom resource definition " + crdName + " not found."));
     }
 
     public static <S, T> String toString(CustomResource<S, T> resource) {
-	String name = resource.getMetadata() != null ? resource.getMetadata().getName() : "unknown";
-	String version = resource.getMetadata() != null ? resource.getMetadata().getResourceVersion() : "unknown";
-	return "name=" + name + " version=" + version + " value=" + resource.getSpec();
+        String name = resource.getMetadata() != null ? resource.getMetadata().getName() : "unknown";
+        String version = resource.getMetadata() != null ? resource.getMetadata().getResourceVersion() : "unknown";
+        return "name=" + name + " version=" + version + " value=" + resource.getSpec();
     }
 
 }

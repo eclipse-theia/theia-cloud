@@ -37,43 +37,43 @@ public final class TheiaCloudK8sUtil {
     }
 
     public static boolean checkIfMaxInstancesReached(NamespacedKubernetesClient client, String namespace,
-	    SessionSpec sessionSpec, AppDefinitionSpec appDefinitionSpec, String correlationId) {
+            SessionSpec sessionSpec, AppDefinitionSpec appDefinitionSpec, String correlationId) {
 
-	if (appDefinitionSpec.getMaxInstances() == null || appDefinitionSpec.getMaxInstances() < 0) {
-	    LOGGER.debug(formatLogMessage(correlationId,
-		    "App Definition " + appDefinitionSpec.getName() + " allows indefinite sessions."));
-	    return false;
-	}
+        if (appDefinitionSpec.getMaxInstances() == null || appDefinitionSpec.getMaxInstances() < 0) {
+            LOGGER.debug(formatLogMessage(correlationId,
+                    "App Definition " + appDefinitionSpec.getName() + " allows indefinite sessions."));
+            return false;
+        }
 
-	final String appDefinitionName = appDefinitionSpec.getName();
-	if (appDefinitionName == null || appDefinitionName.isBlank()) {
-	    LOGGER.error(
-		    formatLogMessage(correlationId, "The App Definition does not have a name: " + appDefinitionSpec));
-	    return true;
-	}
+        final String appDefinitionName = appDefinitionSpec.getName();
+        if (appDefinitionName == null || appDefinitionName.isBlank()) {
+            LOGGER.error(
+                    formatLogMessage(correlationId, "The App Definition does not have a name: " + appDefinitionSpec));
+            return true;
+        }
 
-	long currentInstances = client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
-		.list().getItems().stream()//
-		.filter(w -> {
-		    String sessionAppDefinition = w.getSpec().getAppDefinition();
-		    boolean result = appDefinitionName.equals(sessionAppDefinition);
-		    LOGGER.trace(formatLogMessage(correlationId, "Counting instances of app definition "
-			    + appDefinitionSpec.getName() + ": Is " + w.getSpec() + " of app definition? " + result));
-		    return result;
-		})//
-		.count();
-	return currentInstances > appDefinitionSpec.getMaxInstances();
+        long currentInstances = client.resources(Session.class, SessionSpecResourceList.class).inNamespace(namespace)
+                .list().getItems().stream()//
+                .filter(w -> {
+                    String sessionAppDefinition = w.getSpec().getAppDefinition();
+                    boolean result = appDefinitionName.equals(sessionAppDefinition);
+                    LOGGER.trace(formatLogMessage(correlationId, "Counting instances of app definition "
+                            + appDefinitionSpec.getName() + ": Is " + w.getSpec() + " of app definition? " + result));
+                    return result;
+                })//
+                .count();
+        return currentInstances > appDefinitionSpec.getMaxInstances();
     }
 
     public static String extractIdFromName(ObjectMeta metadata) {
-	String name = metadata.getName();
-	String[] split = name.split("-");
-	String instance = split.length == 0 ? "" : split[0];
-	// kubernetes names must not start with letter, remove automatically added
-	// prefix
-	instance = instance.length() == 0 ? ""
-		: instance.charAt(0) == NamingUtil.VALID_NAME_PREFIX ? instance.substring(1) : instance;
-	return instance;
+        String name = metadata.getName();
+        String[] split = name.split("-");
+        String instance = split.length == 0 ? "" : split[0];
+        // kubernetes names must not start with letter, remove automatically added
+        // prefix
+        instance = instance.length() == 0 ? ""
+                : instance.charAt(0) == NamingUtil.VALID_NAME_PREFIX ? instance.substring(1) : instance;
+        return instance;
     }
 
 }

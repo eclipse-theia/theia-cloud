@@ -34,87 +34,85 @@ public class BaseResource {
     protected TheiaCloudUser theiaCloudUser;
 
     public BaseResource(ApplicationProperties applicationProperties) {
-	this.applicationProperties = applicationProperties;
-	appId = applicationProperties.getAppId();
-	logger = Logger.getLogger(getClass().getSuperclass());
+        this.applicationProperties = applicationProperties;
+        appId = applicationProperties.getAppId();
+        logger = Logger.getLogger(getClass().getSuperclass());
     }
 
     protected String evaluateRequest(ServiceRequest request) {
-	return basicEvaluateRequest(request);
+        return basicEvaluateRequest(request);
     }
 
     private String basicEvaluateRequest(ServiceRequest request) {
-	String correlationId = generateCorrelationId();
-	if (request == null || request.appId == null || !request.appId.equals(appId)) {
-	    info(correlationId, "Request '" + request.kind + "' without matching appId: " + request.appId);
-	    trace(correlationId, request.toString());
-	    throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_ID);
-	}
-	return correlationId;
+        String correlationId = generateCorrelationId();
+        if (request == null || request.appId == null || !request.appId.equals(appId)) {
+            info(correlationId, "Request '" + request.kind + "' without matching appId: " + request.appId);
+            trace(correlationId, request.toString());
+            throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_ID);
+        }
+        return correlationId;
     }
 
     /**
-     * Evaluates user scoped requests. In addition to the basic evaluation performed
-     * for every {@linkplain ServiceRequest}, this ensures that the requested user
-     * is the same as the authenticated user.
-     * 
-     * In anonymous mode, this ensures a user is set in the request.
+     * Evaluates user scoped requests. In addition to the basic evaluation performed for every
+     * {@linkplain ServiceRequest}, this ensures that the requested user is the same as the authenticated user. In
+     * anonymous mode, this ensures a user is set in the request.
      * 
      * @param request The {@link UserScopedServiceRequest} to evaluate
      * @throws TheiaCloudWebException
      * @return The {@link EvaluatedRequest} including the user identifier to use
      */
     protected EvaluatedRequest evaluateRequest(UserScopedServiceRequest request) {
-	String correlationId = basicEvaluateRequest(request);
+        String correlationId = basicEvaluateRequest(request);
 
-	// Keycloak is not used => user must be specified in request.
-	if (!applicationProperties.isUseKeycloak()) {
-	    if (request.user == null || request.user.isBlank()) {
-		info(correlationId,
-			"User was not specified for user scoped request. This is mandatory in anonymous mode.");
-		throw new TheiaCloudWebException(Status.BAD_REQUEST,
-			"Property \"user\" was not specified for user scoped request.");
-	    }
-	    return new EvaluatedRequest(correlationId, request.user);
-	}
+        // Keycloak is not used => user must be specified in request.
+        if (!applicationProperties.isUseKeycloak()) {
+            if (request.user == null || request.user.isBlank()) {
+                info(correlationId,
+                        "User was not specified for user scoped request. This is mandatory in anonymous mode.");
+                throw new TheiaCloudWebException(Status.BAD_REQUEST,
+                        "Property \"user\" was not specified for user scoped request.");
+            }
+            return new EvaluatedRequest(correlationId, request.user);
+        }
 
-	// Keycloak is used. User must not be considered anonymous (i.e. have a
-	// non-empty identifier) and the request user must match the authenticated user
-	// (this might change if the concept of admin users is introduced later)
-	if (theiaCloudUser.isAnonymous()) {
-	    info(correlationId,
-		    "User is unexpectetly considered anonymous and, thus, must not access user scoped resources.");
-	    throw new TheiaCloudWebException(Status.UNAUTHORIZED);
-	} else if (request.user == null || request.user.equals(theiaCloudUser.getIdentifier())) {
-	    return new EvaluatedRequest(correlationId, theiaCloudUser.getIdentifier());
-	} else {
-	    info(correlationId, "User specified in the request does not match the authenticated user.");
-	    trace(correlationId, request.toString());
-	    throw new TheiaCloudWebException(Status.FORBIDDEN);
-	}
+        // Keycloak is used. User must not be considered anonymous (i.e. have a
+        // non-empty identifier) and the request user must match the authenticated user
+        // (this might change if the concept of admin users is introduced later)
+        if (theiaCloudUser.isAnonymous()) {
+            info(correlationId,
+                    "User is unexpectetly considered anonymous and, thus, must not access user scoped resources.");
+            throw new TheiaCloudWebException(Status.UNAUTHORIZED);
+        } else if (request.user == null || request.user.equals(theiaCloudUser.getIdentifier())) {
+            return new EvaluatedRequest(correlationId, theiaCloudUser.getIdentifier());
+        } else {
+            info(correlationId, "User specified in the request does not match the authenticated user.");
+            trace(correlationId, request.toString());
+            throw new TheiaCloudWebException(Status.FORBIDDEN);
+        }
     }
 
     public void info(String correlationId, String message) {
-	logger.info(LogMessageUtil.formatLogMessage(correlationId, message));
+        logger.info(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     public void warn(String correlationId, String message) {
-	logger.warn(LogMessageUtil.formatLogMessage(correlationId, message));
+        logger.warn(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     public void error(String correlationId, String message) {
-	logger.error(LogMessageUtil.formatLogMessage(correlationId, message));
+        logger.error(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     public void error(String correlationId, String message, Throwable throwable) {
-	logger.error(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
+        logger.error(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
     }
 
     public void trace(String correlationId, String message) {
-	logger.trace(LogMessageUtil.formatLogMessage(correlationId, message));
+        logger.trace(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
     public void trace(String correlationId, String message, Throwable throwable) {
-	logger.trace(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
+        logger.trace(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
     }
 }

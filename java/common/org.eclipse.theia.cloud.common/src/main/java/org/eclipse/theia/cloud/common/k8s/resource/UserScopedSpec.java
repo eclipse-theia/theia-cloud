@@ -19,6 +19,6 @@ public interface UserScopedSpec {
     String getUser();
 
     static String getUser(Object object) {
-	return object instanceof UserScopedSpec ? ((UserScopedSpec) object).getUser() : null;
+        return object instanceof UserScopedSpec ? ((UserScopedSpec) object).getUser() : null;
     }
 }

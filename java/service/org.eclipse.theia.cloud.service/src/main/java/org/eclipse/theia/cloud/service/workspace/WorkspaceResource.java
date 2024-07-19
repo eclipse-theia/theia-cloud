@@ -47,7 +47,7 @@ public class WorkspaceResource extends BaseResource {
 
     @Inject
     public WorkspaceResource(ApplicationProperties applicationProperties) {
-	super(applicationProperties);
+        super(applicationProperties);
     }
 
     @Operation(summary = "List workspaces", description = "Lists the workspaces of a user.")
@@ -55,64 +55,64 @@ public class WorkspaceResource extends BaseResource {
     @Path("/{appId}/{user}")
     @NoAnonymousAccess
     public List<UserWorkspace> list(@PathParam("appId") String appId, @PathParam("user") String user) {
-	WorkspaceListRequest request = new WorkspaceListRequest(appId, user);
-	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
-	final String correlationId = evaluatedRequest.getCorrelationId();
+        WorkspaceListRequest request = new WorkspaceListRequest(appId, user);
+        final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+        final String correlationId = evaluatedRequest.getCorrelationId();
 
-	info(correlationId, "Listing workspaces " + request);
-	return k8sUtil.listWorkspaces(evaluatedRequest.getUser());
+        info(correlationId, "Listing workspaces " + request);
+        return k8sUtil.listWorkspaces(evaluatedRequest.getUser());
     }
 
     @Operation(summary = "Create workspace", description = "Creates a new workspace for a user.")
     @POST
     @NoAnonymousAccess
     public UserWorkspace create(WorkspaceCreationRequest request) {
-	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
-	final String correlationId = evaluatedRequest.getCorrelationId();
+        final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+        final String correlationId = evaluatedRequest.getCorrelationId();
 
-	info(correlationId, "Creating workspace " + request);
-	Workspace workspace = k8sUtil.createWorkspace(correlationId,
-		new UserWorkspace(request.appDefinition, evaluatedRequest.getUser(), request.label));
-	TheiaCloudWebException.throwIfErroneous(workspace);
-	return new UserWorkspace(workspace.getSpec());
+        info(correlationId, "Creating workspace " + request);
+        Workspace workspace = k8sUtil.createWorkspace(correlationId,
+                new UserWorkspace(request.appDefinition, evaluatedRequest.getUser(), request.label));
+        TheiaCloudWebException.throwIfErroneous(workspace);
+        return new UserWorkspace(workspace.getSpec());
     }
 
     @Operation(summary = "Delete workspace", description = "Deletes a workspace.")
     @DELETE
     @NoAnonymousAccess
     public boolean delete(WorkspaceDeletionRequest request) {
-	final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
-	final String correlationId = evaluatedRequest.getCorrelationId();
+        final EvaluatedRequest evaluatedRequest = evaluateRequest(request);
+        final String correlationId = evaluatedRequest.getCorrelationId();
 
-	if (request.workspaceName == null) {
-	    throw new TheiaCloudWebException(TheiaCloudError.MISSING_WORKSPACE_NAME);
-	}
+        if (request.workspaceName == null) {
+            throw new TheiaCloudWebException(TheiaCloudError.MISSING_WORKSPACE_NAME);
+        }
 
-	WorkspaceSpec existingWorkspace = k8sUtil.findWorkspace(request.workspaceName).orElse(null);
-	if (existingWorkspace == null) {
-	    info(correlationId, "Workspace " + request.workspaceName + " does not exist.");
-	    // Return true because the goal of not having a workspace of the given name is
-	    // reached
-	    // Note: Another solution is returning a 404
-	    return true;
-	}
-	if (!isOwner(evaluatedRequest.getUser(), existingWorkspace)) {
-	    info(correlationId,
-		    "User " + evaluatedRequest.getUser() + " does not own workspace " + request.workspaceName);
-	    trace(correlationId, "Workspace: " + existingWorkspace);
-	    throw new TheiaCloudWebException(Status.FORBIDDEN);
-	}
+        WorkspaceSpec existingWorkspace = k8sUtil.findWorkspace(request.workspaceName).orElse(null);
+        if (existingWorkspace == null) {
+            info(correlationId, "Workspace " + request.workspaceName + " does not exist.");
+            // Return true because the goal of not having a workspace of the given name is
+            // reached
+            // Note: Another solution is returning a 404
+            return true;
+        }
+        if (!isOwner(evaluatedRequest.getUser(), existingWorkspace)) {
+            info(correlationId,
+                    "User " + evaluatedRequest.getUser() + " does not own workspace " + request.workspaceName);
+            trace(correlationId, "Workspace: " + existingWorkspace);
+            throw new TheiaCloudWebException(Status.FORBIDDEN);
+        }
 
-	info(correlationId, "Deleting workspace " + request);
-	return k8sUtil.deleteWorkspace(correlationId, request.workspaceName);
+        info(correlationId, "Deleting workspace " + request);
+        return k8sUtil.deleteWorkspace(correlationId, request.workspaceName);
     }
 
     protected boolean isOwner(String user, WorkspaceSpec workspace) {
-	if (workspace.getUser() == null || workspace.getUser().isBlank()) {
-	    logger.warnv("Workspace does not have a user. {0}", workspace);
-	    return false;
-	}
+        if (workspace.getUser() == null || workspace.getUser().isBlank()) {
+            logger.warnv("Workspace does not have a user. {0}", workspace);
+            return false;
+        }
 
-	return workspace.getUser().equals(user);
+        return workspace.getUser().equals(user);
     }
 }

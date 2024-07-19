@@ -26,16 +26,16 @@ public final class WatcherAdapter {
     }
 
     public static <T> Watcher<T> eventReceived(BiConsumer<Action, T> consumer) {
-	return new Watcher<T>() {
-	    @Override
-	    public void eventReceived(Action action, T resource) {
-		consumer.accept(action, resource);
-	    }
+        return new Watcher<T>() {
+            @Override
+            public void eventReceived(Action action, T resource) {
+                consumer.accept(action, resource);
+            }
 
-	    @Override
-	    public void onClose(WatcherException cause) {
-		// do nothing
-	    }
-	};
+            @Override
+            public void onClose(WatcherException cause) {
+                // do nothing
+            }
+        };
     }
 }

@@ -1,78 +1,78 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.eclipse.theia.cloud</groupId>
-	<artifactId>conf</artifactId>
-	<version>0.11.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>Theia Cloud Maven Configuration</name>
-	<description>Common properties and configuration</description>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.eclipse.theia.cloud</groupId>
+    <artifactId>conf</artifactId>
+    <version>0.11.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Theia Cloud Maven Configuration</name>
+    <description>Common properties and configuration</description>
 
-	<properties>
-		<failsafe.useModulePath>false</failsafe.useModulePath>
-		<guice.version>5.0.1</guice.version>
-		<kubernetes-client.version>6.10.0</kubernetes-client.version>
-		<log4j.version>2.17.1</log4j.version>
-		<slf4j.version>1.7.32</slf4j.version>
-		<maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-		<maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-		<quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-		<quarkus.platform.version>3.8.1</quarkus.platform.version>
-		<surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
-		<webhooks.framework.core.version>1.1.2</webhooks.framework.core.version>
-	</properties>
+    <properties>
+        <failsafe.useModulePath>false</failsafe.useModulePath>
+        <guice.version>5.0.1</guice.version>
+        <kubernetes-client.version>6.10.0</kubernetes-client.version>
+        <log4j.version>2.17.1</log4j.version>
+        <slf4j.version>1.7.32</slf4j.version>
+        <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
+        <maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+        <quarkus.platform.version>3.8.1</quarkus.platform.version>
+        <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
+        <webhooks.framework.core.version>1.1.2</webhooks.framework.core.version>
+    </properties>
 
-	<profiles>
-		<profile>
-			<id>github</id>
-			<distributionManagement>
-				<repository>
-				<id>github</id>
-				<name>GitHub Packages</name>
-				<url>https://maven.pkg.github.com/eclipsesource/theia-cloud</url>
-				</repository>
-			</distributionManagement>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-		</profile>
+    <profiles>
+        <profile>
+            <id>github</id>
+            <distributionManagement>
+                <repository>
+                    <id>github</id>
+                    <name>GitHub Packages</name>
+                    <url>https://maven.pkg.github.com/eclipsesource/theia-cloud</url>
+                </repository>
+            </distributionManagement>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
 
-		<profile>
-			<id>artifact-registry</id>
-			<distributionManagement>
-				<snapshotRepository>
-				<id>artifact-registry</id>
-				<name>Google Artifact Registry</name>
-				<url>artifactregistry://europe-west3-maven.pkg.dev/kubernetes-238012/theia-cloud</url>
-				</snapshotRepository>
-			</distributionManagement>
-			<repositories>
-				<repository>
-				<id>artifact-registry</id>
-				<url>artifactregistry://europe-west3-maven.pkg.dev/kubernetes-238012/theia-cloud</url>
-				<releases>
-					<enabled>true</enabled>
-				</releases>
-				<snapshots>
-					<enabled>true</enabled>
-				</snapshots>
-				</repository>
-			</repositories>
-			<build>
-			<plugins>
-				<plugin>
-				<groupId>com.google.cloud.artifactregistry</groupId>
-				<artifactId>artifactregistry-maven-wagon</artifactId>
-				<version>2.2.0</version>
-				<extensions>true</extensions>
-				</plugin>
-			</plugins>
-			</build>
-		</profile>
-	</profiles>
+        <profile>
+            <id>artifact-registry</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>artifact-registry</id>
+                    <name>Google Artifact Registry</name>
+                    <url>artifactregistry://europe-west3-maven.pkg.dev/kubernetes-238012/theia-cloud</url>
+                </snapshotRepository>
+            </distributionManagement>
+            <repositories>
+                <repository>
+                    <id>artifact-registry</id>
+                    <url>artifactregistry://europe-west3-maven.pkg.dev/kubernetes-238012/theia-cloud</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.artifactregistry</groupId>
+                        <artifactId>artifactregistry-maven-wagon</artifactId>
+                        <version>2.2.0</version>
+                        <extensions>true</extensions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

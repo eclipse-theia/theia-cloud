@@ -1,1 +1,3 @@
-setTimeout(function () { document.body.innerHTML = "Bye bye!"; }, 10000);
+setTimeout(function () {
+  document.body.innerHTML = "Bye bye!";
+}, 10000);

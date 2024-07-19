@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug Default Operator",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/java/operator/org.eclipse.theia.cloud.defaultoperator",
+      "mainClass": "org.eclipse.theia.cloud.defaultoperator.DefaultTheiaCloudOperatorLauncher",
+      "args": [
+        "--instancesHost",
+        "ws.$(minikube.ip).nip.io",
+        "--cloudProvider",
+        "MINIKUBE",
+        "--sessionsPerUser",
+        "3",
+        "--appId",
+        "asdfghjkl",
+        "--storageClassName",
+        "default",
+        "--requestedStorage",
+        "250Mi"
+      ],
+      "vmArgs": "-Dlog4j2.configurationFile=log4j2.xml",
+      "preLaunchTask": "Build and Install Operator library"
+    }
+  ]
+}

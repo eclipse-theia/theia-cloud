@@ -19,22 +19,22 @@ import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 
 public interface SessionHandler {
     default boolean sessionAdded(Session session, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean sessionDeleted(Session session, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean sessionModified(Session session, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean sessionErrored(Session session, String correlationId) {
-	return true;
+        return true;
     }
 
     default boolean sessionBookmarked(Session session, String correlationId) {
-	return true;
+        return true;
     }
 }

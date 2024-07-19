@@ -70,132 +70,132 @@ public class MonitorActivityTracker implements OperatorPlugin {
 
     @Override
     public void start() {
-	if (arguments.isEnableMonitor() && arguments.isEnableActivityTracker()) {
-	    int interval = arguments.getMonitorInterval();
-	    LOGGER.info("Launching Monitor service with interval of " + interval + " minutes");
-	    EXECUTOR.scheduleWithFixedDelay(this::pingAllSessions, 0, interval, TimeUnit.MINUTES);
-	}
+        if (arguments.isEnableMonitor() && arguments.isEnableActivityTracker()) {
+            int interval = arguments.getMonitorInterval();
+            LOGGER.info("Launching Monitor service with interval of " + interval + " minutes");
+            EXECUTOR.scheduleWithFixedDelay(this::pingAllSessions, 0, interval, TimeUnit.MINUTES);
+        }
     }
 
     protected void pingAllSessions() {
-	List<Session> sessions = resourceClient.sessions().list();
-	String correlationId = generateCorrelationId();
+        List<Session> sessions = resourceClient.sessions().list();
+        String correlationId = generateCorrelationId();
 
-	LOGGER.debug("Pinging sessions: " + sessions);
+        LOGGER.debug("Pinging sessions: " + sessions);
 
-	for (Session session : sessions) {
-	    Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getName());
-	    if (sessionIP.isPresent()) {
-		String appDefinitionName = session.getSpec().getAppDefinition();
-		Optional<AppDefinition> appDefinitionOptional = resourceClient.appDefinitions().get(appDefinitionName);
-		if (appDefinitionOptional.isPresent()) {
-		    AppDefinition appDefinition = appDefinitionOptional.get();
-		    int timeoutAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getTimeoutAfter();
-		    int notifyAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getNotifyAfter();
-		    int port = appDefinition.getSpec().getMonitor().getPort();
+        for (Session session : sessions) {
+            Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getName());
+            if (sessionIP.isPresent()) {
+                String appDefinitionName = session.getSpec().getAppDefinition();
+                Optional<AppDefinition> appDefinitionOptional = resourceClient.appDefinitions().get(appDefinitionName);
+                if (appDefinitionOptional.isPresent()) {
+                    AppDefinition appDefinition = appDefinitionOptional.get();
+                    int timeoutAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getTimeoutAfter();
+                    int notifyAfter = appDefinition.getSpec().getMonitor().getActivityTracker().getNotifyAfter();
+                    int port = appDefinition.getSpec().getMonitor().getPort();
 
-		    pingSession(correlationId, session, sessionIP.get(), port, timeoutAfter, notifyAfter);
-		}
-	    } else {
-		LOGGER.error("No ClusterIP found for session " + session.getSpec().getName());
-	    }
-	}
+                    pingSession(correlationId, session, sessionIP.get(), port, timeoutAfter, notifyAfter);
+                }
+            } else {
+                LOGGER.error("No ClusterIP found for session " + session.getSpec().getName());
+            }
+        }
     }
 
     protected void pingSession(String correlationId, Session session, String sessionURL, int port, int shutdownAfter,
-	    int notifyAfter) {
-	String sessionName = session.getSpec().getName();
-	logInfo(sessionName, "Pinging session at " + sessionURL);
-	OkHttpClient client = new OkHttpClient().newBuilder().build();
+            int notifyAfter) {
+        String sessionName = session.getSpec().getName();
+        logInfo(sessionName, "Pinging session at " + sessionURL);
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
 
-	String getActivityURL = getURL(sessionURL, port, GET_ACTIVITY);
-	logInfo(sessionName, "GET " + getActivityURL);
+        String getActivityURL = getURL(sessionURL, port, GET_ACTIVITY);
+        logInfo(sessionName, "GET " + getActivityURL);
 
-	Request getActivityRequest = new Request.Builder().url(getActivityURL)
-		.addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).get().build();
-	Response getActivityResponse;
-	try {
-	    getActivityResponse = client.newCall(getActivityRequest).execute();
-	    ResponseBody body = getActivityResponse.body();
-	    if (getActivityResponse.code() == 200 && body != null) {
-		long lastReportedMilliseconds = Long.valueOf(body.string());
+        Request getActivityRequest = new Request.Builder().url(getActivityURL)
+                .addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).get().build();
+        Response getActivityResponse;
+        try {
+            getActivityResponse = client.newCall(getActivityRequest).execute();
+            ResponseBody body = getActivityResponse.body();
+            if (getActivityResponse.code() == 200 && body != null) {
+                long lastReportedMilliseconds = Long.valueOf(body.string());
 
-		session = updateLastActivity(correlationId, session, lastReportedMilliseconds);
-	    } else {
-		logInfo(sessionName,
-			"REQUEST FAILED (Returned " + getActivityResponse.code() + ": " + "GET " + getActivityURL);
-	    }
-	} catch (IOException e) {
-	    logInfo(sessionName, "REQUEST FAILED: " + "GET " + getActivityURL + ". Error: " + e);
+                session = updateLastActivity(correlationId, session, lastReportedMilliseconds);
+            } else {
+                logInfo(sessionName,
+                        "REQUEST FAILED (Returned " + getActivityResponse.code() + ": " + "GET " + getActivityURL);
+            }
+        } catch (IOException e) {
+            logInfo(sessionName, "REQUEST FAILED: " + "GET " + getActivityURL + ". Error: " + e);
 
-	}
-	Date lastActivityDate = new Date(session.getNonNullStatus().getLastActivity());
-	Date currentDate = new Date(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
+        }
+        Date lastActivityDate = new Date(session.getNonNullStatus().getLastActivity());
+        Date currentDate = new Date(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
 
-	long minutesPassed = getMinutesPassed(lastActivityDate, currentDate);
+        long minutesPassed = getMinutesPassed(lastActivityDate, currentDate);
 
-	String minutes = minutesPassed == 1 ? "minute" : "minutes";
-	logInfo(sessionName, "Last reported activity was: " + formatDate(lastActivityDate) + " (" + minutesPassed + " "
-		+ minutes + " ago)");
+        String minutes = minutesPassed == 1 ? "minute" : "minutes";
+        logInfo(sessionName, "Last reported activity was: " + formatDate(lastActivityDate) + " (" + minutesPassed + " "
+                + minutes + " ago)");
 
-	if (minutesPassed < shutdownAfter) {
-	    if (minutesPassed >= notifyAfter) {
-		logInfo(sessionName, "Notifying session as timeout of " + notifyAfter + " minutes was reached!");
-		String postPopupURL = getURL(sessionURL, port, POST_POPUP);
-		logInfo(sessionName, "POST " + postPopupURL);
-		MediaType mediaType = MediaType.parse("text/plain");
-		RequestBody body = RequestBody.create(mediaType, "");
-		Request postRequest = new Request.Builder().url(postPopupURL)
-			.addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).post(body)
-			.build();
-		try {
-		    client.newCall(postRequest).execute();
-		} catch (IOException e) {
-		    logInfo(sessionName, "REQUEST FAILED: " + "POST " + postPopupURL);
-		}
-	    }
-	} else {
-	    // Timeout reached
-	    stopNonActiveSession(correlationId, session, shutdownAfter);
-	}
+        if (minutesPassed < shutdownAfter) {
+            if (minutesPassed >= notifyAfter) {
+                logInfo(sessionName, "Notifying session as timeout of " + notifyAfter + " minutes was reached!");
+                String postPopupURL = getURL(sessionURL, port, POST_POPUP);
+                logInfo(sessionName, "POST " + postPopupURL);
+                MediaType mediaType = MediaType.parse("text/plain");
+                RequestBody body = RequestBody.create(mediaType, "");
+                Request postRequest = new Request.Builder().url(postPopupURL)
+                        .addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).post(body)
+                        .build();
+                try {
+                    client.newCall(postRequest).execute();
+                } catch (IOException e) {
+                    logInfo(sessionName, "REQUEST FAILED: " + "POST " + postPopupURL);
+                }
+            }
+        } else {
+            // Timeout reached
+            stopNonActiveSession(correlationId, session, shutdownAfter);
+        }
     }
 
     protected Session updateLastActivity(String correlationId, Session session, long reportedTimestamp) {
-	long currentTimestamp = session.getNonNullStatus().getLastActivity();
-	if (currentTimestamp < reportedTimestamp) {
-	    session = resourceClient.sessions().updateStatus(correlationId, session,
-		    status -> status.setLastActivity(reportedTimestamp));
-	}
-	return session;
+        long currentTimestamp = session.getNonNullStatus().getLastActivity();
+        if (currentTimestamp < reportedTimestamp) {
+            session = resourceClient.sessions().updateStatus(correlationId, session,
+                    status -> status.setLastActivity(reportedTimestamp));
+        }
+        return session;
     }
 
     protected long getMinutesPassed(Date lastActivity, Date currentTime) {
-	long timePassed = currentTime.getTime() - lastActivity.getTime();
-	return TimeUnit.MILLISECONDS.toMinutes(timePassed);
+        long timePassed = currentTime.getTime() - lastActivity.getTime();
+        return TimeUnit.MILLISECONDS.toMinutes(timePassed);
     }
 
     protected void stopNonActiveSession(String correlationId, Session session, int shutdownAfter) {
-	String sessionName = session.getSpec().getName();
-	try {
-	    this.messagingService.sendTimeoutMessage(session,
-		    "Timeout of " + shutdownAfter + " minutes of inactivity was reached!");
-	    logInfo(sessionName, "Deleting session as timeout of " + shutdownAfter + " minutes was reached!");
-	    resourceClient.sessions().delete(COR_ID_NOACTIVITYPREFIX + correlationId, sessionName);
-	} catch (Exception e) {
-	    LOGGER.error(formatLogMessage(COR_ID_NOACTIVITYPREFIX, correlationId, "Exception trying to delete session"),
-		    e);
-	}
+        String sessionName = session.getSpec().getName();
+        try {
+            this.messagingService.sendTimeoutMessage(session,
+                    "Timeout of " + shutdownAfter + " minutes of inactivity was reached!");
+            logInfo(sessionName, "Deleting session as timeout of " + shutdownAfter + " minutes was reached!");
+            resourceClient.sessions().delete(COR_ID_NOACTIVITYPREFIX + correlationId, sessionName);
+        } catch (Exception e) {
+            LOGGER.error(formatLogMessage(COR_ID_NOACTIVITYPREFIX, correlationId, "Exception trying to delete session"),
+                    e);
+        }
     }
 
     protected void logInfo(String sessionName, String message) {
-	LOGGER.info("[" + sessionName + "] " + message);
+        LOGGER.info("[" + sessionName + "] " + message);
     }
 
     protected String getURL(String sessionUrl, int port, String endpoint) {
-	return "http://" + sessionUrl + ":" + port + MONITOR_BASE_PATH + ACTIVITY_TRACKER_BASE_PATH + endpoint;
+        return "http://" + sessionUrl + ":" + port + MONITOR_BASE_PATH + ACTIVITY_TRACKER_BASE_PATH + endpoint;
     }
 
     protected String formatDate(Date date) {
-	return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).format(date);
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).format(date);
     }
 }

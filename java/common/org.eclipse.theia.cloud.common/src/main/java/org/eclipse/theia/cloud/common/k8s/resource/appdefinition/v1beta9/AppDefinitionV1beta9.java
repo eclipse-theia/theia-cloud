@@ -36,7 +36,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Singular("appdefinition")
 @Plural("appdefinitions")
 public class AppDefinitionV1beta9 extends CustomResource<AppDefinitionV1beta9Spec, AppDefinitionV1beta9Status>
-	implements Namespaced {
+        implements Namespaced {
 
     private static final long serialVersionUID = 8749670583218521755L;
     public static final String API = "theia.cloud/v1beta9";
@@ -45,23 +45,23 @@ public class AppDefinitionV1beta9 extends CustomResource<AppDefinitionV1beta9Spe
 
     @Override
     public String toString() {
-	return CustomResourceUtil.toString(this);
+        return CustomResourceUtil.toString(this);
     }
 
     public AppDefinitionV1beta9() {
     }
 
     public AppDefinitionV1beta9(AppDefinitionHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new AppDefinitionV1beta9Spec(fromHub);
-	this.status = new AppDefinitionV1beta9Status(fromHub);
+        if (fromHub.getMetadata().isPresent()) {
+            this.setMetadata(fromHub.getMetadata().get());
+        }
+        this.spec = new AppDefinitionV1beta9Spec(fromHub);
+        this.status = new AppDefinitionV1beta9Status(fromHub);
     }
 
     @JsonIgnore
     public AppDefinitionV1beta9Status getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new AppDefinitionV1beta9Status();
+        return super.getStatus() != null ? super.getStatus() : new AppDefinitionV1beta9Status();
     }
 
 }

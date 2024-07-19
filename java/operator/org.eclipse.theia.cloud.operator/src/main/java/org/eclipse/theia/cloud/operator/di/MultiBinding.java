@@ -26,11 +26,11 @@ import com.google.inject.name.Names;
 
 public final class MultiBinding<T> {
     public static <T> MultiBinding<T> create(final Class<T> type) {
-	return new MultiBinding<>(TypeLiteral.get(type));
+        return new MultiBinding<>(TypeLiteral.get(type));
     }
 
     public static <T> MultiBinding<T> create(final TypeLiteral<T> type) {
-	return new MultiBinding<>(type);
+        return new MultiBinding<>(type);
     }
 
     private final Set<Class<? extends T>> bindings;
@@ -40,17 +40,17 @@ public final class MultiBinding<T> {
     private String annotationName;
 
     private MultiBinding(final TypeLiteral<T> type) {
-	this.type = type;
-	bindings = new LinkedHashSet<>();
+        this.type = type;
+        bindings = new LinkedHashSet<>();
     }
 
     public MultiBinding<T> setAnnotationName(final String annotationName) {
-	this.annotationName = annotationName;
-	return this;
+        this.annotationName = annotationName;
+        return this;
     }
 
     public String getAnnotationName() {
-	return annotationName;
+        return annotationName;
     }
 
     /**
@@ -59,45 +59,45 @@ public final class MultiBinding<T> {
      * @param binder binder
      */
     public void applyBinding(final Binder binder) {
-	Multibinder<T> multiBinder = this.annotationName == null ? Multibinder.newSetBinder(binder, getType())
-		: Multibinder.newSetBinder(binder, getType(), Names.named(annotationName));
-	bindings.forEach(b -> multiBinder.addBinding().to(b));
+        Multibinder<T> multiBinder = this.annotationName == null ? Multibinder.newSetBinder(binder, getType())
+                : Multibinder.newSetBinder(binder, getType(), Names.named(annotationName));
+        bindings.forEach(b -> multiBinder.addBinding().to(b));
     }
 
     public boolean add(final Class<? extends T> newBinding) {
-	return bindings.add(newBinding);
+        return bindings.add(newBinding);
     }
 
     public boolean addAll(final Collection<Class<? extends T>> newBindings) {
-	return bindings.addAll(newBindings);
+        return bindings.addAll(newBindings);
     }
 
     public boolean remove(final Class<? extends T> toRemove) {
-	return bindings.remove(toRemove);
+        return bindings.remove(toRemove);
     }
 
     public boolean removeAll(final Collection<Class<? extends T>> toRemove) {
-	return bindings.removeAll(toRemove);
+        return bindings.removeAll(toRemove);
     }
 
     public boolean rebind(final Class<? extends T> oldBinding, final Class<? extends T> newBinding) {
-	if (remove(oldBinding)) {
-	    add(newBinding);
-	    return true;
-	}
-	return false;
+        if (remove(oldBinding)) {
+            add(newBinding);
+            return true;
+        }
+        return false;
     }
 
     public Set<Class<? extends T>> getAll() {
-	return this.bindings;
+        return this.bindings;
     }
 
     public boolean contains(final Class<? extends T> binding) {
-	return bindings.contains(binding);
+        return bindings.contains(binding);
     }
 
     TypeLiteral<T> getType() {
-	return type;
+        return type;
     }
 
 }

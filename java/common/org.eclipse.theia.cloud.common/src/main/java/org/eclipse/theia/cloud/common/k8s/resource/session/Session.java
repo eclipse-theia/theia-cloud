@@ -45,20 +45,20 @@ public class Session extends CustomResource<SessionSpec, SessionStatus> implemen
     }
 
     public Session(SessionHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new SessionSpec(fromHub);
-	this.status = new SessionStatus(fromHub);
+        if (fromHub.getMetadata().isPresent()) {
+            this.setMetadata(fromHub.getMetadata().get());
+        }
+        this.spec = new SessionSpec(fromHub);
+        this.status = new SessionStatus(fromHub);
     }
 
     @Override
     public String toString() {
-	return CustomResourceUtil.toString(this);
+        return CustomResourceUtil.toString(this);
     }
 
     @JsonIgnore
     public SessionStatus getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new SessionStatus();
+        return super.getStatus() != null ? super.getStatus() : new SessionStatus();
     }
 }

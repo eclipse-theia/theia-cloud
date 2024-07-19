@@ -46,20 +46,20 @@ public class SessionV1beta7 extends CustomResource<SessionV1beta7Spec, SessionV1
     }
 
     public SessionV1beta7(SessionHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new SessionV1beta7Spec(fromHub);
-	this.status = new SessionV1beta7Status(fromHub);
+        if (fromHub.getMetadata().isPresent()) {
+            this.setMetadata(fromHub.getMetadata().get());
+        }
+        this.spec = new SessionV1beta7Spec(fromHub);
+        this.status = new SessionV1beta7Status(fromHub);
     }
 
     @Override
     public String toString() {
-	return CustomResourceUtil.toString(this);
+        return CustomResourceUtil.toString(this);
     }
 
     @JsonIgnore
     public SessionV1beta7Status getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new SessionV1beta7Status();
+        return super.getStatus() != null ? super.getStatus() : new SessionV1beta7Status();
     }
 }

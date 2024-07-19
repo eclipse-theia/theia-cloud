@@ -27,11 +27,11 @@ public class WorkspaceV1beta3Mapper implements Mapper<WorkspaceV1beta3, Workspac
 
     @Override
     public WorkspaceHub toHub(WorkspaceV1beta3 resource) {
-	return new WorkspaceHub(resource);
+        return new WorkspaceHub(resource);
     }
 
     @Override
     public WorkspaceV1beta3 fromHub(WorkspaceHub hub) {
-	return new WorkspaceV1beta3(hub);
+        return new WorkspaceV1beta3(hub);
     }
 }

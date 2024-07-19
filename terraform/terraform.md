@@ -18,11 +18,11 @@ If you can't use Terraform, the `./modules/helm/main.tf` contains the informatio
 
 Currently, we have Getting Started configurations for the following Clusters/Services:
 
-* [Minikube](#minikube)
-* [Google Kubernetes Engine](#google-kubernetes-engine)
+- [Minikube](#minikube)
+- [Google Kubernetes Engine](#google-kubernetes-engine)
 
 The configurations will create a small cluster running Theia Cloud and all dependencies.\
-We will create a Keycloak with two dummy users *foo* and *bar*. The password matches their user names.
+We will create a Keycloak with two dummy users _foo_ and _bar_. The password matches their user names.
 The keycloak admin password may be passed during the installation. The defaults to "admin" for local installations while it has to be entered for remote installations.
 
 ### Minikube

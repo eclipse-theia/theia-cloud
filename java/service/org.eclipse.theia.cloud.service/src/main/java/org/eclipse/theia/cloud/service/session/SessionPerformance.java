@@ -36,15 +36,15 @@ public class SessionPerformance {
     }
 
     public SessionPerformance(String cpuAmount, String cpuFormat, String memoryAmount, String memoryFormat) {
-	this.cpuAmount = cpuAmount;
-	this.cpuFormat = cpuFormat;
-	this.memoryAmount = memoryAmount;
-	this.memoryFormat = memoryFormat;
+        this.cpuAmount = cpuAmount;
+        this.cpuFormat = cpuFormat;
+        this.memoryAmount = memoryAmount;
+        this.memoryFormat = memoryFormat;
     }
 
     @Override
     public String toString() {
-	return "UserWorkspace [cpu=" + cpuAmount + cpuFormat + ", memory=" + memoryFormat + memoryFormat + "]";
+        return "UserWorkspace [cpu=" + cpuAmount + cpuFormat + ", memory=" + memoryFormat + memoryFormat + "]";
     }
 
 }

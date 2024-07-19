@@ -1,32 +1,25 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "type": "object",
-    "properties": {
-        "name": {
-            "type": "string"
-        },
-        "image": {
-            "type": "string"
-        },
-        "limits": {
-            "type": "object",
-            "properties": {
-                "cpu": {
-                    "type": "string"
-                },
-                "memory": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "cpu",
-                "memory"
-            ]
-        }
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
     },
-    "required": [
-        "name",
-        "image",
-        "limits"
-    ]
+    "image": {
+      "type": "string"
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "string"
+        },
+        "memory": {
+          "type": "string"
+        }
+      },
+      "required": ["cpu", "memory"]
+    }
+  },
+  "required": ["name", "image", "limits"]
 }

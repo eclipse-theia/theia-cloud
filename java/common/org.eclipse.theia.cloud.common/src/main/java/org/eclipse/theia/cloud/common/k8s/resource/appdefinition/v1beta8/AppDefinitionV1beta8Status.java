@@ -35,18 +35,18 @@ public class AppDefinitionV1beta8Status extends ResourceStatus {
     }
 
     public AppDefinitionV1beta8Status(AppDefinitionHub fromHub) {
-	if (fromHub.getOperatorMessage().isPresent()) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage().get());
-	}
-	if (fromHub.getOperatorStatus().isPresent()) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
-	}
+        if (fromHub.getOperatorMessage().isPresent()) {
+            this.setOperatorMessage(fromHub.getOperatorMessage().get());
+        }
+        if (fromHub.getOperatorStatus().isPresent()) {
+            this.setOperatorStatus(fromHub.getOperatorStatus().get());
+        }
     }
 
     @Override
     public String toString() {
-	return "AppDefinitionV1beta8Status [getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()="
-		+ getOperatorMessage() + "]";
+        return "AppDefinitionV1beta8Status [getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()="
+                + getOperatorMessage() + "]";
     }
 
 }

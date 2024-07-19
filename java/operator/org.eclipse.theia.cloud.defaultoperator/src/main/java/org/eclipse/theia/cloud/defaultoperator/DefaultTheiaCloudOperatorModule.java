@@ -24,12 +24,12 @@ import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 public class DefaultTheiaCloudOperatorModule extends AbstractTheiaCloudOperatorModule {
 
     public DefaultTheiaCloudOperatorModule(TheiaCloudOperatorArguments arguments) {
-	super(arguments);
+        super(arguments);
     }
 
     @Override
     protected Class<? extends TheiaCloudOperator> bindTheiaCloudOperator() {
-	return BasicTheiaCloudOperator.class;
+        return BasicTheiaCloudOperator.class;
     }
 
 }

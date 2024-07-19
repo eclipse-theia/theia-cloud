@@ -41,40 +41,40 @@ public final class TheiaCloudDeploymentUtil {
     }
 
     public static String getSessionURL(String host, IngressPathProvider ingressPathProvider,
-	    AppDefinition appDefinition, Session session) {
-	return getSessionURL(host, ingressPathProvider.getPath(appDefinition, session));
+            AppDefinition appDefinition, Session session) {
+        return getSessionURL(host, ingressPathProvider.getPath(appDefinition, session));
     }
 
     public static String getSessionURL(String host, IngressPathProvider ingressPathProvider,
-	    AppDefinition appDefinition, int instance) {
-	return getSessionURL(host, ingressPathProvider.getPath(appDefinition, instance));
+            AppDefinition appDefinition, int instance) {
+        return getSessionURL(host, ingressPathProvider.getPath(appDefinition, instance));
     }
 
     private static String getSessionURL(String host, String path) {
-	return HOST_PROTOCOL + host + path + "/";
+        return HOST_PROTOCOL + host + path + "/";
     }
 
     public static String getDeploymentName(AppDefinition appDefinition, int instance) {
-	return NamingUtil.createName(appDefinition, instance, DEPLOYMENT_NAME);
+        return NamingUtil.createName(appDefinition, instance, DEPLOYMENT_NAME);
     }
 
     public static String getDeploymentName(Session session) {
-	return NamingUtil.createName(session, DEPLOYMENT_NAME);
+        return NamingUtil.createName(session, DEPLOYMENT_NAME);
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Deployment deployment) {
-	String instance = TheiaCloudK8sUtil.extractIdFromName(deployment.getMetadata());
-	try {
-	    return Integer.valueOf(instance);
-	} catch (NumberFormatException e) {
-	    LOGGER.error(formatLogMessage(correlationId, "Error while getting integer value of " + instance), e);
-	}
-	return null;
+        String instance = TheiaCloudK8sUtil.extractIdFromName(deployment.getMetadata());
+        try {
+            return Integer.valueOf(instance);
+        } catch (NumberFormatException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while getting integer value of " + instance), e);
+        }
+        return null;
     }
 
     public static Set<Integer> computeIdsOfMissingDeployments(AppDefinition appDefinition, String correlationId,
-	    int instances, List<Deployment> existingItems) {
-	return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
-		service -> getId(correlationId, appDefinition, service));
+            int instances, List<Deployment> existingItems) {
+        return TheiaCloudHandlerUtil.computeIdsOfMissingItems(instances, existingItems,
+                service -> getId(correlationId, appDefinition, service));
     }
 }

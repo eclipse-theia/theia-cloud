@@ -43,23 +43,23 @@ public class AppDefinition extends CustomResource<AppDefinitionSpec, AppDefiniti
 
     @Override
     public String toString() {
-	return CustomResourceUtil.toString(this);
+        return CustomResourceUtil.toString(this);
     }
 
     public AppDefinition() {
     }
 
     public AppDefinition(AppDefinitionHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new AppDefinitionSpec(fromHub);
-	this.status = new AppDefinitionStatus(fromHub);
+        if (fromHub.getMetadata().isPresent()) {
+            this.setMetadata(fromHub.getMetadata().get());
+        }
+        this.spec = new AppDefinitionSpec(fromHub);
+        this.status = new AppDefinitionStatus(fromHub);
     }
 
     @JsonIgnore
     public AppDefinitionStatus getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new AppDefinitionStatus();
+        return super.getStatus() != null ? super.getStatus() : new AppDefinitionStatus();
     }
 
 }

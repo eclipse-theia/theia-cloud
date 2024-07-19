@@ -26,17 +26,17 @@ public class SessionPerformanceRequest extends ServiceRequest {
     public String sessionName;
 
     public SessionPerformanceRequest() {
-	super(KIND);
+        super(KIND);
     }
 
     public SessionPerformanceRequest(String appId, String sessionName) {
-	super(KIND, appId);
-	this.sessionName = sessionName;
+        super(KIND, appId);
+        this.sessionName = sessionName;
     }
 
     @Override
     public String toString() {
-	return "SessionPerformanceRequest [sessionName=" + sessionName + ", appId=" + appId + ", kind=" + kind + "]";
+        return "SessionPerformanceRequest [sessionName=" + sessionName + ", appId=" + appId + ", kind=" + kind + "]";
     }
 
 }

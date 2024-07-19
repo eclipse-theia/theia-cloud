@@ -17,10 +17,10 @@ package org.eclipse.theia.cloud.operator.replacements;
 
 public interface TemplateReplacements {
     default String orEmpty(String string) {
-	return string == null ? "" : string;
+        return string == null ? "" : string;
     }
 
     default String orDefault(String string, String defaultValue) {
-	return string == null ? defaultValue : string;
+        return string == null ? defaultValue : string;
     }
 }
