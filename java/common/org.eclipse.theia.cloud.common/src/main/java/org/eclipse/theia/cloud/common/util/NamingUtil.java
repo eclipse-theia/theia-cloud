@@ -146,8 +146,8 @@ public final class NamingUtil {
          * This must be shorter than {@link NamingUtil.VALID_NAME_LIMIT} We fill remaining space with additional
          * information about the workspace. This may be trimmed away however.
          */
-        return createName("workspace", identifier, workspace.getSpec().getUser(),
-                workspace.getSpec().getAppDefinition(), workspace.getMetadata().getUid());
+        return createName("ws", identifier, workspace.getSpec().getUser(), workspace.getSpec().getAppDefinition(),
+                workspace.getMetadata().getUid());
     }
 
     /**
