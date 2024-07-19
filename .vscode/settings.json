@@ -23,5 +23,8 @@
   },
   "[plantuml]": {
     "editor.defaultFormatter": "jebbs.plantuml"
+  },
+  "[xml]": {
+    "editor.defaultFormatter": "redhat.vscode-xml"
   }
 }

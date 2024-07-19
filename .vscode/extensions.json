@@ -4,6 +4,7 @@
     "vscjava.vscode-java-pack",
     "esbenp.prettier-vscode",
     "ms-azuretools.vscode-docker",
-    "jebbs.plantuml"
+    "jebbs.plantuml",
+    "redhat.vscode-xml"
   ]
 }

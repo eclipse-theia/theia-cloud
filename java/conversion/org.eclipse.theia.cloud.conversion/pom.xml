@@ -48,11 +48,11 @@
 			<version>0.11.0-SNAPSHOT</version>
 		</dependency>
 		<!-- Webhooks -->
-        <dependency>
-            <groupId>io.javaoperatorsdk</groupId>
-            <artifactId>kubernetes-webhooks-framework-core</artifactId>
-            <version>${webhooks.framework.core.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>io.javaoperatorsdk</groupId>
+			<artifactId>kubernetes-webhooks-framework-core</artifactId>
+			<version>${webhooks.framework.core.version}</version>
+		</dependency>
 		<!-- Test utilities -->
 		<dependency>
 			<groupId>io.quarkus</groupId>
