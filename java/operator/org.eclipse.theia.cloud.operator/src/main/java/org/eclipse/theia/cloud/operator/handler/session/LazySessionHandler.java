@@ -348,6 +348,15 @@ public class LazySessionHandler implements SessionHandler {
             return Optional.empty();
 
         }
+        if (!session.getSpec().getUser().equals(workspace.get().getSpec().getUser())) {
+            // the workspace is owned by a different user. do not mount and go ephemeral
+            // should get prevented by service, but we need to be sure to not expose data
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Workspace is owned by " + workspace.get().getSpec().getUser() + ", but requesting user is "
+                            + session.getSpec().getUser()));
+            return Optional.empty();
+        }
+
         String storageName = WorkspaceUtil.getStorageName(workspace.get());
         if (!client.persistentVolumeClaimsClient().has(storageName)) {
             LOGGER.info(formatLogMessage(correlationId,
