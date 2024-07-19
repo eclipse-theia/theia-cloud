@@ -27,93 +27,92 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 /**
  * Unit tests for {@link NamingUtil}.
- *
  */
 class NamingUtilTests {
 
     @Test
     void createName_SessionAndNullIdentifier() {
-	Session session = createSession();
+        Session session = createSession();
 
-	String result = NamingUtil.createName(session, null);
-	assertEquals("session-some-username-test-app-definiti-426930ea37d7", result);
+        String result = NamingUtil.createName(session, null);
+        assertEquals("session-some-username-test-app-definiti-426930ea37d7", result);
     }
 
     @Test
     void createName_SessionAndWhitespaceIdentifier() {
-	Session session = createSession();
+        Session session = createSession();
 
-	String result = NamingUtil.createName(session, " ");
-	assertEquals("session-some-username-test-app-definiti-426930ea37d7", result);
+        String result = NamingUtil.createName(session, " ");
+        assertEquals("session-some-username-test-app-definiti-426930ea37d7", result);
     }
 
     @Test
     void createName_SessionAndEmptyIdentifier() {
-	Session session = createSession();
+        Session session = createSession();
 
-	String result = NamingUtil.createName(session, "");
-	assertEquals("session-some-username-test-app-definiti-426930ea37d7", result);
+        String result = NamingUtil.createName(session, "");
+        assertEquals("session-some-username-test-app-definiti-426930ea37d7", result);
     }
 
     @Test
     void createName_SessionAndIdentifier() {
-	Session session = createSession();
+        Session session = createSession();
 
-	String result = NamingUtil.createName(session, "longidentifier");
-	assertEquals("session-longidentif-some-userna-test-app-de-426930ea37d7", result);
+        String result = NamingUtil.createName(session, "longidentifier");
+        assertEquals("session-longidentif-some-userna-test-app-de-426930ea37d7", result);
     }
 
     @Test
     void createName_WorkspaceAndNullIdentifier() {
-	Workspace workspace = createWorkspace();
+        Workspace workspace = createWorkspace();
 
-	String result = NamingUtil.createName(workspace, null);
-	assertEquals("workspace-some-username-test-app-definiti-381261d79c23", result);
+        String result = NamingUtil.createName(workspace, null);
+        assertEquals("ws-some-username-test-app-definiti-381261d79c23", result);
     }
 
     @Test
     void createName_WorkspaceAndWhitespaceIdentifier() {
-	Workspace workspace = createWorkspace();
+        Workspace workspace = createWorkspace();
 
-	String result = NamingUtil.createName(workspace, " ");
-	assertEquals("workspace-some-username-test-app-definiti-381261d79c23", result);
+        String result = NamingUtil.createName(workspace, " ");
+        assertEquals("ws-some-username-test-app-definiti-381261d79c23", result);
     }
 
     @Test
     void createName_WorkspaceAndEmptyIdentifier() {
-	Workspace workspace = createWorkspace();
+        Workspace workspace = createWorkspace();
 
-	String result = NamingUtil.createName(workspace, "");
-	assertEquals("workspace-some-username-test-app-definiti-381261d79c23", result);
+        String result = NamingUtil.createName(workspace, "");
+        assertEquals("ws-some-username-test-app-definiti-381261d79c23", result);
     }
 
     @Test
     void createName_WorkspaceAndIdentifier() {
-	Workspace workspace = createWorkspace();
+        Workspace workspace = createWorkspace();
 
-	String result = NamingUtil.createName(workspace, "longidentifier");
-	assertEquals("workspace-longidentif-some-userna-test-app-de-381261d79c23", result);
+        String result = NamingUtil.createName(workspace, "longidentifier");
+        assertEquals("ws-longidentif-some-userna-test-app-de-381261d79c23", result);
     }
 
     private Session createSession() {
-	Session session = new Session();
-	ObjectMeta objectMeta = new ObjectMeta();
-	objectMeta.setUid("2b8a76db-a049-496f-b897-426930ea37d7");
-	session.setMetadata(objectMeta);
-	SessionSpec sessionSpec = new SessionSpec("some-session-spec", "test-app-definition",
-		"some.username@example.org");
-	session.setSpec(sessionSpec);
-	return session;
+        Session session = new Session();
+        ObjectMeta objectMeta = new ObjectMeta();
+        objectMeta.setUid("2b8a76db-a049-496f-b897-426930ea37d7");
+        session.setMetadata(objectMeta);
+        SessionSpec sessionSpec = new SessionSpec("some-session-spec", "test-app-definition",
+                "some.username@example.org");
+        session.setSpec(sessionSpec);
+        return session;
     }
 
     private Workspace createWorkspace() {
-	Workspace workspace = new Workspace();
-	ObjectMeta objectMeta = new ObjectMeta();
-	objectMeta.setUid("6f1a8966-4d5a-41dc-82ba-381261d79c23");
-	workspace.setMetadata(objectMeta);
-	WorkspaceSpec workspaceSpec = new WorkspaceSpec("some-workspace-spec", "some-workspace-label",
-		"test-app-definition", "some.username@example.org");
-	workspace.setSpec(workspaceSpec);
-	return workspace;
+        Workspace workspace = new Workspace();
+        ObjectMeta objectMeta = new ObjectMeta();
+        objectMeta.setUid("6f1a8966-4d5a-41dc-82ba-381261d79c23");
+        workspace.setMetadata(objectMeta);
+        WorkspaceSpec workspaceSpec = new WorkspaceSpec("some-workspace-spec", "some-workspace-label",
+                "test-app-definition", "some.username@example.org");
+        workspace.setSpec(workspaceSpec);
+        return workspace;
     }
 }
