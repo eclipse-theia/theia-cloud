@@ -16,7 +16,8 @@
   "[java]": {
     "editor.detectIndentation": false,
     "editor.insertSpaces": true,
-    "editor.defaultFormatter": "redhat.java"
+    "editor.defaultFormatter": "redhat.java",
+    "editor.tabSize": 4
   },
   "[dockerfile]": {
     "editor.defaultFormatter": "ms-azuretools.vscode-docker"

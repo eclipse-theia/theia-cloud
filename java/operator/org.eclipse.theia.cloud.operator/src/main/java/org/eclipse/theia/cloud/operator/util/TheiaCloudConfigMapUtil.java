@@ -35,8 +35,8 @@ public final class TheiaCloudConfigMapUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudConfigMapUtil.class);
 
-    public static final String CONFIGMAP_PROXY_NAME = "config";
-    public static final String CONFIGMAP_EMAIL_NAME = "emailconfig";
+    public static final String CONFIGMAP_PROXY_NAME = "proxy";
+    public static final String CONFIGMAP_EMAIL_NAME = "email";
 
     private TheiaCloudConfigMapUtil() {
     }
