@@ -1,6 +1,8 @@
 # Changelog
 
-## [0.11.0] - estimated 2024-07
+<!-- ## [0.12.0] - estimated 2024-10 -->
+
+## [0.11.0] - 2024-07-22
 
 - [common] Add option field to CRDs and increase version to `Session.v1beta8`, `Workspace.v1beta5` and `AppDefinition.v1beta10` [#293](https://github.com/eclipsesource/theia-cloud/pull/293) | [#55](https://github.com/eclipsesource/theia-cloud-helm/pull/55)
 - [java] Separate operator default implementation from library to allow for easier customization [#303](https://github.com/eclipsesource/theia-cloud/pull/303)
@@ -10,6 +12,7 @@
   - Removed terms and conditions
   - Build the common package as ESM and CJS bundles for extended compatibility
 - [common] Add `ingressHostnamePrefixes` list to `AppDefinition.v1beta10` [#298](https://github.com/eclipsesource/theia-cloud/pull/298) | [#57](https://github.com/eclipsesource/theia-cloud-helm/pull/57)
+- [java] Improved naming for kubernetes resources [#326](https://github.com/eclipsesource/theia-cloud/pull/326)
 
 ### Breaking Changes in 0.11.0
 
