@@ -8,7 +8,7 @@ issuer:
   email: jfaltermeier@eclipsesource.com
 
 demoApplication:
-  name: theiacloud/theia-cloud-demo:0.11.0-next
+  name: theiacloud/theia-cloud-demo:0.11.0
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
@@ -24,7 +24,7 @@ hosts:
     instance: ws
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.11.0-next
+  image: theiacloud/theia-cloud-landing-page:0.11.0
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
   additionalApps:
