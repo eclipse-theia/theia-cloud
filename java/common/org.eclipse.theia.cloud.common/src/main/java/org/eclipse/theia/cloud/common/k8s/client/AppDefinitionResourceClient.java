@@ -21,5 +21,5 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSp
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionStatus;
 
 public interface AppDefinitionResourceClient extends
-	CustomResourceClient<AppDefinitionSpec, AppDefinitionStatus, AppDefinition, AppDefinitionSpecResourceList> {
+        CustomResourceClient<AppDefinitionSpec, AppDefinitionStatus, AppDefinition, AppDefinitionSpecResourceList> {
 }

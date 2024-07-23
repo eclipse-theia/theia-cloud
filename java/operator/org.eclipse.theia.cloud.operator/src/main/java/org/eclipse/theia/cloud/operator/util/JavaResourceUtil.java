@@ -43,33 +43,33 @@ public final class JavaResourceUtil {
     }
 
     public static String readResourceAndReplacePlaceholders(String resourceName, Map<String, String> replacements,
-	    String correlationId) throws IOException, URISyntaxException {
-	try (InputStream inputStream = getInputStream(resourceName, correlationId)) {
-	    String template = new BufferedReader(new InputStreamReader(inputStream)).lines().parallel()
-		    .collect(Collectors.joining("\n"));
-	    LOGGER.trace(formatLogMessage(correlationId, "Replacing placeholders. Starting template:\n" + template));
-	    for (Entry<String, String> replacement : replacements.entrySet()) {
-		String value = replacement.getValue() != null ? replacement.getValue() : "";
-		template = template.replace(replacement.getKey(), value);
-		LOGGER.trace(formatLogMessage(correlationId, "Replaced " + replacement.getKey() + " with " + value));
-	    }
-	    LOGGER.trace(formatLogMessage(correlationId, "Replacement finished. Result:\n" + template));
-	    return template;
-	}
+            String correlationId) throws IOException, URISyntaxException {
+        try (InputStream inputStream = getInputStream(resourceName, correlationId)) {
+            String template = new BufferedReader(new InputStreamReader(inputStream)).lines().parallel()
+                    .collect(Collectors.joining("\n"));
+            LOGGER.trace(formatLogMessage(correlationId, "Replacing placeholders. Starting template:\n" + template));
+            for (Entry<String, String> replacement : replacements.entrySet()) {
+                String value = replacement.getValue() != null ? replacement.getValue() : "";
+                template = template.replace(replacement.getKey(), value);
+                LOGGER.trace(formatLogMessage(correlationId, "Replaced " + replacement.getKey() + " with " + value));
+            }
+            LOGGER.trace(formatLogMessage(correlationId, "Replacement finished. Result:\n" + template));
+            return template;
+        }
     }
 
     protected static InputStream getInputStream(String resourceName, String correlationId)
-	    throws FileNotFoundException {
-	/* check if template is overridden */
-	File file = Paths.get(TEMPLATES, resourceName).toFile();
-	if (file.exists()) {
-	    LOGGER.info(
-		    formatLogMessage(correlationId, "Updating custom template read from " + file.getAbsolutePath()));
-	    return new FileInputStream(file);
-	}
+            throws FileNotFoundException {
+        /* check if template is overridden */
+        File file = Paths.get(TEMPLATES, resourceName).toFile();
+        if (file.exists()) {
+            LOGGER.info(
+                    formatLogMessage(correlationId, "Updating custom template read from " + file.getAbsolutePath()));
+            return new FileInputStream(file);
+        }
 
-	LOGGER.trace(formatLogMessage(correlationId, "Updating template read with classloader from " + resourceName));
-	return JavaResourceUtil.class.getResourceAsStream(resourceName);
+        LOGGER.trace(formatLogMessage(correlationId, "Updating template read with classloader from " + resourceName));
+        return JavaResourceUtil.class.getResourceAsStream(resourceName);
     }
 
 }

@@ -12,7 +12,7 @@ You can run your application in dev mode that enables live coding using:
 ./mvnw compile quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+> **_NOTE:_** Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
 
 ## Packaging and running the application
 
@@ -67,7 +67,7 @@ Unit tests use the Quarkus test infrastructure.
 
 All tests can be run in Eclipse via launch config [TheiaCloud Service Tests](./TheiaCloud Service Tests.launch).
 
-When running tests from an IDE, the following VM argument might need to be set to enable logging during tests  (this is pre-configured in the launch config):
+When running tests from an IDE, the following VM argument might need to be set to enable logging during tests (this is pre-configured in the launch config):
 
 ```bash
 -Djava.util.logging.manager=org.jboss.logmanager.LogManager

@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link org.eclipse.theia.cloud.service.ApplicationProperties}
- *
  */
 class ApplicationPropertiesTests {
 
@@ -30,29 +29,29 @@ class ApplicationPropertiesTests {
 
     @Test
     void isUseKeycloak_propertyTrue_returnTrue() {
-	System.setProperty(THEIA_CLOUD_USE_KEYCLOAK, "true");
-	ApplicationProperties fixture = new ApplicationProperties();
-	assertTrue(fixture.isUseKeycloak());
+        System.setProperty(THEIA_CLOUD_USE_KEYCLOAK, "true");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertTrue(fixture.isUseKeycloak());
     }
 
     @Test
     void isUseKeycloak_propertyNotSet_returnTrue() {
-	System.clearProperty(THEIA_CLOUD_USE_KEYCLOAK);
-	ApplicationProperties fixture = new ApplicationProperties();
-	assertTrue(fixture.isUseKeycloak());
+        System.clearProperty(THEIA_CLOUD_USE_KEYCLOAK);
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertTrue(fixture.isUseKeycloak());
     }
 
     @Test
     void isUseKeycloak_propertyFalse_returnFalse() {
-	System.setProperty(THEIA_CLOUD_USE_KEYCLOAK, "false");
-	ApplicationProperties fixture = new ApplicationProperties();
-	assertFalse(fixture.isUseKeycloak());
+        System.setProperty(THEIA_CLOUD_USE_KEYCLOAK, "false");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertFalse(fixture.isUseKeycloak());
     }
 
     @Test
     void isUseKeycloak_propertySetToSomeValue_returnTrue() {
-	System.setProperty(THEIA_CLOUD_USE_KEYCLOAK, "asdasd");
-	ApplicationProperties fixture = new ApplicationProperties();
-	assertTrue(fixture.isUseKeycloak());
+        System.setProperty(THEIA_CLOUD_USE_KEYCLOAK, "asdasd");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertTrue(fixture.isUseKeycloak());
     }
 }

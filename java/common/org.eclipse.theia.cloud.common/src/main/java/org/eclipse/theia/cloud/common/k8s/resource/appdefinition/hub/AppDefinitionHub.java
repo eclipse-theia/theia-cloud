@@ -15,6 +15,8 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -41,6 +43,7 @@ public class AppDefinitionHub {
     final OptionalInt downlinkLimit;// kilobits per second
     final OptionalInt uplinkLimit;// kilobits per second
     final Optional<String> mountPath;
+    final Optional<List<String>> ingressHostnamePrefixes;
 
     final OptionalInt timeoutLimit;
     @Deprecated
@@ -53,204 +56,270 @@ public class AppDefinitionHub {
     final Optional<String> operatorStatus;
     final Optional<String> operatorMessage;
 
+    final Optional<Map<String, String>> options;
+
     public AppDefinitionHub(AppDefinition toHub) {
-	this.metadata = Optional.ofNullable(toHub.getMetadata());
-	this.name = Optional.ofNullable(toHub.getSpec().getName());
-	this.image = Optional.ofNullable(toHub.getSpec().getImage());
-	this.imagePullPolicy = Optional.ofNullable(toHub.getSpec().getImagePullPolicy());
-	this.pullSecret = Optional.ofNullable(toHub.getSpec().getPullSecret());
-	this.uid = OptionalInt.of(toHub.getSpec().getUid());
-	this.port = OptionalInt.of(toHub.getSpec().getPort());
-	this.ingressname = Optional.ofNullable(toHub.getSpec().getIngressname());
-	this.minInstances = OptionalInt.of(toHub.getSpec().getMinInstances());
-	this.maxInstances = OptionalInt.of(toHub.getSpec().getMaxInstances());
-	this.requestsMemory = Optional.ofNullable(toHub.getSpec().getRequestsMemory());
-	this.requestsCpu = Optional.ofNullable(toHub.getSpec().getRequestsCpu());
-	this.limitsMemory = Optional.ofNullable(toHub.getSpec().getLimitsMemory());
-	this.limitsCpu = Optional.ofNullable(toHub.getSpec().getLimitsCpu());
-	this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
-	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
-	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+        this.metadata = Optional.ofNullable(toHub.getMetadata());
+        this.name = Optional.ofNullable(toHub.getSpec().getName());
+        this.image = Optional.ofNullable(toHub.getSpec().getImage());
+        this.imagePullPolicy = Optional.ofNullable(toHub.getSpec().getImagePullPolicy());
+        this.pullSecret = Optional.ofNullable(toHub.getSpec().getPullSecret());
+        this.uid = OptionalInt.of(toHub.getSpec().getUid());
+        this.port = OptionalInt.of(toHub.getSpec().getPort());
+        this.ingressname = Optional.ofNullable(toHub.getSpec().getIngressname());
+        this.minInstances = OptionalInt.of(toHub.getSpec().getMinInstances());
+        this.maxInstances = OptionalInt.of(toHub.getSpec().getMaxInstances());
+        this.requestsMemory = Optional.ofNullable(toHub.getSpec().getRequestsMemory());
+        this.requestsCpu = Optional.ofNullable(toHub.getSpec().getRequestsCpu());
+        this.limitsMemory = Optional.ofNullable(toHub.getSpec().getLimitsMemory());
+        this.limitsCpu = Optional.ofNullable(toHub.getSpec().getLimitsCpu());
+        this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
+        this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
+        this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+        this.options = Optional.ofNullable(toHub.getSpec().getOptions());
+        this.ingressHostnamePrefixes = Optional.ofNullable(toHub.getSpec().getIngressHostnamePrefixes());
 
-	this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout());
+        this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout());
 
-	if (toHub.getSpec().getMonitor() != null) {
-	    this.monitorPort = OptionalInt.of(toHub.getSpec().getMonitor().getPort());
-	    if (toHub.getSpec().getMonitor().getActivityTracker() != null) {
-		this.monitorActivityTrackerNotifyAfter = OptionalInt
-			.of(toHub.getSpec().getMonitor().getActivityTracker().getNotifyAfter());
-		this.monitorActivityTrackerTimeoutAfter = OptionalInt
-			.of(toHub.getSpec().getMonitor().getActivityTracker().getTimeoutAfter());
-	    } else {
-		this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
-		this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
-	    }
-	} else {
-	    this.monitorPort = OptionalInt.empty();
-	    this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
-	    this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
-	}
+        if (toHub.getSpec().getMonitor() != null) {
+            this.monitorPort = OptionalInt.of(toHub.getSpec().getMonitor().getPort());
+            if (toHub.getSpec().getMonitor().getActivityTracker() != null) {
+                this.monitorActivityTrackerNotifyAfter = OptionalInt
+                        .of(toHub.getSpec().getMonitor().getActivityTracker().getNotifyAfter());
+                this.monitorActivityTrackerTimeoutAfter = OptionalInt
+                        .of(toHub.getSpec().getMonitor().getActivityTracker().getTimeoutAfter());
+            } else {
+                this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+                this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+            }
+        } else {
+            this.monitorPort = OptionalInt.empty();
+            this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+            this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+        }
 
-	// Status is not a required field
-	if (toHub.getStatus() != null) {
-	    this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
-	    this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
-	} else {
-	    this.operatorStatus = Optional.empty();
-	    this.operatorMessage = Optional.empty();
-	}
+        // Status is not a required field
+        if (toHub.getStatus() != null) {
+            this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+            this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+        } else {
+            this.operatorStatus = Optional.empty();
+            this.operatorMessage = Optional.empty();
+        }
     }
 
     @SuppressWarnings("deprecation")
     public AppDefinitionHub(
-	    org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta8.AppDefinitionV1beta8 toHub) {
-	this.metadata = Optional.ofNullable(toHub.getMetadata());
-	this.name = Optional.ofNullable(toHub.getSpec().getName());
-	this.image = Optional.ofNullable(toHub.getSpec().getImage());
-	this.imagePullPolicy = Optional.ofNullable(toHub.getSpec().getImagePullPolicy());
-	this.pullSecret = Optional.ofNullable(toHub.getSpec().getPullSecret());
-	this.uid = OptionalInt.of(toHub.getSpec().getUid());
-	this.port = OptionalInt.of(toHub.getSpec().getPort());
-	this.ingressname = Optional.ofNullable(toHub.getSpec().getIngressname());
-	this.minInstances = OptionalInt.of(toHub.getSpec().getMinInstances());
-	this.maxInstances = OptionalInt.of(toHub.getSpec().getMaxInstances());
-	this.requestsMemory = Optional.ofNullable(toHub.getSpec().getRequestsMemory());
-	this.requestsCpu = Optional.ofNullable(toHub.getSpec().getRequestsCpu());
-	this.limitsMemory = Optional.ofNullable(toHub.getSpec().getLimitsMemory());
-	this.limitsCpu = Optional.ofNullable(toHub.getSpec().getLimitsCpu());
-	this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
-	this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
-	this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+            org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta9.AppDefinitionV1beta9 toHub) {
+        this.metadata = Optional.ofNullable(toHub.getMetadata());
+        this.name = Optional.ofNullable(toHub.getSpec().getName());
+        this.image = Optional.ofNullable(toHub.getSpec().getImage());
+        this.imagePullPolicy = Optional.ofNullable(toHub.getSpec().getImagePullPolicy());
+        this.pullSecret = Optional.ofNullable(toHub.getSpec().getPullSecret());
+        this.uid = OptionalInt.of(toHub.getSpec().getUid());
+        this.port = OptionalInt.of(toHub.getSpec().getPort());
+        this.ingressname = Optional.ofNullable(toHub.getSpec().getIngressname());
+        this.minInstances = OptionalInt.of(toHub.getSpec().getMinInstances());
+        this.maxInstances = OptionalInt.of(toHub.getSpec().getMaxInstances());
+        this.requestsMemory = Optional.ofNullable(toHub.getSpec().getRequestsMemory());
+        this.requestsCpu = Optional.ofNullable(toHub.getSpec().getRequestsCpu());
+        this.limitsMemory = Optional.ofNullable(toHub.getSpec().getLimitsMemory());
+        this.limitsCpu = Optional.ofNullable(toHub.getSpec().getLimitsCpu());
+        this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
+        this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
+        this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+        this.options = Optional.empty();
+        this.ingressHostnamePrefixes = Optional.empty();
 
-	if (toHub.getSpec().getTimeout() != null) {
-	    this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout().getLimit());
-	    this.timeoutStrategy = Optional.of(toHub.getSpec().getTimeout().getStrategy());
-	} else {
-	    this.timeoutLimit = OptionalInt.empty();
-	    this.timeoutStrategy = Optional.empty();
-	}
+        this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout());
 
-	if (toHub.getSpec().getMonitor() != null) {
-	    this.monitorPort = OptionalInt.of(toHub.getSpec().getMonitor().getPort());
-	    if (toHub.getSpec().getMonitor().getActivityTracker() != null) {
-		this.monitorActivityTrackerNotifyAfter = OptionalInt
-			.of(toHub.getSpec().getMonitor().getActivityTracker().getNotifyAfter());
-		this.monitorActivityTrackerTimeoutAfter = OptionalInt
-			.of(toHub.getSpec().getMonitor().getActivityTracker().getTimeoutAfter());
-	    } else {
-		this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
-		this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
-	    }
-	} else {
-	    this.monitorPort = OptionalInt.empty();
-	    this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
-	    this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
-	}
+        if (toHub.getSpec().getMonitor() != null) {
+            this.monitorPort = OptionalInt.of(toHub.getSpec().getMonitor().getPort());
+            if (toHub.getSpec().getMonitor().getActivityTracker() != null) {
+                this.monitorActivityTrackerNotifyAfter = OptionalInt
+                        .of(toHub.getSpec().getMonitor().getActivityTracker().getNotifyAfter());
+                this.monitorActivityTrackerTimeoutAfter = OptionalInt
+                        .of(toHub.getSpec().getMonitor().getActivityTracker().getTimeoutAfter());
+            } else {
+                this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+                this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+            }
+        } else {
+            this.monitorPort = OptionalInt.empty();
+            this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+            this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+        }
 
-	// Status is not a required field
-	if (toHub.getStatus() != null) {
-	    this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
-	    this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
-	} else {
-	    this.operatorStatus = Optional.empty();
-	    this.operatorMessage = Optional.empty();
-	}
+        // Status is not a required field
+        if (toHub.getStatus() != null) {
+            this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+            this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+        } else {
+            this.operatorStatus = Optional.empty();
+            this.operatorMessage = Optional.empty();
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    public AppDefinitionHub(
+            org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta8.AppDefinitionV1beta8 toHub) {
+        this.metadata = Optional.ofNullable(toHub.getMetadata());
+        this.name = Optional.ofNullable(toHub.getSpec().getName());
+        this.image = Optional.ofNullable(toHub.getSpec().getImage());
+        this.imagePullPolicy = Optional.ofNullable(toHub.getSpec().getImagePullPolicy());
+        this.pullSecret = Optional.ofNullable(toHub.getSpec().getPullSecret());
+        this.uid = OptionalInt.of(toHub.getSpec().getUid());
+        this.port = OptionalInt.of(toHub.getSpec().getPort());
+        this.ingressname = Optional.ofNullable(toHub.getSpec().getIngressname());
+        this.minInstances = OptionalInt.of(toHub.getSpec().getMinInstances());
+        this.maxInstances = OptionalInt.of(toHub.getSpec().getMaxInstances());
+        this.requestsMemory = Optional.ofNullable(toHub.getSpec().getRequestsMemory());
+        this.requestsCpu = Optional.ofNullable(toHub.getSpec().getRequestsCpu());
+        this.limitsMemory = Optional.ofNullable(toHub.getSpec().getLimitsMemory());
+        this.limitsCpu = Optional.ofNullable(toHub.getSpec().getLimitsCpu());
+        this.downlinkLimit = OptionalInt.of(toHub.getSpec().getDownlinkLimit());
+        this.uplinkLimit = OptionalInt.of(toHub.getSpec().getUplinkLimit());
+        this.mountPath = Optional.ofNullable(toHub.getSpec().getMountPath());
+        this.options = Optional.empty();
+        this.ingressHostnamePrefixes = Optional.empty();
+
+        if (toHub.getSpec().getTimeout() != null) {
+            this.timeoutLimit = OptionalInt.of(toHub.getSpec().getTimeout().getLimit());
+            this.timeoutStrategy = Optional.of(toHub.getSpec().getTimeout().getStrategy());
+        } else {
+            this.timeoutLimit = OptionalInt.empty();
+            this.timeoutStrategy = Optional.empty();
+        }
+
+        if (toHub.getSpec().getMonitor() != null) {
+            this.monitorPort = OptionalInt.of(toHub.getSpec().getMonitor().getPort());
+            if (toHub.getSpec().getMonitor().getActivityTracker() != null) {
+                this.monitorActivityTrackerNotifyAfter = OptionalInt
+                        .of(toHub.getSpec().getMonitor().getActivityTracker().getNotifyAfter());
+                this.monitorActivityTrackerTimeoutAfter = OptionalInt
+                        .of(toHub.getSpec().getMonitor().getActivityTracker().getTimeoutAfter());
+            } else {
+                this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+                this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+            }
+        } else {
+            this.monitorPort = OptionalInt.empty();
+            this.monitorActivityTrackerNotifyAfter = OptionalInt.empty();
+            this.monitorActivityTrackerTimeoutAfter = OptionalInt.empty();
+        }
+
+        // Status is not a required field
+        if (toHub.getStatus() != null) {
+            this.operatorStatus = Optional.ofNullable(toHub.getNonNullStatus().getOperatorStatus());
+            this.operatorMessage = Optional.ofNullable(toHub.getNonNullStatus().getOperatorMessage());
+        } else {
+            this.operatorStatus = Optional.empty();
+            this.operatorMessage = Optional.empty();
+        }
     }
 
     public Optional<ObjectMeta> getMetadata() {
-	return metadata;
+        return metadata;
     }
 
     public Optional<String> getName() {
-	return name;
+        return name;
     }
 
     public Optional<String> getImage() {
-	return image;
+        return image;
     }
 
     public Optional<String> getImagePullPolicy() {
-	return imagePullPolicy;
+        return imagePullPolicy;
     }
 
     public Optional<String> getPullSecret() {
-	return pullSecret;
+        return pullSecret;
     }
 
     public OptionalInt getUid() {
-	return uid;
+        return uid;
     }
 
     public OptionalInt getPort() {
-	return port;
+        return port;
     }
 
     public Optional<String> getIngressname() {
-	return ingressname;
+        return ingressname;
     }
 
     public OptionalInt getMinInstances() {
-	return minInstances;
+        return minInstances;
     }
 
     public OptionalInt getMaxInstances() {
-	return maxInstances;
+        return maxInstances;
     }
 
     public Optional<String> getRequestsMemory() {
-	return requestsMemory;
+        return requestsMemory;
     }
 
     public Optional<String> getRequestsCpu() {
-	return requestsCpu;
+        return requestsCpu;
     }
 
     public Optional<String> getLimitsMemory() {
-	return limitsMemory;
+        return limitsMemory;
     }
 
     public Optional<String> getLimitsCpu() {
-	return limitsCpu;
+        return limitsCpu;
     }
 
     public OptionalInt getDownlinkLimit() {
-	return downlinkLimit;
+        return downlinkLimit;
     }
 
     public OptionalInt getUplinkLimit() {
-	return uplinkLimit;
+        return uplinkLimit;
     }
 
     public Optional<String> getMountPath() {
-	return mountPath;
+        return mountPath;
     }
 
     public OptionalInt getTimeoutLimit() {
-	return timeoutLimit;
+        return timeoutLimit;
     }
 
     public Optional<String> getTimeoutStrategy() {
-	return timeoutStrategy;
+        return timeoutStrategy;
     }
 
     public OptionalInt getMonitorPort() {
-	return monitorPort;
+        return monitorPort;
     }
 
     public OptionalInt getMonitorActivityTrackerTimeoutAfter() {
-	return monitorActivityTrackerTimeoutAfter;
+        return monitorActivityTrackerTimeoutAfter;
     }
 
     public OptionalInt getMonitorActivityTrackerNotifyAfter() {
-	return monitorActivityTrackerNotifyAfter;
+        return monitorActivityTrackerNotifyAfter;
     }
 
     public Optional<String> getOperatorStatus() {
-	return operatorStatus;
+        return operatorStatus;
     }
 
     public Optional<String> getOperatorMessage() {
-	return operatorMessage;
+        return operatorMessage;
+    }
+
+    public Optional<Map<String, String>> getOptions() {
+        return options;
+    }
+
+    public Optional<List<String>> getIngressHostnamePrefixes() {
+        return ingressHostnamePrefixes;
     }
 
 }

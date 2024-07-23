@@ -24,17 +24,17 @@ public class SessionListRequest extends UserScopedServiceRequest {
     public static final String KIND = "sessionListRequest";
 
     public SessionListRequest() {
-	super(KIND);
+        super(KIND);
     }
 
     public SessionListRequest(String appId, String user) {
-	super(KIND, appId);
-	this.user = user;
+        super(KIND, appId);
+        this.user = user;
     }
 
     @Override
     public String toString() {
-	return "SessionListRequest [user=" + user + ", appId=" + appId + ", kind=" + kind + "]";
+        return "SessionListRequest [user=" + user + ", appId=" + appId + ", kind=" + kind + "]";
     }
 
 }

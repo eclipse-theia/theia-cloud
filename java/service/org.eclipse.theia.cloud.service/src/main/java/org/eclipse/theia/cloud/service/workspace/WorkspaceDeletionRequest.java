@@ -26,19 +26,19 @@ public class WorkspaceDeletionRequest extends UserScopedServiceRequest {
     public String workspaceName;
 
     public WorkspaceDeletionRequest() {
-	super(KIND);
+        super(KIND);
     }
 
     public WorkspaceDeletionRequest(String appId, String user, String workspaceName) {
-	super(KIND, appId);
-	this.workspaceName = workspaceName;
-	this.user = user;
+        super(KIND, appId);
+        this.workspaceName = workspaceName;
+        this.user = user;
     }
 
     @Override
     public String toString() {
-	return "WorkspaceDeletionRequest [user=" + user + ", workspaceName=" + workspaceName + ", appId=" + appId
-		+ ", kind=" + kind + "]";
+        return "WorkspaceDeletionRequest [user=" + user + ", workspaceName=" + workspaceName + ", appId=" + appId
+                + ", kind=" + kind + "]";
     }
 
 }

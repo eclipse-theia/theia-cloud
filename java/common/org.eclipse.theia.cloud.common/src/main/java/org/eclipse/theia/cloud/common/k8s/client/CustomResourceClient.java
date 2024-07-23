@@ -27,40 +27,40 @@ import io.fabric8.kubernetes.api.model.KubernetesResourceList;
 import io.fabric8.kubernetes.client.CustomResource;
 
 public interface CustomResourceClient<SPEC, STATUS, T extends CustomResource<SPEC, STATUS>, L extends KubernetesResourceList<T>>
-	extends ResourceClient<T, L> {
+        extends ResourceClient<T, L> {
 
     T create(String correlationId, SPEC spec);
 
     default Optional<SPEC> spec(String name) {
-	return get(name).map(T::getSpec);
+        return get(name).map(T::getSpec);
     }
 
     default Optional<STATUS> status(String name) {
-	return get(name).map(T::getStatus);
+        return get(name).map(T::getStatus);
     }
 
     default List<T> list(String user) {
-	return list().stream().filter(item -> Objects.equals(UserScopedSpec.getUser(item.getSpec()), user))
-		.collect(Collectors.toList());
+        return list().stream().filter(item -> Objects.equals(UserScopedSpec.getUser(item.getSpec()), user))
+                .collect(Collectors.toList());
     }
 
     default List<SPEC> specs() {
-	return list().stream().map(item -> item.getSpec()).collect(Collectors.toList());
+        return list().stream().map(item -> item.getSpec()).collect(Collectors.toList());
     }
 
     default List<SPEC> specs(String user) {
-	return list(user).stream().map(item -> item.getSpec()).collect(Collectors.toList());
+        return list(user).stream().map(item -> item.getSpec()).collect(Collectors.toList());
     }
 
     default T updateStatus(String correlationId, T resource, Consumer<STATUS> editOperation) {
-	trace(correlationId, "Update Status of " + resource);
-	final String name = resource.getMetadata().getName();
-	T updatedResource = editStatus(correlationId, name, res -> {
-	    STATUS status = Optional.ofNullable(res.getStatus()).orElse(createDefaultStatus());
-	    res.setStatus(status);
-	    editOperation.accept(status);
-	});
-	return (updatedResource != null) ? updatedResource : resource;
+        trace(correlationId, "Update Status of " + resource);
+        final String name = resource.getMetadata().getName();
+        T updatedResource = editStatus(correlationId, name, res -> {
+            STATUS status = Optional.ofNullable(res.getStatus()).orElse(createDefaultStatus());
+            res.setStatus(status);
+            editOperation.accept(status);
+        });
+        return (updatedResource != null) ? updatedResource : resource;
     }
 
     STATUS createDefaultStatus();

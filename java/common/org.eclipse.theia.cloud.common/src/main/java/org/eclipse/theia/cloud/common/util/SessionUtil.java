@@ -18,7 +18,7 @@ package org.eclipse.theia.cloud.common.util;
 public final class SessionUtil {
 
     private SessionUtil() {
-	// util
+        // util
     }
 
 }

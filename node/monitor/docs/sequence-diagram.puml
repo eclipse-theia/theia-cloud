@@ -2,7 +2,7 @@
 
 hide footbox
 
-participant "Theia.cloud Monitoring Service" as mon
+participant "Theia Cloud Monitoring Service" as mon
 participant "VSCode extension" as vscode
 participant "User" as user
 

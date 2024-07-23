@@ -23,11 +23,11 @@ import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpecResourceLi
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 
 public interface SessionResourceClient
-	extends CustomResourceClient<SessionSpec, SessionStatus, Session, SessionSpecResourceList> {
+        extends CustomResourceClient<SessionSpec, SessionStatus, Session, SessionSpecResourceList> {
     Session launch(String correlationId, SessionSpec spec, long timeout, TimeUnit unit);
 
     default Session launch(String correlationId, SessionSpec spec, int timeout) {
-	return launch(correlationId, spec, timeout, TimeUnit.MINUTES);
+        return launch(correlationId, spec, timeout, TimeUnit.MINUTES);
     }
 
     boolean reportActivity(String correlationId, String name);

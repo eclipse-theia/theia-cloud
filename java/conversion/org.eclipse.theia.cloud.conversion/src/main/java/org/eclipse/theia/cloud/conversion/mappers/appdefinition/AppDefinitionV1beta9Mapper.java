@@ -15,23 +15,24 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.conversion.mappers.appdefinition;
 
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.v1beta9.AppDefinitionV1beta9;
 
 import io.javaoperatorsdk.webhook.conversion.Mapper;
 import io.javaoperatorsdk.webhook.conversion.TargetVersion;
 
+@SuppressWarnings("deprecation")
 @TargetVersion("v1beta9")
-public class AppDefinitionV1beta9Mapper implements Mapper<AppDefinition, AppDefinitionHub> {
+public class AppDefinitionV1beta9Mapper implements Mapper<AppDefinitionV1beta9, AppDefinitionHub> {
 
     @Override
-    public AppDefinitionHub toHub(AppDefinition resource) {
-	return new AppDefinitionHub(resource);
+    public AppDefinitionHub toHub(AppDefinitionV1beta9 resource) {
+        return new AppDefinitionHub(resource);
     }
 
     @Override
-    public AppDefinition fromHub(AppDefinitionHub hub) {
-	return new AppDefinition(hub);
+    public AppDefinitionV1beta9 fromHub(AppDefinitionHub hub) {
+        return new AppDefinitionV1beta9(hub);
     }
 
 }

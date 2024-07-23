@@ -46,12 +46,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response.Status;
 
 /**
- * Unit tests for
- * {@link org.eclipse.theia.cloud.service.session.SessionResource}.
- * 
- * Disable authorization via {@link TestSecurity} annotation as this is a unit
- * test of the resource itself. Thus, we do not want authentication interceptors
- * to trigger when calling the resource's methods.
+ * Unit tests for {@link org.eclipse.theia.cloud.service.session.SessionResource}. Disable authorization via
+ * {@link TestSecurity} annotation as this is a unit test of the resource itself. Thus, we do not want authentication
+ * interceptors to trigger when calling the resource's methods.
  */
 @QuarkusTest
 @TestSecurity(authorizationEnabled = false)
@@ -76,7 +73,7 @@ class SessionResourceTests {
 
     @BeforeEach
     void mockApplicationProperties() {
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
     }
 
     /**
@@ -85,19 +82,19 @@ class SessionResourceTests {
      */
     @Test
     void stop_matchingUser_true() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	SessionSpec session = mockDefaultSession();
-	SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
-	Mockito.when(k8sUtil.stopSession(anyString(), eq(TEST_SESSION), eq(TEST_USER))).thenReturn(true);
+        // Prepare
+        mockUser(false, TEST_USER);
+        SessionSpec session = mockDefaultSession();
+        SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
+        Mockito.when(k8sUtil.stopSession(anyString(), eq(TEST_SESSION), eq(TEST_USER))).thenReturn(true);
 
-	// Execute
-	boolean result = fixture.stop(request);
+        // Execute
+        boolean result = fixture.stop(request);
 
-	// Assert
-	Mockito.verify(k8sUtil).stopSession(anyString(), eq(TEST_SESSION), eq(TEST_USER));
-	assertEquals(true, result);
+        // Assert
+        Mockito.verify(k8sUtil).stopSession(anyString(), eq(TEST_SESSION), eq(TEST_USER));
+        assertEquals(true, result);
     }
 
     /**
@@ -106,24 +103,24 @@ class SessionResourceTests {
      */
     @Test
     void stop_otherUser_throwForbidden() {
-	// Prepare
-	mockUser(false, OTHER_TEST_USER);
-	SessionSpec session = mockDefaultSession();
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
+        // Prepare
+        mockUser(false, OTHER_TEST_USER);
+        SessionSpec session = mockDefaultSession();
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
-	// We leave the matching user in the request to verify that the stop is
-	// denied even if the correct user is specified in the request.
-	// After all, an attacker could do this.
-	SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
+        // We leave the matching user in the request to verify that the stop is
+        // denied even if the correct user is specified in the request.
+        // After all, an attacker could do this.
+        SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.stop(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.stop(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     /**
@@ -132,24 +129,24 @@ class SessionResourceTests {
      */
     @Test
     void stop_otherUserWithNullName_throwForbidden() {
-	// Prepare
-	mockUser(false, null);
-	SessionSpec session = mockDefaultSession();
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
+        // Prepare
+        mockUser(false, null);
+        SessionSpec session = mockDefaultSession();
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
-	// We leave the matching user in the request to verify that the stop is
-	// denied even if the correct user is specified in the request.
-	// After all, an attacker could do this.
-	SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
+        // We leave the matching user in the request to verify that the stop is
+        // denied even if the correct user is specified in the request.
+        // After all, an attacker could do this.
+        SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.stop(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.stop(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     /**
@@ -158,33 +155,33 @@ class SessionResourceTests {
      */
     @Test
     void stop_sessionNotExisting_true() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.empty());
-	SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
+        // Prepare
+        mockUser(false, TEST_USER);
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.empty());
+        SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
 
-	// Execute
-	boolean result = fixture.stop(request);
+        // Execute
+        boolean result = fixture.stop(request);
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
-	assertEquals(true, result);
+        // Assert
+        Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
+        assertEquals(true, result);
     }
 
     @Test
     void stop_noRequestSessionName_throwMissingSessionName() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, null);
+        // Prepare
+        mockUser(false, TEST_USER);
+        SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, null);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.stop(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.stop(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
-	assertEquals(TheiaCloudError.MISSING_SESSION_NAME.getCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
+        assertEquals(TheiaCloudError.MISSING_SESSION_NAME.getCode(), exception.getResponse().getStatus());
     }
 
     /**
@@ -193,24 +190,24 @@ class SessionResourceTests {
      */
     @Test
     void stop_anonymousUser_throwForbidden() {
-	// Prepare
-	mockUser(true, null);
-	SessionSpec session = mockDefaultSession();
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
+        // Prepare
+        mockUser(true, null);
+        SessionSpec session = mockDefaultSession();
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
-	// We leave the matching user in the request to verify that the stop is
-	// denied even if the correct user is specified in the request.
-	// After all, an attacker could do this.
-	SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
+        // We leave the matching user in the request to verify that the stop is
+        // denied even if the correct user is specified in the request.
+        // After all, an attacker could do this.
+        SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.stop(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.stop(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     /**
@@ -219,219 +216,219 @@ class SessionResourceTests {
      */
     @Test()
     void stop_noKeycloak_throwForbidden() {
-	// Prepare
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
-	mockUser(true, null);
-	SessionSpec session = mockDefaultSession();
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
+        // Prepare
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+        mockUser(true, null);
+        SessionSpec session = mockDefaultSession();
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
-	// We leave the matching user in the request to verify that the deletion is
-	// denied even if the correct user is specified in the request.
-	// After all, an attacker could know this.
-	SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
+        // We leave the matching user in the request to verify that the deletion is
+        // denied even if the correct user is specified in the request.
+        // After all, an attacker could know this.
+        SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.stop(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.stop(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).stopSession(anyString(), anyString(), anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void stop_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
-	Method method = SessionResource.class.getMethod("stop", SessionStopRequest.class);
-	TestUtil.assertNoAnonymousAccessAnnotations(method);
+        Method method = SessionResource.class.getMethod("stop", SessionStopRequest.class);
+        TestUtil.assertNoAnonymousAccessAnnotations(method);
     }
 
     @Test
     void list_matchingUser_SessionSpecs() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	List<SessionSpec> resultList = List.of();
-	Mockito.when(k8sUtil.listSessions(TEST_USER)).thenReturn(resultList);
+        // Prepare
+        mockUser(false, TEST_USER);
+        List<SessionSpec> resultList = List.of();
+        Mockito.when(k8sUtil.listSessions(TEST_USER)).thenReturn(resultList);
 
-	List<SessionSpec> result = fixture.list(APP_ID, TEST_USER);
+        List<SessionSpec> result = fixture.list(APP_ID, TEST_USER);
 
-	assertSame(resultList, result);
+        assertSame(resultList, result);
     }
 
     @Test
     void list_otherUser_throwForbidden() {
-	// Prepare
-	mockUser(false, TEST_USER);
+        // Prepare
+        mockUser(false, TEST_USER);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.list(APP_ID, OTHER_TEST_USER);
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.list(APP_ID, OTHER_TEST_USER);
 
-	});
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).listSessions(anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).listSessions(anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void list_noKeycloak_throwForbidden() {
-	// Prepare
-	mockUser(true, null);
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+        // Prepare
+        mockUser(true, null);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.list(APP_ID, TEST_USER);
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.list(APP_ID, TEST_USER);
 
-	});
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).listSessions(anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).listSessions(anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void list_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
-	Method method = SessionResource.class.getMethod("list", String.class, String.class);
-	TestUtil.assertNoAnonymousAccessAnnotations(method);
+        Method method = SessionResource.class.getMethod("list", String.class, String.class);
+        TestUtil.assertNoAnonymousAccessAnnotations(method);
     }
 
     @Test
     void performance_matchingUser_SessionPerformance() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, TEST_USER);
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
-	SessionPerformance sessionPerformance = Mockito.mock(SessionPerformance.class);
-	Mockito.when(k8sUtil.reportPerformance(TEST_SESSION)).thenReturn(sessionPerformance);
+        // Prepare
+        mockUser(false, TEST_USER);
+        SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, TEST_USER);
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
+        SessionPerformance sessionPerformance = Mockito.mock(SessionPerformance.class);
+        Mockito.when(k8sUtil.reportPerformance(TEST_SESSION)).thenReturn(sessionPerformance);
 
-	// Execute
-	SessionPerformance result = fixture.performance(APP_ID, TEST_SESSION);
+        // Execute
+        SessionPerformance result = fixture.performance(APP_ID, TEST_SESSION);
 
-	// Assert
-	assertSame(sessionPerformance, result);
+        // Assert
+        assertSame(sessionPerformance, result);
     }
 
     @Test
     void performance_noPerformanceData_throwMetricsServerUnavailable() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, TEST_USER);
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
-	Mockito.when(k8sUtil.reportPerformance(TEST_SESSION)).thenReturn(null);
+        // Prepare
+        mockUser(false, TEST_USER);
+        SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, TEST_USER);
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
+        Mockito.when(k8sUtil.reportPerformance(TEST_SESSION)).thenReturn(null);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.performance(APP_ID, TEST_SESSION);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.performance(APP_ID, TEST_SESSION);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil).reportPerformance(TEST_SESSION);
-	assertEquals(TheiaCloudError.METRICS_SERVER_UNAVAILABLE.getCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil).reportPerformance(TEST_SESSION);
+        assertEquals(TheiaCloudError.METRICS_SERVER_UNAVAILABLE.getCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void performance_noSessionFound_throwInvalidSessionName() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.empty());
+        // Prepare
+        mockUser(false, TEST_USER);
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.empty());
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.performance(APP_ID, TEST_SESSION);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.performance(APP_ID, TEST_SESSION);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).reportPerformance(anyString());
-	assertEquals(TheiaCloudError.INVALID_SESSION_NAME.getCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).reportPerformance(anyString());
+        assertEquals(TheiaCloudError.INVALID_SESSION_NAME.getCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void performance_otherUser_throwForbidden() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, OTHER_TEST_USER);
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
+        // Prepare
+        mockUser(false, TEST_USER);
+        SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, OTHER_TEST_USER);
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.performance(APP_ID, TEST_SESSION);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.performance(APP_ID, TEST_SESSION);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).reportPerformance(anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).reportPerformance(anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void performance_noKeycloak_throwForbidden() {
-	// Prepare
-	mockUser(true, null);
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+        // Prepare
+        mockUser(true, null);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.performance(APP_ID, TEST_SESSION);
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.performance(APP_ID, TEST_SESSION);
 
-	});
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).listSessions(anyString());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).listSessions(anyString());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void performance_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
-	Method method = SessionResource.class.getMethod("performance", String.class, String.class);
-	TestUtil.assertNoAnonymousAccessAnnotations(method);
+        Method method = SessionResource.class.getMethod("performance", String.class, String.class);
+        TestUtil.assertNoAnonymousAccessAnnotations(method);
     }
 
     @Test
     void start_noKeycloak_throwForbidden() {
-	// Prepare
-	mockUser(true, null);
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
+        // Prepare
+        mockUser(true, null);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.start(Mockito.mock(SessionStartRequest.class));
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.start(Mockito.mock(SessionStartRequest.class));
 
-	});
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).getWorkspace(anyString(), anyString());
-	Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).getWorkspace(anyString(), anyString());
+        Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void start_otherUser_throwForbidden() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	SessionSpec session = mockDefaultSession();
-	Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
+        // Prepare
+        mockUser(false, TEST_USER);
+        SessionSpec session = mockDefaultSession();
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
-	// We leave the matching user in the request to verify that the stop is
-	// denied even if the correct user is specified in the request.
-	// After all, an attacker could do this.
-	SessionStartRequest request = new SessionStartRequest(APP_ID, OTHER_TEST_USER, "abc");
+        // We leave the matching user in the request to verify that the stop is
+        // denied even if the correct user is specified in the request.
+        // After all, an attacker could do this.
+        SessionStartRequest request = new SessionStartRequest(APP_ID, OTHER_TEST_USER, "abc");
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.start(request);
-	});
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.start(request);
+        });
 
-	// Assert
-	Mockito.verify(k8sUtil, never()).getWorkspace(anyString(), anyString());
-	Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any());
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        Mockito.verify(k8sUtil, never()).getWorkspace(anyString(), anyString());
+        Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any());
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     @Test
     void start_hasNoAnonymousAccessAnnotations() throws NoSuchMethodException, SecurityException {
-	Method method = SessionResource.class.getMethod("start", SessionStartRequest.class);
-	TestUtil.assertNoAnonymousAccessAnnotations(method);
+        Method method = SessionResource.class.getMethod("start", SessionStartRequest.class);
+        TestUtil.assertNoAnonymousAccessAnnotations(method);
     }
 
     // ---
@@ -439,14 +436,14 @@ class SessionResourceTests {
     // ---
 
     private void mockUser(boolean anonymous, String name) {
-	Mockito.when(user.isAnonymous()).thenReturn(anonymous);
-	Mockito.when(user.getIdentifier()).thenReturn(name);
+        Mockito.when(user.isAnonymous()).thenReturn(anonymous);
+        Mockito.when(user.getIdentifier()).thenReturn(name);
     }
 
     private SessionSpec mockDefaultSession() {
-	SessionSpec session = Mockito.mock(SessionSpec.class);
-	Mockito.when(session.getName()).thenReturn(TEST_SESSION);
-	Mockito.when(session.getUser()).thenReturn(TEST_USER);
-	return session;
+        SessionSpec session = Mockito.mock(SessionSpec.class);
+        Mockito.when(session.getName()).thenReturn(TEST_SESSION);
+        Mockito.when(session.getUser()).thenReturn(TEST_USER);
+        return session;
     }
 }

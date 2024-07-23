@@ -1,4 +1,4 @@
-# Theia.Cloud Web Packages
+# Theia Cloud Web Packages
 
 This folder is a monorepo containing a common web api and UIs.
 It is based on [npm workspaces](https://docs.npmjs.com/cli/v8/using-npm/workspaces#running-commands-in-the-context-of-workspaces).
@@ -33,8 +33,8 @@ or build only a single package
 npm run build -w <folder>
 ```
 
-## Run Try Now Page
+## Run Landing Page
 
 ```bash
-npm run start -w try-now-page
+npm run start -w landing-page
 ```

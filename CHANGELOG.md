@@ -1,6 +1,22 @@
 # Changelog
 
-<!--  ## [0.11.0] - estimated 2024-07 -->
+<!-- ## [0.12.0] - estimated 2024-10 -->
+
+## [0.11.0] - 2024-07-23
+
+- [common] Add option field to CRDs and increase version to `Session.v1beta8`, `Workspace.v1beta5` and `AppDefinition.v1beta10` [#293](https://github.com/eclipsesource/theia-cloud/pull/293) | [#55](https://github.com/eclipsesource/theia-cloud-helm/pull/55)
+- [java] Separate operator default implementation from library to allow for easier customization [#303](https://github.com/eclipsesource/theia-cloud/pull/303)
+- [node] Unify the existing landing and try now pages to a new ViteJS based landing page [#304](https://github.com/eclipsesource/theia-cloud/pull/304) | [#58](https://github.com/eclipsesource/theia-cloud-helm/pull/58) - contributed on behalf of STMicroelectronics
+  - The new page is based on the old try now page but uses ViteJS instead of the deprecated Create React App
+  - Extend configuration options for the new landing page for texts and logo file type
+  - Removed terms and conditions
+  - Build the common package as ESM and CJS bundles for extended compatibility
+- [common] Add `ingressHostnamePrefixes` list to `AppDefinition.v1beta10` [#298](https://github.com/eclipsesource/theia-cloud/pull/298) | [#57](https://github.com/eclipsesource/theia-cloud-helm/pull/57)
+- [java] Improved naming for kubernetes resources [#326](https://github.com/eclipsesource/theia-cloud/pull/326)
+
+### Breaking Changes in 0.11.0
+
+See the helm chart Changelog for [more details](https://github.com/eclipsesource/theia-cloud-helm/blob/main/CHANGELOG.md).
 
 ## [0.10.0] - 2024-04-02
 

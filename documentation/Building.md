@@ -22,12 +22,6 @@ docker build --no-cache -t theia-cloud-operator -f dockerfiles/operator/Dockerfi
 docker build -t theia-cloud-landing-page -f dockerfiles/landing-page/Dockerfile .
 ```
 
-## Try now page
-
-```bash
-docker build -t theia-cloud-try-now-page -f dockerfiles/try-now-page/Dockerfile .
-```
-
 ## Wondershaper
 
 ```bash

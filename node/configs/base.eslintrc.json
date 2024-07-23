@@ -41,6 +41,8 @@
     "es2020": true
   },
   "ignorePatterns": [
+    ".eslintrc.js",
+    ".eslintrc.cjs",
     "node_modules",
     "*.d.ts"
   ]

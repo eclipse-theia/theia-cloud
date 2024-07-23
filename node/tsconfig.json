@@ -5,9 +5,9 @@
   },
   "include": [
     "common/src",
+    "landing-page/src",
     "monitor/src",
-    "monitor-theia/src",
-    "try-now-page/src"
+    "monitor-theia/src"
   ],
   "exclude": ["node_modules"]
 }

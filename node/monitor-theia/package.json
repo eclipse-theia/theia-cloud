@@ -1,8 +1,23 @@
 {
   "name": "@eclipse-theiacloud/monitor-theia",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "keywords": [
     "theia-extension"
+  ],
+  "author": {
+    "name": "Theia Cloud"
+  },
+  "homepage": "http://theia-cloud.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipsesource/theia-cloud.git"
+  },
+  "bugs": "https://github.com/eclipsesource/theia-cloud/issues",
+  "contributors": [
+    {
+      "name": "Theia Cloud Project",
+      "url": "http://theia-cloud.io"
+    }
   ],
   "files": [
     "lib",
@@ -22,7 +37,7 @@
     "watch": "tsc -w",
     "lint": "eslint -c ../.eslintrc.js --ext .ts ./src",
     "prepublishOnly": "npm run build",
-    "publish:next": "npm pkg set version=`npm pkg get version | head -1  | tr -d '\"'`.`git rev-parse --short HEAD` && npm publish --tag next",
+    "publish:next": "npm pkg set version=`node --print \"require('./package.json').version\"`.`git rev-parse --short HEAD` && npm publish --tag next",
     "publish:latest": "npm publish --tag latest"
   },
   "theiaExtensions": [

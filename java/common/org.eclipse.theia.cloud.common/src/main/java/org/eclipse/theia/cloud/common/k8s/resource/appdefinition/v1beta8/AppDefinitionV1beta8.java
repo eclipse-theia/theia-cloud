@@ -36,7 +36,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Singular("appdefinition")
 @Plural("appdefinitions")
 public class AppDefinitionV1beta8 extends CustomResource<AppDefinitionV1beta8Spec, AppDefinitionV1beta8Status>
-	implements Namespaced {
+        implements Namespaced {
 
     private static final long serialVersionUID = 8749670583218521755L;
     public static final String API = "theia.cloud/v1beta8";
@@ -45,7 +45,7 @@ public class AppDefinitionV1beta8 extends CustomResource<AppDefinitionV1beta8Spe
 
     @Override
     public String toString() {
-	return CustomResourceUtil.toString(this);
+        return CustomResourceUtil.toString(this);
     }
 
     public AppDefinitionV1beta8() {
@@ -53,16 +53,16 @@ public class AppDefinitionV1beta8 extends CustomResource<AppDefinitionV1beta8Spe
     }
 
     public AppDefinitionV1beta8(AppDefinitionHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new AppDefinitionV1beta8Spec(fromHub);
-	this.status = new AppDefinitionV1beta8Status(fromHub);
+        if (fromHub.getMetadata().isPresent()) {
+            this.setMetadata(fromHub.getMetadata().get());
+        }
+        this.spec = new AppDefinitionV1beta8Spec(fromHub);
+        this.status = new AppDefinitionV1beta8Status(fromHub);
     }
 
     @JsonIgnore
     public AppDefinitionV1beta8Status getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new AppDefinitionV1beta8Status();
+        return super.getStatus() != null ? super.getStatus() : new AppDefinitionV1beta8Status();
     }
 
 }

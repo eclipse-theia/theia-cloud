@@ -40,29 +40,29 @@ public class LaunchRequest extends UserScopedServiceRequest {
     public EnvironmentVars env = new EnvironmentVars();
 
     public LaunchRequest() {
-	super(KIND);
+        super(KIND);
     }
 
     @Schema(hidden = true)
     public boolean isEphemeral() {
-	return ephemeral;
+        return ephemeral;
     }
 
     @Schema(hidden = true)
     public boolean isExistingWorkspace() {
-	return workspaceName != null && !workspaceName.isBlank();
+        return workspaceName != null && !workspaceName.isBlank();
     }
 
     @Schema(hidden = true)
     public boolean isCreateWorkspace() {
-	return !isExistingWorkspace() && !isEphemeral();
+        return !isExistingWorkspace() && !isEphemeral();
     }
 
     @Override
     public String toString() {
-	return "LaunchRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName=" + workspaceName
-		+ ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + ", timeout="
-		+ timeout + ", " + env + "]";
+        return "LaunchRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName=" + workspaceName
+                + ", label=" + label + ", ephemeral=" + ephemeral + ", appId=" + appId + ", kind=" + kind + ", timeout="
+                + timeout + ", " + env + "]";
     }
 
 }

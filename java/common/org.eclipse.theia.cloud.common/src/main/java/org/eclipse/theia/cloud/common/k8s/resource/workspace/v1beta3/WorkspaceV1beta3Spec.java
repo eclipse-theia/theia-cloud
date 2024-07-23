@@ -52,31 +52,31 @@ public class WorkspaceV1beta3Spec implements UserScopedSpec {
     }
 
     public WorkspaceV1beta3Spec(String name, String label, String appDefinition, String user) {
-	this.name = name;
-	this.appDefinition = appDefinition;
-	this.user = user;
-	this.label = label;
+        this.name = name;
+        this.appDefinition = appDefinition;
+        this.user = user;
+        this.label = label;
     }
 
     public WorkspaceV1beta3Spec(WorkspaceHub spec) {
-	this.name = spec.getName().orElse(null); // required
-	this.label = spec.getLabel().orElse(null);
-	this.appDefinition = spec.getAppDefinition().orElse(null);
-	this.user = spec.getUser().orElse(null); // required
-	this.storage = spec.getStorage().orElse(null);
-	this.error = spec.getError().orElse(null);
+        this.name = spec.getName().orElse(null); // required
+        this.label = spec.getLabel().orElse(null);
+        this.appDefinition = spec.getAppDefinition().orElse(null);
+        this.user = spec.getUser().orElse(null); // required
+        this.storage = spec.getStorage().orElse(null);
+        this.error = spec.getError().orElse(null);
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public String getLabel() {
-	return label;
+        return label;
     }
 
     public void setAppDefinition(String appDefinition) {
-	this.appDefinition = appDefinition;
+        this.appDefinition = appDefinition;
     }
 
     /**
@@ -85,7 +85,7 @@ public class WorkspaceV1beta3Spec implements UserScopedSpec {
      * @return last app definition
      */
     public String getAppDefinition() {
-	return appDefinition;
+        return appDefinition;
     }
 
     /**
@@ -93,41 +93,41 @@ public class WorkspaceV1beta3Spec implements UserScopedSpec {
      */
     @Override
     public String getUser() {
-	return user;
+        return user;
     }
 
     public String getStorage() {
-	return storage;
+        return storage;
     }
 
     public void setStorage(String storage) {
-	this.storage = storage;
+        this.storage = storage;
     }
 
     public String getError() {
-	return error;
+        return error;
     }
 
     public void setError(TheiaCloudError error) {
-	setError(error.asString());
+        setError(error.asString());
     }
 
     public void setError(String error) {
-	this.error = error;
+        this.error = error;
     }
 
     public boolean hasStorage() {
-	return getStorage() != null && !getStorage().isBlank();
+        return getStorage() != null && !getStorage().isBlank();
     }
 
     public boolean hasError() {
-	return TheiaCloudError.isErrorString(getError());
+        return TheiaCloudError.isErrorString(getError());
     }
 
     @Override
     public String toString() {
-	return "WorkspaceSpec [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
-		+ user + ", storage=" + storage + ", error=" + error + "]";
+        return "WorkspaceSpec [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
+                + user + ", storage=" + storage + ", error=" + error + "]";
     }
 
 }

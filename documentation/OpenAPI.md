@@ -2,7 +2,7 @@
 
 ## Generate and Update
 
-Start Theia.cloud service from IDE (which starts quarkus in dev mode).
+Start Theia Cloud service from IDE (which starts quarkus in dev mode).
 
 Access generated specs at <http://localhost:8081/q/openapi?format=json>
 
@@ -40,6 +40,7 @@ Install the `openapi-generator-cli`:
 
 ```bash
 npm install @openapitools/openapi-generator-cli -g
+openapi-generator-cli version-manager set 6.6.0
 ```
 
 Use the `openapi-generator-cli` from the root of this repository:

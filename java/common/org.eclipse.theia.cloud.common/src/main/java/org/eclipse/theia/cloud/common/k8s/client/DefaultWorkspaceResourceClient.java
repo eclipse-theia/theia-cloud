@@ -27,73 +27,73 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public class DefaultWorkspaceResourceClient extends BaseResourceClient<Workspace, WorkspaceSpecResourceList>
-	implements WorkspaceResourceClient {
+        implements WorkspaceResourceClient {
 
     public DefaultWorkspaceResourceClient(NamespacedKubernetesClient client) {
-	super(client, Workspace.class, WorkspaceSpecResourceList.class);
+        super(client, Workspace.class, WorkspaceSpecResourceList.class);
     }
 
     @Override
     public Workspace create(String correlationId, WorkspaceSpec spec) {
-	Workspace workspace = new Workspace();
-	workspace.setSpec(spec);
+        Workspace workspace = new Workspace();
+        workspace.setSpec(spec);
 
-	ObjectMeta metadata = new ObjectMeta();
-	metadata.setName(spec.getName());
-	workspace.setMetadata(metadata);
+        ObjectMeta metadata = new ObjectMeta();
+        metadata.setName(spec.getName());
+        workspace.setMetadata(metadata);
 
-	info(correlationId, "Create Workspace " + workspace.getSpec());
-	return operation().resource(workspace).create();
+        info(correlationId, "Create Workspace " + workspace.getSpec());
+        return operation().resource(workspace).create();
     }
 
     @Override
     public Workspace launch(String correlationId, WorkspaceSpec spec, long timeout, TimeUnit unit) {
-	Workspace workspace = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
-	WorkspaceSpec workspaceSpec = workspace.getSpec();
-	WorkspaceStatus workspaceStatus = workspace.getNonNullStatus();
+        Workspace workspace = get(spec.getName()).orElseGet(() -> create(correlationId, spec));
+        WorkspaceSpec workspaceSpec = workspace.getSpec();
+        WorkspaceStatus workspaceStatus = workspace.getNonNullStatus();
 
-	if (workspaceSpec.hasStorage()) {
-	    return workspace;
-	}
+        if (workspaceSpec.hasStorage()) {
+            return workspace;
+        }
 
-	if (workspaceStatus.hasError()) {
-	    delete(correlationId, spec.getName());
-	    return workspace;
-	}
+        if (workspaceStatus.hasError()) {
+            delete(correlationId, spec.getName());
+            return workspace;
+        }
 
-	try {
-	    watchUntil((action, changedWorkspace) -> isWorkspaceComplete(correlationId, workspace, changedWorkspace),
-		    timeout, unit);
-	} catch (InterruptedException exception) {
-	    error(correlationId, "Timeout while waiting for workspace storage " + workspaceSpec.getName()
-		    + ". Deleting workspace again.", exception);
-	    updateStatus(correlationId, workspace, status -> status.setError(TheiaCloudError.WORKSPACE_LAUNCH_TIMEOUT));
-	}
-	return workspace;
+        try {
+            watchUntil((action, changedWorkspace) -> isWorkspaceComplete(correlationId, workspace, changedWorkspace),
+                    timeout, unit);
+        } catch (InterruptedException exception) {
+            error(correlationId, "Timeout while waiting for workspace storage " + workspaceSpec.getName()
+                    + ". Deleting workspace again.", exception);
+            updateStatus(correlationId, workspace, status -> status.setError(TheiaCloudError.WORKSPACE_LAUNCH_TIMEOUT));
+        }
+        return workspace;
     }
 
     protected boolean isWorkspaceComplete(String correlationId, Workspace createdWorkspace,
-	    Workspace changedWorkspace) {
-	if (createdWorkspace.getSpec().getName().equals(changedWorkspace.getSpec().getName())) {
-	    if (changedWorkspace.getSpec().hasStorage()) {
-		info(correlationId, "Received URL for " + createdWorkspace);
-		createdWorkspace.getSpec().setStorage(changedWorkspace.getSpec().getStorage());
-		return true;
-	    }
-	    if (changedWorkspace.getNonNullStatus().hasError()) {
-		info(correlationId, "Received Error for " + changedWorkspace + ". Deleting workspace again.");
-		delete(correlationId, createdWorkspace.getSpec().getName());
-		updateStatus(correlationId, createdWorkspace,
-			status -> status.setError(changedWorkspace.getNonNullStatus().getError()));
+            Workspace changedWorkspace) {
+        if (createdWorkspace.getSpec().getName().equals(changedWorkspace.getSpec().getName())) {
+            if (changedWorkspace.getSpec().hasStorage()) {
+                info(correlationId, "Received URL for " + createdWorkspace);
+                createdWorkspace.getSpec().setStorage(changedWorkspace.getSpec().getStorage());
+                return true;
+            }
+            if (changedWorkspace.getNonNullStatus().hasError()) {
+                info(correlationId, "Received Error for " + changedWorkspace + ". Deleting workspace again.");
+                delete(correlationId, createdWorkspace.getSpec().getName());
+                updateStatus(correlationId, createdWorkspace,
+                        status -> status.setError(changedWorkspace.getNonNullStatus().getError()));
 
-		return true;
-	    }
-	}
-	return false;
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public WorkspaceStatus createDefaultStatus() {
-	return new WorkspaceStatus();
+        return new WorkspaceStatus();
     }
 }

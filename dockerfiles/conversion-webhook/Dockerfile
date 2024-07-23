@@ -12,7 +12,7 @@ RUN cd /conversion/common/maven-conf && \
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /conversion
-COPY --from=builder /conversion/conversion/org.eclipse.theia.cloud.conversion/target/conversion-webhook-0.10.0-runner.jar .
+COPY --from=builder /conversion/conversion/org.eclipse.theia.cloud.conversion/target/conversion-webhook-0.11.0-runner.jar .
 
-ENTRYPOINT java -jar ./conversion-webhook-0.10.0-runner.jar
+ENTRYPOINT java -jar ./conversion-webhook-0.11.0-runner.jar
 CMD [ "" ]

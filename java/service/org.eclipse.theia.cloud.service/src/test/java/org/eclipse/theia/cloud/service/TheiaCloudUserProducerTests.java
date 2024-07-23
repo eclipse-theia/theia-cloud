@@ -47,116 +47,110 @@ class TheiaCloudUserProducerTests {
     TheiaCloudUserProducer fixture;
 
     /**
-     * Test method for
-     * {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
+     * Test method for {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
      */
     @Test
     void getTheiaCloudUser_anonymousIdentity_anonymousTheiaCloudUser() {
-	// Prepare
-	Mockito.when(identity.isAnonymous()).thenReturn(true);
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(true);
 
-	// Execute
-	TheiaCloudUser result = fixture.getTheiaCloudUser();
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
 
-	// Assert
-	assertTrue(result.isAnonymous());
-	assertNull(result.getIdentifier());
+        // Assert
+        assertTrue(result.isAnonymous());
+        assertNull(result.getIdentifier());
     }
 
     /**
-     * Test method for
-     * {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
+     * Test method for {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
      */
     @Test
     void getTheiaCloudUser_authenticatedIdentity_TheiaCloudUser() {
-	// Prepare
-	Mockito.when(identity.isAnonymous()).thenReturn(false);
-	JsonWebToken token = Mockito.mock(JsonWebToken.class);
-	Mockito.when(token.getClaim(Claims.email)).thenReturn(TEST_EMAIL);
-	Mockito.when(identity.getPrincipal()).thenReturn(token);
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(false);
+        JsonWebToken token = Mockito.mock(JsonWebToken.class);
+        Mockito.when(token.getClaim(Claims.email)).thenReturn(TEST_EMAIL);
+        Mockito.when(identity.getPrincipal()).thenReturn(token);
 
-	// Execute
-	TheiaCloudUser result = fixture.getTheiaCloudUser();
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
 
-	// Assert
-	assertFalse(result.isAnonymous());
-	assertEquals(TEST_EMAIL, result.getIdentifier());
+        // Assert
+        assertFalse(result.isAnonymous());
+        assertEquals(TEST_EMAIL, result.getIdentifier());
     }
 
     /**
-     * Test method for
-     * {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
+     * Test method for {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
      */
     @Test
     void getTheiaCloudUser_authenticatedIdentityJWTmissingEmailClaim_anonymousTheiaCloudUser() {
-	// Prepare
-	Mockito.when(identity.isAnonymous()).thenReturn(false);
-	JsonWebToken token = Mockito.mock(JsonWebToken.class);
-	Mockito.when(token.getClaim(Claims.email)).thenReturn(null);
-	Mockito.when(identity.getPrincipal()).thenReturn(token);
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(false);
+        JsonWebToken token = Mockito.mock(JsonWebToken.class);
+        Mockito.when(token.getClaim(Claims.email)).thenReturn(null);
+        Mockito.when(identity.getPrincipal()).thenReturn(token);
 
-	// Execute
-	TheiaCloudUser result = fixture.getTheiaCloudUser();
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
 
-	// Assert
-	assertTrue(result.isAnonymous());
-	assertNull(result.getIdentifier());
+        // Assert
+        assertTrue(result.isAnonymous());
+        assertNull(result.getIdentifier());
     }
 
     /**
-     * Test method for
-     * {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
+     * Test method for {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
      */
     @Test
     void getTheiaCloudUser_authenticatedIdentityJWTwhitespaceEmailClaim_anonymousTheiaCloudUser() {
-	// Prepare
-	Mockito.when(identity.isAnonymous()).thenReturn(false);
-	JsonWebToken token = Mockito.mock(JsonWebToken.class);
-	Mockito.when(token.getClaim(Claims.email)).thenReturn(" \t");
-	Mockito.when(identity.getPrincipal()).thenReturn(token);
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(false);
+        JsonWebToken token = Mockito.mock(JsonWebToken.class);
+        Mockito.when(token.getClaim(Claims.email)).thenReturn(" \t");
+        Mockito.when(identity.getPrincipal()).thenReturn(token);
 
-	// Execute
-	TheiaCloudUser result = fixture.getTheiaCloudUser();
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
 
-	// Assert
-	assertTrue(result.isAnonymous());
-	assertNull(result.getIdentifier());
+        // Assert
+        assertTrue(result.isAnonymous());
+        assertNull(result.getIdentifier());
     }
 
     /**
-     * Test method for
-     * {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
+     * Test method for {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
      */
     @Test
     void getTheiaCloudUser_authenticatedIdentityNoJWT_anonymousTheiaCloudUser() {
-	// Prepare
-	Mockito.when(identity.isAnonymous()).thenReturn(false);
-	Principal principal = Mockito.mock(Principal.class);
-	Mockito.when(identity.getPrincipal()).thenReturn(principal);
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(false);
+        Principal principal = Mockito.mock(Principal.class);
+        Mockito.when(identity.getPrincipal()).thenReturn(principal);
 
-	// Execute
-	TheiaCloudUser result = fixture.getTheiaCloudUser();
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
 
-	// Assert
-	assertTrue(result.isAnonymous());
-	assertNull(result.getIdentifier());
+        // Assert
+        assertTrue(result.isAnonymous());
+        assertNull(result.getIdentifier());
     }
 
     /**
-     * Test method for
-     * {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
+     * Test method for {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
      */
     @Test
     void getTheiaCloudUser_authenticatedIdentityWithAnonymousPrincipal_anonymousTheiaCloudUser() {
-	// Prepare
-	Mockito.when(identity.isAnonymous()).thenReturn(false);
-	Mockito.when(identity.getPrincipal()).thenReturn(AnonymousPrincipal.getInstance());
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(false);
+        Mockito.when(identity.getPrincipal()).thenReturn(AnonymousPrincipal.getInstance());
 
-	// Execute
-	TheiaCloudUser result = fixture.getTheiaCloudUser();
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
 
-	// Assert
-	assertTrue(result.isAnonymous());
-	assertNull(result.getIdentifier());
+        // Assert
+        assertTrue(result.isAnonymous());
+        assertNull(result.getIdentifier());
     }
 }

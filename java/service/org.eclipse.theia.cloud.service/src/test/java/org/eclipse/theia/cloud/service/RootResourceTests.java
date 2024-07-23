@@ -29,11 +29,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response.Status;
 
 /**
- * Unit tests for {@link RootResource}.
- *
- * Disable authorization via {@link TestSecurity} annotation as this is a unit
- * test of the resource itself. Thus, we do not want authentication interceptors
- * to trigger when calling the resource's methods.
+ * Unit tests for {@link RootResource}. Disable authorization via {@link TestSecurity} annotation as this is a unit test
+ * of the resource itself. Thus, we do not want authentication interceptors to trigger when calling the resource's
+ * methods.
  */
 @QuarkusTest
 @TestSecurity(authorizationEnabled = false)
@@ -54,25 +52,25 @@ class RootResourceTests {
 
     @BeforeEach
     void mockApplicationProperties() {
-	Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
+        Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
     }
 
     @Test
     void launch_otherUser_throwForbidden() {
-	// Prepare
-	mockUser(false, TEST_USER);
-	LaunchRequest launchRequest = new LaunchRequest();
-	launchRequest.appId = APP_ID;
-	launchRequest.user = OTHER_TEST_USER;
+        // Prepare
+        mockUser(false, TEST_USER);
+        LaunchRequest launchRequest = new LaunchRequest();
+        launchRequest.appId = APP_ID;
+        launchRequest.user = OTHER_TEST_USER;
 
-	// Execute
-	TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
-	    fixture.launch(launchRequest);
+        // Execute
+        TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
+            fixture.launch(launchRequest);
 
-	});
+        });
 
-	// Assert
-	assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
+        // Assert
+        assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
     // ---
@@ -80,7 +78,7 @@ class RootResourceTests {
     // ---
 
     private void mockUser(boolean anonymous, String name) {
-	Mockito.when(user.isAnonymous()).thenReturn(anonymous);
-	Mockito.when(user.getIdentifier()).thenReturn(name);
+        Mockito.when(user.isAnonymous()).thenReturn(anonymous);
+        Mockito.when(user.getIdentifier()).thenReturn(name);
     }
 }

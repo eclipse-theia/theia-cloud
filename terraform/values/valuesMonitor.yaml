@@ -5,7 +5,7 @@ app:
   name: Theia Blueprint
 
 demoApplication:
-  name: theiacloud/theia-cloud-activity-demo:0.10.0
+  name: theiacloud/theia-cloud-activity-demo:0.11.0
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "0"
@@ -18,13 +18,14 @@ demoApplication:
 
 hosts:
   usePaths: false
-  service: service.theia-cloud.io
-  serviceProtocol: https
-  landing: try.theia-cloud.io
-  instance: ws.theia-cloud.io
+  configuration:
+    baseHost: theia-cloud.io
+    service: service
+    landing: try
+    instance: ws
 
 landingPage:
-  image: theiacloud/theia-cloud-try-now-page:0.10.0
+  image: theiacloud/theia-cloud-landing-page:0.11.0
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
 
@@ -35,6 +36,9 @@ keycloak:
   keycloakClientId: "theia-cloud"
   clientSecret: "publicbutoauth2proxywantsasecret"
   cookieSecret: "s-p4GxfRlPa_BI1XsLuvE2ihNOqYD1vmewWcXcpYjr0="
+
+service:
+  protocol: https
 
 operator:
   eagerStart: false

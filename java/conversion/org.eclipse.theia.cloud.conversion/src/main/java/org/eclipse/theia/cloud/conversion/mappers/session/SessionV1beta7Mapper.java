@@ -15,23 +15,24 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.conversion.mappers.session;
 
-import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
+import org.eclipse.theia.cloud.common.k8s.resource.session.v1beta7.SessionV1beta7;
 
 import io.javaoperatorsdk.webhook.conversion.Mapper;
 import io.javaoperatorsdk.webhook.conversion.TargetVersion;
 
+@SuppressWarnings("deprecation")
 @TargetVersion("v1beta7")
-public class SessionV1beta7Mapper implements Mapper<Session, SessionHub> {
+public class SessionV1beta7Mapper implements Mapper<SessionV1beta7, SessionHub> {
 
     @Override
-    public SessionHub toHub(Session resource) {
-	return new SessionHub(resource);
+    public SessionHub toHub(SessionV1beta7 resource) {
+        return new SessionHub(resource);
     }
 
     @Override
-    public Session fromHub(SessionHub hub) {
-	return new Session(hub);
+    public SessionV1beta7 fromHub(SessionHub hub) {
+        return new SessionV1beta7(hub);
     }
 
 }

@@ -1,0 +1,28 @@
+name: "[MAVEN] operator"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/operator/org.eclipse.theia.cloud.operator/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/operator/org.eclipse.theia.cloud.operator/**"
+  release:
+    types:
+      - published
+
+jobs:
+  run:
+    permissions:
+      packages: write
+    uses: ./.github/workflows/reusable-maven.yml
+    with:
+      path_to_package: operator/org.eclipse.theia.cloud.operator/
+      dependencies: common/maven-conf/,common/org.eclipse.theia.cloud.common/
+    secrets: inherit

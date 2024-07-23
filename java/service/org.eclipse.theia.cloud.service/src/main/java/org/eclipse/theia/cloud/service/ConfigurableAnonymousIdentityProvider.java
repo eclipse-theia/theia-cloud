@@ -25,12 +25,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Custom {@link io.quarkus.security.identity.IdentityProvider IdentityProvider}
- * that authenticates anonymous users if the Theia.Cloud service's usage of
- * keycloak was disabled. This facilitates configuring resources as generally
- * requiring authentication while still being able to use the service without
- * any authentication by setting the {@value #THEIA_CLOUD_USE_KEYCLOAK} system
- * property.
+ * Custom {@link io.quarkus.security.identity.IdentityProvider IdentityProvider} that authenticates anonymous users if
+ * the Theia Cloud service's usage of keycloak was disabled. This facilitates configuring resources as generally
+ * requiring authentication while still being able to use the service without any authentication by setting the
+ * {@value #THEIA_CLOUD_USE_KEYCLOAK} system property.
  */
 @ApplicationScoped
 public class ConfigurableAnonymousIdentityProvider extends AnonymousIdentityProvider {
@@ -40,25 +38,25 @@ public class ConfigurableAnonymousIdentityProvider extends AnonymousIdentityProv
 
     @Override
     public Class<AnonymousAuthenticationRequest> getRequestType() {
-	return AnonymousAuthenticationRequest.class;
+        return AnonymousAuthenticationRequest.class;
     }
 
     @Override
     public Uni<SecurityIdentity> authenticate(AnonymousAuthenticationRequest request,
-	    AuthenticationRequestContext context) {
-	if (applicationProperties.isUseKeycloak()) {
-	    // If keycloak is used, anonymous requests are handled with their default
-	    // behavior. That is, the user will not be authenticated and won't be able to
-	    // access any resources requiring authentication.
-	    return super.authenticate(request, context);
-	}
+            AuthenticationRequestContext context) {
+        if (applicationProperties.isUseKeycloak()) {
+            // If keycloak is used, anonymous requests are handled with their default
+            // behavior. That is, the user will not be authenticated and won't be able to
+            // access any resources requiring authentication.
+            return super.authenticate(request, context);
+        }
 
-	// We don't use keycloak. Thus, anonymous requests must be treated as
-	// authenticated users to allow access to the service.
-	// Every authenticated identity needs a principal. We use the singleton
-	// anonymous principal here.
-	SecurityIdentity authenticatedIdentity = QuarkusSecurityIdentity.builder()
-		.setPrincipal(AnonymousPrincipal.getInstance()).setAnonymous(false).build();
-	return Uni.createFrom().item(authenticatedIdentity);
+        // We don't use keycloak. Thus, anonymous requests must be treated as
+        // authenticated users to allow access to the service.
+        // Every authenticated identity needs a principal. We use the singleton
+        // anonymous principal here.
+        SecurityIdentity authenticatedIdentity = QuarkusSecurityIdentity.builder()
+                .setPrincipal(AnonymousPrincipal.getInstance()).setAnonymous(false).build();
+        return Uni.createFrom().item(authenticatedIdentity);
     }
 }

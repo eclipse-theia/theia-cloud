@@ -29,7 +29,7 @@ import io.fabric8.kubernetes.model.annotation.Plural;
 import io.fabric8.kubernetes.model.annotation.Singular;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Version("v1beta7")
+@Version("v1beta8")
 @Group("theia.cloud")
 @Kind("Session")
 @Singular("session")
@@ -37,7 +37,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 public class Session extends CustomResource<SessionSpec, SessionStatus> implements Namespaced {
 
     private static final long serialVersionUID = 4518092300237069237L;
-    public static final String API = "theia.cloud/v1beta7";
+    public static final String API = "theia.cloud/v1beta8";
     public static final String KIND = "Session";
     public static final String CRD_NAME = "sessions.theia.cloud";
 
@@ -45,20 +45,20 @@ public class Session extends CustomResource<SessionSpec, SessionStatus> implemen
     }
 
     public Session(SessionHub fromHub) {
-	if (fromHub.getMetadata().isPresent()) {
-	    this.setMetadata(fromHub.getMetadata().get());
-	}
-	this.spec = new SessionSpec(fromHub);
-	this.status = new SessionStatus(fromHub);
+        if (fromHub.getMetadata().isPresent()) {
+            this.setMetadata(fromHub.getMetadata().get());
+        }
+        this.spec = new SessionSpec(fromHub);
+        this.status = new SessionStatus(fromHub);
     }
 
     @Override
     public String toString() {
-	return CustomResourceUtil.toString(this);
+        return CustomResourceUtil.toString(this);
     }
 
     @JsonIgnore
     public SessionStatus getNonNullStatus() {
-	return super.getStatus() != null ? super.getStatus() : new SessionStatus();
+        return super.getStatus() != null ? super.getStatus() : new SessionStatus();
     }
 }

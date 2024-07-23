@@ -26,17 +26,17 @@ public class SessionActivityRequest extends ServiceRequest {
     public String sessionName;
 
     public SessionActivityRequest() {
-	super(KIND);
+        super(KIND);
     }
 
     public SessionActivityRequest(String appId, String sessionName) {
-	super(KIND, appId);
-	this.sessionName = sessionName;
+        super(KIND, appId);
+        this.sessionName = sessionName;
     }
 
     @Override
     public String toString() {
-	return "SessionActivityRequest [sessionName=" + sessionName + ", appId=" + appId + ", kind=" + kind + "]";
+        return "SessionActivityRequest [sessionName=" + sessionName + ", appId=" + appId + ", kind=" + kind + "]";
     }
 
 }

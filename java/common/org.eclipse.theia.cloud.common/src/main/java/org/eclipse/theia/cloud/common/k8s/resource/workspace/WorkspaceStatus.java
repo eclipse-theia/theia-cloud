@@ -42,62 +42,62 @@ public class WorkspaceStatus extends ResourceStatus {
     }
 
     public WorkspaceStatus(WorkspaceHub fromHub) {
-	if (fromHub.getOperatorMessage().isPresent()) {
-	    this.setOperatorMessage(fromHub.getOperatorMessage().get());
-	}
-	if (fromHub.getOperatorStatus().isPresent()) {
-	    this.setOperatorStatus(fromHub.getOperatorStatus().get());
-	}
-	if (fromHub.getVolumeAttachMessage().isPresent() && fromHub.getVolumeAttachStatus().isPresent()) {
-	    this.volumeAttach = new StatusStep();
-	    this.volumeAttach.setStatus(fromHub.getVolumeAttachStatus().get());
-	    this.volumeAttach.setMessage(fromHub.getVolumeAttachMessage().get());
-	}
-	if (fromHub.getVolumeClaimMessage().isPresent() && fromHub.getVolumeClaimStatus().isPresent()) {
-	    this.volumeClaim = new StatusStep();
-	    this.volumeClaim.setStatus(fromHub.getVolumeClaimStatus().get());
-	    this.volumeClaim.setMessage(fromHub.getVolumeClaimMessage().get());
-	}
-	this.error = fromHub.getError().orElse(null);
+        if (fromHub.getOperatorMessage().isPresent()) {
+            this.setOperatorMessage(fromHub.getOperatorMessage().get());
+        }
+        if (fromHub.getOperatorStatus().isPresent()) {
+            this.setOperatorStatus(fromHub.getOperatorStatus().get());
+        }
+        if (fromHub.getVolumeAttachMessage().isPresent() && fromHub.getVolumeAttachStatus().isPresent()) {
+            this.volumeAttach = new StatusStep();
+            this.volumeAttach.setStatus(fromHub.getVolumeAttachStatus().get());
+            this.volumeAttach.setMessage(fromHub.getVolumeAttachMessage().get());
+        }
+        if (fromHub.getVolumeClaimMessage().isPresent() && fromHub.getVolumeClaimStatus().isPresent()) {
+            this.volumeClaim = new StatusStep();
+            this.volumeClaim.setStatus(fromHub.getVolumeClaimStatus().get());
+            this.volumeClaim.setMessage(fromHub.getVolumeClaimMessage().get());
+        }
+        this.error = fromHub.getError().orElse(null);
     }
 
     public StatusStep getVolumeClaim() {
-	return volumeClaim;
+        return volumeClaim;
     }
 
     public void setVolumeClaim(StatusStep volumeClaim) {
-	this.volumeClaim = volumeClaim;
+        this.volumeClaim = volumeClaim;
     }
 
     public StatusStep getVolumeAttach() {
-	return volumeAttach;
+        return volumeAttach;
     }
 
     public void setVolumeAttach(StatusStep volumeAttach) {
-	this.volumeAttach = volumeAttach;
+        this.volumeAttach = volumeAttach;
     }
 
     public String getError() {
-	return error;
+        return error;
     }
 
     public void setError(TheiaCloudError error) {
-	setError(error.asString());
+        setError(error.asString());
     }
 
     public void setError(String error) {
-	this.error = error;
+        this.error = error;
     }
 
     public boolean hasError() {
-	return TheiaCloudError.isErrorString(getError());
+        return TheiaCloudError.isErrorString(getError());
     }
 
     @Override
     public String toString() {
-	return "WorkspaceStatus [volumeClaim=" + volumeClaim + ", volumeAttach=" + volumeAttach + ", error=" + error
-		+ ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
-		+ "]";
+        return "WorkspaceStatus [volumeClaim=" + volumeClaim + ", volumeAttach=" + volumeAttach + ", error=" + error
+                + ", getOperatorStatus()=" + getOperatorStatus() + ", getOperatorMessage()=" + getOperatorMessage()
+                + "]";
     }
 
 }

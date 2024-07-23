@@ -37,39 +37,39 @@ public class SessionStartRequest extends UserScopedServiceRequest {
     public EnvironmentVars env = new EnvironmentVars();
 
     public SessionStartRequest() {
-	super(KIND);
+        super(KIND);
     }
 
     public SessionStartRequest(String appId, String user, String appDefinition, String workspaceName, int timeout) {
-	super(KIND, appId);
-	this.user = user;
-	this.appDefinition = appDefinition;
-	this.workspaceName = workspaceName;
-	this.timeout = timeout;
+        super(KIND, appId);
+        this.user = user;
+        this.appDefinition = appDefinition;
+        this.workspaceName = workspaceName;
+        this.timeout = timeout;
     }
 
     public SessionStartRequest(String appId, String user, String appDefinition, int timeout) {
-	super(KIND, appId);
-	this.user = user;
-	this.appDefinition = appDefinition;
-	this.timeout = timeout;
+        super(KIND, appId);
+        this.user = user;
+        this.appDefinition = appDefinition;
+        this.timeout = timeout;
     }
 
     public SessionStartRequest(String appId, String user, String appDefinition) {
-	super(KIND, appId);
-	this.user = user;
-	this.appDefinition = appDefinition;
+        super(KIND, appId);
+        this.user = user;
+        this.appDefinition = appDefinition;
     }
 
     @Schema(hidden = true)
     public boolean isEphemeral() {
-	return this.workspaceName == null || this.workspaceName.isBlank();
+        return this.workspaceName == null || this.workspaceName.isBlank();
     }
 
     @Override
     public String toString() {
-	return "SessionStartRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName="
-		+ workspaceName + ", timeout=" + timeout + ", env=" + env + "]";
+        return "SessionStartRequest [user=" + user + ", appDefinition=" + appDefinition + ", workspaceName="
+                + workspaceName + ", timeout=" + timeout + ", env=" + env + "]";
     }
 
 }

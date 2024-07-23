@@ -1,7 +1,7 @@
 {
   "name": "@eclipse-theiacloud/common",
-  "version": "0.10.0",
-  "description": "Common functionality for Theia.cloud",
+  "version": "0.11.0",
+  "description": "Common functionality for Theia Cloud",
   "license": "EPL-2.0",
   "keywords": [
     "theia",
@@ -10,7 +10,7 @@
     "k8s"
   ],
   "author": {
-    "name": "Theia.cloud"
+    "name": "Theia Cloud"
   },
   "homepage": "http://theia-cloud.io",
   "repository": {
@@ -20,20 +20,34 @@
   "bugs": "https://github.com/eclipsesource/theia-cloud/issues",
   "contributors": [
     {
-      "name": "Theia.cloud Project",
+      "name": "Theia Cloud Project",
       "url": "http://theia-cloud.io"
     }
   ],
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/cjs/index.js",
+  "types": "lib/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/esm/index.d.ts",
+        "default": "./lib/esm/index.js"
+      },
+      "require": {
+        "types": "./lib/cjs/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      }
+    }
+  },
   "files": [
     "src",
     "lib"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc",
+    "build:esm": "tsc -p tsconfig.esm.json",
     "prepublishOnly": "npm run build",
-    "publish:next": "npm pkg set version=`npm pkg get version | head -1  | tr -d '\"'`.`git rev-parse --short HEAD` && npm publish --tag next",
+    "publish:next": "npm pkg set version=`node --print \"require('./package.json').version\"`.`git rev-parse --short HEAD` && npm publish --tag next",
     "publish:latest": "npm publish --tag latest"
   },
   "dependencies": {

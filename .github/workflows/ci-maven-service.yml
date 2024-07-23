@@ -1,0 +1,27 @@
+name: "[MAVEN] service"
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/service/org.eclipse.theia.cloud.service/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "java/common/**"
+      - "java/service/org.eclipse.theia.cloud.service/**"
+  release:
+    types:
+      - published
+
+jobs:
+  run:
+    permissions:
+      packages: write
+    uses: ./.github/workflows/reusable-maven.yml
+    with:
+      path_to_package: service/org.eclipse.theia.cloud.service/
+      dependencies: common/maven-conf/,common/org.eclipse.theia.cloud.common/
+    secrets: inherit

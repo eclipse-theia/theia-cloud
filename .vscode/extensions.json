@@ -1,5 +1,10 @@
 {
-    "recommendations": [
-        "hashicorp.terraform"
-    ]
+  "recommendations": [
+    "hashicorp.terraform",
+    "vscjava.vscode-java-pack",
+    "esbenp.prettier-vscode",
+    "ms-azuretools.vscode-docker",
+    "jebbs.plantuml",
+    "redhat.vscode-xml"
+  ]
 }

@@ -26,19 +26,19 @@ public class SessionStopRequest extends UserScopedServiceRequest {
     public String sessionName;
 
     public SessionStopRequest() {
-	super(KIND);
+        super(KIND);
     }
 
     public SessionStopRequest(String appId, String user, String sessionName) {
-	super(KIND, appId);
-	this.sessionName = sessionName;
-	this.user = user;
+        super(KIND, appId);
+        this.sessionName = sessionName;
+        this.user = user;
     }
 
     @Override
     public String toString() {
-	return "SessionStopRequest [user=" + user + ", sessionName=" + sessionName + ", appId=" + appId + ", kind="
-		+ kind + "]";
+        return "SessionStopRequest [user=" + user + ", sessionName=" + sessionName + ", appId=" + appId + ", kind="
+                + kind + "]";
     }
 
 }

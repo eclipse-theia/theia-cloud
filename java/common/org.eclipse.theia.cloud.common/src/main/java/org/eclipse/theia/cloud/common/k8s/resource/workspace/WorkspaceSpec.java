@@ -16,6 +16,8 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.workspace;
 
+import java.util.Map;
+
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
 
@@ -40,6 +42,9 @@ public class WorkspaceSpec implements UserScopedSpec {
     @JsonProperty("storage")
     private String storage;
 
+    @JsonProperty("options")
+    private Map<String, String> options;
+
     /**
      * Default constructor.
      */
@@ -47,30 +52,31 @@ public class WorkspaceSpec implements UserScopedSpec {
     }
 
     public WorkspaceSpec(String name, String label, String appDefinition, String user) {
-	this.name = name;
-	this.appDefinition = appDefinition;
-	this.user = user;
-	this.label = label;
+        this.name = name;
+        this.appDefinition = appDefinition;
+        this.user = user;
+        this.label = label;
     }
 
-    public WorkspaceSpec(WorkspaceHub spec) {
-	this.name = spec.getName().orElse(null); // required
-	this.label = spec.getLabel().orElse(null);
-	this.appDefinition = spec.getAppDefinition().orElse(null);
-	this.user = spec.getUser().orElse(null); // required
-	this.storage = spec.getStorage().orElse(null);
+    public WorkspaceSpec(WorkspaceHub fromHub) {
+        this.name = fromHub.getName().orElse(null); // required
+        this.label = fromHub.getLabel().orElse(null);
+        this.appDefinition = fromHub.getAppDefinition().orElse(null);
+        this.user = fromHub.getUser().orElse(null); // required
+        this.storage = fromHub.getStorage().orElse(null);
+        this.options = fromHub.getOptions().orElse(null);
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public String getLabel() {
-	return label;
+        return label;
     }
 
     public void setAppDefinition(String appDefinition) {
-	this.appDefinition = appDefinition;
+        this.appDefinition = appDefinition;
     }
 
     /**
@@ -79,7 +85,7 @@ public class WorkspaceSpec implements UserScopedSpec {
      * @return last app definition
      */
     public String getAppDefinition() {
-	return appDefinition;
+        return appDefinition;
     }
 
     /**
@@ -87,25 +93,29 @@ public class WorkspaceSpec implements UserScopedSpec {
      */
     @Override
     public String getUser() {
-	return user;
+        return user;
     }
 
     public String getStorage() {
-	return storage;
+        return storage;
+    }
+
+    public Map<String, String> getOptions() {
+        return options;
     }
 
     public void setStorage(String storage) {
-	this.storage = storage;
+        this.storage = storage;
     }
 
     public boolean hasStorage() {
-	return getStorage() != null && !getStorage().isBlank();
+        return getStorage() != null && !getStorage().isBlank();
     }
 
     @Override
     public String toString() {
-	return "WorkspaceSpec [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
-		+ user + ", storage=" + storage + "]";
+        return "WorkspaceSpec [name=" + name + ", label=" + label + ", appDefinition=" + appDefinition + ", user="
+                + user + ", storage=" + storage + "]";
     }
 
 }

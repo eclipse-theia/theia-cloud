@@ -27,7 +27,7 @@ provider "helm" {
 
 resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
-  chart            = "../../../../theia-cloud-helm/charts/theia.cloud"
+  chart            = "../../../../theia-cloud-helm/charts/theia-cloud"
   namespace        = "theiacloud"
   create_namespace = true
 
@@ -36,18 +36,23 @@ resource "helm_release" "theia-cloud" {
   ]
 
   set {
-    name  = "hosts.service"
-    value = "service.${data.terraform_remote_state.minikube.outputs.hostname}"
+    name  = "hosts.configuration.baseHost"
+    value = data.terraform_remote_state.minikube.outputs.hostname
   }
 
   set {
-    name  = "hosts.landing"
-    value = "try.${data.terraform_remote_state.minikube.outputs.hostname}"
+    name  = "hosts.configuration.service"
+    value = "service"
   }
 
   set {
-    name  = "hosts.instance"
-    value = "ws.${data.terraform_remote_state.minikube.outputs.hostname}"
+    name  = "hosts.configuration.landing"
+    value = "try"
+  }
+
+  set {
+    name  = "hosts.configuration.instance"
+    value = "ws"
   }
 
   set {
@@ -77,7 +82,7 @@ resource "helm_release" "theia-cloud" {
 
   set {
     name  = "demoApplication.name"
-    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:0.10.0" : "theiacloud/theia-cloud-activity-demo-theia:0.10.0"
+    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:0.11.0" : "theiacloud/theia-cloud-activity-demo-theia:0.11.0"
   }
 
   set {

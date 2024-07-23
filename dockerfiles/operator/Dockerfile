@@ -8,14 +8,16 @@ RUN cd /operator/common/maven-conf && \
     cd /operator/common/org.eclipse.theia.cloud.common && \
     mvn clean install --no-transfer-progress && \
     cd /operator/operator/org.eclipse.theia.cloud.operator && \
+    mvn clean install --no-transfer-progress && \
+    cd /operator/operator/org.eclipse.theia.cloud.defaultoperator && \
     mvn clean verify --no-transfer-progress
 
 FROM eclipse-temurin:17-jre-alpine
 RUN mkdir /templates
 WORKDIR /log-config
-COPY java/operator/org.eclipse.theia.cloud.operator/log4j2.xml .
+COPY java/operator/org.eclipse.theia.cloud.defaultoperator/log4j2.xml .
 WORKDIR /operator
-COPY --from=builder /operator/operator/org.eclipse.theia.cloud.operator/target/operator-0.10.0-jar-with-dependencies.jar .
+COPY --from=builder /operator/operator/org.eclipse.theia.cloud.defaultoperator/target/defaultoperator-0.11.0-jar-with-dependencies.jar .
 # to get more debug information from the kubernetes client itself, add -Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG below
-ENTRYPOINT [ "java", "-Dlog4j2.configurationFile=/log-config/log4j2.xml", "-jar", "./operator-0.10.0-jar-with-dependencies.jar" ]
+ENTRYPOINT [ "java", "-Dlog4j2.configurationFile=/log-config/log4j2.xml", "-jar", "./defaultoperator-0.11.0-jar-with-dependencies.jar" ]
 CMD [ "" ]
