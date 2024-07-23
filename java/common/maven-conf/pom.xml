@@ -45,6 +45,11 @@
         <profile>
             <id>artifact-registry</id>
             <distributionManagement>
+                <repository>
+                    <id>artifact-registry</id>
+                    <name>Google Artifact Registry</name>
+                    <url>artifactregistry://europe-west3-maven.pkg.dev/kubernetes-238012/theia-cloud</url>
+                </repository>
                 <snapshotRepository>
                     <id>artifact-registry</id>
                     <name>Google Artifact Registry</name>

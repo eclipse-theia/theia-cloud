@@ -53,7 +53,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - id: version_check
+      - name: Run Version Check
+        id: version_check
         run: |
           cd ${{ inputs.path_to_package }}
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
@@ -77,9 +78,11 @@ jobs:
 
       - name: Build dependencies
         if: |
-          ${{ inputs.dependencies != '' }} &&
-          (github.event_name == 'push' && steps.version_check.outputs.is_snapshot_version == 'true') || 
-          (github.event_name == 'release' && steps.version_check.outputs.is_snapshot_version == 'false')
+          ${{ inputs.dependencies != '' }} && 
+          ( 
+            (github.event_name == 'push' && steps.version_check.outputs.is_snapshot_version == 'true') || 
+            (github.event_name == 'release' && steps.version_check.outputs.is_snapshot_version == 'false')
+          )
         run: |
           IFS=',' read -r -a dirs <<< "${{ inputs.dependencies }}"
           for dir in "${dirs[@]}"
@@ -105,7 +108,7 @@ jobs:
           (github.event_name == 'release' && steps.version_check.outputs.is_snapshot_version == 'false')
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          credentials_json: "${{ secrets.GCP_SA_KEY }}"
 
       - name: Publish package to Google Artifact Registry
         if: |
