@@ -112,6 +112,7 @@ provider "keycloak" {
   url                      = "https://${module.host.host}.nip.io/keycloak"
   tls_insecure_skip_verify = true # only for minikube self signed
   initial_login            = false
+  client_timeout           = 60
 }
 
 module "keycloak" {
