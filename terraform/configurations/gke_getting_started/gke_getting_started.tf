@@ -75,11 +75,12 @@ module "helm" {
 }
 
 provider "keycloak" {
-  client_id     = "admin-cli"
-  username      = "admin"
-  password      = var.keycloak_admin_password
-  url           = "https://${google_compute_address.host_ip.address}.sslip.io/keycloak"
-  initial_login = false
+  client_id      = "admin-cli"
+  username       = "admin"
+  password       = var.keycloak_admin_password
+  url            = "https://${google_compute_address.host_ip.address}.sslip.io/keycloak"
+  initial_login  = false
+  client_timeout = 60
 }
 
 module "keycloak" {
