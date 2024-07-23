@@ -66,6 +66,12 @@ public class RootResource extends BaseResource {
             throw new TheiaCloudWebException(TheiaCloudError.INVALID_APP_DEFINITION_NAME);
         }
 
+        if (k8sUtil.isMaxInstancesReached(request.appDefinition)) {
+            error(correlationId, "Failed to launch session. App Definition '" + request.appDefinition
+                    + "' has max instances reached.");
+            throw new TheiaCloudWebException(TheiaCloudError.SESSION_SERVER_LIMIT_REACHED);
+        }
+
         if (request.isEphemeral()) {
             info(correlationId, "Launching ephemeral session " + request);
             return k8sUtil.launchEphemeralSession(correlationId, request.appDefinition, user, request.timeout,

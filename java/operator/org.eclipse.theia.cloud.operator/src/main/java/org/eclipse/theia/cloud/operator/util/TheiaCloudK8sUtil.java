@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.resource.OperatorStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
@@ -41,7 +42,7 @@ public final class TheiaCloudK8sUtil {
 
         if (appDefinitionSpec.getMaxInstances() == null || appDefinitionSpec.getMaxInstances() < 0) {
             LOGGER.debug(formatLogMessage(correlationId,
-                    "App Definition " + appDefinitionSpec.getName() + " allows indefinite sessions."));
+                    "App Definition " + appDefinitionSpec.getName() + " allows infinite sessions."));
             return false;
         }
 
@@ -56,9 +57,12 @@ public final class TheiaCloudK8sUtil {
                 .list().getItems().stream()//
                 .filter(w -> {
                     String sessionAppDefinition = w.getSpec().getAppDefinition();
-                    boolean result = appDefinitionName.equals(sessionAppDefinition);
-                    LOGGER.trace(formatLogMessage(correlationId, "Counting instances of app definition "
-                            + appDefinitionSpec.getName() + ": Is " + w.getSpec() + " of app definition? " + result));
+                    // Errored resources should not be counted
+                    boolean result = appDefinitionName.equals(sessionAppDefinition)
+                            && !OperatorStatus.ERROR.equals(w.getStatus().getOperatorStatus());
+                    LOGGER.trace(formatLogMessage(correlationId,
+                            "Counting handled instances of app definition " + appDefinitionSpec.getName() + ": Is "
+                                    + w.getSpec() + " of app definition and handled? " + result));
                     return result;
                 })//
                 .count();

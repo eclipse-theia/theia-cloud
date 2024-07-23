@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
@@ -33,6 +34,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.CustomResourceUtil;
 import org.eclipse.theia.cloud.service.session.SessionPerformance;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
+import org.jboss.logging.Logger;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
@@ -48,7 +50,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public final class K8sUtil {
     private NamespacedKubernetesClient KUBERNETES = CustomResourceUtil.createClient();
-    private TheiaCloudClient CLIENT = new DefaultTheiaCloudClient(KUBERNETES);
+    public TheiaCloudClient CLIENT = new DefaultTheiaCloudClient(KUBERNETES);
+
+    protected final Logger logger = Logger.getLogger(getClass());
 
     public Workspace createWorkspace(String correlationId, UserWorkspace data) {
         WorkspaceSpec spec = new WorkspaceSpec(data.name, data.label, data.appDefinition, data.user);
@@ -178,15 +182,34 @@ public final class K8sUtil {
         }
         Container container = optionalContainer.get();
         Optional<EnvVar> optionalEnv = container.getEnv().stream()
-                .filter(env -> env.getName().equals("THEIA_CLOUD_SESSION_NAME")).findFirst();
+                .filter(env -> env.getName().equals("THEIACLOUD_SESSION_NAME")).findFirst();
         if (optionalEnv.isEmpty()) {
             return false;
         }
         EnvVar env = optionalEnv.get();
-        return env.getValue().equals(session.getSpec().getName()) ? true : false;
+        return env.getValue().equals(session.getSpec().getName());
     }
 
     public boolean hasAppDefinition(String appDefinition) {
         return CLIENT.appDefinitions().get(appDefinition).isPresent();
+    }
+
+    public boolean isMaxInstancesReached(String appDefString) {
+        Optional<AppDefinition> optAppDef = CLIENT.appDefinitions().get(appDefString);
+        if (!optAppDef.isPresent()) {
+            return true; // appDef does not exist, so we already reached the maximum number of instances
+        }
+        AppDefinition appDef = optAppDef.get();
+        if (appDef.getSpec().getMaxInstances() == null) {
+            return false; // max instances is not set, so we do not have a limit
+        }
+        long maxInstances = appDef.getSpec().getMaxInstances();
+        if (maxInstances < 0) {
+            return false; // max instances is set to negative, so we can ignore it
+        }
+        long podsOfAppDef = CLIENT.sessions().list().stream() // All sessions
+                .filter(s -> s.getSpec().getAppDefinition().equals(appDefString)) // That are from the appDefinition
+                .filter(s -> getPodForSession(s).isPresent()).count(); // That already have a pod
+        return podsOfAppDef >= maxInstances;
     }
 }
