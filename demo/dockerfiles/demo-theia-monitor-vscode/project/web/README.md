@@ -6,4 +6,4 @@ Run `npm run build` in the `web` directory
 
 ## Running
 
-Right click `bin/index.html` -> `Open With...` -> `Preview`
+Open `bin/index.html` and select `Open Preview to the Side` from the editor's toolbar
