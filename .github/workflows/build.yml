@@ -1,0 +1,17 @@
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push-base:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@feat/include-label-for-docker-images
+    with:
+      docker-file: dockerfiles/landing-page/Dockerfile
+      image-name: ghcr.io/ls1intum/theia/landing-page
+      docker-context: .
+      tags: "2024-08-09"
+    secrets: inherit

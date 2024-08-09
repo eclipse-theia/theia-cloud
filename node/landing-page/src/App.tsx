@@ -104,6 +104,11 @@ function App(): JSX.Element {
             console.error('Authentication Failed');
           });
       }
+
+      // Try to start the app if the app definition is set
+      if (selectedAppDefinition) {
+        handleStartSession(selectedAppDefinition);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -221,10 +226,7 @@ function App(): JSX.Element {
         )}
         <Footer
           appDefinition={config.appDefinition}
-          appName={config.appName}
           additionalApps={config.additionalApps !== undefined ? config.additionalApps : []}
-          setSelectedAppName={setSelectedAppName}
-          setSelectedAppDefinition={setSelectedAppDefinition}
         />
       </div>
     </div>
