@@ -224,10 +224,7 @@ function App(): JSX.Element {
             title={config.infoTitle}
           />
         )}
-        <Footer
-          appDefinition={config.appDefinition}
-          additionalApps={config.additionalApps !== undefined ? config.additionalApps : []}
-        />
+        <Footer selectedAppDefinition={selectedAppDefinition} />
       </div>
     </div>
   );

@@ -1,13 +1,11 @@
-import { AppDefinition } from '@eclipse-theiacloud/common';
-
 interface FooterProps {
-  selectedAppDefinition: AppDefinition;
+  selectedAppDefinition: string;
 }
 
 export const Footer = ({ selectedAppDefinition }: FooterProps): JSX.Element => (
   <div className='App__footer'>
     <p>
-      <label htmlFor='selectapp'> {selectedAppDefinition.appName} </label>
+      <label htmlFor='selectapp'> {selectedAppDefinition} </label>
     </p>
     <p></p>
     <p>
