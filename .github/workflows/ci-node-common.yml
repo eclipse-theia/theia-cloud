@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - "node/package-lock.json"
       - "node/common/**"
       # Publish when a workflow has changed (this is needed to detect version updates)
       - ".github/workflows/ci-node-common.yml"
@@ -13,6 +14,7 @@ on:
     branches:
       - main
     paths:
+      - "node/package-lock.json"
       - "node/common/**"
   release:
     types:

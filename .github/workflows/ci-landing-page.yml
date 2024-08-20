@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - "node/package-lock.json"
       - "node/common/**"
       - "node/landing-page/**"
       - "dockerfiles/landing-page/**"
@@ -15,6 +16,7 @@ on:
     branches:
       - main
     paths:
+      - "node/package-lock.json"
       - "node/common/**"
       - "node/landing-page/**"
       - "dockerfiles/landing-page/**"
