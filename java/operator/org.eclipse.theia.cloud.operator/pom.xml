@@ -15,10 +15,6 @@
         <relativePath>../../common/maven-conf/</relativePath>
     </parent>
 
-    <properties>
-        <picocli.version>4.6.3</picocli.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.eclipse.theia.cloud</groupId>
@@ -28,7 +24,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20220924</version>
+            <version>${org.json.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
