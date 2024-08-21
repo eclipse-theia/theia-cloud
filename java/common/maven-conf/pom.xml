@@ -12,19 +12,23 @@
 
     <properties>
         <failsafe.useModulePath>false</failsafe.useModulePath>
-        <guice.version>5.0.1</guice.version>
-        <kubernetes-client.version>6.10.0</kubernetes-client.version>
-        <log4j.version>2.17.1</log4j.version>
-        <slf4j.version>1.7.32</slf4j.version>
-        <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-        <maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.8.1</quarkus.platform.version>
-        <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
-        <webhooks.framework.core.version>1.1.2</webhooks.framework.core.version>
+        <guice.version>7.0.0</guice.version>
+        <log4j.version>2.23.1</log4j.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <surefire-plugin.version>3.4.0</surefire-plugin.version>
+        <google.artifactregistry-maven-wagon-version>2.2.2</google.artifactregistry-maven-wagon-version>
+        <junit-jupiter.version>5.11.0</junit-jupiter.version>
+        <org.json.version>20240303</org.json.version>
+        <picocli.version>4.7.6</picocli.version>
+        <webhooks.framework.core.version>1.1.4</webhooks.framework.core.version>
+        <slf4j.version>1.7.36</slf4j.version>
+        <kubernetes-client.version>6.12.1</kubernetes-client.version>
+        <quarkus.platform.version>3.11.3</quarkus.platform.version>
     </properties>
 
     <profiles>
@@ -73,7 +77,7 @@
                     <plugin>
                         <groupId>com.google.cloud.artifactregistry</groupId>
                         <artifactId>artifactregistry-maven-wagon</artifactId>
-                        <version>2.2.0</version>
+                        <version>${google.artifactregistry-maven-wagon-version}</version>
                         <extensions>true</extensions>
                     </plugin>
                 </plugins>
