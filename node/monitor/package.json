@@ -39,7 +39,7 @@
     "update:demo:monitor": "npm run build:vsix && rm ../../demo/dockerfiles/demo-theia-monitor-vscode/*vsix && mv *.vsix ../../demo/dockerfiles/demo-theia-monitor-vscode"
   },
   "dependencies": {
-    "express": "^4.18.1",
+    "express": "^4.19.2",
     "express-formidable": "^1.2.0"
   },
   "devDependencies": {
