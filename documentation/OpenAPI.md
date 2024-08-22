@@ -40,7 +40,7 @@ Install the `openapi-generator-cli`:
 
 ```bash
 npm install @openapitools/openapi-generator-cli -g
-openapi-generator-cli version-manager set 6.6.0
+openapi-generator-cli version-manager set 7.8.0
 ```
 
 Use the `openapi-generator-cli` from the root of this repository:
