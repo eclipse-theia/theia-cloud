@@ -1,14 +1,25 @@
+/* eslint-disable indent */
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
   LaunchRequest as ClientLaunchRequest,
-  PingRequest as ClientPingRequest, RootResourceApi, SessionActivityRequest as ClientSessionActivityRequest, SessionListRequest as ClientSessionListRequest,
-  SessionPerformance, SessionPerformanceRequest as ClientSessionPerformanceRequest,
-  SessionResourceApi, SessionSpec, SessionStartRequest as ClientSessionStartRequest, SessionStopRequest as ClientSessionStopRequest,
-  UserWorkspace, WorkspaceCreationRequest as ClientWorkspaceCreationRequest,
-  WorkspaceDeletionRequest as ClientWorkspaceDeletionRequest, WorkspaceListRequest as ClientWorkspaceListRequest,
-  WorkspaceResourceApi } from './client/api';
+  PingRequest as ClientPingRequest,
+  RootResourceApi,
+  SessionActivityRequest as ClientSessionActivityRequest,
+  SessionListRequest as ClientSessionListRequest,
+  SessionPerformance,
+  SessionPerformanceRequest as ClientSessionPerformanceRequest,
+  SessionResourceApi,
+  SessionSpec,
+  SessionStartRequest as ClientSessionStartRequest,
+  SessionStopRequest as ClientSessionStopRequest,
+  UserWorkspace,
+  WorkspaceCreationRequest as ClientWorkspaceCreationRequest,
+  WorkspaceDeletionRequest as ClientWorkspaceDeletionRequest,
+  WorkspaceListRequest as ClientWorkspaceListRequest,
+  WorkspaceResourceApi
+} from './client/api';
 import { Configuration } from './client/configuration';
 
 export const DEFAULT_CALL_TIMEOUT = 30000;
@@ -44,17 +55,37 @@ export type LaunchRequest = ClientLaunchRequest & ServiceRequest;
 export namespace LaunchRequest {
   export const KIND = 'launchRequest';
 
-  export function ephemeral(serviceUrl: string, appId: string, appDefinition: string, timeout?: number, user: string = createUser()): LaunchRequest {
+  export function ephemeral(
+    serviceUrl: string,
+    appId: string,
+    appDefinition: string,
+    timeout?: number,
+    user: string = createUser()
+  ): LaunchRequest {
     return { serviceUrl, appId, appDefinition, user, ephemeral: true, timeout };
   }
 
-  export function createWorkspace(serviceUrl: string, appId: string, appDefinition: string, timeout?: number, user: string = createUser(),
-    workspaceName?: string, label?: string): LaunchRequest {
+  export function createWorkspace(
+    serviceUrl: string,
+    appId: string,
+    appDefinition: string,
+    timeout?: number,
+    user: string = createUser(),
+    workspaceName?: string,
+    label?: string
+  ): LaunchRequest {
     return { serviceUrl, appId, appDefinition, user, label, workspaceName, ephemeral: false, timeout };
   }
 
   // eslint-disable-next-line max-len
-  export function existingWorkspace(serviceUrl: string, appId: string, workspaceName: string, timeout?: number, appDefinition?: string, user: string = createUser()): LaunchRequest {
+  export function existingWorkspace(
+    serviceUrl: string,
+    appId: string,
+    workspaceName: string,
+    timeout?: number,
+    appDefinition?: string,
+    user: string = createUser()
+  ): LaunchRequest {
     return { serviceUrl, appId, workspaceName, appDefinition, user, timeout };
   }
 }
@@ -114,13 +145,19 @@ export namespace TheiaCloud {
 
   export async function ping(request: PingRequest, options: RequestOptions = {}): Promise<boolean> {
     const { accessToken, retries, timeout } = options;
-    return call(() => rootApi(request.serviceUrl, accessToken).serviceAppIdGet(request.appId, createConfig(timeout)), retries);
+    return call(
+      () => rootApi(request.serviceUrl, accessToken).serviceAppIdGet(request.appId, createConfig(timeout)),
+      retries
+    );
   }
 
   export async function launch(request: LaunchRequest, options: RequestOptions = {}): Promise<string> {
     const { accessToken, retries, timeout } = options;
     const launchRequest = { kind: LaunchRequest.KIND, ...request };
-    return call(() => rootApi(request.serviceUrl, accessToken).servicePost(launchRequest, createConfig(timeout)), retries);
+    return call(
+      () => rootApi(request.serviceUrl, accessToken).servicePost(launchRequest, createConfig(timeout)),
+      retries
+    );
   }
 
   export async function launchAndRedirect(request: LaunchRequest, options: RequestOptions = {}): Promise<string> {
@@ -131,54 +168,122 @@ export namespace TheiaCloud {
   }
 
   export namespace Session {
-    export async function listSessions(request: SessionListRequest, options: RequestOptions = {}): Promise<SessionSpec[]> {
+    export async function listSessions(
+      request: SessionListRequest,
+      options: RequestOptions = {}
+    ): Promise<SessionSpec[]> {
       const { accessToken, retries, timeout } = options;
-      return call(() => sessionApi(request.serviceUrl, accessToken).serviceSessionAppIdUserGet(request.appId, request.user, createConfig(timeout)), retries);
+      return call(
+        () =>
+          sessionApi(request.serviceUrl, accessToken).serviceSessionAppIdUserGet(
+            request.appId,
+            request.user,
+            createConfig(timeout)
+          ),
+        retries
+      );
     }
 
     export async function startSession(request: SessionStartRequest, options: RequestOptions = {}): Promise<string> {
       const { accessToken, retries, timeout } = options;
       const sessionStartRequest = { kind: SessionStartRequest.KIND, ...request };
-      return call(() => sessionApi(request.serviceUrl, accessToken).serviceSessionPost(sessionStartRequest, createConfig(timeout)), retries);
+      return call(
+        () =>
+          sessionApi(request.serviceUrl, accessToken).serviceSessionPost(sessionStartRequest, createConfig(timeout)),
+        retries
+      );
     }
 
     export async function stopSession(request: SessionStopRequest, options: RequestOptions = {}): Promise<boolean> {
       const { accessToken, retries, timeout } = options;
       const sessionStopRequest = { kind: SessionStopRequest.KIND, ...request };
-      return call(() => sessionApi(request.serviceUrl, accessToken).serviceSessionDelete(sessionStopRequest, createConfig(timeout)), retries);
+      return call(
+        () =>
+          sessionApi(request.serviceUrl, accessToken).serviceSessionDelete(sessionStopRequest, createConfig(timeout)),
+        retries
+      );
     }
 
-    export async function reportSessionActivity(request: SessionActivityRequest, options: RequestOptions = {}): Promise<boolean> {
+    export async function reportSessionActivity(
+      request: SessionActivityRequest,
+      options: RequestOptions = {}
+    ): Promise<boolean> {
       const { accessToken, retries, timeout } = options;
       const sessionActivityRequest = { kind: SessionActivityRequest.KIND, ...request };
-      return call(() => sessionApi(request.serviceUrl, accessToken).serviceSessionPatch(sessionActivityRequest, createConfig(timeout)), retries);
+      return call(
+        () =>
+          sessionApi(request.serviceUrl, accessToken).serviceSessionPatch(
+            sessionActivityRequest,
+            createConfig(timeout)
+          ),
+        retries
+      );
     }
 
-    export async function getSessionPerformance(request: SessionPerformanceRequest, options: RequestOptions = {}): Promise<SessionPerformance> {
+    export async function getSessionPerformance(
+      request: SessionPerformanceRequest,
+      options: RequestOptions = {}
+    ): Promise<SessionPerformance> {
       const { accessToken, retries, timeout } = options;
       return call(
-        () => sessionApi(request.serviceUrl, accessToken).serviceSessionPerformanceAppIdSessionNameGet(request.appId, request.sessionName, createConfig(timeout)),
+        () =>
+          sessionApi(request.serviceUrl, accessToken).serviceSessionPerformanceAppIdSessionNameGet(
+            request.appId,
+            request.sessionName,
+            createConfig(timeout)
+          ),
         retries
       );
     }
   }
 
   export namespace Workspace {
-    export async function listWorkspaces(request: WorkspaceListRequest, options: RequestOptions = {}): Promise<UserWorkspace[]> {
+    export async function listWorkspaces(
+      request: WorkspaceListRequest,
+      options: RequestOptions = {}
+    ): Promise<UserWorkspace[]> {
       const { accessToken, retries, timeout } = options;
-      return call(() => workspaceApi(request.serviceUrl, accessToken).serviceWorkspaceAppIdUserGet(request.appId, request.user, createConfig(timeout)), retries);
+      return call(
+        () =>
+          workspaceApi(request.serviceUrl, accessToken).serviceWorkspaceAppIdUserGet(
+            request.appId,
+            request.user,
+            createConfig(timeout)
+          ),
+        retries
+      );
     }
 
-    export async function createWorkspace(request: WorkspaceCreationRequest, options: RequestOptions = {}): Promise<UserWorkspace> {
+    export async function createWorkspace(
+      request: WorkspaceCreationRequest,
+      options: RequestOptions = {}
+    ): Promise<UserWorkspace> {
       const { accessToken, retries, timeout } = options;
       const workspaceCreationRequest = { kind: WorkspaceCreationRequest.KIND, ...request };
-      return call(() => workspaceApi(request.serviceUrl, accessToken).serviceWorkspacePost(workspaceCreationRequest, createConfig(timeout)), retries);
+      return call(
+        () =>
+          workspaceApi(request.serviceUrl, accessToken).serviceWorkspacePost(
+            workspaceCreationRequest,
+            createConfig(timeout)
+          ),
+        retries
+      );
     }
 
-    export async function deleteWorkspace(request: WorkspaceDeletionRequest, options: RequestOptions = {}): Promise<boolean> {
+    export async function deleteWorkspace(
+      request: WorkspaceDeletionRequest,
+      options: RequestOptions = {}
+    ): Promise<boolean> {
       const { accessToken, retries, timeout } = options;
       const workspaceDeletionRequest = { kind: WorkspaceDeletionRequest.KIND, ...request };
-      return call(() => workspaceApi(request.serviceUrl, accessToken).serviceWorkspaceDelete(workspaceDeletionRequest, createConfig(timeout)), retries);
+      return call(
+        () =>
+          workspaceApi(request.serviceUrl, accessToken).serviceWorkspaceDelete(
+            workspaceDeletionRequest,
+            createConfig(timeout)
+          ),
+        retries
+      );
     }
   }
 }
@@ -218,7 +323,13 @@ export namespace TheiaCloudErrorResponse {
 export class TheiaCloudError extends Error {
   static INTERNAL_ERROR = 500;
 
-  constructor(message: string, public status: number, public originalError: Error, public serverError?: TheiaCloudErrorResponse, public request?: ServiceRequest) {
+  constructor(
+    message: string,
+    public status: number,
+    public originalError: Error,
+    public serverError?: TheiaCloudErrorResponse,
+    public request?: ServiceRequest
+  ) {
     super(message);
   }
 
@@ -228,14 +339,21 @@ export class TheiaCloudError extends Error {
       const errorResponse = TheiaCloudErrorResponse.is(responseData) ? responseData : undefined;
       const message = errorResponse ? errorResponse.reason : error.message;
 
-      const requestData = typeof error.config.data === 'string' ? JSON.parse(error.config.data) : error.config.data;
-      const serviceRequest = ServiceRequest.is(requestData) ? requestData : undefined;
+      const status = error.status
+        ? error.status
+        : error.response
+        ? error.response.status
+        : errorResponse
+        ? errorResponse.code
+        : TheiaCloudError.INTERNAL_ERROR;
 
-      const status = error.status ? parseInt(error.status, 10)
-        : error.response ? error.response.status
-          : errorResponse ? errorResponse.code
-            : TheiaCloudError.INTERNAL_ERROR;
-      return new TheiaCloudError(message, status, error, errorResponse, serviceRequest);
+      if (error.config === undefined) {
+        return new TheiaCloudError(message, status, error, errorResponse);
+      } else {
+        const requestData = typeof error.config.data === 'string' ? JSON.parse(error.config.data) : error.config.data;
+        const serviceRequest = ServiceRequest.is(requestData) ? requestData : undefined;
+        return new TheiaCloudError(message, status, error, errorResponse, serviceRequest);
+      }
     }
     return new TheiaCloudError(error.message, TheiaCloudError.INTERNAL_ERROR, error);
   }
