@@ -3,7 +3,7 @@ window.theiaCloudConfig = {
   appName: 'Theia Blueprint',
   useKeycloak: false,
   serviceUrl: 'http://localhost:8081/service',
-  appDefinition: 'theia-cloud-demo',
+  //appDefinition: 'theia-cloud-demo',
   useEphemeralStorage: true
   // additionalApps: [
   //   {

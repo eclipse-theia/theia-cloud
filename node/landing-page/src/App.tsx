@@ -76,11 +76,6 @@ function App(): JSX.Element {
           setError('Invalid default selection value: ' + pathBlueprintSelection);
           console.error('Invalid default selection value: ' + pathBlueprintSelection);
         }
-        console.log('App initialization complete');
-        console.log('Selected app definition: ' + selectedAppDefinition);
-        console.log('Selected app name: ' + selectedAppName);
-        console.log('Configured app definition: ' + config.appDefinition);
-        console.log('Initial app definition: ' + initialAppDefinition);
       }
       if (config.useKeycloak) {
         keycloakConfig = {
@@ -118,9 +113,26 @@ function App(): JSX.Element {
       } else {
         console.log('Decided not to auto-start the session');
       }
+    } else {
+      console.log('App already initialized');
+      console.log('Selected app definition: ' + selectedAppDefinition);
+      console.log('Selected app name: ' + selectedAppName);
+      console.log('Configured app definition: ' + config.appDefinition);
+      console.log('Initial app definition: ' + initialAppDefinition);
+      console.log('-----------------------------------');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+      console.log('App init changed');
+      console.log('Selected app definition: ' + selectedAppDefinition);
+      console.log('Selected app name: ' + selectedAppName);
+      console.log('Configured app definition: ' + config.appDefinition);
+      console.log('Initial app definition: ' + initialAppDefinition);
+      console.log('-----------------------------------');
+  }, [initialized]);
+
   /* eslint-enable react-hooks/rules-of-hooks */
 
   document.title = `${selectedAppName} - Theia`;
