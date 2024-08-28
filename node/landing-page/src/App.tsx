@@ -53,6 +53,7 @@ function App(): JSX.Element {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('appDef') || urlParams.has('appdef')) {
       const pathBlueprintSelection = urlParams.get('appDef') || urlParams.get('appdef');
+      console.log('additionalApps: ' + JSON.stringify(config.additionalApps));
       if (
         // eslint-disable-next-line no-null/no-null
         pathBlueprintSelection !== null &&
