@@ -47,82 +47,72 @@ function App(): JSX.Element {
   const [token, setToken] = useState<string>();
   const [logoutUrl, setLogoutUrl] = useState<string>();
 
-  useEffect(() => {
-    if (!initialized) {
-      initialized = true;
-      const element = document.getElementById('selectapp');
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('appDef') || urlParams.has('appdef')) {
-        const pathBlueprintSelection = urlParams.get('appDef') || urlParams.get('appdef');
-        if (
-          // eslint-disable-next-line no-null/no-null
-          pathBlueprintSelection !== null &&
-          isDefaultSelectionValueValid(pathBlueprintSelection, config.appDefinition, config.additionalApps)
-        ) {
-          // eslint-disable-next-line no-null/no-null
-          if (element !== null && config.additionalApps && config.additionalApps.length > 0) {
-            (element as HTMLSelectElement).value = pathBlueprintSelection;
-            setSelectedAppName(
-              (element as HTMLSelectElement).options[(element as HTMLSelectElement).selectedIndex].text
-            );
-            setSelectedAppDefinition((element as HTMLSelectElement).value);
-          } else {
-            // If there are no additional apps, just use the application id as the name
-            console.log('App definitition provided via URL parameter not found in additional apps');
-            setSelectedAppDefinition(pathBlueprintSelection);
-            setSelectedAppName(pathBlueprintSelection);
-          }
+  if (!initialized) {
+    initialized = true;
+    const element = document.getElementById('selectapp');
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('appDef') || urlParams.has('appdef')) {
+      const pathBlueprintSelection = urlParams.get('appDef') || urlParams.get('appdef');
+      if (
+        // eslint-disable-next-line no-null/no-null
+        pathBlueprintSelection !== null &&
+        isDefaultSelectionValueValid(pathBlueprintSelection, config.appDefinition, config.additionalApps)
+      ) {
+        // eslint-disable-next-line no-null/no-null
+        if (element !== null && config.additionalApps && config.additionalApps.length > 0) {
+          (element as HTMLSelectElement).value = pathBlueprintSelection;
+          setSelectedAppName(
+            (element as HTMLSelectElement).options[(element as HTMLSelectElement).selectedIndex].text
+          );
+          setSelectedAppDefinition((element as HTMLSelectElement).value);
         } else {
-          setError('Invalid default selection value: ' + pathBlueprintSelection);
-          console.error('Invalid default selection value: ' + pathBlueprintSelection);
+          // If there are no additional apps, just use the application id as the name
+          console.log('App definitition provided via URL parameter not found in additional apps');
+          setSelectedAppDefinition(pathBlueprintSelection);
+          setSelectedAppName(pathBlueprintSelection);
         }
-      }
-      if (config.useKeycloak) {
-        keycloakConfig = {
-          url: config.keycloakAuthUrl,
-          realm: config.keycloakRealm!,
-          clientId: config.keycloakClientId!
-        };
-        const keycloak = Keycloak(keycloakConfig);
-        keycloak
-          .init({
-            onLoad: 'check-sso',
-            redirectUri: window.location.href,
-            checkLoginIframe: false
-          })
-          .then(auth => {
-            if (auth) {
-              const parsedToken = keycloak.idTokenParsed;
-              if (parsedToken) {
-                const userMail = parsedToken.email;
-                setToken(keycloak.idToken);
-                setEmail(userMail);
-                setLogoutUrl(keycloak.createLogoutUrl());
-              }
-            }
-          })
-          .catch(() => {
-            console.error('Authentication Failed');
-          });
-      }
-
-      // Try to start the app if the app definition was changed via URL parameter
-      if (selectedAppDefinition && selectedAppDefinition !== initialAppDefinition) {
-        console.log('Starting session for ' + selectedAppDefinition);
-        //handleStartSession(selectedAppDefinition);
       } else {
-        console.log('Decided not to auto-start the session');
+        setError('Invalid default selection value: ' + pathBlueprintSelection);
+        console.error('Invalid default selection value: ' + pathBlueprintSelection);
       }
-    } else {
-      console.log('App already initialized');
-      console.log('Selected app definition: ' + selectedAppDefinition);
-      console.log('Selected app name: ' + selectedAppName);
-      console.log('Configured app definition: ' + config.appDefinition);
-      console.log('Initial app definition: ' + initialAppDefinition);
-      console.log('-----------------------------------');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (config.useKeycloak) {
+      keycloakConfig = {
+        url: config.keycloakAuthUrl,
+        realm: config.keycloakRealm!,
+        clientId: config.keycloakClientId!
+      };
+      const keycloak = Keycloak(keycloakConfig);
+      keycloak
+        .init({
+          onLoad: 'check-sso',
+          redirectUri: window.location.href,
+          checkLoginIframe: false
+        })
+        .then(auth => {
+          if (auth) {
+            const parsedToken = keycloak.idTokenParsed;
+            if (parsedToken) {
+              const userMail = parsedToken.email;
+              setToken(keycloak.idToken);
+              setEmail(userMail);
+              setLogoutUrl(keycloak.createLogoutUrl());
+            }
+          }
+        })
+        .catch(() => {
+          console.error('Authentication Failed');
+        });
+    }
+
+    // Try to start the app if the app definition was changed via URL parameter
+    if (selectedAppDefinition && selectedAppDefinition !== initialAppDefinition) {
+      console.log('Starting session for ' + selectedAppDefinition);
+      //handleStartSession(selectedAppDefinition);
+    } else {
+      console.log('Decided not to auto-start the session');
+    }
+  }
 
   useEffect(() => {
       console.log('App init changed');
