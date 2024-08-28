@@ -53,27 +53,30 @@ function App(): JSX.Element {
       const element = document.getElementById('selectapp');
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('appDef') || urlParams.has('appdef')) {
-        const defaultSelection = urlParams.get('appDef') || urlParams.get('appdef');
+        const pathBlueprintSelection = urlParams.get('appDef') || urlParams.get('appdef');
         if (
           // eslint-disable-next-line no-null/no-null
-          defaultSelection !== null &&
-          isDefaultSelectionValueValid(defaultSelection, config.appDefinition, config.additionalApps)
+          pathBlueprintSelection !== null &&
+          isDefaultSelectionValueValid(pathBlueprintSelection, config.appDefinition, config.additionalApps)
         ) {
           // eslint-disable-next-line no-null/no-null
           if (element !== null && config.additionalApps && config.additionalApps.length > 0) {
-            (element as HTMLSelectElement).value = defaultSelection;
+            (element as HTMLSelectElement).value = pathBlueprintSelection;
             setSelectedAppName(
               (element as HTMLSelectElement).options[(element as HTMLSelectElement).selectedIndex].text
             );
             setSelectedAppDefinition((element as HTMLSelectElement).value);
           } else {
             // If there are no additional apps, just use the application id as the name
-            setSelectedAppDefinition(defaultSelection);
-            setSelectedAppName(defaultSelection);
+            setSelectedAppDefinition(pathBlueprintSelection);
+            setSelectedAppName(pathBlueprintSelection);
           }
           initialAppName = selectedAppName;
           initialAppDefinition = selectedAppDefinition;
-          console.log('Set ' + defaultSelection + ' as default selection');
+          console.log('Set ' + pathBlueprintSelection + ' as selection');
+        } else {
+          setError('Invalid default selection value: ' + pathBlueprintSelection);
+          console.error('Invalid default selection value: ' + pathBlueprintSelection);
         }
       }
       if (config.useKeycloak) {
@@ -107,14 +110,14 @@ function App(): JSX.Element {
 
       // Try to start the app if the app definition is set
       if (selectedAppDefinition) {
-        handleStartSession(selectedAppDefinition);
+        //handleStartSession(selectedAppDefinition);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   /* eslint-enable react-hooks/rules-of-hooks */
 
-  document.title = `${selectedAppName} - Try Now`;
+  document.title = `${selectedAppName} - Theia`;
 
   const authenticate = (): void => {
     const keycloak = Keycloak(keycloakConfig);
