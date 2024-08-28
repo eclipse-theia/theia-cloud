@@ -68,16 +68,19 @@ function App(): JSX.Element {
             setSelectedAppDefinition((element as HTMLSelectElement).value);
           } else {
             // If there are no additional apps, just use the application id as the name
+            console.log('App definitition provided via URL parameter not found in additional apps');
             setSelectedAppDefinition(pathBlueprintSelection);
             setSelectedAppName(pathBlueprintSelection);
           }
-          initialAppName = selectedAppName;
-          initialAppDefinition = selectedAppDefinition;
-          console.log('Set ' + pathBlueprintSelection + ' as selection');
         } else {
           setError('Invalid default selection value: ' + pathBlueprintSelection);
           console.error('Invalid default selection value: ' + pathBlueprintSelection);
         }
+        console.log('App initialization complete');
+        console.log('Selected app definition: ' + selectedAppDefinition);
+        console.log('Selected app name: ' + selectedAppName);
+        console.log('Configured app definition: ' + config.appDefinition);
+        console.log('Initial app definition: ' + initialAppDefinition);
       }
       if (config.useKeycloak) {
         keycloakConfig = {
@@ -108,9 +111,12 @@ function App(): JSX.Element {
           });
       }
 
-      // Try to start the app if the app definition is set
-      if (selectedAppDefinition) {
+      // Try to start the app if the app definition was changed via URL parameter
+      if (selectedAppDefinition && selectedAppDefinition !== initialAppDefinition) {
+        console.log('Starting session for ' + selectedAppDefinition);
         //handleStartSession(selectedAppDefinition);
+      } else {
+        console.log('Decided not to auto-start the session');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
