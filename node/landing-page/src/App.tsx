@@ -105,23 +105,24 @@ function App(): JSX.Element {
           console.error('Authentication Failed');
         });
     }
-
-    // Try to start the app if the app definition was changed via URL parameter
-    if (selectedAppDefinition && selectedAppDefinition !== initialAppDefinition) {
-      console.log('Starting session for ' + selectedAppDefinition);
-      //handleStartSession(selectedAppDefinition);
-    } else {
-      console.log('Decided not to auto-start the session');
-    }
   }
 
   useEffect(() => {
-      console.log('App init changed');
-      console.log('Selected app definition: ' + selectedAppDefinition);
-      console.log('Selected app name: ' + selectedAppName);
-      console.log('Configured app definition: ' + config.appDefinition);
-      console.log('Initial app definition: ' + initialAppDefinition);
-      console.log('-----------------------------------');
+    console.log('App init changed');
+    console.log('Selected app definition: ' + selectedAppDefinition);
+    console.log('Selected app name: ' + selectedAppName);
+    console.log('Configured app definition: ' + config.appDefinition);
+    console.log('Initial app definition: ' + initialAppDefinition);
+    console.log('-----------------------------------');
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Try to start the app if the app definition was changed via URL parameter
+    if (!urlParams.has('no-start') && selectedAppDefinition) {
+      console.log('Starting session for ' + selectedAppDefinition);
+      handleStartSession(selectedAppDefinition);
+    }
+
   }, [initialized]);
 
   /* eslint-enable react-hooks/rules-of-hooks */
