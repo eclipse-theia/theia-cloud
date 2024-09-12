@@ -1,7 +1,7 @@
 imagePullPolicy: Always
 
 app:
-  id: asdfghjkl
+  id: theia-cloud
   name: Theia Cloud
 
 demoApplication:
