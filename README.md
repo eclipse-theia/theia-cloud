@@ -91,7 +91,7 @@ Older versions (before the introduction of `theia-cloud-crds`) require a manual 
 ### Add & update Theia Cloud helm repo
 
 ```bash
-helm repo add theia-cloud-remote https://github.eclipsesource.com/theia-cloud-helm
+helm repo add theia-cloud-remote https://eclipse-theia.github.io/theia-cloud-helm
 helm repo update
 ```
 

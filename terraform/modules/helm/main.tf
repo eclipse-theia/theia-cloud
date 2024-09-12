@@ -128,7 +128,7 @@ resource "helm_release" "theia-cloud-base" {
   count            = var.install_theia_cloud_base ? 1 : 0
   depends_on       = [helm_release.cert-manager, helm_release.nginx-ingress-controller] # we need to install cert issuers
   name             = "theia-cloud-base"
-  repository       = "https://github.eclipsesource.com/theia-cloud-helm"
+  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud-base"
   version          = "0.11.1"
   namespace        = "theiacloud"
@@ -144,7 +144,7 @@ resource "helm_release" "theia-cloud-crds" {
   count            = var.install_theia_cloud_crds ? 1 : 0
   depends_on       = [helm_release.theia-cloud-base]
   name             = "theia-cloud-crds"
-  repository       = "https://github.eclipsesource.com/theia-cloud-helm"
+  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud-crds"
   version          = "0.11.1"
   namespace        = "theiacloud"
@@ -228,7 +228,7 @@ resource "helm_release" "theia-cloud" {
   count            = var.install_theia_cloud ? 1 : 0
   depends_on       = [helm_release.keycloak, helm_release.theia-cloud-crds] # wait for keycloak to make the default cert available
   name             = "theia-cloud"
-  repository       = "https://github.eclipsesource.com/theia-cloud-helm"
+  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud"
   version          = "0.11.1"
   namespace        = "theiacloud"
