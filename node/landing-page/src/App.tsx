@@ -237,22 +237,24 @@ function App(): JSX.Element {
           <div>
             <div>
               <AppLogo fileExtension={logoFileExtension} />
-              {needsLogin ? (
-                <LoginButton login={authenticate} />
-              ) : (
-                autoStart ? (
-                  <LaunchApp
-                    appName={selectedAppName}
-                    appDefinition={selectedAppDefinition}
-                    onStartSession={handleStartSession}
-                  />
+              <p>
+                {needsLogin ? (
+                  <LoginButton login={authenticate} />
                 ) : (
-                  <SelectApp
-                    appDefinitions={config.additionalApps}
-                    onStartSession={handleStartSession}
-                  />
-                )
-              )}
+                  autoStart ? (
+                    <LaunchApp
+                      appName={selectedAppName}
+                      appDefinition={selectedAppDefinition}
+                      onStartSession={handleStartSession}
+                    />
+                  ) : (
+                    <SelectApp
+                      appDefinitions={config.additionalApps}
+                      onStartSession={handleStartSession}
+                    />
+                  )
+                )}
+              </p>
             </div>
           </div>
         )}
