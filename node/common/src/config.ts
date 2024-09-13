@@ -34,6 +34,7 @@ interface BaseTheiaCloudConfig {
 export interface AppDefinition {
   appId: string;
   appName: string;
+  logo: string | undefined;
 }
 
 export interface KeycloakConfig {

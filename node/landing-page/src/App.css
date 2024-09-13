@@ -54,6 +54,42 @@
   -webkit-transform: none;
 }
 
+.App__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  justify-items: center;
+}
+
+.App__grid-item {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  width: 100px; /* Fixed width to maintain consistent size */
+  height: 100px; /* Fixed height to maintain consistent size */
+  display: flex; /* Changed to flex to properly align content */
+  flex-direction: column; /* Align content vertically within the button */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.App__grid-item:hover {
+  background-color: #0056b3;
+}
+
+.App__grid-item-logo {
+  max-width: 50%;
+  max-height: 50%;
+  margin-bottom: 8px; /* Space between the image and the text */
+}
+
 .App__error-message {
   width: 60vw;
   line-height: 1.5em;

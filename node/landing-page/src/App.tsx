@@ -10,6 +10,7 @@ import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { Info } from './components/Info';
 import { LaunchApp } from './components/LaunchApp';
+import { SelectApp } from './components/SelectApp';
 import { Loading } from './components/Loading';
 import { LoginButton } from './components/LoginButton';
 
@@ -47,10 +48,15 @@ function App(): JSX.Element {
   const [token, setToken] = useState<string>();
   const [logoutUrl, setLogoutUrl] = useState<string>();
 
+  const [gitURL, setGitURL] = useState<string>();
+
+  const [autoStart, setAutoStart] = useState<boolean>(true);
+
   if (!initialized) {
-    initialized = true;
     const element = document.getElementById('selectapp');
     const urlParams = new URLSearchParams(window.location.search);
+
+    // Get appDef parameter from URL and set it as the default selection
     if (urlParams.has('appDef') || urlParams.has('appdef')) {
       const pathBlueprintSelection = urlParams.get('appDef') || urlParams.get('appdef');
       console.log('additionalApps: ' + JSON.stringify(config.additionalApps));
@@ -77,6 +83,15 @@ function App(): JSX.Element {
         console.error('Invalid default selection value: ' + pathBlueprintSelection);
       }
     }
+
+    // Get gitURL parameter from URL. This should be changed to a protected body-read in the future.
+    if (urlParams.has('gitURL')) {
+      const gitURL = urlParams.get('gitURL');
+      if (gitURL) {
+        setGitURL(gitURL);
+      }
+    }
+
     if (config.useKeycloak) {
       keycloakConfig = {
         url: config.keycloakAuthUrl,
@@ -105,6 +120,7 @@ function App(): JSX.Element {
           console.error('Authentication Failed');
         });
     }
+    initialized = true;
   }
 
   useEffect(() => {
@@ -113,14 +129,21 @@ function App(): JSX.Element {
     console.log('Selected app name: ' + selectedAppName);
     console.log('Configured app definition: ' + config.appDefinition);
     console.log('Initial app definition: ' + initialAppDefinition);
+    console.log('Git URL: ' + gitURL);
     console.log('-----------------------------------');
 
-    const urlParams = new URLSearchParams(window.location.search);
+    if (!initialized) {
+      console.log('Not initialized yet');
+      return;
+    }
 
-    // Try to start the app if the app definition was changed via URL parameter
-    if (!urlParams.has('no-start') && selectedAppDefinition) {
-      console.log('Starting session for ' + selectedAppDefinition);
+    if (selectedAppDefinition && gitURL) {
+      console.log('Setting autoStart to true and starting session');
+      setAutoStart(true);
       handleStartSession(selectedAppDefinition);
+    } else {
+      console.log('Setting autoStart to false');
+      setAutoStart(false);
     }
 
   }, [initialized]);
@@ -214,17 +237,22 @@ function App(): JSX.Element {
           <div>
             <div>
               <AppLogo fileExtension={logoFileExtension} />
-              <p>
-                {needsLogin ? (
-                  <LoginButton login={authenticate} />
-                ) : (
+              {needsLogin ? (
+                <LoginButton login={authenticate} />
+              ) : (
+                autoStart ? (
                   <LaunchApp
                     appName={selectedAppName}
                     appDefinition={selectedAppDefinition}
                     onStartSession={handleStartSession}
                   />
-                )}
-              </p>
+                ) : (
+                  <SelectApp
+                    appDefinitions={config.additionalApps}
+                    onStartSession={handleStartSession}
+                  />
+                )
+              )}
             </div>
           </div>
         )}
