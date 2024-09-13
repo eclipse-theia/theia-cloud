@@ -56,17 +56,18 @@
 
 .App__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   padding: 16px;
-  justify-items: center;
 }
 
 .App__grid-item {
-  background-color: #007bff;
-  color: white;
+  background-color: white;
+  color: #383838;
+  border-color: #383838;
   border: none;
   padding: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
   font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
@@ -77,11 +78,13 @@
   flex-direction: column; /* Align content vertically within the button */
   align-items: center;
   justify-content: center;
-  text-align: center;
+  font-family: 'Anonymous Pro';
+  font-size: medium;
 }
 
 .App__grid-item:hover {
   background-color: #0056b3;
+  color: white;
 }
 
 .App__grid-item-logo {

@@ -7,8 +7,14 @@ interface SelectAppProps {
 export const SelectApp: React.FC<SelectAppProps> = ({
   appDefinitions,
   onStartSession
-}: SelectAppProps) => (
-  <div className='App__grid'>
+}: SelectAppProps) => {
+  // Calculate the dynamic width based on the number of appDefinitions
+  const dynamicWidth = appDefinitions
+    ? Math.min(110 * appDefinitions.length, 450)
+    : 100;
+  
+  return (
+  <div className='App__grid' style={{ width: `${dynamicWidth}px`}}>
     {appDefinitions && appDefinitions.map((app, index) => (
       <button
         key={index}
@@ -23,6 +29,6 @@ export const SelectApp: React.FC<SelectAppProps> = ({
         {app.appName}
       </button>
     ))}
-  </div>
-);
+  </div>);
+};
 
