@@ -267,7 +267,7 @@ function App(): JSX.Element {
             title={config.infoTitle}
           />
         )}
-        <Footer selectedAppDefinition={selectedAppDefinition} />
+        <Footer selectedAppDefinition={autoStart ? selectedAppDefinition : ''} />
       </div>
     </div>
   );
