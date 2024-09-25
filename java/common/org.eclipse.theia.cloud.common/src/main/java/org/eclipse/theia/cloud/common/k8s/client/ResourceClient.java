@@ -58,6 +58,8 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
         info(correlationId, "Edit " + name);
         Resource<T> resource = resource(name);
         if (resource.get() == null) {
+            warn(correlationId, "Resource not found! Could not edit " + name
+                    + ". Was this called before the resource has been created?");
             return null;
         }
         return resource.edit(JavaUtil.toUnary(consumer));
@@ -67,6 +69,8 @@ public interface ResourceClient<T extends HasMetadata, L extends KubernetesResou
         trace(correlationId, "Edit status of " + name);
         Resource<T> resource = resource(name);
         if (resource.get() == null) {
+            warn(correlationId, "Resource " + name
+                    + " not found. Could not update the status. Note that the status of a resource cannot be changed before it is created on the cluster.");
             return null;
         }
         return resource.editStatus(JavaUtil.toUnary(consumer));

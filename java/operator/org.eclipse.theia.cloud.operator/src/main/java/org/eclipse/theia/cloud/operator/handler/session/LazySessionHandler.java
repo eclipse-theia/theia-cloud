@@ -21,6 +21,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatMetric;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -191,6 +192,7 @@ public class LazySessionHandler implements SessionHandler {
             client.sessions().updateStatus(correlationId, session, s -> {
                 s.setOperatorStatus(OperatorStatus.HANDLED);
                 s.setOperatorMessage("Service already exists.");
+                s.setLastActivity(Instant.now().toEpochMilli());
             });
             // TODO do not return true if the sessions was in handling state at the start of
             // this handler
@@ -218,6 +220,7 @@ public class LazySessionHandler implements SessionHandler {
                 client.sessions().updateStatus(correlationId, session, s -> {
                     s.setOperatorStatus(OperatorStatus.HANDLED);
                     s.setOperatorMessage("Configmaps already exist.");
+                    s.setLastActivity(Instant.now().toEpochMilli());
                 });
                 // TODO do not return true if the sessions was in handling state at the start of
                 // this handler
@@ -237,6 +240,7 @@ public class LazySessionHandler implements SessionHandler {
             client.sessions().updateStatus(correlationId, session, s -> {
                 s.setOperatorStatus(OperatorStatus.HANDLED);
                 s.setOperatorMessage("Deployment already exists.");
+                s.setLastActivity(Instant.now().toEpochMilli());
             });
             return true;
         }
@@ -275,6 +279,7 @@ public class LazySessionHandler implements SessionHandler {
 
         client.sessions().updateStatus(correlationId, session, s -> {
             s.setOperatorStatus(OperatorStatus.HANDLED);
+            s.setLastActivity(Instant.now().toEpochMilli());
         });
         return true;
     }
@@ -351,9 +356,8 @@ public class LazySessionHandler implements SessionHandler {
         if (!session.getSpec().getUser().equals(workspace.get().getSpec().getUser())) {
             // the workspace is owned by a different user. do not mount and go ephemeral
             // should get prevented by service, but we need to be sure to not expose data
-            LOGGER.error(formatLogMessage(correlationId,
-                    "Workspace is owned by " + workspace.get().getSpec().getUser() + ", but requesting user is "
-                            + session.getSpec().getUser()));
+            LOGGER.error(formatLogMessage(correlationId, "Workspace is owned by " + workspace.get().getSpec().getUser()
+                    + ", but requesting user is " + session.getSpec().getUser()));
             return Optional.empty();
         }
 
