@@ -1,4 +1,4 @@
-imagePullPolicy: Always
+imagePullPolicy: IfNotPresent
 
 app:
   id: asdfghjkl
