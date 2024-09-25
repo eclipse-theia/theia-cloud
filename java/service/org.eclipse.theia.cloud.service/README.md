@@ -14,6 +14,14 @@ You can run your application in dev mode that enables live coding using:
 
 > **_NOTE:_** Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
 
+## Debug the service
+
+When you have the service running in dev mode you can use the `Attach to Service` debug config to debug the service.
+
+Check the [OpenAPI documentation](../../../documentation/OpenAPI.md) to see how you can send requests to the service.
+
+_Note_: The landing page will not communicate with this service, as it will be hosted on another address.
+
 ## Packaging and running the application
 
 The application can be packaged using:
