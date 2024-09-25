@@ -48,8 +48,6 @@ public class DefaultSessionResourceClient extends BaseResourceClient<Session, Se
         metadata.setName(spec.getName());
         session.setMetadata(metadata);
 
-        updateStatus(correlationId, session, status -> status.setLastActivity(Instant.now().toEpochMilli()));
-
         info(correlationId, "Create Session " + session.getSpec());
         return operation().resource(session).create();
     }
