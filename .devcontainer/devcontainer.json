@@ -23,7 +23,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "bash scripts/install-dependencies.sh"
+	"postCreateCommand": "bash .devcontainer/scripts/install-dependencies.sh"
 
 	// Use 'postStartCommand' to run commands after the container is created like starting minikube.
 	// "postStartCommand": "nohup bash -c 'minikube start &' > minikube.log 2>&1",
