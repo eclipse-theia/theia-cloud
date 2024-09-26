@@ -29,6 +29,7 @@
   },
   "workspaces": [
     "common",
+    "e2e-tests",
     "landing-page",
     "monitor-theia",
     "testing-page"
