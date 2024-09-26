@@ -1,0 +1,58 @@
+imagePullPolicy: IfNotPresent
+
+app:
+  name: "Theia with Theia Extension Monitor"
+
+issuer:
+  email: jdoe@theia-cloud.io
+
+demoApplication:
+  install: false
+
+hosts:
+  usePaths: false
+  allWildcardInstances: ["*.webview."]
+  configuration:
+    baseHost: 192.168.39.173.nip.io
+
+landingPage:
+  image: theiacloud/theia-cloud-landing-page:minikube-ci-e2e
+  appDefinition: "theia-cloud-monitor-theia"
+  ephemeralStorage: true
+  additionalApps:
+    theia-cloud-monitor-vscode:
+      label: "Theia with VSCode Monitor"
+
+keycloak:
+  enable: false
+  authUrl: "https://keycloak.url/auth/"
+
+operator:
+  image: theiacloud/theia-cloud-operator:minikube-ci-e2e
+  cloudProvider: "MINIKUBE"
+  bandwidthLimiter: "WONDERSHAPER"
+  wondershaperImage: theiacloud/theia-cloud-wondershaper:minikube-ci-e2e
+  sessionsPerUser: "1"
+  storageClassName: "default"
+  requestedStorage: "250Mi"
+  replicas: 2
+
+service:
+  image: theiacloud/theia-cloud-service:minikube-ci-e2e
+
+ingress:
+  certManagerAnnotations: true
+  clusterIssuer: theia-cloud-selfsigned-issuer
+  theiaCloudCommonName: true
+  tls: true
+  addTLSSecretName: true
+
+monitor:
+  enable: true
+  activityTracker:
+    enable: true
+    interval: 1
+
+preloading:
+  enable: true
+  images: []
