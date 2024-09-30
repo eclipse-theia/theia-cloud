@@ -4,10 +4,12 @@ interface FooterProps {
 
 export const Footer = ({ selectedAppDefinition }: FooterProps): JSX.Element => (
   <div className='App__footer'>
-    <p>
-      <label htmlFor='selectapp'> {selectedAppDefinition} </label>
-    </p>
-    <p></p>
+    { selectedAppDefinition != '' && (
+      <p>
+        <label htmlFor='selectapp'> {selectedAppDefinition} </label>
+      </p>)
+     }
+    
     <p>
       Having problems? Please{' '}
       <a target='_blank' href='https://github.com/eclipsesource/theia-cloud/issues' rel='noreferrer'>

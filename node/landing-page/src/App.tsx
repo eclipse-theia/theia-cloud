@@ -41,21 +41,21 @@ function App(): JSX.Element {
   // ignore ESLint conditional rendering warnings.
   // If config === undefined, this is an unremediable situation anyway.
   /* eslint-disable react-hooks/rules-of-hooks */
-  const [selectedAppName, setSelectedAppName] = useState(initialAppName);
-  const [selectedAppDefinition, setSelectedAppDefinition] = useState(initialAppDefinition);
+  const [selectedAppName, setSelectedAppName] = useState<string>(initialAppName);
+  const [selectedAppDefinition, setSelectedAppDefinition] = useState<string>(initialAppDefinition);
 
   const [email, setEmail] = useState<string>();
   const [token, setToken] = useState<string>();
   const [logoutUrl, setLogoutUrl] = useState<string>();
 
-  const [gitURL, setGitURL] = useState<string>();
+  const [gitUri, setGitUri] = useState<string>();
+  const [gitToken, setGitToken] = useState<string>();
 
   const [autoStart, setAutoStart] = useState<boolean>(true);
 
   if (!initialized) {
-    const element = document.getElementById('selectapp');
     const urlParams = new URLSearchParams(window.location.search);
-
+    
     // Get appDef parameter from URL and set it as the default selection
     if (urlParams.has('appDef') || urlParams.has('appdef')) {
       const pathBlueprintSelection = urlParams.get('appDef') || urlParams.get('appdef');
@@ -66,12 +66,15 @@ function App(): JSX.Element {
         isDefaultSelectionValueValid(pathBlueprintSelection, config.appDefinition, config.additionalApps)
       ) {
         // eslint-disable-next-line no-null/no-null
-        if (element !== null && config.additionalApps && config.additionalApps.length > 0) {
-          (element as HTMLSelectElement).value = pathBlueprintSelection;
-          setSelectedAppName(
-            (element as HTMLSelectElement).options[(element as HTMLSelectElement).selectedIndex].text
+        if (config.additionalApps && config.additionalApps.length > 0) {
+          // Find the selected app definition in the additional apps
+          const appDefinition = config.additionalApps.find(
+            (appDef: AppDefinition) => appDef.appId === pathBlueprintSelection
           );
-          setSelectedAppDefinition((element as HTMLSelectElement).value);
+          setSelectedAppName(
+            appDefinition ? appDefinition.appName : pathBlueprintSelection
+          );
+          setSelectedAppDefinition(appDefinition ? appDefinition.appId : pathBlueprintSelection);
         } else {
           // If there are no additional apps, just use the application id as the name
           console.log('App definitition provided via URL parameter not found in additional apps');
@@ -84,11 +87,19 @@ function App(): JSX.Element {
       }
     }
 
-    // Get gitURL parameter from URL. This should be changed to a protected body-read in the future.
-    if (urlParams.has('gitURL')) {
-      const gitURL = urlParams.get('gitURL');
-      if (gitURL) {
-        setGitURL(gitURL);
+    // Get gitUri parameter from URL.
+    if (urlParams.has('gitUri')) {
+      const gitUri = urlParams.get('gitUri');
+      if (gitUri) {
+        setGitUri(gitUri);
+      }
+    }
+
+    // Get gitToken parameter from URL.
+    if (urlParams.has('gitToken')) {
+      const gitToken = urlParams.get('gitToken');
+      if (gitToken) {
+        setGitToken(gitToken);
       }
     }
 
@@ -129,7 +140,8 @@ function App(): JSX.Element {
     console.log('Selected app name: ' + selectedAppName);
     console.log('Configured app definition: ' + config.appDefinition);
     console.log('Initial app definition: ' + initialAppDefinition);
-    console.log('Git URL: ' + gitURL);
+    console.log('Git URI: ' + gitUri);
+    console.log('Git Token: ' + gitToken);
     console.log('-----------------------------------');
 
     if (!initialized) {
@@ -137,8 +149,9 @@ function App(): JSX.Element {
       return;
     }
 
-    if (selectedAppDefinition && gitURL) {
-      console.log('Setting autoStart to true and starting session');
+    if (selectedAppDefinition && gitUri && gitToken) {
+      console.log('Checking auth, setting autoStart to true and starting session');
+      authenticate();
       setAutoStart(true);
       handleStartSession(selectedAppDefinition);
     } else {
@@ -267,7 +280,7 @@ function App(): JSX.Element {
             title={config.infoTitle}
           />
         )}
-        <Footer selectedAppDefinition={selectedAppDefinition} />
+        <Footer selectedAppDefinition={autoStart ? selectedAppDefinition : ''} />
       </div>
     </div>
   );
