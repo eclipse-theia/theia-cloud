@@ -38,7 +38,7 @@ export const Footer = ({appDefinition, appName, additionalApps, setSelectedAppNa
     </p>
     <p>
       Having problems? Please{' '}
-      <a target='_blank' href='https://github.com/eclipsesource/theia-cloud/issues' rel='noreferrer'>
+      <a target='_blank' href='https://github.com/eclipse-theia/theia-cloud/issues' rel='noreferrer'>
         report an issue
       </a>
       .

@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question
-    url: https://github.com/eclipsesource/theia-cloud/discussions
+    url: https://github.com/eclipse-theia/theia-cloud/discussions
     about: Please ask questions on the Theia Cloud discussions page.
   - name: Professional support
     url: https://theia-cloud.io/support/

@@ -15,9 +15,9 @@
   "homepage": "http://theia-cloud.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eclipsesource/theia-cloud.git"
+    "url": "https://github.com/eclipse-theia/theia-cloud.git"
   },
-  "bugs": "https://github.com/eclipsesource/theia-cloud/issues",
+  "bugs": "https://github.com/eclipse-theia/theia-cloud/issues",
   "contributors": [
     {
       "name": "Theia Cloud Project",
