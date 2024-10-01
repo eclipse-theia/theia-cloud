@@ -21,6 +21,7 @@ When you have the service running in dev mode you can use the `Attach to Service
 Check the [OpenAPI documentation](../../../documentation/OpenAPI.md) to see how you can send requests to the service.
 
 _Note_: The landing page will not communicate with this service, as it will be hosted on another address.
+Checkout the [testing-page](../../../node/testing-page/README.md) to test requests against the server.
 
 ## Packaging and running the application
 
