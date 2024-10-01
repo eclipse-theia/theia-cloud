@@ -16,4 +16,4 @@ Full disclosure to the general public happens once there is a patch, fix, or wor
 
 Non-committers will be acknowledged for their security research on disclosure if the issue has been reported responsibly.
 
-Publicly disclosed issues are tagged with the [security label](https://github.com/eclipsesource/theia-cloud/labels/security).
+Publicly disclosed issues are tagged with the [security label](https://github.com/eclipse-theia/theia-cloud/labels/security).

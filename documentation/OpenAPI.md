@@ -30,7 +30,7 @@ docker pull swaggerapi/swagger-ui
 docker run -p 80:8080 swaggerapi/swagger-ui
 ```
 
-Then browse to <http://localhost/> and explore the spec from here: <https://raw.githubusercontent.com/eclipsesource/theia-cloud/main/documentation/openapi.json>
+Then browse to <http://localhost/> and explore the spec from here: <https://raw.githubusercontent.com/eclipse-theia/theia-cloud/main/documentation/openapi.json>
 
 Or explore it from the locally started service: <http://localhost:8081/q/openapi?format=json>.
 

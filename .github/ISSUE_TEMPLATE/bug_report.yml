@@ -1,33 +1,33 @@
 name: Bug Report
 description: Create a bug report to help us improve
-labels: bug
+labels: ["bug"]
 body:
-- type: markdown
-  attributes:
-    value: |
-      This template is not meant for security vulnerabilities disclosure. Any such issue, created in this repo, will be deleted on sight.
-      Instead, please report vulnerabilities to [security@theia-cloud.io](mailto:security@theia-cloud.io). For more details, please read [SECURITY.md](https://github.com/eclipsesource/theia-cloud/blob/main/SECURITY.md) in the repository root.
-- type: textarea
-  validations:
-    required: true
-  attributes:
-    label: Describe the bug
-    description: A clear and concise description of what the bug is.
-- type: textarea
-  validations:
-    required: true
-  attributes:
-    label: Expected behavior
-    description: A clear and concise description of what you expected to happen.
-- type: input
-  attributes:
-    label: Cluster provider
-    description: The cluster provider (e.g. Minikube, AWS, GKE, Azure, Docker Desktop). Please include your OS when using a local cluster. If you are using Terraform, please include the configuration files if possible.  
-- type: input
-  attributes:
-    label: Version
-    description: The used version. Such as the helm chart version or the commit id the bug was discovered on
-- type: textarea
-  attributes:
-    label: Additional information
-    description: Additional information to analyze the bug such as logs, screenshots, screencasts.
+  - type: markdown
+    attributes:
+      value: |
+        This template is not meant for security vulnerabilities disclosure. Any such issue, created in this repo, will be deleted on sight.
+        Instead, please report vulnerabilities to [security@theia-cloud.io](mailto:security@theia-cloud.io). For more details, please read [SECURITY.md](https://github.com/eclipse-theia/theia-cloud/blob/main/SECURITY.md) in the repository root.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+  - type: input
+    attributes:
+      label: Cluster provider
+      description: The cluster provider (e.g. Minikube, AWS, GKE, Azure, Docker Desktop). Please include your OS when using a local cluster. If you are using Terraform, please include the configuration files if possible.
+  - type: input
+    attributes:
+      label: Version
+      description: The used version. Such as the helm chart version or the commit id the bug was discovered on
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: Additional information to analyze the bug such as logs, screenshots, screencasts.
