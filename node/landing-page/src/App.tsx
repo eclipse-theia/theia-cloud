@@ -1,6 +1,6 @@
 import './App.css';
 
-import { AppDefinition, getTheiaCloudConfig, LaunchRequest, PingRequest, TheiaCloud } from '@eclipse-theiacloud/common';
+import { AppDefinition, getTheiaCloudConfig, PingRequest, RequestOptions, SessionStartRequest, TheiaCloud } from '@eclipse-theiacloud/common';
 import Keycloak, { KeycloakConfig } from 'keycloak-js';
 import { useEffect, useState } from 'react';
 
@@ -50,6 +50,7 @@ function App(): JSX.Element {
 
   const [gitUri, setGitUri] = useState<string>();
   const [gitToken, setGitToken] = useState<string>();
+  const [artemisToken, setArtemisToken] = useState<string>();
 
   const [autoStart, setAutoStart] = useState<boolean>(true);
 
@@ -103,6 +104,14 @@ function App(): JSX.Element {
       }
     }
 
+    // Get artemisToken parameter from URL.
+    if (urlParams.has('artemisToken')) {
+      const artemisToken = urlParams.get('artemisToken');
+      if (artemisToken) {
+        setArtemisToken(artemisToken);
+      }
+    }
+
     if (config.useKeycloak) {
       keycloakConfig = {
         url: config.keycloakAuthUrl,
@@ -142,6 +151,7 @@ function App(): JSX.Element {
     console.log('Initial app definition: ' + initialAppDefinition);
     console.log('Git URI: ' + gitUri);
     console.log('Git Token: ' + gitToken);
+    console.log('Artemis Token: ' + artemisToken);
     console.log('-----------------------------------');
 
     if (!initialized) {
@@ -201,10 +211,51 @@ function App(): JSX.Element {
     TheiaCloud.ping(PingRequest.create(config.serviceUrl, config.appId))
       .then(() => {
         // ping successful continue with launch
+        
         const workspace = config.useEphemeralStorage
           ? undefined
           : 'ws-' + config.appId + '-' + selectedAppDefinition + '-' + email;
-        TheiaCloud.launchAndRedirect(
+        
+        const sessionStartRequest: SessionStartRequest = {
+          serviceUrl: config.serviceUrl,
+          appId: config.appId,
+          user: email!,
+          appDefinition,
+          workspaceName: workspace,
+          timeout: 180,
+          env: {
+            fromMap: {
+              THEIA: 'true',
+              ARTEMIS_TOKEN: artemisToken!,
+              ARTEMIS_CLONE_URL: gitUri!
+            }
+          }
+        };
+
+        const requestOptions: RequestOptions = {
+          timeout: 60000,
+          retries: 5,
+          accessToken: token
+        };
+
+        TheiaCloud.Session.startSession(
+          sessionStartRequest,
+          requestOptions
+        ).catch((err: Error) => {
+          if (err && (err as any).status === 473) {
+              setError(
+                `The app definition '${appDefinition}' is not available in the cluster.\n` +
+                  'Please try launching another application.'
+              );
+              return;
+            }
+            setError(err.message);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+        /*
+          TheiaCloud.launchAndRedirect(
           config.useEphemeralStorage
             ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5, email)
             : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5, email, workspace),
@@ -223,6 +274,7 @@ function App(): JSX.Element {
           .finally(() => {
             setLoading(false);
           });
+          */
       })
       .catch((_err: Error) => {
         setError(
