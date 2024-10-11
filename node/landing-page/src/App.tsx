@@ -1,6 +1,6 @@
 import './App.css';
 
-import { AppDefinition, getTheiaCloudConfig, PingRequest, RequestOptions, SessionStartRequest, TheiaCloud } from '@eclipse-theiacloud/common';
+import { AppDefinition, getTheiaCloudConfig, PingRequest, RequestOptions, TheiaCloud } from '@eclipse-theiacloud/common';
 import Keycloak, { KeycloakConfig } from 'keycloak-js';
 import { useEffect, useState } from 'react';
 
@@ -215,7 +215,14 @@ function App(): JSX.Element {
         const workspace = config.useEphemeralStorage
           ? undefined
           : 'ws-' + config.appId + '-' + selectedAppDefinition + '-' + email;
+
+        const requestOptions: RequestOptions = {
+          timeout: 60000,
+          retries: 5,
+          accessToken: token
+        };
         
+        /*
         const sessionStartRequest: SessionStartRequest = {
           serviceUrl: config.serviceUrl,
           appId: config.appId,
@@ -230,12 +237,6 @@ function App(): JSX.Element {
               ARTEMIS_CLONE_URL: gitUri!
             }
           }
-        };
-
-        const requestOptions: RequestOptions = {
-          timeout: 60000,
-          retries: 5,
-          accessToken: token
         };
 
         TheiaCloud.Session.startSession(
@@ -254,13 +255,32 @@ function App(): JSX.Element {
           .finally(() => {
             setLoading(false);
           });
-        /*
+        */
+
+          const launchRequest = {
+            serviceUrl: config.serviceUrl,
+            appId: config.appId,
+            user: email!,
+            appDefinition: appDefinition,
+            workspaceName: workspace,
+            env: {
+              fromMap: {
+                THEIA: 'true',
+                ARTEMIS_TOKEN: artemisToken!,
+                ARTEMIS_CLONE_URL: gitUri!
+              }
+            } 
+          };
+
+          //TheiaCloud.launchAndRedirect(
+          //config.useEphemeralStorage
+          //  ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5, email)
+          //  : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5, email, workspace),
+          
           TheiaCloud.launchAndRedirect(
-          config.useEphemeralStorage
-            ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5, email)
-            : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5, email, workspace),
-          { timeout: 60000, retries: 5, accessToken: token }
-        )
+            launchRequest,
+            requestOptions
+          )
           .catch((err: Error) => {
             if (err && (err as any).status === 473) {
               setError(
@@ -274,7 +294,7 @@ function App(): JSX.Element {
           .finally(() => {
             setLoading(false);
           });
-          */
+          
       })
       .catch((_err: Error) => {
         setError(
