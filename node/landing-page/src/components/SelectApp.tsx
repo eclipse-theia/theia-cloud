@@ -19,6 +19,7 @@ export const SelectApp: React.FC<SelectAppProps> = ({
       <button
         key={index}
         className='App__grid-item'
+        style={{ marginBottom: '1rem' }}
         onClick={() => onStartSession(app.appId)}
       >
         {app.logo && (
