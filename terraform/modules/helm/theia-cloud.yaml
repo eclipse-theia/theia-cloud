@@ -39,10 +39,11 @@ operator:
   storageClassName: ""
 
 ingress:
-  instanceName: "theia-cloud-demo-ws-ingress"
   clusterIssuer: letsencrypt-prod
   theiaCloudCommonName: false
   addTLSSecretName: false
+  instances:
+    name: "theia-cloud-demo-ws-ingress"
 
 monitor:
   enable: false
