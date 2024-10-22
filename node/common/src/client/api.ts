@@ -24,6 +24,165 @@ import type { RequestArgs } from './base';
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
 /**
+ * 
+ * @export
+ * @interface ActivityTracker
+ */
+export interface ActivityTracker {
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityTracker
+     */
+    'timeoutAfter'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ActivityTracker
+     */
+    'notifyAfter'?: number;
+}
+/**
+ * A request to list available app definitions.
+ * @export
+ * @interface AppDefinitionListRequest
+ */
+export interface AppDefinitionListRequest {
+    /**
+     * The App Id of this Theia Cloud instance. Request without a matching Id will be denied.
+     * @type {string}
+     * @memberof AppDefinitionListRequest
+     */
+    'appId': string;
+}
+/**
+ * 
+ * @export
+ * @interface AppDefinitionSpec
+ */
+export interface AppDefinitionSpec {
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'image'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'imagePullPolicy'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'pullSecret'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AppDefinitionSpec
+     */
+    'uid'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AppDefinitionSpec
+     */
+    'port'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'ingressname'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AppDefinitionSpec
+     */
+    'minInstances'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AppDefinitionSpec
+     */
+    'maxInstances'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AppDefinitionSpec
+     */
+    'timeout'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'requestsMemory'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'requestsCpu'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'limitsMemory'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'limitsCpu'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AppDefinitionSpec
+     */
+    'downlinkLimit'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof AppDefinitionSpec
+     */
+    'uplinkLimit'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionSpec
+     */
+    'mountPath'?: string;
+    /**
+     * 
+     * @type {Monitor}
+     * @memberof AppDefinitionSpec
+     */
+    'monitor'?: Monitor;
+    /**
+     * 
+     * @type {{ [key: string]: string; }}
+     * @memberof AppDefinitionSpec
+     */
+    'options'?: { [key: string]: string; };
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AppDefinitionSpec
+     */
+    'ingressHostnamePrefixes'?: Array<string>;
+}
+/**
  * An object to hold all the ways environment variables can be passed. Not to be used by itself.
  * @export
  * @interface EnvironmentVars
@@ -102,6 +261,25 @@ export interface LaunchRequest {
      * @memberof LaunchRequest
      */
     'env'?: EnvironmentVars;
+}
+/**
+ * 
+ * @export
+ * @interface Monitor
+ */
+export interface Monitor {
+    /**
+     * 
+     * @type {number}
+     * @memberof Monitor
+     */
+    'port'?: number;
+    /**
+     * 
+     * @type {ActivityTracker}
+     * @memberof Monitor
+     */
+    'activityTracker'?: ActivityTracker;
 }
 /**
  * Request to ping the availability of the service.
@@ -445,6 +623,118 @@ export interface WorkspaceListRequest {
      */
     'user': string;
 }
+
+/**
+ * AppDefinitionResourceApi - axios parameter creator
+ * @export
+ */
+export const AppDefinitionResourceApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * List available app definitions.
+         * @summary List app definitions
+         * @param {string} appId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceAppdefinitionAppIdGet: async (appId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'appId' is not null or undefined
+            assertParamExists('serviceAppdefinitionAppIdGet', 'appId', appId)
+            const localVarPath = `/service/appdefinition/{appId}`
+                .replace(`{${"appId"}}`, encodeURIComponent(String(appId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication SecurityScheme required
+            // oauth required
+            await setOAuthToObject(localVarHeaderParameter, "SecurityScheme", [], configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AppDefinitionResourceApi - functional programming interface
+ * @export
+ */
+export const AppDefinitionResourceApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AppDefinitionResourceApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * List available app definitions.
+         * @summary List app definitions
+         * @param {string} appId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async serviceAppdefinitionAppIdGet(appId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AppDefinitionSpec>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.serviceAppdefinitionAppIdGet(appId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AppDefinitionResourceApi.serviceAppdefinitionAppIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AppDefinitionResourceApi - factory interface
+ * @export
+ */
+export const AppDefinitionResourceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AppDefinitionResourceApiFp(configuration)
+    return {
+        /**
+         * List available app definitions.
+         * @summary List app definitions
+         * @param {string} appId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceAppdefinitionAppIdGet(appId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<AppDefinitionSpec>> {
+            return localVarFp.serviceAppdefinitionAppIdGet(appId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AppDefinitionResourceApi - object-oriented interface
+ * @export
+ * @class AppDefinitionResourceApi
+ * @extends {BaseAPI}
+ */
+export class AppDefinitionResourceApi extends BaseAPI {
+    /**
+     * List available app definitions.
+     * @summary List app definitions
+     * @param {string} appId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AppDefinitionResourceApi
+     */
+    public serviceAppdefinitionAppIdGet(appId: string, options?: RawAxiosRequestConfig) {
+        return AppDefinitionResourceApiFp(this.configuration).serviceAppdefinitionAppIdGet(appId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
 
 /**
  * RootResourceApi - axios parameter creator

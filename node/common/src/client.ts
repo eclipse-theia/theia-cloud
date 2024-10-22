@@ -3,6 +3,9 @@ import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  AppDefinitionListRequest as ClientAppDefinitionListRequest,
+  AppDefinitionResourceApi,
+  AppDefinitionSpec,
   LaunchRequest as ClientLaunchRequest,
   PingRequest as ClientPingRequest,
   RootResourceApi,
@@ -90,6 +93,11 @@ export namespace LaunchRequest {
   }
 }
 
+export type AppDefinitionListRequest = ClientAppDefinitionListRequest & ServiceRequest;
+export namespace AppDefinitionListRequest {
+  export const KIND = 'appDefinitionListRequest';
+}
+
 export type SessionListRequest = ClientSessionListRequest & ServiceRequest;
 export namespace SessionListRequest {
   export const KIND = 'sessionListRequest';
@@ -135,6 +143,10 @@ export namespace TheiaCloud {
     return new RootResourceApi(new Configuration({ basePath: serviceUrl, accessToken }));
   }
 
+  function appDefinitionApi(serviceUrl: string, accessToken: string | undefined): AppDefinitionResourceApi {
+    return new AppDefinitionResourceApi(new Configuration({ basePath: serviceUrl, accessToken }));
+  }
+
   function sessionApi(serviceUrl: string, accessToken: string | undefined): SessionResourceApi {
     return new SessionResourceApi(new Configuration({ basePath: serviceUrl, accessToken }));
   }
@@ -165,6 +177,23 @@ export namespace TheiaCloud {
     console.log(`Redirect to: https://${url}`);
     location.replace(`https://${url}`);
     return url;
+  }
+
+  export namespace AppDefinition {
+    export async function listAppDefinitions(
+      request: AppDefinitionListRequest,
+      options: RequestOptions = {}
+    ): Promise<AppDefinitionSpec[]> {
+      const { accessToken, retries, timeout } = options;
+      return call(
+        () =>
+          appDefinitionApi(request.serviceUrl, accessToken).serviceAppdefinitionAppIdGet(
+            request.appId,
+            createConfig(timeout)
+          ),
+        retries
+      );
+    }
   }
 
   export namespace Session {

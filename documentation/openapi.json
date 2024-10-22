@@ -30,11 +30,54 @@
               }
             }
           },
+          "401": {
+            "description": "Not Authorized"
+          },
           "403": {
             "description": "Not Allowed"
+          }
+        },
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      }
+    },
+    "/service/appdefinition/{appId}": {
+      "get": {
+        "tags": ["App Definition Resource"],
+        "summary": "List app definitions",
+        "description": "List available app definitions.",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppDefinitionSpec"
+                  }
+                }
+              }
+            }
           },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -69,11 +112,11 @@
               }
             }
           },
-          "403": {
-            "description": "Not Allowed"
-          },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -106,11 +149,11 @@
               }
             }
           },
-          "403": {
-            "description": "Not Allowed"
-          },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -143,11 +186,11 @@
               }
             }
           },
-          "403": {
-            "description": "Not Allowed"
-          },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -191,11 +234,11 @@
               }
             }
           },
-          "403": {
-            "description": "Not Allowed"
-          },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -242,11 +285,11 @@
               }
             }
           },
-          "403": {
-            "description": "Not Allowed"
-          },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -281,11 +324,11 @@
               }
             }
           },
-          "403": {
-            "description": "Not Allowed"
-          },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -318,11 +361,11 @@
               }
             }
           },
-          "403": {
-            "description": "Not Allowed"
-          },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -369,11 +412,11 @@
               }
             }
           },
-          "403": {
-            "description": "Not Allowed"
-          },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -409,11 +452,11 @@
               }
             }
           },
-          "403": {
-            "description": "Not Allowed"
-          },
           "401": {
             "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
           }
         },
         "security": [
@@ -426,6 +469,108 @@
   },
   "components": {
     "schemas": {
+      "ActivityTracker": {
+        "type": "object",
+        "properties": {
+          "timeoutAfter": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "notifyAfter": {
+            "format": "int32",
+            "type": "integer"
+          }
+        }
+      },
+      "AppDefinitionListRequest": {
+        "description": "A request to list available app definitions.",
+        "required": ["appId"],
+        "type": "object",
+        "properties": {
+          "appId": {
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
+            "type": "string"
+          }
+        }
+      },
+      "AppDefinitionSpec": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "imagePullPolicy": {
+            "type": "string"
+          },
+          "pullSecret": {
+            "type": "string"
+          },
+          "uid": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "port": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ingressname": {
+            "type": "string"
+          },
+          "minInstances": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxInstances": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timeout": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestsMemory": {
+            "type": "string"
+          },
+          "requestsCpu": {
+            "type": "string"
+          },
+          "limitsMemory": {
+            "type": "string"
+          },
+          "limitsCpu": {
+            "type": "string"
+          },
+          "downlinkLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "uplinkLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mountPath": {
+            "type": "string"
+          },
+          "monitor": {
+            "$ref": "#/components/schemas/Monitor"
+          },
+          "options": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "ingressHostnamePrefixes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "EnvironmentVars": {
         "description": "An object to hold all the ways environment variables can be passed. Not to be used by itself.",
         "type": "object",
@@ -495,6 +640,18 @@
                 "$ref": "#/components/schemas/EnvironmentVars"
               }
             ]
+          }
+        }
+      },
+      "Monitor": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "activityTracker": {
+            "$ref": "#/components/schemas/ActivityTracker"
           }
         }
       },

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
@@ -66,6 +67,10 @@ public final class K8sUtil {
             return false;
         }
         return true;
+    }
+
+    public List<AppDefinitionSpec> listAppDefinitions() {
+        return CLIENT.appDefinitions().specs();
     }
 
     public List<SessionSpec> listSessions(String user) {
