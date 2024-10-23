@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +40,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.util.LabelsUtil;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
@@ -444,6 +446,16 @@ public class LazySessionHandler implements SessionHandler {
         }
         K8sUtil.loadAndCreateDeploymentWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
                 deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, deployment -> {
+
+                    LOGGER.info("Setting pod labels");
+                    Map<String, String> labels = deployment.getSpec().getTemplate().getMetadata().getLabels();
+                    if (labels == null) {
+                        labels = new HashMap<>();
+                        deployment.getSpec().getTemplate().getMetadata().setLabels(labels);
+                    }
+                    Map<String, String> newLabels = LabelsUtil.createSessionLabels(session.getSpec(), appDefinition.getSpec());
+                    labels.putAll(newLabels);
+
                     pvName.ifPresent(name -> addVolumeClaim(deployment, name, appDefinition.getSpec()));
                     bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
                             appDefinition.getSpec().getUplinkLimit(), correlationId);

@@ -21,6 +21,8 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,6 +32,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.util.JavaUtil;
+import org.eclipse.theia.cloud.common.util.LabelsUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
 import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
@@ -112,6 +115,25 @@ public class EagerStartSessionHandler implements SessionHandler {
         if (serviceToUse.isEmpty()) {
             LOGGER.error(
                     formatLogMessage(correlationId, "No Service for app definition " + appDefinitionID + " found."));
+            return false;
+        }
+
+        try {
+            client.services().inNamespace(client.namespace()).withName(serviceToUse.get().getMetadata().getName())
+                .edit(service -> {
+                    LOGGER.info("Setting pod labels");
+                    Map<String, String> labels = service.getMetadata().getLabels();
+                    if (labels == null) {
+                        labels = new HashMap<>();
+                        service.getMetadata().setLabels(labels);
+                    }
+                    Map<String, String> newLabels = LabelsUtil.createSessionLabels(spec, appDefinition.get().getSpec());
+                    labels.putAll(newLabels);
+                    return service;
+                });
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Error while adding labels to service " + (serviceToUse.get().getMetadata().getName())), e);
             return false;
         }
 
