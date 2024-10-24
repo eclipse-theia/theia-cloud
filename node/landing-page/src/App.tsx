@@ -211,10 +211,15 @@ function App(): JSX.Element {
     TheiaCloud.ping(PingRequest.create(config.serviceUrl, config.appId))
       .then(() => {
         // ping successful continue with launch
+        // Artemis URLs look like: https://user@artemis.cit.tum.de/git/THEIATESTTESTEXERCISE/theiatesttestexercise-artemis_admin.git
+        //                                                                                   ^^^^^^^^^^^^^^^^^^^^^ we need this part
+        // First we split at the / character, get the last part, split at the - character and get the first part
+        const repoName = gitUri?.split('/').pop()?.split('-')[0];
+
         
         const workspace = config.useEphemeralStorage
           ? undefined
-          : 'ws-' + config.appId + '-' + selectedAppDefinition + '-' + email;
+          : 'ws-' + config.appId + '-' + selectedAppDefinition + '-' + repoName + '-' + email;
 
         const requestOptions: RequestOptions = {
           timeout: 60000,
