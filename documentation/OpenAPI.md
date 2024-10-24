@@ -50,3 +50,24 @@ Use the `openapi-generator-cli` from the root of this repository:
 ```bash
 openapi-generator-cli generate -g typescript-axios -i ./documentation/openapi.json -o node/common/src/client/ --additional-properties=supportsES6=true,typescriptThreePlus=true --skip-validate-spec
 ```
+
+## Generate API Documentation
+
+Documentation for the service API can be generated as markdown files.
+
+If not already done for generating the typescript API, install the `openapi-generator-cli`:
+
+```bash
+npm install @openapitools/openapi-generator-cli -g
+openapi-generator-cli version-manager set 7.8.0
+```
+
+Use the `openapi-generator-cli` from the root of this repository:
+
+```bash
+openapi-generator-cli generate -g markdown -i ./documentation/openapi.json -o ./documentation/api --skip-validate-spec
+```
+
+> [!TIP]
+> The Open API generator supports generating code and documentation in various languages.
+> Execute `openapi-generator-cli list` to see all of them.
