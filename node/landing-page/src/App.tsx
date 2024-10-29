@@ -214,12 +214,9 @@ function App(): JSX.Element {
         // Artemis URLs look like: https://user@artemis.cit.tum.de/git/THEIATESTTESTEXERCISE/theiatesttestexercise-artemis_admin.git
         //                                                                                   ^^^^^^^^^^^^^^^^^^^^^ we need this part
         // First we split at the / character, get the last part, split at the - character and get the first part
-        const repoName = gitUri?.split('/').pop()?.split('-')[0];
+        const repoName = gitUri ? gitUri?.split('/').pop()?.split('-')[0] : Math.random().toString().substring(2, 10);
 
-        
-        const workspace = config.useEphemeralStorage
-          ? undefined
-          : 'ws-' + config.appId + '-' + selectedAppDefinition + '-' + repoName + '-' + email;
+        const workspace = 'ws-' + config.appId + '-' + selectedAppDefinition + '-' + repoName + '-' + email;
 
         const requestOptions: RequestOptions = {
           timeout: 60000,
