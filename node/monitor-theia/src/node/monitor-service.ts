@@ -12,9 +12,9 @@ export class DefaultTheiaCloudBackendMonitorService implements TheiaCloudBackend
    * Returns true if ran in theia cloud context
    */
   isRunningOnTheiaCloud(): boolean {
-    const appId = process.env.THEIA_CLOUD_APP_ID;
-    const serviceUrl = process.env.THEIA_CLOUD_SERVICE_URL;
-    const sessionName = process.env.THEIA_CLOUD_SESSION_NAME;
+    const appId = process.env.THEIACLOUD_APP_ID;
+    const serviceUrl = process.env.THEIACLOUD_SERVICE_URL;
+    const sessionName = process.env.THEIACLOUD_SESSION_NAME;
     return appId && serviceUrl && sessionName ? true : false;
   }
 

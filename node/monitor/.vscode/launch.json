@@ -13,8 +13,8 @@
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}",
       "env": {
-        "THEIA_CLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER": "true",
-        "THEIA_CLOUD_SESSION_SECRET": "TestSecret"
+        "THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER": "true",
+        "THEIACLOUD_SESSION_SECRET": "TestSecret"
       }
     },
     {

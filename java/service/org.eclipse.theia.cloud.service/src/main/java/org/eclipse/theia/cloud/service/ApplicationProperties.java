@@ -25,8 +25,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class ApplicationProperties {
 
-    private static final String THEIA_CLOUD_APP_ID = "theia.cloud.app.id";
-    private static final String THEIA_CLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
+    private static final String THEIACLOUD_APP_ID = "theia.cloud.app.id";
+    private static final String THEIACLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
 
     private final Logger logger;
 
@@ -35,9 +35,9 @@ public class ApplicationProperties {
 
     public ApplicationProperties() {
         logger = Logger.getLogger(getClass());
-        appId = System.getProperty(THEIA_CLOUD_APP_ID, "asdfghjkl");
+        appId = System.getProperty(THEIACLOUD_APP_ID, "asdfghjkl");
         // Only disable keycloak if the value was explicitly set to exactly "false".
-        useKeycloak = !"false".equals(System.getProperty(THEIA_CLOUD_USE_KEYCLOAK));
+        useKeycloak = !"false".equals(System.getProperty(THEIACLOUD_USE_KEYCLOAK));
         if (!useKeycloak) {
             logger.warn("Keycloak integration was disabled. Anonymous requests are allowed!");
         }

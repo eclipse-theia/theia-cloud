@@ -29,9 +29,11 @@ This format serves as a preferred technical abbreviation. Use it when no other c
 - **File names**
 - **k8s namespaces**
 
-## `THEIA_CLOUD`
+## `THEIACLOUD`
 
-Use **all uppercase** with underscores for **environment variables**, such as `THEIA_CLOUD_SESSION_NAME`.
+Use **all uppercase** with underscores for **environment variables**, such as `THEIACLOUD_SESSION_NAME`.
+
+We can't use `THEIA_CLOUD` because `THEIA_` env variables may get special treatment by Theia itself.
 
 ## Theia Cloud
 
@@ -39,7 +41,7 @@ In general documentation and free text, use the standard project name **Theia Cl
 
 ## `theia-cloud.io`
 
-For **Kubernetes labels**, use the project domain as a prefix to custom labels, such as `theia-cloud.io/workspace.name`.
+For **Kubernetes labels**, use the project domain as a prefix to custom labels, such as `theia-cloud.io/workspace-name`.
 
 ## Avoid `theiacloud` in Code
 
