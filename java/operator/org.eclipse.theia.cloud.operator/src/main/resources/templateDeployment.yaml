@@ -55,29 +55,29 @@ spec:
               cpu: placeholder-cpu-requests
               memory: placeholder-memory-requests
           env:
-          - name: THEIACLOUD_APP_ID
+          - name: THEIA_CLOUD_APP_ID
             value: placeholder-env-app-id
-          - name: THEIACLOUD_SERVICE_URL
+          - name: THEIA_CLOUD_SERVICE_URL
             value: placeholder-env-service-url
-          - name: THEIACLOUD_SESSION_UID
+          - name: THEIA_CLOUD_SESSION_UID
             value: placeholder-env-session-uid
-          - name: THEIACLOUD_SESSION_NAME
+          - name: THEIA_CLOUD_SESSION_NAME
             value: placeholder-env-session-name
-          - name: THEIACLOUD_SESSION_USER
+          - name: THEIA_CLOUD_SESSION_USER
             value: placeholder-env-session-user
-          - name: THEIACLOUD_SESSION_URL
+          - name: THEIA_CLOUD_SESSION_URL
             value: placeholder-env-session-url
-          - name: THEIACLOUD_SESSION_SECRET
+          - name: THEIA_CLOUD_SESSION_SECRET
             value: placeholder-env-session-secret
-          - name: THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER
+          - name: THEIA_CLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER
             value: placeholder-enable-activity-tracker
-          - name: THEIACLOUD_MONITOR_PORT
+          - name: THEIA_CLOUD_MONITOR_PORT
             value: placeholder-monitor-env-port
-          - name: THEIACLOUD_KEYCLOAK_URL
+          - name: THEIA_CLOUD_KEYCLOAK_URL
             value: placeholder-keycloak-env-url
-          - name: THEIACLOUD_KEYCLOAK_REALM
+          - name: THEIA_CLOUD_KEYCLOAK_REALM
             value: placeholder-keycloak-env-realm
-          - name: THEIACLOUD_KEYCLOAK_CLIENT_ID
+          - name: THEIA_CLOUD_KEYCLOAK_CLIENT_ID
             value: placeholder-keycloak-env-clientid
           securityContext:
             runAsUser: placeholder-uid

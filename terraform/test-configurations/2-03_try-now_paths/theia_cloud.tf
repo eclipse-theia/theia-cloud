@@ -26,7 +26,7 @@ provider "kubectl" {
 resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
   chart            = "../../../../theia-cloud-helm/charts/theia-cloud"
-  namespace        = "theiacloud"
+  namespace        = "theia-cloud"
   create_namespace = true
 
   values = [
@@ -100,7 +100,7 @@ resource "kubectl_manifest" "cdt-cloud-demo" {
   kind: AppDefinition
   metadata:
     name: cdt-cloud-demo
-    namespace: theiacloud
+    namespace: theia-cloud
   spec:
     downlinkLimit: 30000
     image: theiacloud/cdt-cloud:v1.34.4
@@ -129,7 +129,7 @@ resource "kubectl_manifest" "coffee-editor" {
   kind: AppDefinition
   metadata:
     name: coffee-editor
-    namespace: theiacloud
+    namespace: theia-cloud
   spec:
     downlinkLimit: 30000
     image: eu.gcr.io/kubernetes-238012/coffee-editor:v0.7.17

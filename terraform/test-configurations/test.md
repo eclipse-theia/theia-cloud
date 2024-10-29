@@ -8,7 +8,7 @@ Moreover the directory contains terraform configurations to install common Theia
 
 Run `terraform init` and `terraform apply` in both directories below:
 
-- `0_minikube-setup` installs a minikube cluster with all required dependencies, including a Keycloak with a TheiaCloud realm, but without TheiaCloud.
+- `0_minikube-setup` installs a minikube cluster with all required dependencies, including a Keycloak with a TheiaCloud realm, but without Theia Cloud.
 - `1_theia-cloud-base` installs theia cloud base
 
 ```bash

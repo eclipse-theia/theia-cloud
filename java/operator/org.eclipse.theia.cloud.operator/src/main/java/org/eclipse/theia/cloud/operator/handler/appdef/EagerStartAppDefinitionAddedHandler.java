@@ -57,7 +57,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 
     private static final Logger LOGGER = LogManager.getLogger(EagerStartAppDefinitionAddedHandler.class);
 
-    public static final String LABEL_KEY = "theiacloud";
+    public static final String LABEL_KEY = "theia-cloud.io/template-purpose";
     public static final String LABEL_VALUE_PROXY = "proxy";
     public static final String LABEL_VALUE_EMAILS = "emails";
 

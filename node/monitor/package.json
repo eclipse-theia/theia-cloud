@@ -1,5 +1,5 @@
 {
-  "name": "theiacloud-monitor",
+  "name": "theia-cloud-monitor",
   "displayName": "Theia Cloud Monitor extension",
   "description": "Monitor for Theia Cloud hosted tools",
   "version": "0.12.0-next",

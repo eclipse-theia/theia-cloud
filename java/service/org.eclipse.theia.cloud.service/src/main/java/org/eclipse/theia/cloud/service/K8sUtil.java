@@ -187,7 +187,7 @@ public final class K8sUtil {
         }
         Container container = optionalContainer.get();
         Optional<EnvVar> optionalEnv = container.getEnv().stream()
-                .filter(env -> env.getName().equals("THEIACLOUD_SESSION_NAME")).findFirst();
+                .filter(env -> env.getName().equals("THEIA_CLOUD_SESSION_NAME")).findFirst();
         if (optionalEnv.isEmpty()) {
             return false;
         }

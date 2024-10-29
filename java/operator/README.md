@@ -36,7 +36,7 @@ To debug the Default Theia Cloud Operator, follow these steps:
      minikube ip
 ```
 
-_Note_: Ensure your local `kubectl` is set to the correct namespace (e.g., `theiacloud`), as the debuggable operator will interact with your local Kubernetes cluster.
+_Note_: Ensure your local `kubectl` is set to the correct namespace (e.g., `theia-cloud`), as the debuggable operator will interact with your local Kubernetes cluster.
 
 ### Theia Cloud Operator Library
 

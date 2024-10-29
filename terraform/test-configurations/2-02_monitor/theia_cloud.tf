@@ -28,7 +28,7 @@ provider "helm" {
 resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
   chart            = "../../../../theia-cloud-helm/charts/theia-cloud"
-  namespace        = "theiacloud"
+  namespace        = "theia-cloud"
   create_namespace = true
 
   values = [

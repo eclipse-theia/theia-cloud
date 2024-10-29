@@ -1,4 +1,4 @@
-import { getFromEnv, THEIACLOUD_SESSION_SECRET } from '../env-variables';
+import { getFromEnv, THEIA_CLOUD_SESSION_SECRET } from '../env-variables';
 
 export function isAuthorized(req: any): boolean {
   const bearerHeader = req.headers['authorization'];
@@ -6,7 +6,7 @@ export function isAuthorized(req: any): boolean {
     const splitBearer = bearerHeader.split(' ');
     if (splitBearer.length === 2) {
       const bearerToken = splitBearer[1];
-      const sessionSecret = getFromEnv(THEIACLOUD_SESSION_SECRET);
+      const sessionSecret = getFromEnv(THEIA_CLOUD_SESSION_SECRET);
       if (bearerToken === sessionSecret) {
         return true;
       }

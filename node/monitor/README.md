@@ -10,16 +10,16 @@ For this, the extension reads environment variables to check the activation of e
 For an example on setting these environment variables, take a look at the `Run extension` launch config in the `.vscode/launch.json` file.
 
 ```json
-"THEIACLOUD_MONITOR_PORT": "8081",
-"THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER": "true"
+"THEIA_CLOUD_MONITOR_PORT": "8081",
+"THEIA_CLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER": "true"
 ```
 
 ## List of modules
 
-| Name                  | description                                                                                                    | ENV to enable                              |
-| --------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| MessagingModule       | Allows the backend to send messages to be displayed to the user                                                | (always enabled)                           |
-| ActivityTrackerModule | Allows the backend to ask about the users last activity and show a warning if the pod is about to be timed out | THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER |
+| Name                  | description                                                                                                    | ENV to enable                               |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| MessagingModule       | Allows the backend to send messages to be displayed to the user                                                | (always enabled)                            |
+| ActivityTrackerModule | Allows the backend to ask about the users last activity and show a warning if the pod is about to be timed out | THEIA_CLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER |
 
 ## Debugging the extension
 
