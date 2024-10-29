@@ -35,7 +35,7 @@ Use **all uppercase** with underscores for **environment variables**, such as `T
 
 ## Theia Cloud
 
-In general documentation and free text, use the standard project name, **Theia Cloud** (with a space). Avoid spaces in technical contexts.
+In general documentation and free text, use the standard project name **Theia Cloud** (with a space). Avoid spaces in technical contexts.
 
 ## `theia-cloud.io`
 
