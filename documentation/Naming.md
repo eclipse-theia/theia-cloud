@@ -27,6 +27,7 @@ This format serves as a preferred technical abbreviation. Use it when no other c
 
 - **NPM Package names**
 - **File names**
+- **k8s namespaces**
 
 ## `THEIA_CLOUD`
 
