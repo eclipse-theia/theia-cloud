@@ -159,9 +159,9 @@ function App(): JSX.Element {
       return;
     }
 
-    if (selectedAppDefinition && gitUri && gitToken) {
+    if (selectedAppDefinition && gitUri && gitToken && !loading) {
       console.log('Checking auth, setting autoStart to true and starting session');
-      authenticate();
+      //authenticate();
       setAutoStart(true);
       handleStartSession(selectedAppDefinition);
     } else {
