@@ -1,6 +1,32 @@
 # Changelog
 
-## [0.12.0] - estimated 2024-10
+## [1.0.0] - estimated 2024-11
+
+## [0.12.0] - 2024-10-30
+
+- [All components] Documented naming conventions and updated code to follow [#368](https://github.com/eclipse-theia/theia-cloud/pull/368)
+- [documentation] Add REST API markdown docs [#363](https://github.com/eclipse-theia/theia-cloud/pull/363)
+- [node/common] Update Common Package to support listing app definitions [#361](https://github.com/eclipse-theia/theia-cloud/pull/361)
+- [java/service] Extend service with a list app definitions endpoint [#361](https://github.com/eclipse-theia/theia-cloud/pull/361)
+- [documentation] Improved debugging documentation [#354](https://github.com/eclipse-theia/theia-cloud/pull/354)
+- [java] Fixed issue where monitor might have stopped session during session startup [#354](https://github.com/eclipse-theia/theia-cloud/pull/354)
+- [terraform] Added Devcontainer for GKE demo [#353](https://github.com/eclipse-theia/theia-cloud/pull/353)
+- [github] Moved from `eclipsesource` to `eclipse-theia` org as an official Theia subproject [#353](https://github.com/eclipse-theia/theia-cloud/pull/353) [#358](https://github.com/eclipse-theia/theia-cloud/pull/358)
+- [node] Updated Node Dependencies [#345](https://github.com/eclipse-theia/theia-cloud/pull/345) - contributed on behalf of STMicroelectronics
+- [java] Updated Maven Dependencies [#345](https://github.com/eclipse-theia/theia-cloud/pull/345) - contributed on behalf of STMicroelectronics
+
+### Breaking Changes in 0.12.0
+
+See the helm chart Changelog for [more details](https://github.com/eclipse-theia/theia-cloud-helm/blob/main/CHANGELOG.md#breaking-changes-in-0120).
+
+We did some renaming in preparation for 1.0.0
+
+- NOTE: default namespace renamed from `theiacloud` to `theia-cloud`
+- Config Map template label key updated from `theiacloud` to `theia-cloud.io/template-purpose`
+- PVC label `theia.cloud.workspace.name` renamed to `theia-cloud.io/workspace-name`
+- System property `THEIA_CLOUD_APP_ID` renamed to `THEIACLOUD_APP_ID`
+- System property `THEIA_CLOUD_USE_KEYCLOAK` renamed to `THEIACLOUD_USE_KEYCLOAK`
+- Theia Monitor paths changed from `/services/theiacloud-` to `/services/theia-cloud-`
 
 ## [0.11.0] - 2024-07-23
 

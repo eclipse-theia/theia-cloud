@@ -15,7 +15,7 @@ This project implements the default Kubernetes Operator for Theia Cloud.
 
 ```sh
 mvn clean install
-java -jar target/defaultoperator-0.12.0-SNAPSHOT-jar-with-dependencies.jar
+java -jar target/defaultoperator-0.12.0-jar-with-dependencies.jar
 ```
 
 #### Debugging the Default Theia Cloud Operator
