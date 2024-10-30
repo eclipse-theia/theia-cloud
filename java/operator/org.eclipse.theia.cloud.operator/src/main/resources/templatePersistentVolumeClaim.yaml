@@ -4,7 +4,7 @@ metadata:
   name: placeholder-pv
   namespace: placeholder-namespace
   labels:
-    theia.cloud.workspace.name: placeholder-label-workspace-name
+    theia-cloud.io/workspace-name: placeholder-label-workspace-name
 spec:
   accessModes:
     - ReadWriteOnce

@@ -100,9 +100,9 @@ helm repo update
 ```bash
 helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --set issuer.email=your-mail@example.com
 
-helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theiacloud --create-namespace
+helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theia-cloud --create-namespace
 
-helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theia-cloud
 ```
 
 ### Install the current next version
@@ -112,21 +112,21 @@ Simply add the `--devel` flag:
 ```bash
 helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --set issuer.email=your-mail@example.com --devel
 
-helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theiacloud --create-namespace --devel
+helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theia-cloud --create-namespace --devel
 
-helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --devel
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theia-cloud --devel
 ```
 
 ### Optional: switch to the newly created namespace
 
 ```bash
-kubectl config set-context --current --namespace=theiacloud
+kubectl config set-context --current --namespace=theia-cloud
 ```
 
 ### Uninstall
 
 ```bash
-helm uninstall theia-cloud -n theiacloud
+helm uninstall theia-cloud -n theia-cloud
 ```
 
 ### Getting started with

@@ -1,8 +1,8 @@
 import { MonitorBackendModule } from './monitor-backend-module';
 
-export const MONITOR_BACKEND_SERVICE_PATH = '/services/theiacloud-monitor';
-export const MESSAGING_SERVICE_PATH = '/services/theiacloud-monitor/messaging';
-export const ACTIVITY_TRACKER_SERVICE_PATH = '/services/theiacloud-monitor/activity-tracker';
+export const MONITOR_BACKEND_SERVICE_PATH = '/services/theia-cloud-monitor';
+export const MESSAGING_SERVICE_PATH = '/services/theia-cloud-monitor/messaging';
+export const ACTIVITY_TRACKER_SERVICE_PATH = '/services/theia-cloud-monitor/activity-tracker';
 
 export const COMMAND_ACTIVITY_REPORT_TITLE = 'theia.cloud.monitor.activity.report';
 

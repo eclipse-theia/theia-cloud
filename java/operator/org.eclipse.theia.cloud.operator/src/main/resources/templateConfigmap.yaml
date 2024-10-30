@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: placeholder-configname
   labels:
-    theiacloud: proxy
+    theia-cloud.io/template-purpose: proxy
   namespace: placeholder-namespace
   ownerReferences:
     - apiVersion: theia.cloud/v1beta9

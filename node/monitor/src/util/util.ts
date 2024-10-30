@@ -9,6 +9,8 @@ export function isAuthorized(req: any): boolean {
       const sessionSecret = getFromEnv(THEIACLOUD_SESSION_SECRET);
       if (bearerToken === sessionSecret) {
         return true;
+      } else {
+        console.debug('unauthorized');
       }
     }
   }

@@ -74,8 +74,6 @@ Easily start your RESTful Web Services
 
 Unit tests use the Quarkus test infrastructure.
 
-All tests can be run in Eclipse via launch config [TheiaCloud Service Tests](./TheiaCloud Service Tests.launch).
-
 When running tests from an IDE, the following VM argument might need to be set to enable logging during tests (this is pre-configured in the launch config):
 
 ```bash
