@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@eclipse-theiacloud/common": "0.12.0",
+    "@eclipse-theiacloud/common": "1.0.0-next",
     "keycloak-js": "^17.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
