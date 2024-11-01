@@ -45,6 +45,7 @@ function App(): JSX.Element {
   const [selectedAppDefinition, setSelectedAppDefinition] = useState<string>(initialAppDefinition);
 
   const [email, setEmail] = useState<string>();
+  const [username, setUsername] = useState<string>();
   const [token, setToken] = useState<string>();
   const [logoutUrl, setLogoutUrl] = useState<string>();
 
@@ -132,7 +133,9 @@ function App(): JSX.Element {
               const userMail = parsedToken.email;
               setToken(keycloak.idToken);
               setEmail(userMail);
+              setUsername(parsedToken.preferred_username ?? userMail);
               setLogoutUrl(keycloak.createLogoutUrl());
+              console.log('Authenticated as ' + parsedToken.preferred_username + '(' + userMail + ')');
             }
           }
         })
@@ -192,7 +195,9 @@ function App(): JSX.Element {
             const userMail = parsedToken.email;
             setToken(keycloak.idToken);
             setEmail(userMail);
+            setUsername(parsedToken.preferred_username ?? userMail);
             setLogoutUrl(keycloak.createLogoutUrl());
+            console.log('Authenticated as ' + parsedToken.preferred_username + '(' + userMail + ')');
           }
         }
       })
@@ -216,7 +221,9 @@ function App(): JSX.Element {
         // First we split at the / character, get the last part, split at the - character and get the first part
         const repoName = gitUri ? gitUri?.split('/').pop()?.split('-')[0] : Math.random().toString().substring(2, 10);
 
-        const workspace = 'ws-' + config.appId + '-' + selectedAppDefinition + '-' + repoName + '-' + email;
+        const workspace = config.useEphemeralStorage
+          ? undefined
+          : 'ws-' + selectedAppDefinition + '-' + repoName + '-' + username;
 
         const requestOptions: RequestOptions = {
           timeout: 60000,
