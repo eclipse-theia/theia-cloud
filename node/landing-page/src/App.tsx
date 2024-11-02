@@ -208,7 +208,6 @@ function App(): JSX.Element {
   };
 
   const handleStartSession = (appDefinition: string): void => {
-    console.log('Launching ' + appDefinition);
     setLoading(true);
     setError(undefined);
 
@@ -224,6 +223,9 @@ function App(): JSX.Element {
         const workspace = config.useEphemeralStorage
           ? undefined
           : 'ws-' + selectedAppDefinition + '-' + repoName + '-' + username;
+
+
+        console.log('Launching ' + appDefinition + ' in workspace ' + workspace);
 
         const requestOptions: RequestOptions = {
           timeout: 60000,
