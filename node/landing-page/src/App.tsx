@@ -130,20 +130,28 @@ function App(): JSX.Element {
           if (auth) {
             const parsedToken = keycloak.idTokenParsed;
             if (parsedToken) {
+              // Only finish initialization after the username was set successfully (used in automatic session start)
               const userMail = parsedToken.email;
               setToken(keycloak.idToken);
               setEmail(userMail);
               setUsername(parsedToken.preferred_username ?? userMail);
               setLogoutUrl(keycloak.createLogoutUrl());
+              while (username !== (parsedToken.preferred_username ?? userMail)) {
+                // Wait for the username to be set
+              }
+              initialized = true;
               console.log('Authenticated as ' + parsedToken.preferred_username + '(' + userMail + ')');
+              console.log(username);
             }
           }
         })
         .catch(() => {
           console.error('Authentication Failed');
         });
+    } else {
+      // Finish initialization if no keycloak is used
+      initialized = true;
     }
-    initialized = true;
   }
 
   useEffect(() => {
