@@ -162,15 +162,7 @@ function App(): JSX.Element {
       return;
     }
 
-    console.log(`Keycloak required: ${config.useKeycloak}`);
-    if (token) {
-      console.log('Token okay');
-    } else {
-      console.log('Token missing');
-    }
-    console.log(`=> KeyCloak success: ${Boolean(config.useKeycloak ? token : true)}`)
-
-    if (selectedAppDefinition && gitUri && artemisToken && !loading && (config.useKeycloak ? token : true)) {
+    if (selectedAppDefinition && gitUri && artemisToken && !loading) {
       console.log('Checking auth, setting autoStart to true and starting session');
       //authenticate();
       setAutoStart(true);
