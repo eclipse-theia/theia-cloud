@@ -121,7 +121,7 @@ public class EagerStartSessionHandler implements SessionHandler {
         try {
             client.services().inNamespace(client.namespace()).withName(serviceToUse.get().getMetadata().getName())
                 .edit(service -> {
-                    LOGGER.info("Setting pod labels");
+                    LOGGER.debug("Setting session labels");
                     Map<String, String> labels = service.getMetadata().getLabels();
                     if (labels == null) {
                         labels = new HashMap<>();
