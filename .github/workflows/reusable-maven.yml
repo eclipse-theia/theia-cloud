@@ -46,6 +46,11 @@ jobs:
           cd ${{ inputs.path_to_package }}
           mvn verify -fae --no-transfer-progress
 
+      - name: Check mvn licenses
+        run: |
+          cd ${{ inputs.path_to_package }}
+          mvn org.eclipse.dash:license-tool-plugin:license-check -Ddash.iplab.token=${{ secrets.DASH_LICENSES_PAT }} -Ddash.projectId=ecd.theia
+
   publish:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'release'
