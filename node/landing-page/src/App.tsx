@@ -53,7 +53,7 @@ function App(): JSX.Element {
   const [gitToken, setGitToken] = useState<string>();
   const [artemisToken, setArtemisToken] = useState<string>();
 
-  const [autoStart, setAutoStart] = useState<boolean>(true);
+  const [autoStart, setAutoStart] = useState<boolean>(false);
 
   if (!initialized) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -136,22 +136,15 @@ function App(): JSX.Element {
               setEmail(userMail);
               setUsername(parsedToken.preferred_username ?? userMail);
               setLogoutUrl(keycloak.createLogoutUrl());
-              while (username !== (parsedToken.preferred_username ?? userMail)) {
-                // Wait for the username to be set
-              }
-              initialized = true;
               console.log('Authenticated as ' + parsedToken.preferred_username + '(' + userMail + ')');
-              console.log(username);
             }
           }
         })
         .catch(() => {
           console.error('Authentication Failed');
         });
-    } else {
-      // Finish initialization if no keycloak is used
-      initialized = true;
     }
+    initialized = true;
   }
 
   useEffect(() => {
@@ -171,16 +164,23 @@ function App(): JSX.Element {
     }
 
     if (selectedAppDefinition && gitUri && artemisToken && !loading) {
-      console.log('Checking auth, setting autoStart to true and starting session');
+      console.log('Checking auth, setting autoStart to true');
       //authenticate();
       setAutoStart(true);
-      handleStartSession(selectedAppDefinition);
+      // handleStartSession(selectedAppDefinition);
     } else {
       console.log('Setting autoStart to false');
       setAutoStart(false);
     }
 
   }, [initialized]);
+
+  useEffect(() => {
+    console.log('Auto start changed: ' + autoStart);
+    if (autoStart) {
+      handleStartSession(selectedAppDefinition);
+    }
+  }, [autoStart]);
 
   /* eslint-enable react-hooks/rules-of-hooks */
 
