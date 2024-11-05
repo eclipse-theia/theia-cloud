@@ -162,7 +162,7 @@ function App(): JSX.Element {
       return;
     }
 
-    if (selectedAppDefinition && gitUri && gitToken && !loading) {
+    if (selectedAppDefinition  && gitUri && artemisToken && !loading && (config.useKeycloak ? token : true)) {
       console.log('Checking auth, setting autoStart to true and starting session');
       //authenticate();
       setAutoStart(true);
