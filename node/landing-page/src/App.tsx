@@ -222,7 +222,7 @@ function App(): JSX.Element {
 
         const workspace = config.useEphemeralStorage
           ? undefined
-          : 'ws-' + selectedAppDefinition + '-' + repoName + '-' + username;
+          : 'ws-' + appDefinition + '-' + repoName + '-' + username;
 
 
         console.log('Launching ' + appDefinition + ' in workspace ' + workspace);
@@ -288,6 +288,8 @@ function App(): JSX.Element {
           //  ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5, email)
           //  : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5, email, workspace),
           
+          // TheiaCloud.Session.list
+
           TheiaCloud.launchAndRedirect(
             launchRequest,
             requestOptions
