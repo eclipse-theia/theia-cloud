@@ -148,7 +148,17 @@ function App(): JSX.Element {
   }
 
   useEffect(() => {
-    console.log('App init changed');
+    if (!initialized) {
+      console.log('Not initialized yet');
+      return;
+    }
+
+    if (config.useKeycloak && !username) {
+      console.log('No username set yet but required');
+      return;
+    }
+
+    console.log('App init or username changed');
     console.log('Selected app definition: ' + selectedAppDefinition);
     console.log('Selected app name: ' + selectedAppName);
     console.log('Configured app definition: ' + config.appDefinition);
@@ -158,29 +168,17 @@ function App(): JSX.Element {
     console.log('Artemis Token: ' + artemisToken);
     console.log('-----------------------------------');
 
-    if (!initialized) {
-      console.log('Not initialized yet');
-      return;
-    }
-
     if (selectedAppDefinition && gitUri && artemisToken && !loading) {
       console.log('Checking auth, setting autoStart to true');
-      //authenticate();
+      // authenticate();
       setAutoStart(true);
-      // handleStartSession(selectedAppDefinition);
+      handleStartSession(selectedAppDefinition);
     } else {
       console.log('Setting autoStart to false');
       setAutoStart(false);
     }
 
-  }, [initialized]);
-
-  useEffect(() => {
-    console.log('Auto start changed: ' + autoStart);
-    if (autoStart) {
-      handleStartSession(selectedAppDefinition);
-    }
-  }, [autoStart]);
+  }, [initialized, username]);
 
   /* eslint-enable react-hooks/rules-of-hooks */
 
