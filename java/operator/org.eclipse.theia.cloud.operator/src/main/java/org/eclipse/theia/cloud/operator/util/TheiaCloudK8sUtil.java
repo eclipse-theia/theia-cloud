@@ -21,11 +21,11 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.OperatorStatus;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpecResourceList;
-import org.eclipse.theia.cloud.common.util.NamingUtil;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
@@ -69,14 +69,20 @@ public final class TheiaCloudK8sUtil {
         return currentInstances > appDefinitionSpec.getMaxInstances();
     }
 
+    /**
+     * Extracts the instance id from the name of a Kubernetes object whose name was generated based on an app definition
+     * and an id.
+     * 
+     * @param metadata The object's metadata
+     * @return the extracted identifier
+     * @see org.eclipse.theia.cloud.common.util.NamingUtil#createName(AppDefinition, int)
+     * @see org.eclipse.theia.cloud.common.util.NamingUtil#createName(AppDefinition, int, String)
+     */
     public static String extractIdFromName(ObjectMeta metadata) {
+        // Generated name is of the form "instance-<instanceId>-<further-name-segments>"
         String name = metadata.getName();
         String[] split = name.split("-");
-        String instance = split.length == 0 ? "" : split[0];
-        // kubernetes names must not start with letter, remove automatically added
-        // prefix
-        instance = instance.length() == 0 ? ""
-                : instance.charAt(0) == NamingUtil.VALID_NAME_PREFIX ? instance.substring(1) : instance;
+        String instance = split.length < 2 ? "" : split[1];
         return instance;
     }
 
