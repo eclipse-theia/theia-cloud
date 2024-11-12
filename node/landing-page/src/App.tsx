@@ -52,6 +52,7 @@ function App(): JSX.Element {
   const [gitUri, setGitUri] = useState<string>();
   const [gitToken, setGitToken] = useState<string>();
   const [artemisToken, setArtemisToken] = useState<string>();
+  const [artemisUrl, setArtemisUrl] = useState<string>();
 
   const [autoStart, setAutoStart] = useState<boolean>(false);
 
@@ -113,6 +114,14 @@ function App(): JSX.Element {
       }
     }
 
+    // Get artemisUrl parameter from URL.
+    if (urlParams.has('artemisUrl')) {
+      const artemisUrl = urlParams.get('artemisUrl');
+      if (artemisUrl) {
+        setArtemisUrl(artemisUrl);
+      }
+    }
+
     if (config.useKeycloak) {
       keycloakConfig = {
         url: config.keycloakAuthUrl,
@@ -166,6 +175,7 @@ function App(): JSX.Element {
     console.log('Git URI: ' + gitUri);
     console.log('Git Token: ' + gitToken);
     console.log('Artemis Token: ' + artemisToken);
+    console.log('Artemis URL: ' + artemisUrl);
     console.log('-----------------------------------');
 
     if (selectedAppDefinition && gitUri && artemisToken && !loading) {
@@ -284,7 +294,8 @@ function App(): JSX.Element {
               fromMap: {
                 THEIA: 'true',
                 ARTEMIS_TOKEN: artemisToken!,
-                ARTEMIS_CLONE_URL: gitUri!
+                ARTEMIS_CLONE_URL: gitUri!,
+                ARTEMIS_URL: artemisUrl!
               }
             } 
           };
