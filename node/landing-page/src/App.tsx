@@ -231,17 +231,24 @@ function App(): JSX.Element {
     TheiaCloud.ping(PingRequest.create(config.serviceUrl, config.appId))
       .then(() => {
         // ping successful continue with launch
-        // Artemis URLs look like: https://user@artemis.cit.tum.de/git/THEIATESTTESTEXERCISE/theiatesttestexercise-artemis_admin.git
-        //                                                                                   ^^^^^^^^^^^^^^^^^^^^^ we need this part
-        // First we split at the / character, get the last part, split at the - character and get the first part
-        const repoName = gitUri ? gitUri?.split('/').pop()?.split('-')[0] : Math.random().toString().substring(2, 10);
+        let workspace: string | undefined;
 
-        const workspace = config.useEphemeralStorage
-          ? undefined
-          : 'ws-' + appDefinition + '-' + repoName + '-' + username;
-
-
-        console.log('Launching ' + appDefinition + ' in workspace ' + workspace);
+        if (config.useEphemeralStorage) {
+          workspace = undefined;
+          console.log('Launching ' + appDefinition + ' with ephemeral storage as not configured');
+        } else {
+          if (!gitUri) {
+            workspace = undefined;
+            console.log('Launching ' + appDefinition + ' with ephemeral storage as this is a Playground session');
+          } else {
+            // Artemis URLs look like: https://user@artemis.cit.tum.de/git/THEIATESTTESTEXERCISE/theiatesttestexercise-artemis_admin.git
+            //                                                                                   ^^^^^^^^^^^^^^^^^^^^^ we need this part
+            // First we split at the / character, get the last part, split at the - character and get the first part
+            const repoName = gitUri?.split('/').pop()?.split('-')[0] ?? Math.random().toString().substring(2, 10);
+            workspace = 'ws-' + appDefinition + '-' + repoName + '-' + username;
+            console.log('Launching ' + appDefinition + ' with persistent workspace ' + workspace);
+          }
+        }
 
         const requestOptions: RequestOptions = {
           timeout: 60000,
