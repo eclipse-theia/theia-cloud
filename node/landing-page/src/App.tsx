@@ -50,7 +50,6 @@ function App(): JSX.Element {
   const [logoutUrl, setLogoutUrl] = useState<string>();
 
   const [gitUri, setGitUri] = useState<string>();
-  const [gitToken, setGitToken] = useState<string>();
   const [gitUser, setGitUser] = useState<string>();
   const [gitMail, setGitMail] = useState<string>();
   const [artemisToken, setArtemisToken] = useState<string>();
@@ -100,13 +99,6 @@ function App(): JSX.Element {
       }
     }
 
-    // Get gitToken parameter from URL.
-    if (urlParams.has('gitToken')) {
-      const gitToken = urlParams.get('gitToken');
-      if (gitToken) {
-        setGitToken(gitToken);
-      }
-    }
 
     // Get artemisToken parameter from URL.
     if (urlParams.has('artemisToken')) {
@@ -191,7 +183,8 @@ function App(): JSX.Element {
     console.log('Configured app definition: ' + config.appDefinition);
     console.log('Initial app definition: ' + initialAppDefinition);
     console.log('Git URI: ' + gitUri);
-    console.log('Git Token: ' + gitToken);
+    console.log('Git User: ' + gitUser);
+    console.log('Git Mail: ' + gitMail);
     console.log('Artemis Token: ' + artemisToken);
     console.log('Artemis URL: ' + artemisUrl);
     console.log('-----------------------------------');
