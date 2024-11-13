@@ -51,6 +51,8 @@ function App(): JSX.Element {
 
   const [gitUri, setGitUri] = useState<string>();
   const [gitToken, setGitToken] = useState<string>();
+  const [gitUser, setGitUser] = useState<string>();
+  const [gitMail, setGitMail] = useState<string>();
   const [artemisToken, setArtemisToken] = useState<string>();
   const [artemisUrl, setArtemisUrl] = useState<string>();
 
@@ -119,6 +121,22 @@ function App(): JSX.Element {
       const artemisUrl = urlParams.get('artemisUrl');
       if (artemisUrl) {
         setArtemisUrl(artemisUrl);
+      }
+    }
+
+    // Get gitUser parameter from URL.
+    if (urlParams.has('gitUser')) {
+      const gitUser = urlParams.get('gitUser');
+      if (gitUser) {
+        setGitUser(gitUser);
+      }
+    }
+
+    // Get gitMail parameter from URL.
+    if (urlParams.has('gitMail')) {
+      const gitMail = urlParams.get('gitMail');
+      if (gitMail) {
+        setGitMail(gitMail);
       }
     }
 
@@ -301,8 +319,10 @@ function App(): JSX.Element {
               fromMap: {
                 THEIA: 'true',
                 ARTEMIS_TOKEN: artemisToken!,
-                ARTEMIS_CLONE_URL: gitUri!,
-                ARTEMIS_URL: artemisUrl!
+                ARTEMIS_URL: artemisUrl!,
+                GIT_URI: gitUri!,
+                GIT_USER: gitUser!,
+                GIT_MAIL: gitMail!
               }
             } 
           };
