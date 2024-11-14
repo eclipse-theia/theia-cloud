@@ -192,7 +192,9 @@ public final class K8sUtil {
             return false;
         }
         EnvVar env = optionalEnv.get();
-        return env.getValue().equals(session.getSpec().getName());
+
+        // FIXME this is always false in eager mode.
+        return env.getValue() != null && env.getValue().equals(session.getSpec().getName());
     }
 
     public boolean hasAppDefinition(String appDefinition) {
