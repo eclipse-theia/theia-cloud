@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.operator.handler.session;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -51,6 +52,7 @@ import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.dsl.PodResource;
 
 /**
  * A {@link SessionAddedHandler} that relies on the fact that the app definition handler created spare deployments to
@@ -122,11 +124,10 @@ public class EagerStartSessionHandler implements SessionHandler {
             return false;
         }
 
+        final String deploymentName = TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance);
         try {
-            client.kubernetes().apps().deployments()
-                    .withName(TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance))
-                    .edit(deployment -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId,
-                            sessionResourceName, sessionResourceUID, deployment));
+            client.kubernetes().apps().deployments().withName(deploymentName).edit(deployment -> TheiaCloudHandlerUtil
+                    .addOwnerReferenceToItem(correlationId, sessionResourceName, sessionResourceUID, deployment));
         } catch (KubernetesClientException e) {
             LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
                     + (appDefinitionID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
@@ -143,12 +144,42 @@ public class EagerStartSessionHandler implements SessionHandler {
                                     .singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST, userEmail));
                             return configmap;
                         });
+
             } catch (KubernetesClientException e) {
                 LOGGER.error(
                         formatLogMessage(correlationId,
                                 "Error while editing email configmap "
                                         + (appDefinitionID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)),
                         e);
+                return false;
+            }
+
+            // Add/update annotation to the session pod to trigger a sync with the Kubelet.
+            // Otherwise, the pod might not be updated with the new email list for the OAuth proxy in time.
+            // This is the case because ConfigMap changes are not propagated to the pod immediately but during a
+            // periodic sync. See
+            // https://kubernetes.io/docs/concepts/configuration/configmap/#mounted-configmaps-are-updated-automatically
+            try {
+                LOGGER.info(formatLogMessage(correlationId, "Adding update annotation to pods..."));
+                client.kubernetes().pods().list().getItems().forEach(pod -> {
+                    // Use startsWith because the actual owner is the deployment's ReplicaSet
+                    // whose name starts with the deployment name
+                    if (pod.getMetadata().getOwnerReferences().stream()
+                            .anyMatch(or -> or.getName().startsWith(deploymentName))) {
+
+                        LOGGER.debug(formatLogMessage(correlationId,
+                                "Adding update annotation to pod " + pod.getMetadata().getName()));
+                        pod.getMetadata().getAnnotations().put("theia-cloud.io/eager-start-refresh",
+                                Instant.now().toString());
+                        // Apply the changes
+                        PodResource podResource = client.pods().withName(pod.getMetadata().getName());
+                        podResource.edit(p -> pod);
+                        LOGGER.debug(formatLogMessage(correlationId,
+                                "Added update annotation to pod " + pod.getMetadata().getName()));
+                    }
+                });
+            } catch (KubernetesClientException e) {
+                LOGGER.error(formatLogMessage(correlationId, "Error while editing pod annotations"), e);
                 return false;
             }
         }
