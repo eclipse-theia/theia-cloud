@@ -21,6 +21,8 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -110,50 +112,54 @@ public final class K8sUtil {
 
     public static Optional<Ingress> loadAndCreateIngressWithOwnerReference(NamespacedKubernetesClient client,
             String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-            String ownerName, String ownerUid, int ownerReferenceIndex) {
+            String ownerName, String ownerUid, int ownerReferenceIndex, Map<String, String> labelsToAdd) {
         return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
                 ownerName, ownerUid, ownerReferenceIndex, INGRESS,
-                client.network().v1().ingresses().inNamespace(namespace), item -> {
+                client.network().v1().ingresses().inNamespace(namespace), labelsToAdd, item -> {
                 });
     }
 
     public static Optional<Service> loadAndCreateServiceWithOwnerReference(NamespacedKubernetesClient client,
             String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-            String ownerName, String ownerUid, int ownerReferenceIndex) {
+            String ownerName, String ownerUid, int ownerReferenceIndex, Map<String, String> labelsToAdd) {
         return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
-                ownerName, ownerUid, ownerReferenceIndex, SERVICE, client.services().inNamespace(namespace), item -> {
+                ownerName, ownerUid, ownerReferenceIndex, SERVICE, client.services().inNamespace(namespace),
+                labelsToAdd, item -> {
                 });
     }
 
     public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(NamespacedKubernetesClient client,
             String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-            String ownerName, String ownerUid, int ownerReferenceIndex) {
+            String ownerName, String ownerUid, int ownerReferenceIndex, Map<String, String> labelsToAdd) {
         return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
                 ownerName, ownerUid, ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace),
-                item -> {
+                labelsToAdd, item -> {
                 });
     }
 
     public static Optional<Deployment> loadAndCreateDeploymentWithOwnerReference(NamespacedKubernetesClient client,
             String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-            String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<Deployment> additionalModification) {
+            String ownerName, String ownerUid, int ownerReferenceIndex, Map<String, String> labelsToAdd,
+            Consumer<Deployment> additionalModification) {
         return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
                 ownerName, ownerUid, ownerReferenceIndex, DEPLOYMENT,
-                client.apps().deployments().inNamespace(namespace), additionalModification);
+                client.apps().deployments().inNamespace(namespace), labelsToAdd, additionalModification);
     }
 
     public static Optional<ConfigMap> loadAndCreateConfigMapWithOwnerReference(NamespacedKubernetesClient client,
             String namespace, String correlationId, String yaml, String ownerAPIVersion, String ownerKind,
-            String ownerName, String ownerUid, int ownerReferenceIndex, Consumer<ConfigMap> additionalModification) {
+            String ownerName, String ownerUid, int ownerReferenceIndex, Map<String, String> labelsToAdd,
+            Consumer<ConfigMap> additionalModification) {
         return loadAndCreateTypeWithOwnerReference(client, namespace, correlationId, yaml, ownerAPIVersion, ownerKind,
                 ownerName, ownerUid, ownerReferenceIndex, CONFIG_MAP, client.configMaps().inNamespace(namespace),
-                additionalModification);
+                labelsToAdd, additionalModification);
     }
 
     private static <T extends HasMetadata, U, V extends Resource<T>> Optional<T> loadAndCreateTypeWithOwnerReference(
             NamespacedKubernetesClient client, String namespace, String correlationId, String yaml,
             String ownerAPIVersion, String ownerKind, String ownerName, String ownerUid, int ownerReferenceIndex,
-            String typeName, NonNamespaceOperation<T, U, V> items, Consumer<T> additionalModification) {
+            String typeName, NonNamespaceOperation<T, U, V> items, Map<String, String> labelsToAdd,
+            Consumer<T> additionalModification) {
 
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(yaml.getBytes())) {
 
@@ -162,6 +168,20 @@ public final class K8sUtil {
             if (newItem == null) {
                 LOGGER.error(formatLogMessage(correlationId, "Loading new " + typeName + " resulted in null object"));
                 return Optional.empty();
+            }
+
+            // Apply labels to the resource metadata
+            if (newItem.getMetadata().getLabels() == null) {
+                newItem.getMetadata().setLabels(new HashMap<>());
+            }
+            newItem.getMetadata().getLabels().putAll(labelsToAdd);
+
+            // If the resource is a Deployment, also apply labels to the pod template metadata
+            if (newItem instanceof Deployment deployment) {
+                if (deployment.getSpec().getTemplate().getMetadata().getLabels() == null) {
+                    deployment.getSpec().getTemplate().getMetadata().setLabels(new HashMap<>());
+                }
+                deployment.getSpec().getTemplate().getMetadata().getLabels().putAll(labelsToAdd);
             }
 
             ResourceEdit.<T> updateOwnerReference(ownerReferenceIndex, ownerAPIVersion, ownerKind, ownerName, ownerUid,
