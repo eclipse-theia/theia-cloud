@@ -1,6 +1,12 @@
 # Changelog
 
-## [1.0.0] - estimated 2024-11
+<!-- ## [1.1.0] - estimated 2025-02 -->
+
+## [1.0.0] - 2024-11-29
+
+- [java/operator] Add Theia Cloud Labels on Resources created by operator [#362](https://github.com/eclipse-theia/theia-cloud/pull/362)
+- [node] Updated Node Dependencies [#371](https://github.com/eclipse-theia/theia-cloud/pull/371) - contributed on behalf of STMicroelectronics
+- [terraform] Update `cert-manager`, `ingress-nginx`, and `keycloak` [#371](https://github.com/eclipse-theia/theia-cloud/pull/371) - contributed on behalf of STMicroelectronics
 
 ## [0.12.0] - 2024-10-30
 
