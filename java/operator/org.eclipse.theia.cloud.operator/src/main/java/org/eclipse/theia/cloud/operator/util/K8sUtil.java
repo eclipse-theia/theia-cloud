@@ -177,8 +177,7 @@ public final class K8sUtil {
             newItem.getMetadata().getLabels().putAll(labelsToAdd);
 
             // If the resource is a Deployment, also apply labels to the pod template metadata
-            if (newItem instanceof Deployment) {
-                Deployment deployment = (Deployment) newItem;
+            if (newItem instanceof Deployment deployment) {
                 if (deployment.getSpec().getTemplate().getMetadata().getLabels() == null) {
                     deployment.getSpec().getTemplate().getMetadata().setLabels(new HashMap<>());
                 }
