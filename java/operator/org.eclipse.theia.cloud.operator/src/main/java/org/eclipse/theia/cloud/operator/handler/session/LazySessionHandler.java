@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +40,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.util.LabelsUtil;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
@@ -155,6 +157,10 @@ public class LazySessionHandler implements SessionHandler {
             return false;
         }
         AppDefinition appDefinition = optionalAppDefinition.get();
+        AppDefinitionSpec appDefinitionSpec = appDefinition.getSpec();
+
+        /* label maps */
+        Map<String, String> labelsToAdd = LabelsUtil.createSessionLabels(session.getSpec(), appDefinitionSpec);
 
         if (hasMaxInstancesReached(appDefinition, session, correlationId)) {
             client.sessions().updateStatus(correlationId, session, s -> {
@@ -200,7 +206,7 @@ public class LazySessionHandler implements SessionHandler {
         }
 
         Optional<Service> serviceToUse = createAndApplyService(correlationId, sessionResourceName, sessionResourceUID,
-                session, appDefinition.getSpec(), arguments.isUseKeycloak());
+                session, appDefinitionSpec, arguments.isUseKeycloak(), labelsToAdd);
         if (serviceToUse.isEmpty()) {
             LOGGER.error(formatLogMessage(correlationId, "Unable to create service for session " + sessionSpec));
             client.sessions().updateStatus(correlationId, session, s -> {
@@ -226,9 +232,9 @@ public class LazySessionHandler implements SessionHandler {
                 // this handler
                 return true;
             }
-            createAndApplyEmailConfigMap(correlationId, sessionResourceName, sessionResourceUID, session);
+            createAndApplyEmailConfigMap(correlationId, sessionResourceName, sessionResourceUID, session, labelsToAdd);
             createAndApplyProxyConfigMap(correlationId, sessionResourceName, sessionResourceUID, session,
-                    appDefinition);
+                    appDefinition, labelsToAdd);
         }
 
         /* Create deployment for this session */
@@ -247,7 +253,7 @@ public class LazySessionHandler implements SessionHandler {
 
         Optional<String> storageName = getStorageName(session, correlationId);
         createAndApplyDeployment(correlationId, sessionResourceName, sessionResourceUID, session, appDefinition,
-                storageName, arguments.isUseKeycloak());
+                storageName, arguments.isUseKeycloak(), labelsToAdd);
 
         /* adjust the ingress */
         String host;
@@ -371,7 +377,8 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected Optional<Service> createAndApplyService(String correlationId, String sessionResourceName,
-            String sessionResourceUID, Session session, AppDefinitionSpec appDefinitionSpec, boolean useOAuth2Proxy) {
+            String sessionResourceUID, Session session, AppDefinitionSpec appDefinitionSpec, boolean useOAuth2Proxy,
+            Map<String, String> labelsToAdd) {
         Map<String, String> replacements = TheiaCloudServiceUtil.getServiceReplacements(client.namespace(), session,
                 appDefinitionSpec);
         String templateYaml = useOAuth2Proxy ? AddedHandlerUtil.TEMPLATE_SERVICE_YAML
@@ -385,11 +392,11 @@ public class LazySessionHandler implements SessionHandler {
             return Optional.empty();
         }
         return K8sUtil.loadAndCreateServiceWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-                serviceYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0);
+                serviceYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, labelsToAdd);
     }
 
     protected void createAndApplyEmailConfigMap(String correlationId, String sessionResourceName,
-            String sessionResourceUID, Session session) {
+            String sessionResourceUID, Session session, Map<String, String> labelsToAdd) {
         Map<String, String> replacements = TheiaCloudConfigMapUtil.getEmailConfigMapReplacements(client.namespace(),
                 session);
         String configMapYaml;
@@ -401,14 +408,15 @@ public class LazySessionHandler implements SessionHandler {
             return;
         }
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-                configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, configmap -> {
+                configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
+                labelsToAdd, configmap -> {
                     configmap.setData(Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST,
                             session.getSpec().getUser()));
                 });
     }
 
     protected void createAndApplyProxyConfigMap(String correlationId, String sessionResourceName,
-            String sessionResourceUID, Session session, AppDefinition appDefinition) {
+            String sessionResourceUID, Session session, AppDefinition appDefinition, Map<String, String> labelsToAdd) {
         Map<String, String> replacements = TheiaCloudConfigMapUtil.getProxyConfigMapReplacements(client.namespace(),
                 session);
         String configMapYaml;
@@ -420,7 +428,8 @@ public class LazySessionHandler implements SessionHandler {
             return;
         }
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-                configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, configMap -> {
+                configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
+                labelsToAdd, configMap -> {
                     String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, session);
                     int port = appDefinition.getSpec().getPort();
                     AddedHandlerUtil.updateProxyConfigMap(client.kubernetes(), client.namespace(), configMap, host,
@@ -429,7 +438,8 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     protected void createAndApplyDeployment(String correlationId, String sessionResourceName, String sessionResourceUID,
-            Session session, AppDefinition appDefinition, Optional<String> pvName, boolean useOAuth2Proxy) {
+            Session session, AppDefinition appDefinition, Optional<String> pvName, boolean useOAuth2Proxy,
+            Map<String, String> labelsToAdd) {
         Map<String, String> replacements = deploymentReplacements.getReplacements(client.namespace(), appDefinition,
                 session);
         String templateYaml = useOAuth2Proxy ? AddedHandlerUtil.TEMPLATE_DEPLOYMENT_YAML
@@ -443,7 +453,17 @@ public class LazySessionHandler implements SessionHandler {
             return;
         }
         K8sUtil.loadAndCreateDeploymentWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-                deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, deployment -> {
+                deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
+                labelsToAdd, deployment -> {
+
+                    LOGGER.debug("Setting session labels");
+                    Map<String, String> labels = deployment.getSpec().getTemplate().getMetadata().getLabels();
+                    if (labels == null) {
+                        labels = new HashMap<>();
+                        deployment.getSpec().getTemplate().getMetadata().setLabels(labels);
+                    }
+                    labels.putAll(labelsToAdd);
+
                     pvName.ifPresent(name -> addVolumeClaim(deployment, name, appDefinition.getSpec()));
                     bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
                             appDefinition.getSpec().getUplinkLimit(), correlationId);
