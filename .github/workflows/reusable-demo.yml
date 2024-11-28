@@ -47,7 +47,7 @@ jobs:
         run: docker build -t ${{ steps.get_tags.outputs.version_tag }} -f ${{ inputs.docker_file }} ${{ inputs.docker_location }}
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           username: ${{ secrets.dockerhub_username }}
           password: ${{ secrets.dockerhub_token }}

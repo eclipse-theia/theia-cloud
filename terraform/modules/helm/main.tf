@@ -94,7 +94,7 @@ resource "helm_release" "cert-manager" {
   name             = "cert-manager"
   repository       = "https://charts.jetstack.io"
   chart            = "cert-manager"
-  version          = "v1.11.0"
+  version          = "v1.16.1"
   namespace        = "cert-manager"
   create_namespace = true
 
@@ -109,7 +109,7 @@ resource "helm_release" "nginx-ingress-controller" {
   name             = "nginx-ingress-controller"
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
-  version          = "4.5.2"
+  version          = "4.11.3"
   namespace        = "ingress-nginx"
   create_namespace = true
 
@@ -121,6 +121,11 @@ resource "helm_release" "nginx-ingress-controller" {
   set {
     name  = "controller.service.loadBalancerIP"
     value = var.loadBalancerIP
+  }
+
+  set {
+    name  = "controller.allowSnippetAnnotations"
+    value = true
   }
 }
 
@@ -174,7 +179,7 @@ resource "helm_release" "keycloak" {
   name             = "keycloak"
   repository       = "https://charts.bitnami.com/bitnami"
   chart            = "keycloak"
-  version          = "13.3.0"
+  version          = "15.1.8"
   namespace        = "keycloak"
   create_namespace = true
 
