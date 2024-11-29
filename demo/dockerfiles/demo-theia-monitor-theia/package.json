@@ -62,6 +62,9 @@
   "devDependencies": {
     "@theia/cli": "1.43.1"
   },
+  "resolutions": {
+    "inversify": "6.0.3"
+  },
   "scripts": {
     "preinstall": "node-gyp install"
   },
