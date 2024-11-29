@@ -3,7 +3,22 @@
   "keywords": [
     "theia-extension"
   ],
-  "version": "1.0.0-next",
+  "version": "1.0.0",
+  "author": {
+    "name": "Theia Cloud"
+  },
+  "homepage": "http://theia-cloud.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eclipse-theia/theia-cloud.git"
+  },
+  "bugs": "https://github.com/eclipse-theia/theia-cloud/issues",
+  "contributors": [
+    {
+      "name": "Theia Cloud Project",
+      "url": "http://theia-cloud.io"
+    }
+  ],
   "files": [
     "lib",
     "src"
@@ -12,14 +27,15 @@
     "@theia/core": "1.55.0"
   },
   "devDependencies": {
-    "rimraf": "^5.0.0",
+    "rimraf": "^6.0.1",
     "typescript": "~5.4.5"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "lint": "eslint -c ../../.eslintrc.js --ext .ts ./src"
   },
   "theiaExtensions": [
     {
