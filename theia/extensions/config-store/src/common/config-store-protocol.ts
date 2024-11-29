@@ -1,7 +1,7 @@
 export const configStoreServicePath = '/services/theia-cloud/config-store';
 
-export const ConfigStoreService = Symbol('ConfigStoreService');
-export interface ConfigStoreService {
+export const ConfigStoreServer = Symbol('ConfigStoreServer');
+export interface ConfigStoreServer {
   /** Add client to be notified about config store changes. */
   addClient(client: ConfigStoreClient): void;
   /**

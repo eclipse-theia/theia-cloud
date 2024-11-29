@@ -2,19 +2,19 @@ import { ConnectionHandler, RpcConnectionHandler } from '@theia/core';
 import { BackendApplicationContribution } from '@theia/core/lib/node/backend-application';
 import { ContainerModule } from '@theia/core/shared/inversify';
 
-import { ConfigStoreClient, ConfigStoreService, configStoreServicePath } from '../common/config-store-protocol';
+import { ConfigStoreClient, ConfigStoreServer, configStoreServicePath } from '../common/config-store-protocol';
 import { ConfigStoreBackendClient } from './config-store-client';
-import { ConfigStoreServiceImpl } from './config-store-service';
+import { ConfigStoreServerImpl } from './config-store-service';
 
 export default new ContainerModule(bind => {
   bind(ConfigStoreClient).to(ConfigStoreBackendClient).inSingletonScope();
-  bind(ConfigStoreServiceImpl).toSelf().inSingletonScope();
-  bind(BackendApplicationContribution).toService(ConfigStoreServiceImpl);
+  bind(ConfigStoreServerImpl).toSelf().inSingletonScope();
+  bind(BackendApplicationContribution).toService(ConfigStoreServerImpl);
 
-  // Bind ConfigStoreService dynamically to add the backend client to the service.
-  bind(ConfigStoreService)
+  // Bind ConfigStoreServer dynamically to add the backend client to the service.
+  bind(ConfigStoreServer)
     .toDynamicValue(ctx => {
-      const service = ctx.container.get(ConfigStoreServiceImpl);
+      const service = ctx.container.get(ConfigStoreServerImpl);
       const client = ctx.container.get<ConfigStoreClient>(ConfigStoreBackendClient);
       service.addClient(client);
       return service;
@@ -25,7 +25,7 @@ export default new ContainerModule(bind => {
     .toDynamicValue(
       ctx =>
         new RpcConnectionHandler<ConfigStoreClient>(configStoreServicePath, client => {
-          const service = ctx.container.get<ConfigStoreService>(ConfigStoreService);
+          const service = ctx.container.get<ConfigStoreServer>(ConfigStoreServer);
           service.addClient(client);
           client.onDidCloseConnection(() => {
             service.removeClient(client);

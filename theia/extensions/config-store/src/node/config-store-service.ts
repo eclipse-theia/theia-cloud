@@ -3,12 +3,12 @@ import { BackendApplicationContribution } from '@theia/core/lib/node/backend-app
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { Application, Router } from 'express';
 
-import { ConfigStoreClient, ConfigStoreService } from '../common/config-store-protocol';
+import { ConfigStoreClient, ConfigStoreServer } from '../common/config-store-protocol';
 
 const configStoreRestPath = '/theia-cloud/config-store';
 
 @injectable()
-export class ConfigStoreServiceImpl implements ConfigStoreService, BackendApplicationContribution {
+export class ConfigStoreServerImpl implements ConfigStoreServer, BackendApplicationContribution {
   protected clients: ConfigStoreClient[] = [];
 
   @inject(ILogger)
