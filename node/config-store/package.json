@@ -1,0 +1,30 @@
+{
+  "name": "@eclipse-theiacloud/config-store",
+  "keywords": [
+    "theia-extension"
+  ],
+  "version": "1.0.0-next",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@theia/core": "1.55.0"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.0",
+    "typescript": "~5.4.5"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/config-store-frontend-module",
+      "backend": "lib/node/config-store-backend-module"
+    }
+  ]
+}
