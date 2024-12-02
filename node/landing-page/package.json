@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@eclipse-theiacloud/common": "1.0.0",
+    "@eclipse-theiacloud/common": "1.1.0-next",
     "keycloak-js": "20.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
