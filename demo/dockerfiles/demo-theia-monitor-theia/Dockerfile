@@ -8,7 +8,6 @@ ADD node ./node
 WORKDIR /home/theia/node
 RUN npm ci && npm run build -w monitor-theia
 WORKDIR /home/theia
-RUN sed -i 's/"@eclipse-theiacloud\/monitor-theia": "next"/"@eclipse-theiacloud\/monitor-theia": "file:node\/monitor-theia"/' package.json
 
 RUN yarn --pure-lockfile && \
     NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \

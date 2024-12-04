@@ -6,7 +6,6 @@ ENV THEIA_WEBVIEW_ENDPOINT {{hostname}}
 # Copy project
 COPY --chown=theia:theia project /home/project
 COPY --chown=theia:theia settings.json /home/theia/theia-blueprint/applications/browser/.theia/settings.json
-COPY --chown=theia:theia settings.json /home/theia/theia-blueprint/applications/browser/.theia/settings.json
 
 # Build projects once
 RUN mvn clean verify -f /home/project/java/pom.xml && \

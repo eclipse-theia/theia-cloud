@@ -12,7 +12,7 @@ on:
         type: boolean
         required: true
       publish_theia_cloud_activity_demo:
-        description: "Publishtheia-cloud-activity-demo?"
+        description: "Publish theia-cloud-activity-demo?"
         type: boolean
         required: true
 
