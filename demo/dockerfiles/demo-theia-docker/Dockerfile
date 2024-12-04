@@ -1,4 +1,4 @@
-FROM ghcr.io/eclipse-theia/theia-ide/theia-ide:1.55.0 as production-stage
+FROM ghcr.io/eclipse-theia/theia-ide/theia-ide:1.56.1 as production-stage
 
 ENV THEIA_MINI_BROWSER_HOST_PATTERN {{hostname}}
 ENV THEIA_WEBVIEW_ENDPOINT {{hostname}}
