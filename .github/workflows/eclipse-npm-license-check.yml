@@ -45,6 +45,7 @@ jobs:
       - name: Run dash-licenses
         shell: bash
         run: |
+          sudo apt-get install libsecret-1-dev
           cd node
           npm ci
           npm run license:check
