@@ -4,11 +4,8 @@
     "baseUrl": "."
   },
   "include": [
-    "common/src",
-    "config-store/src",
-    "landing-page/src",
-    "monitor/src",
-    "monitor-theia/src"
+    "examples/config-store-example/src",
+    "extensions/config-store/src"
   ],
   "exclude": ["node_modules"]
 }

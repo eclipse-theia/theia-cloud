@@ -2,6 +2,7 @@
 
 ## [1.1.0] - estimated 2025-02
 
+- [theia] Introduce new folder `theia` for all theia extensions and an example app to test these.
 ## [1.0.0] - 2024-11-29
 
 - [java/operator] Add Theia Cloud Labels on Resources created by operator [#362](https://github.com/eclipse-theia/theia-cloud/pull/362)
