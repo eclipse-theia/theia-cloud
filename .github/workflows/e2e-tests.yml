@@ -1,20 +1,14 @@
 name: "[E2E Tests] Minikube"
 
 on:
-  push:
-    branches:
-      - e2e-testing
-    inputs:
-      theia-cloud-helm-branch:
-        description: "Theia Cloud Helm Branch to use"
-        type: string
-        default: "main"
   workflow_dispatch:
     inputs:
       theia-cloud-helm-branch:
         description: "Theia Cloud Helm Branch to use"
         type: string
         default: "main"
+  schedule:
+    - cron: "0 13 * * 0"
 
 permissions:
   contents: read
@@ -30,11 +24,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.31.0, v1.30.4] #[v1.31.0, v1.30.4, v1.29.8, v1.28.13]
+        kubernetes: [v1.32.0, v1.31.4, v1.30.8, v1.29.12]
         paths: [true, false]
         ephemeral: [true, false]
         keycloak: [true, false]
     steps:
+      - name: Set Helm Branch for Scheduled Runs
+        if: ${{ github.event_name == 'schedule' }}
+        run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=main" >> $GITHUB_ENV
+
+      - name: Set Helm Branch for Manual Runs
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=${{ github.event.inputs.theia-cloud-helm-branch }}" >> $GITHUB_ENV
+
       - name: Checkout Theia Cloud
         uses: actions/checkout@v4
         with:
@@ -44,7 +46,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: "eclipsesource/theia-cloud-helm"
-          ref: "${{ github.event.inputs.theia-cloud-helm-branch }}"
+          ref: "${{ env.INPUT_THEIA_CLOUD_HELM_BRANCH }}"
           path: "./theia-cloud-helm"
 
       - name: Setup Minikube
