@@ -1,30 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { KubeConfig, CustomObjectsApi } from '@kubernetes/client-node';
-import { namespace, resourceGroup, resourcePlural, resourceVersion } from '../constats';
 
-const kc = new KubeConfig();
-kc.loadFromDefault();
-const k8sApi = kc.makeApiClient(CustomObjectsApi);
+import { deleteAllSessions, deleteAllWorkspaces } from '../k8s';
 
 test.describe('Logout', () => {
   test.beforeEach(async () => {
-    /* delete all sessions */
-    const resources: any = await k8sApi.listNamespacedCustomObject(
-      resourceGroup,
-      resourceVersion,
-      namespace,
-      resourcePlural
-    );
-
-    for (const resource of resources.body.items) {
-      await k8sApi.deleteNamespacedCustomObject(
-        resourceGroup,
-        resourceVersion,
-        namespace,
-        resourcePlural,
-        resource.metadata.name
-      );
-    }
+    deleteAllSessions();
+    deleteAllWorkspaces();
   });
 
   test('should work', async ({ page, baseURL }) => {

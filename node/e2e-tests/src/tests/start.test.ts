@@ -1,30 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { KubeConfig, CustomObjectsApi } from '@kubernetes/client-node';
-import { namespace, resourceGroup, resourcePlural, resourceVersion } from '../constats';
 
-const kc = new KubeConfig();
-kc.loadFromDefault();
-const k8sApi = kc.makeApiClient(CustomObjectsApi);
+import { namespace, resourceGroup, sessionPlural, sessionVersion } from '../constats';
+import { deleteAllSessions, deleteAllWorkspaces, k8sApi } from '../k8s';
 
 test.describe('Start Session', () => {
   test.beforeEach(async () => {
-    /* delete all sessions */
-    const resources: any = await k8sApi.listNamespacedCustomObject(
-      resourceGroup,
-      resourceVersion,
-      namespace,
-      resourcePlural
-    );
-
-    for (const resource of resources.body.items) {
-      await k8sApi.deleteNamespacedCustomObject(
-        resourceGroup,
-        resourceVersion,
-        namespace,
-        resourcePlural,
-        resource.metadata.name
-      );
-    }
+    deleteAllSessions();
+    deleteAllWorkspaces();
   });
 
   test('should work', async ({ page, baseURL }) => {
@@ -56,15 +38,23 @@ test.describe('Start Session', () => {
     await expect(loadingAnimation).toBeHidden({ timeout: 180000 });
 
     /* check redirect url */
-    expect(page.url()).toContain(baseURL!.replace('trynow', 'instances'));
+    const browserUrl = page.url();
+    expect(browserUrl).toContain(baseURL!.replace('trynow', 'instances'));
 
     /* check created session */
     const resources: any = await k8sApi.listNamespacedCustomObject(
       resourceGroup,
-      resourceVersion,
+      sessionVersion,
       namespace,
-      resourcePlural
+      sessionPlural
     );
     expect(resources.body.items).toHaveLength(1);
+
+    const sessionUrl = resources.body.items[0].status.url;
+    expect(sessionUrl).toBeDefined();
+    const normalizedBrowserUrl = new URL(browserUrl);
+    const normalizedSessionUrl = new URL(sessionUrl.startsWith('http') ? sessionUrl : `https://${sessionUrl}`);
+    expect(normalizedBrowserUrl.hostname).toBe(normalizedSessionUrl.hostname);
+    expect(normalizedBrowserUrl.pathname).toBe(normalizedSessionUrl.pathname);
   });
 });
