@@ -1,9 +1,6 @@
 name: "[E2E Tests] Minikube"
 
 on:
-  push:
-    branches:
-      - e2e-testing
   workflow_dispatch:
     inputs:
       theia-cloud-helm-branch:
