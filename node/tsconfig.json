@@ -7,7 +7,8 @@
     "common/src",
     "landing-page/src",
     "monitor/src",
-    "monitor-theia/src"
+    "monitor-theia/src",
+    "e2e-tests/src"
   ],
   "exclude": ["node_modules"]
 }
