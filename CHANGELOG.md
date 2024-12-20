@@ -2,7 +2,11 @@
 
 ## [1.1.0] - estimated 2025-02
 
-- [theia] Introduce new folder `theia` for all theia extensions and an example app to test these.
+- [theia] Introduce new folder `theia` for all theia extensions and an example app to test these [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
+- [node/monitor-theia] Move Theia monitor extension to `theia/extensions/monitor-theia` [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
+- [theia/extensions/monitor-theia] Update Theia dependencies to `^1.55.0` [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
+- [ci] Add Theia CI workflow, add reusable Theia extension publish workflow [#389](https://github.com/eclipse-theia/theia-cloud/pull/388)
+
 ## [1.0.0] - 2024-11-29
 
 - [java/operator] Add Theia Cloud Labels on Resources created by operator [#362](https://github.com/eclipse-theia/theia-cloud/pull/362)

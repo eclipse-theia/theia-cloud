@@ -3,12 +3,6 @@
   "compilerOptions": {
     "baseUrl": "."
   },
-  "include": [
-    "common/src",
-    "config-store/src",
-    "landing-page/src",
-    "monitor/src",
-    "monitor-theia/src"
-  ],
+  "include": ["common/src", "config-store/src", "landing-page/src", "monitor/src"],
   "exclude": ["node_modules"]
 }

@@ -5,7 +5,8 @@
   },
   "include": [
     "examples/config-store-example/src",
-    "extensions/config-store/src"
+    "extensions/config-store/src",
+    "extensions/monitor-theia/src"
   ],
   "exclude": ["node_modules"]
 }

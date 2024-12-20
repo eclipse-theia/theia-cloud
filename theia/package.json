@@ -8,7 +8,10 @@
   },
   "scripts": {
     "prepare": "lerna run prepare --loglevel=verbose",
-    "build": "lerna run clean && lerna run build",
+    "build": "yarn clean && lerna run build",
+    "build:workspace": "lerna run build --scope",
+    "clean": "lerna run clean",
+    "clean:workspace": "lerna run clean --scope",
     "example-app": "yarn --cwd examples/browser-app",
     "lint": "lerna run lint",
     "start": "yarn example-app start",
@@ -34,7 +37,8 @@
   "workspaces": [
     "examples/browser-app",
     "examples/config-store-example",
-    "extensions/config-store"
+    "extensions/config-store",
+    "extensions/monitor-theia"
   ],
   "resolutions": {
     "inversify": "6.0.3"
