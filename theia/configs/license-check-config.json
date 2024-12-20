@@ -1,7 +1,7 @@
 {
   "project": "ecd.theia",
   "review": true,
-  "inputFile": "package-lock.json",
+  "inputFile": "yarn.lock",
   "batch": 50,
   "timeout": 200,
   "summary": "license-check-summary.txt",

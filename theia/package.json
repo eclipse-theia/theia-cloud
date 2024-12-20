@@ -15,7 +15,8 @@
     "example-app": "yarn --cwd examples/browser-app",
     "lint": "lerna run lint",
     "start": "yarn example-app start",
-    "watch": "lerna run watch"
+    "watch": "lerna run watch",
+    "license:check": "npx dash-licenses-wrapper --configFile=./configs/license-check-config.json"
   },
   "devDependencies": {
     "@eclipse-dash/nodejs-wrapper": "^0.0.1",
