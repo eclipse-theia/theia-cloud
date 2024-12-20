@@ -1,0 +1,65 @@
+name: Reusable workflow for publishing theia extensions
+
+on:
+  workflow_call:
+    inputs:
+      package_workspace:
+        required: true
+        type: string
+        description: The package's workspace path relative to the node directory.
+    secrets:
+      npm-token:
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'release'
+    defaults:
+      run:
+        working-directory: ./theia
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check version (only for push events)
+        if: github.event_name == 'push'
+        id: version_check
+        run: |
+          VERSION=$(cd extensions/${{ inputs.package_workspace }} && node --print "require('./package.json').version")
+          echo "Package version: ${VERSION}"
+          if [[ $VERSION == *"-next" ]]; then
+            echo "is_next_version=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_next_version=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libsecret-1-dev
+          yarn --frozen-lockfile
+
+      # Publish the package to the npm registry. The publish command also builds the package via the prepublishOnly lifecycle script.
+      - name: Publish next version
+        if: github.event_name == 'push' && steps.version_check.outputs.is_next_version == 'true'
+        run: npm run publish:next -w ${{ inputs.package_workspace }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
+          NPM_CONFIG_PROVENANCE: true
+
+      - name: Publish latest version
+        if: github.event_name == 'release'
+        run: npm run publish:latest -w ${{ inputs.package_workspace }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
+          NPM_CONFIG_PROVENANCE: true

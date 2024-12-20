@@ -1,12 +1,12 @@
-FROM node:20-bookworm as build-stage
+FROM node:20-bookworm AS build-stage
 RUN apt-get update && apt-get install -y libxkbfile-dev libsecret-1-dev
 WORKDIR /home/theia
 ADD demo/dockerfiles/demo-theia-monitor-theia/package.json ./package.json
 
 ## Link package from local
-ADD node ./node
-WORKDIR /home/theia/node
-RUN npm ci && npm run build -w monitor-theia
+ADD theia ./theia
+WORKDIR /home/theia/theia
+RUN yarn --frozen-lockfile --ignore-scripts && yarn build:workspace @eclipse-theiacloud/monitor-theia
 WORKDIR /home/theia
 
 RUN yarn --pure-lockfile && \
@@ -21,7 +21,7 @@ RUN yarn --pure-lockfile && \
     yarn autoclean --force && \
     yarn cache clean
 
-FROM node:20-bookworm-slim as production-stage
+FROM node:20-bookworm-slim AS production-stage
 
 # Use fixed user id 101 to guarantee it matches the app definition
 RUN adduser --system --group --uid 101 theia

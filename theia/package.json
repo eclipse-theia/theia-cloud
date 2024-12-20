@@ -1,0 +1,47 @@
+{
+  "private": true,
+  "name": "@eclipse-theiacloud/theia-monorepo",
+  "version": "0.0.0",
+  "engines": {
+    "yarn": ">=1.7.0 <2",
+    "node": ">=20.0.0 || <21"
+  },
+  "scripts": {
+    "prepare": "lerna run prepare --loglevel=verbose",
+    "build": "yarn clean && lerna run build",
+    "build:workspace": "lerna run build --scope",
+    "clean": "lerna run clean",
+    "clean:workspace": "lerna run clean --scope",
+    "example-app": "yarn --cwd examples/browser-app",
+    "lint": "lerna run lint",
+    "start": "yarn example-app start",
+    "watch": "lerna run watch",
+    "license:check": "npx dash-licenses-wrapper --configFile=./configs/license-check-config.json"
+  },
+  "devDependencies": {
+    "@eclipse-dash/nodejs-wrapper": "^0.0.1",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "eslint": "^8.20.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-header": "^3.1.1",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-no-null": "^1.0.2",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "lerna": "^8.1.9",
+    "prettier": "^2.6.2",
+    "typescript": "~5.4.5"
+  },
+  "workspaces": [
+    "examples/browser-app",
+    "examples/config-store-example",
+    "extensions/config-store",
+    "extensions/monitor-theia"
+  ],
+  "resolutions": {
+    "inversify": "6.0.3"
+  }
+}

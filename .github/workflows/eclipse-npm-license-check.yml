@@ -42,12 +42,22 @@ jobs:
           distribution: "adopt"
           java-version: ${{ matrix.java }}
 
-      - name: Run dash-licenses
+      - name: Run node dash-licenses
         shell: bash
         run: |
           sudo apt-get install libsecret-1-dev
           cd node
           npm ci
           npm run license:check
+        env:
+          DASH_TOKEN: ${{ secrets.DASH_LICENSES_PAT }}
+
+      - name: Run theia dash-licenses
+        shell: bash
+        run: |
+          sudo apt-get install libsecret-1-dev
+          cd theia
+          yarn --frozen-lockfile --ignore-scripts
+          yarn license:check
         env:
           DASH_TOKEN: ${{ secrets.DASH_LICENSES_PAT }}

@@ -1,9 +1,9 @@
 {
-  "name": "@eclipse-theiacloud/monitor-theia",
-  "version": "1.1.0-next",
+  "name": "@eclipse-theiacloud/config-store",
   "keywords": [
     "theia-extension"
   ],
+  "version": "1.0.0",
   "author": {
     "name": "Theia Cloud"
   },
@@ -24,26 +24,24 @@
     "src"
   ],
   "peerDependencies": {
-    "@theia/core": "^1.34.0",
-    "@theia/plugin-ext": "^1.34.0"
+    "@theia/core": "^1.55.0"
   },
   "devDependencies": {
-    "rimraf": "^3.0.2"
+    "@theia/core": "^1.55.0",
+    "rimraf": "^6.0.1",
+    "typescript": "~5.4.5"
   },
   "scripts": {
-    "prepare": "npm run clean && npm run build",
+    "prepare": "yarn run clean && yarn run build",
     "clean": "rimraf lib",
     "build": "tsc",
     "watch": "tsc -w",
-    "lint": "eslint -c ../.eslintrc.js --ext .ts ./src",
-    "prepublishOnly": "npm run build",
-    "publish:next": "npm pkg set version=`node --print \"require('./package.json').version\"`.`git rev-parse --short HEAD` && npm publish --tag next",
-    "publish:latest": "npm publish --tag latest"
+    "lint": "eslint -c ../../.eslintrc.js --ext .ts ./src"
   },
   "theiaExtensions": [
     {
-      "frontend": "lib/browser/monitor-frontend-module",
-      "backend": "lib/node/monitor-backend-module"
+      "frontend": "lib/browser/config-store-frontend-module",
+      "backend": "lib/node/config-store-backend-module"
     }
   ]
 }

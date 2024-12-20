@@ -31,8 +31,8 @@
   },
   "workspaces": [
     "common",
+    "config-store",
     "landing-page",
-    "monitor-theia",
     "testing-page"
   ]
 }
