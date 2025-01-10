@@ -150,6 +150,47 @@
       "preLaunchTask": "Build and Install Operator library"
     },
     {
+      // This works with terraform config 2-04_try-now_paths_eager_start
+      "type": "java",
+      "name": "Debug Operator (eager start try-now-paths)",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/java/operator/org.eclipse.theia.cloud.defaultoperator",
+      "mainClass": "org.eclipse.theia.cloud.defaultoperator.DefaultTheiaCloudOperatorLauncher",
+      "args": [
+        "--keycloak",
+        "--keycloakURL",
+        "https://${input:minikubeIP}.nip.io/keycloak/",
+        "--keycloakRealm",
+        "TheiaCloud",
+        "--keycloakClientId",
+        "theia-cloud",
+        "--usePaths",
+        "--instancesPath",
+        "instances",
+        "--instancesHost",
+        "${input:minikubeIP}.nip.io",
+        "--serviceUrl",
+        "https://${input:minikubeIP}.nip.io/service",
+        "--cloudProvider",
+        "MINIKUBE",
+        "--sessionsPerUser",
+        "3",
+        "--appId",
+        "asdfghjkl",
+        "--storageClassName",
+        "default",
+        "--requestedStorage",
+        "250Mi",
+        "--bandwidthLimiter",
+        "WONDERSHAPER",
+        "--oAuth2ProxyVersion",
+        "v7.5.1",
+        "--eagerStart"
+      ],
+      "vmArgs": "-Dlog4j2.configurationFile=log4j2.xml",
+      "preLaunchTask": "Build and Install Operator library"
+    },
+    {
       // Attach to the service running (Task: Run Service)
       "type": "java",
       "name": "Attach to Service",
