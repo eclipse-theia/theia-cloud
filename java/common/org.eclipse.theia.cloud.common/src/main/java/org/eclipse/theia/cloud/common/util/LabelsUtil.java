@@ -2,6 +2,7 @@ package org.eclipse.theia.cloud.common.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
@@ -27,5 +28,14 @@ public class LabelsUtil {
         labels.put(LABEL_KEY_USER, sanitizedUser);
         labels.put(LABEL_KEY_APPDEF, appDefinitionSpec.getName());
         return labels;
+    }
+
+    /**
+     * Returns the set of label keys that are specific to a specific session, i.e. the user key.
+     * 
+     * @return The session specific label keys.
+     */
+    public static Set<String> getSessionSpecificLabelKeys() {
+        return Set.of(LABEL_KEY_USER);
     }
 }

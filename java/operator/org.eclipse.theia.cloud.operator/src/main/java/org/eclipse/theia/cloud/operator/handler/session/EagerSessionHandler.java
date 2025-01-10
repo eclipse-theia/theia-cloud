@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.util.JavaUtil;
@@ -45,7 +46,9 @@ import org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil;
 
 import com.google.inject.Inject;
 
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -55,17 +58,19 @@ import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
 import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.ServiceResource;
 
 /**
  * A {@link SessionAddedHandler} that relies on the fact that the app definition handler created spare deployments to
  * use.
  */
-public class EagerStartSessionHandler implements SessionHandler {
+public class EagerSessionHandler implements SessionHandler {
 
     public static final String EAGER_START_REFRESH_ANNOTATION = "theia-cloud.io/eager-start-refresh";
 
-    private static final Logger LOGGER = LogManager.getLogger(EagerStartSessionHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(EagerSessionHandler.class);
 
     @Inject
     private TheiaCloudClient client;
@@ -79,7 +84,7 @@ public class EagerStartSessionHandler implements SessionHandler {
     @Override
     public boolean sessionAdded(Session session, String correlationId) {
         SessionSpec spec = session.getSpec();
-        LOGGER.info(formatLogMessage(correlationId, "Handling " + spec));
+        LOGGER.info(formatLogMessage(correlationId, "Handling sessionAdded " + spec));
 
         String sessionResourceName = session.getMetadata().getName();
         String sessionResourceUID = session.getMetadata().getUid();
@@ -245,7 +250,8 @@ public class EagerStartSessionHandler implements SessionHandler {
             return JavaUtil.tuple(alreadyReservedService, true);
         }
 
-        Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingServices);
+        Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingServices,
+                appDefinitionResourceUID);
         if (serviceToUse.isEmpty()) {
             return JavaUtil.tuple(serviceToUse, false);
         }
@@ -300,4 +306,140 @@ public class EagerStartSessionHandler implements SessionHandler {
         return ingress;
     }
 
+    @Override
+    public boolean sessionDeleted(Session session, String correlationId) {
+        SessionSpec spec = session.getSpec();
+        LOGGER.info(formatLogMessage(correlationId, "Handling sessionDeleted " + spec));
+
+        // Find app definition for session. If it's not there anymore, we don't need to clean up because the resources
+        // are deleted by Kubernetes garbage collection.
+        String appDefinitionID = spec.getAppDefinition();
+        Optional<AppDefinition> appDefinition = client.appDefinitions().get(appDefinitionID);
+        if (appDefinition.isEmpty()) {
+            LOGGER.info(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID
+                    + " found. Thus, no cleanup is needed because associated resources are deleted by Kubernets garbage collecion."));
+            return true;
+        }
+        AppDefinitionSpec appDefinitionSpec = appDefinition.get().getSpec();
+
+        // Find service by first filtering all services by the session's corresponding session labels (as added in
+        // sessionCreated) and then checking if the service has an owner reference to the session
+        String sessionResourceName = session.getMetadata().getName();
+        String sessionResourceUID = session.getMetadata().getUid();
+        Map<String, String> sessionLabels = LabelsUtil.createSessionLabels(spec, appDefinitionSpec);
+        String namespace = session.getMetadata().getNamespace();
+        // Filtering by withLabels(sessionLabels) because the method requires an exact match of the labels.
+        // Additional labels on the service prevent a match and the service has an additional app label.
+        // Thus, filter by each session label separately.
+        FilterWatchListDeletable<Service, ServiceList, ServiceResource<Service>> servicesFilter = client.services();
+        for (Entry<String, String> entry : sessionLabels.entrySet()) {
+            servicesFilter = servicesFilter.withLabel(entry.getKey(), entry.getValue());
+        }
+        List<Service> services = servicesFilter.list().getItems();
+        Optional<Service> ownedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
+                sessionResourceUID, services);
+
+        if (ownedService.isEmpty()) {
+            LOGGER.error(
+                    formatLogMessage(correlationId, "No Service owned by session " + sessionResourceName + " found."));
+            return false;
+        }
+        String serviceName = ownedService.get().getMetadata().getName();
+
+        // Remove owner reference and user specific labels from the service
+        Service cleanedService;
+        try {
+            cleanedService = client.services().inNamespace(namespace).withName(serviceName).edit(service -> {
+                TheiaCloudHandlerUtil.removeOwnerReferenceFromItem(correlationId, sessionResourceName,
+                        sessionResourceUID, service);
+                service.getMetadata().getLabels().keySet().removeAll(LabelsUtil.getSessionSpecificLabelKeys());
+                return service;
+            });
+            LOGGER.info(formatLogMessage(correlationId,
+                    "Removed owner reference and user-specific session labels from service: " + serviceName));
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while editing service " + serviceName), e);
+            return false;
+        }
+        Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition.get(), cleanedService);
+
+        // Cleanup ingress rule to prevent further traffic to the session pod
+        Optional<Ingress> ingress = K8sUtil.getExistingIngress(client.kubernetes(), client.namespace(),
+                appDefinition.get().getMetadata().getName(), appDefinition.get().getMetadata().getUid());
+        if (ingress.isEmpty()) {
+            LOGGER.error(
+                    formatLogMessage(correlationId, "No Ingress for app definition " + appDefinitionID + " found."));
+            return false;
+        }
+        // Remove ingress rule
+        try {
+            removeIngressRule(correlationId, appDefinition.get(), ingress.get(), instance);
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
+            return false;
+        }
+
+        // Remove owner reference from deployment
+        if (instance == null) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while getting instance from Service"));
+            return false;
+        }
+        final String deploymentName = TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance);
+        try {
+            client.kubernetes().apps().deployments().withName(deploymentName).edit(deployment -> TheiaCloudHandlerUtil
+                    .removeOwnerReferenceFromItem(correlationId, sessionResourceName, sessionResourceUID, deployment));
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
+                    + (appDefinitionID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
+            return false;
+        }
+
+        // Remove user from allowed emails in config map
+        try {
+            client.kubernetes().configMaps()
+                    .withName(TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition.get(), instance))
+                    .edit(configmap -> {
+                        configmap.setData(
+                                Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST, null));
+                        return configmap;
+                    });
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while editing email configmap "
+                    + (appDefinitionID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)), e);
+            return false;
+        }
+
+        // Delete the pod to clean temporary workspace files. The deployment recreates a fresh pod automatically.
+        try {
+            Optional<Pod> pod = client.kubernetes().pods().list().getItems().stream()
+                    .filter(p -> p.getMetadata().getName().startsWith(deploymentName)).findAny();
+            if (pod.isPresent()) {
+                LOGGER.info(formatLogMessage(correlationId, "Deleting pod " + pod.get().getMetadata().getName()));
+                client.pods().withName(pod.get().getMetadata().getName()).delete();
+            }
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while deleting pod"), e);
+            return false;
+        }
+
+        return true;
+    }
+
+    protected synchronized void removeIngressRule(String correlationId, AppDefinition appDefinition, Ingress ingress,
+            Integer instance) throws KubernetesClientException {
+        final String ruleHttpPath = ingressPathProvider.getPath(appDefinition, instance)
+                + AddedHandlerUtil.INGRESS_REWRITE_PATH;
+        client.ingresses().resource(ingress.getMetadata().getName()).edit(ingressToUpdate -> {
+            ingressToUpdate.getSpec().getRules().removeIf(rule -> {
+                if (rule.getHttp() == null) {
+                    LOGGER.warn(formatLogMessage(correlationId,
+                            "Error while removing ingress rule: The rule's HTTP block is null"));
+                    return false;
+                }
+                return rule.getHttp().getPaths().stream().anyMatch(httpPath -> ruleHttpPath.equals(httpPath.getPath()));
+            });
+            return ingressToUpdate;
+        });
+    }
 }
