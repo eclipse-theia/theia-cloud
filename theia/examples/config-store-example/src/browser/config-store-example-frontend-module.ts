@@ -10,7 +10,6 @@ import {
 } from './config-store-example-contribution';
 
 export default new ContainerModule(bind => {
-  // add your contribution bindings here
-  bind(CommandContribution).to(ConfigStoreExampleCommandContribution);
-  bind(MenuContribution).to(ConfigStoreExampleMenuContribution);
+  bind(CommandContribution).to(ConfigStoreExampleCommandContribution).inSingletonScope();
+  bind(MenuContribution).to(ConfigStoreExampleMenuContribution).inSingletonScope();
 });

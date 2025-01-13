@@ -9,8 +9,10 @@
     "src"
   ],
   "dependencies": {
-    "@theia/core": "1.55.0",
-    "@eclipse-theiacloud/config-store": "^1.0.0"
+    "@eclipse-theiacloud/config-store": "1.1.0-next"
+  },
+  "peerDependencies": {
+    "@theia/core": "^1.55.0"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
