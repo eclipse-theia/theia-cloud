@@ -18,6 +18,7 @@ public class LabelsUtil {
 
     public static final String LABEL_KEY_USER = LABEL_CUSTOM_PREFIX + "/user";
     public static final String LABEL_KEY_APPDEF = LABEL_CUSTOM_PREFIX + "/app-definition";
+    public static final String LABEL_KEY_SESSION_NAME = LABEL_CUSTOM_PREFIX + "/session";
 
     public static Map<String, String> createSessionLabels(SessionSpec sessionSpec,
             AppDefinitionSpec appDefinitionSpec) {
@@ -27,15 +28,16 @@ public class LabelsUtil {
         String sanitizedUser = sessionSpec.getUser().replaceAll("@", "_at_").replaceAll("[^a-zA-Z0-9]", "_");
         labels.put(LABEL_KEY_USER, sanitizedUser);
         labels.put(LABEL_KEY_APPDEF, appDefinitionSpec.getName());
+        labels.put(LABEL_KEY_SESSION_NAME, sessionSpec.getName());
         return labels;
     }
 
     /**
-     * Returns the set of label keys that are specific to a specific session, i.e. the user key.
+     * Returns the set of label keys that are specific to a specific session, i.e. the user and session name keys.
      * 
      * @return The session specific label keys.
      */
     public static Set<String> getSessionSpecificLabelKeys() {
-        return Set.of(LABEL_KEY_USER);
+        return Set.of(LABEL_KEY_SESSION_NAME, LABEL_KEY_USER);
     }
 }

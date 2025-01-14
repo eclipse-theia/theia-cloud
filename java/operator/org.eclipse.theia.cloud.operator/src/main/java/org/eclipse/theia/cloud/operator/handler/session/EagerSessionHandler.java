@@ -189,6 +189,7 @@ public class EagerSessionHandler implements SessionHandler {
             // This is the case because ConfigMap changes are not propagated to the pod immediately but during a
             // periodic sync. See
             // https://kubernetes.io/docs/concepts/configuration/configmap/#mounted-configmaps-are-updated-automatically
+            // NOTE that this is still not a one hundred percent guarantee that the pod is updated in time.
             try {
                 LOGGER.info(formatLogMessage(correlationId, "Adding update annotation to pods..."));
                 client.kubernetes().pods().list().getItems().forEach(pod -> {
@@ -327,29 +328,32 @@ public class EagerSessionHandler implements SessionHandler {
         String sessionResourceName = session.getMetadata().getName();
         String sessionResourceUID = session.getMetadata().getUid();
         Map<String, String> sessionLabels = LabelsUtil.createSessionLabels(spec, appDefinitionSpec);
-        String namespace = session.getMetadata().getNamespace();
         // Filtering by withLabels(sessionLabels) because the method requires an exact match of the labels.
         // Additional labels on the service prevent a match and the service has an additional app label.
         // Thus, filter by each session label separately.
+        // We rely on the fact that the session labels are unique for each session.
+        // We cannot rely on owner references because they might have been cleaned up automatically by Kubernetes.
+        // While this should not happen, it did on Minikube.
         FilterWatchListDeletable<Service, ServiceList, ServiceResource<Service>> servicesFilter = client.services();
         for (Entry<String, String> entry : sessionLabels.entrySet()) {
             servicesFilter = servicesFilter.withLabel(entry.getKey(), entry.getValue());
         }
         List<Service> services = servicesFilter.list().getItems();
-        Optional<Service> ownedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
-                sessionResourceUID, services);
-
-        if (ownedService.isEmpty()) {
-            LOGGER.error(
-                    formatLogMessage(correlationId, "No Service owned by session " + sessionResourceName + " found."));
+        if (services.isEmpty()) {
+            LOGGER.error(formatLogMessage(correlationId, "No Service owned by session " + spec.getName() + " found."));
+            return false;
+        } else if (services.size() > 1) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Multiple Services owned by session " + spec.getName() + " found. This should never happen."));
             return false;
         }
-        String serviceName = ownedService.get().getMetadata().getName();
+        Service ownedService = services.get(0);
+        String serviceName = ownedService.getMetadata().getName();
 
         // Remove owner reference and user specific labels from the service
         Service cleanedService;
         try {
-            cleanedService = client.services().inNamespace(namespace).withName(serviceName).edit(service -> {
+            cleanedService = client.services().withName(serviceName).edit(service -> {
                 TheiaCloudHandlerUtil.removeOwnerReferenceFromItem(correlationId, sessionResourceName,
                         sessionResourceUID, service);
                 service.getMetadata().getLabels().keySet().removeAll(LabelsUtil.getSessionSpecificLabelKeys());
