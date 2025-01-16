@@ -1,0 +1,30 @@
+name: "[THEIA] Publish monitor-theia"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "theia/yarn.lock"
+      - "theia/extensions/monitor-theia/**"
+      # Publish when a workflow has changed (this is needed to detect version updates)
+      - ".github/workflows/cd-monitor-theia.yml"
+      - ".github/workflows/reusable-theia-extension.yml"
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  run:
+    uses: ./.github/workflows/reusable-theia-extension.yml
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      package_workspace: extensions/monitor-theia
+    secrets:
+      npm-token: ${{ secrets.NPM_TOKEN }}

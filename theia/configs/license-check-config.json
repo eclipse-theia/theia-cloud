@@ -1,0 +1,9 @@
+{
+  "project": "ecd.theia",
+  "review": true,
+  "inputFile": "yarn.lock",
+  "batch": 50,
+  "timeout": 200,
+  "summary": "license-check-summary.txt",
+  "exclusions": "configs/license-check-exclusions.json"
+}

@@ -197,6 +197,25 @@
       "request": "attach",
       "hostName": "localhost",
       "port": 5005
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Theia Example Browser Backend",
+      "program": "${workspaceRoot}/theia/examples/browser-app/src-gen/backend/main.js",
+      "args": ["--loglevel=debug", "--port=3000", "--no-cluster"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceRoot}/theia/node_modules/@theia/*/lib/**/*.js",
+        "${workspaceRoot}/theia/*/lib/**/*.js",
+        "${workspaceRoot}/theia/examples/browser-app/src-gen/**/*.js"
+      ],
+      "smartStep": true,
+      "internalConsoleOptions": "openOnSessionStart",
+      "outputCapture": "std"
     }
   ],
   "inputs": [
