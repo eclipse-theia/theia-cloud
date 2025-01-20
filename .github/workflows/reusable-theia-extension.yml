@@ -30,7 +30,7 @@ jobs:
         if: github.event_name == 'push'
         id: version_check
         run: |
-          VERSION=$(cd extensions/${{ inputs.package_workspace }} && node --print "require('./package.json').version")
+          VERSION=$(cd ${{ inputs.package_workspace }} && node --print "require('./package.json').version")
           echo "Package version: ${VERSION}"
           if [[ $VERSION == *"-next" ]]; then
             echo "is_next_version=true" >> $GITHUB_OUTPUT
