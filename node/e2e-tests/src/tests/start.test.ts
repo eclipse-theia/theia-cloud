@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { namespace, resourceGroup, sessionPlural, sessionVersion } from '../constats';
+import { namespace, resourceGroup, sessionPlural, sessionVersion } from '../constants';
 import { deleteAllSessions, deleteAllWorkspaces, k8sApi } from '../k8s';
 
 test.describe('Start Session', () => {

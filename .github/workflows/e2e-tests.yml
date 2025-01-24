@@ -53,7 +53,7 @@ jobs:
           path: "./theia-cloud-helm"
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@92af4db914ab207f837251cd53eb7060e6477614
+        uses: manusa/actions-setup-minikube@92af4db914ab207f837251cd53eb7060e6477614 # v2.11.0
         with:
           minikube version: v1.33.1
           kubernetes version: ${{ matrix.kubernetes }}
@@ -62,7 +62,6 @@ jobs:
 
       - name: Enable Minikube Addons
         run: |
-          minikube addons enable dashboard
           minikube addons enable default-storageclass
           minikube addons enable ingress
           minikube addons enable metrics-server
@@ -118,10 +117,10 @@ jobs:
       - name: Wait for Deployments to be Ready
         run: |
           kubectl wait --namespace ingress-nginx --for=condition=available deployment/ingress-nginx-controller --timeout=300s
-          kubectl wait --namespace theiacloud --for=condition=available deployment/conversion-webhook --timeout=300s
-          kubectl wait --namespace theiacloud --for=condition=available deployment/landing-page-deployment --timeout=300s
-          kubectl wait --namespace theiacloud --for=condition=available deployment/operator-deployment --timeout=300s
-          kubectl wait --namespace theiacloud --for=condition=available deployment/service-deployment --timeout=300s
+          kubectl wait --namespace theia-cloud --for=condition=available deployment/conversion-webhook --timeout=300s
+          kubectl wait --namespace theia-cloud --for=condition=available deployment/landing-page-deployment --timeout=300s
+          kubectl wait --namespace theia-cloud --for=condition=available deployment/operator-deployment --timeout=300s
+          kubectl wait --namespace theia-cloud --for=condition=available deployment/service-deployment --timeout=300s
 
       # URLs
       # service: servicex
