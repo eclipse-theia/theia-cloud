@@ -10,5 +10,10 @@ node/**/node_modules/
 node/**/build/
 node/**/dist/
 
+theia/**/node_modules/
+theia/**/lib/
+theia/**/src-gen/
+theia/**/gen-webpack.*.js
+
 # Java build artifacts
 java/**/target/

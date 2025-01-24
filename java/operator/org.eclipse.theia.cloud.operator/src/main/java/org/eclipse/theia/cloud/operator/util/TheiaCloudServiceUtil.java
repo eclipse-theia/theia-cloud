@@ -132,6 +132,15 @@ public final class TheiaCloudServiceUtil {
         return service.getMetadata().getOwnerReferences().size() == 1;
     }
 
+    /**
+     * Returns an unused service.
+     * 
+     * @param existingServices
+     * @return
+     * @deprecated Use {@link #getUnusedService(List, String)} instead: Services should be owned by the corresponding
+     *             app definition.
+     */
+    @Deprecated
     public static Optional<Service> getUnusedService(List<Service> existingServices) {
         Optional<Service> serviceToUse = existingServices.stream()//
                 .filter(TheiaCloudServiceUtil::isUnusedService)//
@@ -139,4 +148,25 @@ public final class TheiaCloudServiceUtil {
         return serviceToUse;
     }
 
+    /**
+     * Returns an unused service that is owned by the given app definition.
+     * 
+     * @param existingServices         The list of services to search in.
+     * @param appDefinitionResourceUID The UID of the app definition that should own the service.
+     * @return The unused service that is owned by the given app definition or nothing if none is available.
+     */
+    public static Optional<Service> getUnusedService(List<Service> existingServices, String appDefinitionResourceUID) {
+        Optional<Service> serviceToUse = existingServices.stream()//
+                .filter(TheiaCloudServiceUtil::isUnusedService)//
+                .filter(service -> {
+                    for (OwnerReference ownerReference : service.getMetadata().getOwnerReferences()) {
+                        if (appDefinitionResourceUID.equals(ownerReference.getUid())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })//
+                .findAny();
+        return serviceToUse;
+    };
 }

@@ -1,0 +1,33 @@
+{
+  "name": "config-store-example",
+  "keywords": [
+    "theia-extension"
+  ],
+  "version": "0.0.0",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@eclipse-theiacloud/config-store": "1.1.0-next"
+  },
+  "peerDependencies": {
+    "@theia/core": "^1.55.0"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "~5.4.5"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "tsc",
+    "lint": "eslint -c ../../.eslintrc.js --ext .ts ./src",
+    "watch": "tsc -w"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/config-store-example-frontend-module"
+    }
+  ]
+}

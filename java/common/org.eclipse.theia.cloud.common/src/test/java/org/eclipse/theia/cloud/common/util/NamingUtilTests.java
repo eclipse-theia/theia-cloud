@@ -17,6 +17,8 @@ package org.eclipse.theia.cloud.common.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
@@ -29,6 +31,22 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
  * Unit tests for {@link NamingUtil}.
  */
 class NamingUtilTests {
+
+    @Test
+    void createName_AppDefinitionAndInstace() {
+        AppDefinition appDefinition = createAppDefinition();
+
+        String result = NamingUtil.createName(appDefinition, 1);
+        assertEquals("instance-1-some-app-definiti-381261d79c23", result);
+    }
+
+    @Test
+    void createName_AppDefinitionAndInstaceAndIdentifier() {
+        AppDefinition appDefinition = createAppDefinition();
+
+        String result = NamingUtil.createName(appDefinition, 1, "longidentifier");
+        assertEquals("instance-1-longidentif-some-app-de-381261d79c23", result);
+    }
 
     @Test
     void createName_SessionAndNullIdentifier() {
@@ -92,6 +110,21 @@ class NamingUtilTests {
 
         String result = NamingUtil.createName(workspace, "longidentifier");
         assertEquals("ws-longidentif-some-userna-test-app-de-381261d79c23", result);
+    }
+
+    private AppDefinition createAppDefinition() {
+        AppDefinition appDefinition = new AppDefinition();
+        ObjectMeta objectMeta = new ObjectMeta();
+        objectMeta.setUid("6f1a8966-4d5a-41dc-82ba-381261d79c23");
+        appDefinition.setMetadata(objectMeta);
+        AppDefinitionSpec spec = new AppDefinitionSpec() {
+            @Override
+            public String getName() {
+                return "some-app-definition";
+            }
+        };
+        appDefinition.setSpec(spec);
+        return appDefinition;
     }
 
     private Session createSession() {

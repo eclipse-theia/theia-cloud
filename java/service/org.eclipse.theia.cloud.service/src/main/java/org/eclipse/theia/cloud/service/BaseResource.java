@@ -100,6 +100,10 @@ public class BaseResource {
         logger.warn(LogMessageUtil.formatLogMessage(correlationId, message));
     }
 
+    public void warn(String correlationId, String message, Throwable throwable) {
+        logger.warn(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
+    }
+
     public void error(String correlationId, String message) {
         logger.error(LogMessageUtil.formatLogMessage(correlationId, message));
     }

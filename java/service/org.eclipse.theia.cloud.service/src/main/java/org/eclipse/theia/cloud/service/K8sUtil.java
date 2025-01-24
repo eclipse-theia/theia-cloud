@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.service;
 
 import static org.eclipse.theia.cloud.common.util.WorkspaceUtil.getSessionName;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,11 +38,11 @@ import org.eclipse.theia.cloud.service.session.SessionPerformance;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 import org.jboss.logging.Logger;
 
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
 import io.fabric8.kubernetes.api.model.metrics.v1beta1.ContainerMetrics;
 import io.fabric8.kubernetes.api.model.metrics.v1beta1.PodMetrics;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -154,11 +155,15 @@ public final class K8sUtil {
     public SessionPerformance reportPerformance(String sessionName) {
         Optional<Session> optionalSession = CLIENT.sessions().get(sessionName);
         if (optionalSession.isEmpty()) {
+            logger.warn(MessageFormat.format("Cannot get performance data for session {0} because it does not exist.",
+                    sessionName));
             return null;
         }
         Session session = optionalSession.get();
         Optional<Pod> optionalPod = getPodForSession(session);
         if (optionalPod.isEmpty()) {
+            logger.warn(MessageFormat.format("Cannot get performance data for session {0} because no pod was found.",
+                    sessionName));
             return null;
         }
         PodMetrics test = CLIENT.kubernetes().top().pods().metrics(CLIENT.namespace(),
@@ -166,6 +171,9 @@ public final class K8sUtil {
         Optional<ContainerMetrics> optionalContainer = test.getContainers().stream()
                 .filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
         if (optionalContainer.isEmpty()) {
+            logger.warn(MessageFormat.format(
+                    "Cannot get performance data for session {0} because the app container was not found in the pod.",
+                    sessionName));
             return null;
         }
         ContainerMetrics container = optionalContainer.get();
@@ -179,20 +187,39 @@ public final class K8sUtil {
         return podlist.getItems().stream().filter(pod -> isPodFromSession(pod, session)).findFirst();
     }
 
+    /**
+     * Checks whether a Pod belongs to a Session by resolving the Pod's Deployment and checking whether the Deployment
+     * is owned by the Session.
+     */
     private boolean isPodFromSession(Pod pod, Session session) {
-        Optional<Container> optionalContainer = pod.getSpec().getContainers().stream()
-                .filter(con -> con.getName().equals(session.getSpec().getAppDefinition())).findFirst();
-        if (optionalContainer.isEmpty()) {
-            return false;
-        }
-        Container container = optionalContainer.get();
-        Optional<EnvVar> optionalEnv = container.getEnv().stream()
-                .filter(env -> env.getName().equals("THEIACLOUD_SESSION_NAME")).findFirst();
-        if (optionalEnv.isEmpty()) {
-            return false;
-        }
-        EnvVar env = optionalEnv.get();
-        return env.getValue().equals(session.getSpec().getName());
+        return getDeploymentForPod(pod)//
+                .flatMap(deployment -> deployment.getOwnerReferenceFor(session.getMetadata().getUid()))//
+                .isPresent();
+    }
+
+    /**
+     * <p>
+     * Returns the Deployment associated with a given Pod.
+     * </p>
+     * <p>
+     * The deployment is retrieved by following the owner references of the Pod. The Pod's owner references are filtered
+     * to find the ReplicaSet. Then, the ReplicaSet's owner references are filtered to find the Deployment and return
+     * it.
+     * </p>
+     *
+     * @param Pod the Pod for which to retrieve the Deployment.
+     * @return the Deployment associated with the given Pod or an empty Optional if not found.
+     */
+    private Optional<Deployment> getDeploymentForPod(Pod pod) {
+        Optional<ReplicaSet> replicaSet = pod.getMetadata().getOwnerReferences().stream()
+                .filter(ownerReference -> "ReplicaSet".equals(ownerReference.getKind()))
+                .map(ownerReference -> CLIENT.apps().replicaSets().withName(ownerReference.getName()).get())
+                .filter(Objects::nonNull).findFirst();
+
+        return replicaSet.flatMap(rs -> rs.getMetadata().getOwnerReferences().stream()
+                .filter(rsOwnerReference -> "Deployment".equals(rsOwnerReference.getKind()))
+                .map(rsOwnerReference -> CLIENT.apps().deployments().withName(rsOwnerReference.getName()).get())
+                .filter(Objects::nonNull).findFirst());
     }
 
     public boolean hasAppDefinition(String appDefinition) {
@@ -212,9 +239,11 @@ public final class K8sUtil {
         if (maxInstances < 0) {
             return false; // max instances is set to negative, so we can ignore it
         }
-        long podsOfAppDef = CLIENT.sessions().list().stream() // All sessions
+
+        long sessionsOfAppDef = CLIENT.sessions().list().stream() // All sessions
                 .filter(s -> s.getSpec().getAppDefinition().equals(appDefString)) // That are from the appDefinition
-                .filter(s -> getPodForSession(s).isPresent()).count(); // That already have a pod
-        return podsOfAppDef >= maxInstances;
+                .filter(s -> s.getStatus() == null || !s.getStatus().hasError()) // That are not in error state
+                .count();
+        return sessionsOfAppDef >= maxInstances;
     }
 }

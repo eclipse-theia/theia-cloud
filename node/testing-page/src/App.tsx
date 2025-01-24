@@ -12,7 +12,8 @@ import {
   WorkspaceDeletionRequest,
   WorkspaceListRequest,
   PingRequest,
-  LaunchRequest
+  LaunchRequest,
+  SessionPerformanceRequest
 } from '@eclipse-theiacloud/common';
 
 const KEYCLOAK_CONFIG: KeycloakConfig = {
@@ -159,6 +160,14 @@ function App() {
     };
     return TheiaCloud.Session.stopSession(request, generateRequestOptions(accessToken));
   };
+  const reportSessionPerformance = (user: string, accessToken?: string) => {
+    const request: SessionPerformanceRequest = {
+      appId: APP_ID,
+      sessionName: resourceName,
+      serviceUrl: SERVICE_URL
+    };
+    return TheiaCloud.Session.getSessionPerformance(request, generateRequestOptions(accessToken));
+  };
 
   // App definition requests
   const listAppDefinitions = (user: string, accessToken?: string) => {
@@ -197,6 +206,7 @@ function App() {
         <button onClick={() => executeRequest(listSessions)}>List Sessions</button>
         <button onClick={() => executeRequest(startSession)}>Start Session</button>
         <button onClick={() => executeRequest(stopSession)}>Stop Session</button>
+        <button onClick={() => executeRequest(reportSessionPerformance)}>Report Session Performance</button>
       </p>
       <p>
         <button onClick={() => executeRequest(listWorkspaces)}>List Workspaces</button>

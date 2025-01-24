@@ -21,4 +21,6 @@ terraform state rm kubernetes_persistent_volume.minikube
 Pick an installation in one of below directories and run `terraform init` and `terraform apply`.
 
 - `2-01_try-now` installs a local version of <https://try.theia-cloud.io/>
-- `2-02_monitor-vscode` installs a setup that allows to test the vscode monitor with and without authentication
+- `2-02_monitor` installs a setup that allows to test the monitor (VSCode extension or Theia extension based) with and without authentication
+- `2-03_try-now_paths` installs a local version of <https://try.theia-cloud.io/> using paths instead of subdomains.
+- `2-04_try-now_paths_eager-start` installs a local version of <https://try.theia-cloud.io/> using paths and eager instead of lazy starting of pods. See its [README](./2-04_try-now_paths_eager-start/README.md) for more details.

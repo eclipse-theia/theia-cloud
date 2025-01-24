@@ -31,7 +31,7 @@ import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiterImpl;
 import org.eclipse.theia.cloud.operator.handler.appdef.AppDefinitionHandler;
 import org.eclipse.theia.cloud.operator.handler.appdef.EagerStartAppDefinitionAddedHandler;
 import org.eclipse.theia.cloud.operator.handler.appdef.LazyStartAppDefinitionHandler;
-import org.eclipse.theia.cloud.operator.handler.session.EagerStartSessionHandler;
+import org.eclipse.theia.cloud.operator.handler.session.EagerSessionHandler;
 import org.eclipse.theia.cloud.operator.handler.session.LazySessionHandler;
 import org.eclipse.theia.cloud.operator.handler.session.SessionHandler;
 import org.eclipse.theia.cloud.operator.handler.ws.LazyWorkspaceHandler;
@@ -143,7 +143,7 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
     protected Class<? extends SessionHandler> bindSessionHandler() {
         if (arguments.isEagerStart()) {
-            return EagerStartSessionHandler.class;
+            return EagerSessionHandler.class;
         } else {
             return LazySessionHandler.class;
         }

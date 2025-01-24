@@ -73,6 +73,20 @@ public final class TheiaCloudHandlerUtil {
         return item;
     }
 
+    /**
+     * Removes the owner reference from the item if it is present. Does nothing otherwise.
+     */
+    public static <T extends HasMetadata> T removeOwnerReferenceFromItem(String correlationId,
+            String sessionResourceName, String sessionResourceUID, T item) {
+        LOGGER.info(
+                formatLogMessage(correlationId, "Removing the owner reference from " + item.getMetadata().getName()));
+        item.getMetadata().getOwnerReferences().removeIf(ownerReference -> {
+            return ownerReference.getName().equals(sessionResourceName)
+                    && ownerReference.getUid().equals(sessionResourceUID);
+        });
+        return item;
+    }
+
     public static OwnerReference createOwnerReference(String sessionResourceName, String sessionResourceUID) {
         OwnerReference ownerReference = new OwnerReference();
         ownerReference.setApiVersion(HasMetadata.getApiVersion(Session.class));
