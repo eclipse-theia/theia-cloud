@@ -1,4 +1,4 @@
-export const namespace = 'theiacloud';
+export const namespace = 'theia-cloud';
 export const resourceGroup = 'theia.cloud';
 export const sessionVersion = 'v1beta8';
 export const sessionPlural = 'sessions';
