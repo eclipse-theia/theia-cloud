@@ -97,7 +97,7 @@ resource "helm_release" "theia-cloud-crds" {
 
   name             = "theia-cloud-crds"
   chart            = "../../../theia-cloud-helm/charts/theia-cloud-crds"
-  namespace        = "theiacloud"
+  namespace        = "theia-cloud"
   create_namespace = true
 
   set {
@@ -111,7 +111,7 @@ resource "helm_release" "theia-cloud-base" {
 
   name             = "theia-cloud-base"
   chart            = "../../../theia-cloud-helm/charts/theia-cloud-base"
-  namespace        = "theiacloud"
+  namespace        = "theia-cloud"
   create_namespace = true
 
   set {
@@ -125,7 +125,7 @@ resource "helm_release" "theia-cloud" {
 
   name             = "theia-cloud"
   chart            = "../../../theia-cloud-helm/charts/theia-cloud"
-  namespace        = "theiacloud"
+  namespace        = "theia-cloud"
   create_namespace = true
 
   values = [
@@ -165,7 +165,7 @@ resource "kubectl_manifest" "theia-cloud-monitor-theia" {
   kind: AppDefinition
   metadata:
     name: theia-cloud-monitor-theia
-    namespace: theiacloud
+    namespace: theia-cloud
   spec:
     name: theia-cloud-monitor-theia
     image: theiacloud/theia-cloud-activity-demo-theia:minikube-ci-e2e
@@ -199,7 +199,7 @@ resource "kubectl_manifest" "theia-cloud-monitor-vscode" {
   kind: AppDefinition
   metadata:
     name: theia-cloud-monitor-vscode
-    namespace: theiacloud
+    namespace: theia-cloud
   spec:
     name: theia-cloud-monitor-vscode
     image: theiacloud/theia-cloud-activity-demo:minikube-ci-e2e

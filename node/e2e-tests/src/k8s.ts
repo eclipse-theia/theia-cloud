@@ -1,6 +1,13 @@
 import { CustomObjectsApi, KubeConfig } from '@kubernetes/client-node';
 
-import { namespace, resourceGroup, sessionPlural, sessionVersion, workspacePlural, workspaceVersion } from './constats';
+import {
+  namespace,
+  resourceGroup,
+  sessionPlural,
+  sessionVersion,
+  workspacePlural,
+  workspaceVersion
+} from './constants';
 
 const kc = new KubeConfig();
 kc.loadFromDefault();

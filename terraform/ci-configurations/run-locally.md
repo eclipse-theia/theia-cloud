@@ -16,7 +16,9 @@ kubectl -n ingress-nginx patch cm ingress-nginx-controller --patch '{"data":{"al
 kubectl -n ingress-nginx delete pod -l app.kubernetes.io/name=ingress-nginx
 ```
 
-Adapt your environment so that all docker images are built in minikube. Build all Theia Cloud docker images + Demos with tag `minikube-ci-e2e`, e.g. `theiacloud/theia-cloud-service:minikube-ci-e2e`.
+Adapt your environment so that all docker images are built in minikube.
+Build all Theia Cloud docker images + Demos with tag `minikube-ci-e2e`, e.g. `theiacloud/theia-cloud-service:minikube-ci-e2e`.
+The build commands need to be executed from the root of the repository.
 
 ```sh
 eval $(minikube docker-env)
