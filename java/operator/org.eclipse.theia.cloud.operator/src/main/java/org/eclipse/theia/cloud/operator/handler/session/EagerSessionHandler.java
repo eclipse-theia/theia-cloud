@@ -351,19 +351,36 @@ public class EagerSessionHandler implements SessionHandler {
         String serviceName = ownedService.getMetadata().getName();
 
         // Remove owner reference and user specific labels from the service
-        Service cleanedService;
-        try {
-            cleanedService = client.services().withName(serviceName).edit(service -> {
-                TheiaCloudHandlerUtil.removeOwnerReferenceFromItem(correlationId, sessionResourceName,
-                        sessionResourceUID, service);
-                service.getMetadata().getLabels().keySet().removeAll(LabelsUtil.getSessionSpecificLabelKeys());
-                return service;
-            });
-            LOGGER.info(formatLogMessage(correlationId,
-                    "Removed owner reference and user-specific session labels from service: " + serviceName));
-        } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while editing service " + serviceName), e);
-            return false;
+        // Allow retries because in rare cases the update fails. It is not clear why but might be caused by the owner
+        // reference being removed by Kubernetes garbage collection.
+        // The retries aim to stabilize the clean up process.
+        Service cleanedService = null;
+        int editServiceAttempts = 0;
+        boolean editServiceSuccess = false;
+        while (editServiceAttempts < 3 && !editServiceSuccess) {
+            try {
+                cleanedService = client.services().withName(serviceName).edit(service -> {
+                    TheiaCloudHandlerUtil.removeOwnerReferenceFromItem(correlationId, sessionResourceName,
+                            sessionResourceUID, service);
+                    service.getMetadata().getLabels().keySet().removeAll(LabelsUtil.getSessionSpecificLabelKeys());
+                    return service;
+                });
+                LOGGER.info(formatLogMessage(correlationId,
+                        "Removed owner reference and user-specific session labels from service: " + serviceName));
+                editServiceSuccess = true;
+            } catch (KubernetesClientException e) {
+                editServiceAttempts++;
+                if (editServiceAttempts < 3) {
+                    LOGGER.warn(
+                            formatLogMessage(correlationId,
+                                    "Attempt " + editServiceAttempts + " failed while editing service " + serviceName),
+                            e);
+                } else {
+                    LOGGER.error(formatLogMessage(correlationId, "Error while editing service " + serviceName
+                            + " after " + editServiceAttempts + " attempts"), e);
+                    return false;
+                }
+            }
         }
         Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition.get(), cleanedService);
 
