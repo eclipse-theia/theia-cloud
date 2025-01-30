@@ -23,6 +23,8 @@
     "lib",
     "src"
   ],
+  "main": "lib/common/index.js",
+  "typings": "lib/common/index.d.ts",
   "peerDependencies": {
     "@theia/core": "^1.55.0"
   },

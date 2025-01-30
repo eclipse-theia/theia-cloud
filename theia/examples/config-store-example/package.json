@@ -27,7 +27,8 @@
   },
   "theiaExtensions": [
     {
-      "frontend": "lib/browser/config-store-example-frontend-module"
+      "frontend": "lib/browser/config-store-example-frontend-module",
+      "backend": "lib/node/config-store-example-backend-module"
     }
   ]
 }
