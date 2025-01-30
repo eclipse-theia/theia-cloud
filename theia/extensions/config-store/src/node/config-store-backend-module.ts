@@ -4,7 +4,7 @@ import { ContainerModule } from '@theia/core/shared/inversify';
 
 import { ConfigStoreClient, ConfigStoreServer, configStoreServicePath } from '../common/config-store-protocol';
 import { ConfigStoreBackendClient } from './config-store-client';
-import { ConfigStoreServerImpl } from './config-store-service';
+import { ConfigStoreServerImpl } from './config-store-server';
 
 export default new ContainerModule(bind => {
   bind(ConfigStoreClient).to(ConfigStoreBackendClient).inSingletonScope();
@@ -15,7 +15,7 @@ export default new ContainerModule(bind => {
   bind(ConfigStoreServer)
     .toDynamicValue(ctx => {
       const service = ctx.container.get(ConfigStoreServerImpl);
-      const client = ctx.container.get<ConfigStoreClient>(ConfigStoreBackendClient);
+      const client = ctx.container.get<ConfigStoreClient>(ConfigStoreClient);
       service.addClient(client);
       return service;
     })

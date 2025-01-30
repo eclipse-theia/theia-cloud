@@ -9,7 +9,7 @@ as well as further example extensions using them.
 - [configs](./configs/): Common configs such as ESLint, prettier, and licensing configs
 - [examples](./examples/): The browser example app and test extensions that facilitate testing the developed extensions
 - [extensions](./extensions/): The Theia extensions developed for Theia apps running in Theia Cloud
-  - [config-store](./extensions/config-store/): **WIP**: Will provided REST endpoints to inject data (e.g. user credentials) into the Theia instance.
+  - [config-store](./extensions/config-store/): Adds a REST endpoint to inject data (e.g. user credentials) into the Theia instance. Provides clients to set/unset/get values and get notified of changes to configured values.
   - [monitor-theia](./extensions/monitor-theia/): Adds REST endpoints to Theia to monitor activity and send messages to display to the user.
 
 ## Setup
