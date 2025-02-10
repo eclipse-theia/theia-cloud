@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.Principal;
+import java.util.Set;
 
 import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -45,6 +46,9 @@ class TheiaCloudUserProducerTests {
 
     @Inject
     TheiaCloudUserProducer fixture;
+
+    @InjectMock
+    ApplicationProperties applicationProperties;
 
     /**
      * Test method for {@link org.eclipse.theia.cloud.service.TheiaCloudUserProducer#getTheiaCloudUser()}.
@@ -152,5 +156,81 @@ class TheiaCloudUserProducerTests {
         // Assert
         assertTrue(result.isAnonymous());
         assertNull(result.getIdentifier());
+    }
+
+    @Test
+    void getTheiaCloudUser_authenticatedIdentityJWTwithAdminGroup_adminTheiaCloudUser() {
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(false);
+        JsonWebToken token = Mockito.mock(JsonWebToken.class);
+        Mockito.when(token.getClaim(Claims.email)).thenReturn("admin@example.com");
+        Mockito.when(token.getClaim(Claims.groups)).thenReturn(Set.of("theia-cloud-admin"));
+        Mockito.when(identity.getPrincipal()).thenReturn(token);
+        Mockito.when(applicationProperties.getAdminGroupName()).thenReturn("theia-cloud-admin");
+
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
+
+        // Assert
+        assertFalse(result.isAnonymous());
+        assertTrue(result.isAdmin());
+        assertEquals("admin@example.com", result.getIdentifier());
+    }
+
+    @Test
+    void getTheiaCloudUser_authenticatedIdentityJWTwithEmptyGroupsClaim_nonAdminTheiaCloudUser() {
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(false);
+        JsonWebToken token = Mockito.mock(JsonWebToken.class);
+        Mockito.when(token.getClaim(Claims.email)).thenReturn("user@example.com");
+        Mockito.when(token.getClaim(Claims.groups)).thenReturn(Set.of());
+        Mockito.when(identity.getPrincipal()).thenReturn(token);
+        Mockito.when(applicationProperties.getAdminGroupName()).thenReturn("theia-cloud-admin");
+
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
+
+        // Assert
+        assertFalse(result.isAnonymous());
+        assertFalse(result.isAdmin());
+        assertEquals("user@example.com", result.getIdentifier());
+    }
+
+    @Test
+    void getTheiaCloudUser_authenticatedIdentityJWTwithNullGroupsClaim_nonAdminTheiaCloudUser() {
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(false);
+        JsonWebToken token = Mockito.mock(JsonWebToken.class);
+        Mockito.when(token.getClaim(Claims.email)).thenReturn("user@example.com");
+        Mockito.when(token.getClaim(Claims.groups)).thenReturn(null);
+        Mockito.when(identity.getPrincipal()).thenReturn(token);
+        Mockito.when(applicationProperties.getAdminGroupName()).thenReturn("theia-cloud-admin");
+
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
+
+        // Assert
+        assertFalse(result.isAnonymous());
+        assertFalse(result.isAdmin());
+        assertEquals("user@example.com", result.getIdentifier());
+    }
+
+    @Test
+    void getTheiaCloudUser_authenticatedIdentityJWTwithDifferentGroup_nonAdminTheiaCloudUser() {
+        // Prepare
+        Mockito.when(identity.isAnonymous()).thenReturn(false);
+        JsonWebToken token = Mockito.mock(JsonWebToken.class);
+        Mockito.when(token.getClaim(Claims.email)).thenReturn("user@example.com");
+        Mockito.when(token.getClaim(Claims.groups)).thenReturn(Set.of("some-other-group"));
+        Mockito.when(identity.getPrincipal()).thenReturn(token);
+        Mockito.when(applicationProperties.getAdminGroupName()).thenReturn("theia-cloud-admin");
+
+        // Execute
+        TheiaCloudUser result = fixture.getTheiaCloudUser();
+
+        // Assert
+        assertFalse(result.isAnonymous());
+        assertFalse(result.isAdmin());
+        assertEquals("user@example.com", result.getIdentifier());
     }
 }

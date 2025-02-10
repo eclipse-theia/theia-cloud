@@ -22,9 +22,11 @@ ENV KEYCLOAK_ENABLE true
 ENV KEYCLOAK_SERVERURL https://keycloak.url/auth/realms/TheiaCloud
 ENV KEYCLOAK_CLIENTID theia-cloud
 ENV KEYCLOAK_CLIENTSECRET publicbutoauth2proxywantsasecret
+ENV KEYCLOAK_ADMIN_GROUP theia-cloud/admin
 
 ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} \
     -Dquarkus.http.port=${SERVICE_PORT} \
+    -Dtheia.cloud.auth.admin.group=${KEYCLOAK_ADMIN_GROUP} \
     -Dtheia.cloud.use.keycloak=${KEYCLOAK_ENABLE} \
     -Dquarkus.oidc.auth-server-url=${KEYCLOAK_SERVERURL} \
     -Dquarkus.oidc.client-id=${KEYCLOAK_CLIENTID} \

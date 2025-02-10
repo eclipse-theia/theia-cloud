@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022-2023 EclipseSource, STMicroelectronics and others.
+ * Copyright (C) 2022-2025 EclipseSource, STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -22,12 +22,29 @@ import java.util.Objects;
  */
 public class TheiaCloudUser {
 
-    public static TheiaCloudUser ANONYMOUS = new TheiaCloudUser(null);
+    public static final TheiaCloudUser ANONYMOUS = new TheiaCloudUser(null, false);
 
-    private String identifier;
+    private final String identifier;
+    private final boolean admin;
 
+    /**
+     * Creates a non-admin user.
+     *
+     * @param identifier the user identifier
+     */
     public TheiaCloudUser(String identifier) {
+        this(identifier, false);
+    }
+
+    /**
+     * Creates a user with the specified admin flag.
+     *
+     * @param identifier the user identifier
+     * @param admin      {@code true} if the user is an admin
+     */
+    public TheiaCloudUser(String identifier, boolean admin) {
         this.identifier = identifier;
+        this.admin = admin;
     }
 
     /**
@@ -41,13 +58,27 @@ public class TheiaCloudUser {
         return identifier;
     }
 
+    /**
+     * Returns whether the user is an admin.
+     *
+     * @return {@code true} if admin and not anonymous, {@code false} otherwise
+     */
+    public boolean isAdmin() {
+        return !isAnonymous() && admin;
+    }
+
+    /**
+     * Determines if the user is anonymous.
+     *
+     * @return {@code true} if the user is anonymous
+     */
     public boolean isAnonymous() {
         return identifier == null || identifier.isBlank();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(identifier);
+        return Objects.hash(identifier, admin);
     }
 
     @Override
@@ -59,12 +90,11 @@ public class TheiaCloudUser {
         if (getClass() != obj.getClass())
             return false;
         TheiaCloudUser other = (TheiaCloudUser) obj;
-        return Objects.equals(identifier, other.identifier);
+        return Objects.equals(identifier, other.identifier) && admin == other.admin;
     }
 
     @Override
     public String toString() {
-        return "TheiaCloudUser [identifier=" + identifier + "]";
+        return "TheiaCloudUser [identifier=" + identifier + ", admin=" + admin + "]";
     }
-
 }
