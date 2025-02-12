@@ -43,6 +43,91 @@ export interface ActivityTracker {
     'notifyAfter'?: number;
 }
 /**
+ * 
+ * @export
+ * @interface AppDefinition
+ */
+export interface AppDefinition {
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinition
+     */
+    'apiVersion'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinition
+     */
+    'kind'?: string;
+    /**
+     * 
+     * @type {ObjectMeta}
+     * @memberof AppDefinition
+     */
+    'metadata'?: ObjectMeta;
+    /**
+     * 
+     * @type {AppDefinitionSpec}
+     * @memberof AppDefinition
+     */
+    'spec'?: AppDefinitionSpec;
+    /**
+     * 
+     * @type {AppDefinitionStatus}
+     * @memberof AppDefinition
+     */
+    'status'?: AppDefinitionStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinition
+     */
+    'singular'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinition
+     */
+    'crdName'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinition
+     */
+    'scope'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinition
+     */
+    'plural'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AppDefinition
+     */
+    'served'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AppDefinition
+     */
+    'storage'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AppDefinition
+     */
+    'deprecated'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinition
+     */
+    'deprecationWarning'?: string;
+}
+/**
  * A request to list available app definitions.
  * @export
  * @interface AppDefinitionListRequest
@@ -183,6 +268,50 @@ export interface AppDefinitionSpec {
     'ingressHostnamePrefixes'?: Array<string>;
 }
 /**
+ * 
+ * @export
+ * @interface AppDefinitionStatus
+ */
+export interface AppDefinitionStatus {
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionStatus
+     */
+    'operatorStatus'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AppDefinitionStatus
+     */
+    'operatorMessage'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface AppDefinitionUpdateRequest
+ */
+export interface AppDefinitionUpdateRequest {
+    /**
+     * The App Id of this Theia Cloud instance. Request without a matching Id will be denied.
+     * @type {string}
+     * @memberof AppDefinitionUpdateRequest
+     */
+    'appId': string;
+    /**
+     * The minimum number of instances to run.
+     * @type {number}
+     * @memberof AppDefinitionUpdateRequest
+     */
+    'minInstances'?: number;
+    /**
+     * The maximum number of instances to run.
+     * @type {number}
+     * @memberof AppDefinitionUpdateRequest
+     */
+    'maxInstances'?: number;
+}
+/**
  * An object to hold all the ways environment variables can be passed. Not to be used by itself.
  * @export
  * @interface EnvironmentVars
@@ -265,6 +394,55 @@ export interface LaunchRequest {
 /**
  * 
  * @export
+ * @interface ManagedFieldsEntry
+ */
+export interface ManagedFieldsEntry {
+    /**
+     * 
+     * @type {string}
+     * @memberof ManagedFieldsEntry
+     */
+    'apiVersion'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ManagedFieldsEntry
+     */
+    'fieldsType'?: string;
+    /**
+     * 
+     * @type {object}
+     * @memberof ManagedFieldsEntry
+     */
+    'fieldsV1'?: object;
+    /**
+     * 
+     * @type {string}
+     * @memberof ManagedFieldsEntry
+     */
+    'manager'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ManagedFieldsEntry
+     */
+    'operation'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ManagedFieldsEntry
+     */
+    'subresource'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ManagedFieldsEntry
+     */
+    'time'?: string;
+}
+/**
+ * 
+ * @export
  * @interface Monitor
  */
 export interface Monitor {
@@ -280,6 +458,146 @@ export interface Monitor {
      * @memberof Monitor
      */
     'activityTracker'?: ActivityTracker;
+}
+/**
+ * 
+ * @export
+ * @interface ObjectMeta
+ */
+export interface ObjectMeta {
+    /**
+     * 
+     * @type {{ [key: string]: string; }}
+     * @memberof ObjectMeta
+     */
+    'annotations'?: { [key: string]: string; };
+    /**
+     * 
+     * @type {string}
+     * @memberof ObjectMeta
+     */
+    'creationTimestamp'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ObjectMeta
+     */
+    'deletionGracePeriodSeconds'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObjectMeta
+     */
+    'deletionTimestamp'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ObjectMeta
+     */
+    'finalizers'?: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObjectMeta
+     */
+    'generateName'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof ObjectMeta
+     */
+    'generation'?: number;
+    /**
+     * 
+     * @type {{ [key: string]: string; }}
+     * @memberof ObjectMeta
+     */
+    'labels'?: { [key: string]: string; };
+    /**
+     * 
+     * @type {Array<ManagedFieldsEntry>}
+     * @memberof ObjectMeta
+     */
+    'managedFields'?: Array<ManagedFieldsEntry>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObjectMeta
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObjectMeta
+     */
+    'namespace'?: string;
+    /**
+     * 
+     * @type {Array<OwnerReference>}
+     * @memberof ObjectMeta
+     */
+    'ownerReferences'?: Array<OwnerReference>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObjectMeta
+     */
+    'resourceVersion'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObjectMeta
+     */
+    'selfLink'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ObjectMeta
+     */
+    'uid'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface OwnerReference
+ */
+export interface OwnerReference {
+    /**
+     * 
+     * @type {string}
+     * @memberof OwnerReference
+     */
+    'apiVersion'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OwnerReference
+     */
+    'kind'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof OwnerReference
+     */
+    'blockOwnerDeletion'?: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof OwnerReference
+     */
+    'controller'?: boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof OwnerReference
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OwnerReference
+     */
+    'uid'?: string;
 }
 /**
  * Request to ping the availability of the service.
@@ -625,6 +943,123 @@ export interface WorkspaceListRequest {
 }
 
 /**
+ * AppDefinitionAdminResourceApi - axios parameter creator
+ * @export
+ */
+export const AppDefinitionAdminResourceApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Updates an app definition\'s properties. Allowed properties to update are defined by AppDefinitionUpdateRequest.
+         * @summary Updates an app definition
+         * @param {string} appDefinitionName The K8S resource name of the app definition to update.
+         * @param {AppDefinitionUpdateRequest} appDefinitionUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceAdminAppdefinitionAppDefinitionNamePatch: async (appDefinitionName: string, appDefinitionUpdateRequest: AppDefinitionUpdateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'appDefinitionName' is not null or undefined
+            assertParamExists('serviceAdminAppdefinitionAppDefinitionNamePatch', 'appDefinitionName', appDefinitionName)
+            // verify required parameter 'appDefinitionUpdateRequest' is not null or undefined
+            assertParamExists('serviceAdminAppdefinitionAppDefinitionNamePatch', 'appDefinitionUpdateRequest', appDefinitionUpdateRequest)
+            const localVarPath = `/service/admin/appdefinition/{appDefinitionName}`
+                .replace(`{${"appDefinitionName"}}`, encodeURIComponent(String(appDefinitionName)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(appDefinitionUpdateRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AppDefinitionAdminResourceApi - functional programming interface
+ * @export
+ */
+export const AppDefinitionAdminResourceApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AppDefinitionAdminResourceApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Updates an app definition\'s properties. Allowed properties to update are defined by AppDefinitionUpdateRequest.
+         * @summary Updates an app definition
+         * @param {string} appDefinitionName The K8S resource name of the app definition to update.
+         * @param {AppDefinitionUpdateRequest} appDefinitionUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async serviceAdminAppdefinitionAppDefinitionNamePatch(appDefinitionName: string, appDefinitionUpdateRequest: AppDefinitionUpdateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AppDefinition>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.serviceAdminAppdefinitionAppDefinitionNamePatch(appDefinitionName, appDefinitionUpdateRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AppDefinitionAdminResourceApi.serviceAdminAppdefinitionAppDefinitionNamePatch']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AppDefinitionAdminResourceApi - factory interface
+ * @export
+ */
+export const AppDefinitionAdminResourceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AppDefinitionAdminResourceApiFp(configuration)
+    return {
+        /**
+         * Updates an app definition\'s properties. Allowed properties to update are defined by AppDefinitionUpdateRequest.
+         * @summary Updates an app definition
+         * @param {string} appDefinitionName The K8S resource name of the app definition to update.
+         * @param {AppDefinitionUpdateRequest} appDefinitionUpdateRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceAdminAppdefinitionAppDefinitionNamePatch(appDefinitionName: string, appDefinitionUpdateRequest: AppDefinitionUpdateRequest, options?: RawAxiosRequestConfig): AxiosPromise<AppDefinition> {
+            return localVarFp.serviceAdminAppdefinitionAppDefinitionNamePatch(appDefinitionName, appDefinitionUpdateRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AppDefinitionAdminResourceApi - object-oriented interface
+ * @export
+ * @class AppDefinitionAdminResourceApi
+ * @extends {BaseAPI}
+ */
+export class AppDefinitionAdminResourceApi extends BaseAPI {
+    /**
+     * Updates an app definition\'s properties. Allowed properties to update are defined by AppDefinitionUpdateRequest.
+     * @summary Updates an app definition
+     * @param {string} appDefinitionName The K8S resource name of the app definition to update.
+     * @param {AppDefinitionUpdateRequest} appDefinitionUpdateRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AppDefinitionAdminResourceApi
+     */
+    public serviceAdminAppdefinitionAppDefinitionNamePatch(appDefinitionName: string, appDefinitionUpdateRequest: AppDefinitionUpdateRequest, options?: RawAxiosRequestConfig) {
+        return AppDefinitionAdminResourceApiFp(this.configuration).serviceAdminAppdefinitionAppDefinitionNamePatch(appDefinitionName, appDefinitionUpdateRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * AppDefinitionResourceApi - axios parameter creator
  * @export
  */
@@ -737,6 +1172,114 @@ export class AppDefinitionResourceApi extends BaseAPI {
 
 
 /**
+ * RootAdminResourceApi - axios parameter creator
+ * @export
+ */
+export const RootAdminResourceApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Replies with success if the service is available and the user an admin.
+         * @summary Admin Ping
+         * @param {string} appId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceAdminAppIdGet: async (appId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'appId' is not null or undefined
+            assertParamExists('serviceAdminAppIdGet', 'appId', appId)
+            const localVarPath = `/service/admin/{appId}`
+                .replace(`{${"appId"}}`, encodeURIComponent(String(appId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * RootAdminResourceApi - functional programming interface
+ * @export
+ */
+export const RootAdminResourceApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = RootAdminResourceApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Replies with success if the service is available and the user an admin.
+         * @summary Admin Ping
+         * @param {string} appId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async serviceAdminAppIdGet(appId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.serviceAdminAppIdGet(appId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RootAdminResourceApi.serviceAdminAppIdGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * RootAdminResourceApi - factory interface
+ * @export
+ */
+export const RootAdminResourceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = RootAdminResourceApiFp(configuration)
+    return {
+        /**
+         * Replies with success if the service is available and the user an admin.
+         * @summary Admin Ping
+         * @param {string} appId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serviceAdminAppIdGet(appId: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
+            return localVarFp.serviceAdminAppIdGet(appId, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * RootAdminResourceApi - object-oriented interface
+ * @export
+ * @class RootAdminResourceApi
+ * @extends {BaseAPI}
+ */
+export class RootAdminResourceApi extends BaseAPI {
+    /**
+     * Replies with success if the service is available and the user an admin.
+     * @summary Admin Ping
+     * @param {string} appId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RootAdminResourceApi
+     */
+    public serviceAdminAppIdGet(appId: string, options?: RawAxiosRequestConfig) {
+        return RootAdminResourceApiFp(this.configuration).serviceAdminAppIdGet(appId, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
  * RootResourceApi - axios parameter creator
  * @export
  */
@@ -783,11 +1326,13 @@ export const RootResourceApiAxiosParamCreator = function (configuration?: Config
         /**
          * Launches a session and creates a workspace if required. Responds with the URL of the launched session.
          * @summary Launch Session
-         * @param {LaunchRequest} [launchRequest] 
+         * @param {LaunchRequest} launchRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        servicePost: async (launchRequest?: LaunchRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        servicePost: async (launchRequest: LaunchRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'launchRequest' is not null or undefined
+            assertParamExists('servicePost', 'launchRequest', launchRequest)
             const localVarPath = `/service`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -844,11 +1389,11 @@ export const RootResourceApiFp = function(configuration?: Configuration) {
         /**
          * Launches a session and creates a workspace if required. Responds with the URL of the launched session.
          * @summary Launch Session
-         * @param {LaunchRequest} [launchRequest] 
+         * @param {LaunchRequest} launchRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async servicePost(launchRequest?: LaunchRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+        async servicePost(launchRequest: LaunchRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.servicePost(launchRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['RootResourceApi.servicePost']?.[localVarOperationServerIndex]?.url;
@@ -877,11 +1422,11 @@ export const RootResourceApiFactory = function (configuration?: Configuration, b
         /**
          * Launches a session and creates a workspace if required. Responds with the URL of the launched session.
          * @summary Launch Session
-         * @param {LaunchRequest} [launchRequest] 
+         * @param {LaunchRequest} launchRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        servicePost(launchRequest?: LaunchRequest, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+        servicePost(launchRequest: LaunchRequest, options?: RawAxiosRequestConfig): AxiosPromise<string> {
             return localVarFp.servicePost(launchRequest, options).then((request) => request(axios, basePath));
         },
     };
@@ -909,12 +1454,12 @@ export class RootResourceApi extends BaseAPI {
     /**
      * Launches a session and creates a workspace if required. Responds with the URL of the launched session.
      * @summary Launch Session
-     * @param {LaunchRequest} [launchRequest] 
+     * @param {LaunchRequest} launchRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof RootResourceApi
      */
-    public servicePost(launchRequest?: LaunchRequest, options?: RawAxiosRequestConfig) {
+    public servicePost(launchRequest: LaunchRequest, options?: RawAxiosRequestConfig) {
         return RootResourceApiFp(this.configuration).servicePost(launchRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
@@ -972,11 +1517,13 @@ export const SessionResourceApiAxiosParamCreator = function (configuration?: Con
         /**
          * Stops a session.
          * @summary Stop session
-         * @param {SessionStopRequest} [sessionStopRequest] 
+         * @param {SessionStopRequest} sessionStopRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceSessionDelete: async (sessionStopRequest?: SessionStopRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        serviceSessionDelete: async (sessionStopRequest: SessionStopRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sessionStopRequest' is not null or undefined
+            assertParamExists('serviceSessionDelete', 'sessionStopRequest', sessionStopRequest)
             const localVarPath = `/service/session`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1010,11 +1557,13 @@ export const SessionResourceApiAxiosParamCreator = function (configuration?: Con
         /**
          * Updates the last activity timestamp for a session to monitor activity.
          * @summary Report session activity
-         * @param {SessionActivityRequest} [sessionActivityRequest] 
+         * @param {SessionActivityRequest} sessionActivityRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceSessionPatch: async (sessionActivityRequest?: SessionActivityRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        serviceSessionPatch: async (sessionActivityRequest: SessionActivityRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sessionActivityRequest' is not null or undefined
+            assertParamExists('serviceSessionPatch', 'sessionActivityRequest', sessionActivityRequest)
             const localVarPath = `/service/session`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1090,11 +1639,13 @@ export const SessionResourceApiAxiosParamCreator = function (configuration?: Con
         /**
          * Starts a new session for an existing workspace and responds with the URL of the started session.
          * @summary Start a new session
-         * @param {SessionStartRequest} [sessionStartRequest] 
+         * @param {SessionStartRequest} sessionStartRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceSessionPost: async (sessionStartRequest?: SessionStartRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        serviceSessionPost: async (sessionStartRequest: SessionStartRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sessionStartRequest' is not null or undefined
+            assertParamExists('serviceSessionPost', 'sessionStartRequest', sessionStartRequest)
             const localVarPath = `/service/session`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1152,11 +1703,11 @@ export const SessionResourceApiFp = function(configuration?: Configuration) {
         /**
          * Stops a session.
          * @summary Stop session
-         * @param {SessionStopRequest} [sessionStopRequest] 
+         * @param {SessionStopRequest} sessionStopRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async serviceSessionDelete(sessionStopRequest?: SessionStopRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+        async serviceSessionDelete(sessionStopRequest: SessionStopRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.serviceSessionDelete(sessionStopRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SessionResourceApi.serviceSessionDelete']?.[localVarOperationServerIndex]?.url;
@@ -1165,11 +1716,11 @@ export const SessionResourceApiFp = function(configuration?: Configuration) {
         /**
          * Updates the last activity timestamp for a session to monitor activity.
          * @summary Report session activity
-         * @param {SessionActivityRequest} [sessionActivityRequest] 
+         * @param {SessionActivityRequest} sessionActivityRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async serviceSessionPatch(sessionActivityRequest?: SessionActivityRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+        async serviceSessionPatch(sessionActivityRequest: SessionActivityRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.serviceSessionPatch(sessionActivityRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SessionResourceApi.serviceSessionPatch']?.[localVarOperationServerIndex]?.url;
@@ -1192,11 +1743,11 @@ export const SessionResourceApiFp = function(configuration?: Configuration) {
         /**
          * Starts a new session for an existing workspace and responds with the URL of the started session.
          * @summary Start a new session
-         * @param {SessionStartRequest} [sessionStartRequest] 
+         * @param {SessionStartRequest} sessionStartRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async serviceSessionPost(sessionStartRequest?: SessionStartRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+        async serviceSessionPost(sessionStartRequest: SessionStartRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.serviceSessionPost(sessionStartRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SessionResourceApi.serviceSessionPost']?.[localVarOperationServerIndex]?.url;
@@ -1226,21 +1777,21 @@ export const SessionResourceApiFactory = function (configuration?: Configuration
         /**
          * Stops a session.
          * @summary Stop session
-         * @param {SessionStopRequest} [sessionStopRequest] 
+         * @param {SessionStopRequest} sessionStopRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceSessionDelete(sessionStopRequest?: SessionStopRequest, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
+        serviceSessionDelete(sessionStopRequest: SessionStopRequest, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
             return localVarFp.serviceSessionDelete(sessionStopRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Updates the last activity timestamp for a session to monitor activity.
          * @summary Report session activity
-         * @param {SessionActivityRequest} [sessionActivityRequest] 
+         * @param {SessionActivityRequest} sessionActivityRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceSessionPatch(sessionActivityRequest?: SessionActivityRequest, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
+        serviceSessionPatch(sessionActivityRequest: SessionActivityRequest, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
             return localVarFp.serviceSessionPatch(sessionActivityRequest, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1257,11 +1808,11 @@ export const SessionResourceApiFactory = function (configuration?: Configuration
         /**
          * Starts a new session for an existing workspace and responds with the URL of the started session.
          * @summary Start a new session
-         * @param {SessionStartRequest} [sessionStartRequest] 
+         * @param {SessionStartRequest} sessionStartRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceSessionPost(sessionStartRequest?: SessionStartRequest, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+        serviceSessionPost(sessionStartRequest: SessionStartRequest, options?: RawAxiosRequestConfig): AxiosPromise<string> {
             return localVarFp.serviceSessionPost(sessionStartRequest, options).then((request) => request(axios, basePath));
         },
     };
@@ -1290,24 +1841,24 @@ export class SessionResourceApi extends BaseAPI {
     /**
      * Stops a session.
      * @summary Stop session
-     * @param {SessionStopRequest} [sessionStopRequest] 
+     * @param {SessionStopRequest} sessionStopRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SessionResourceApi
      */
-    public serviceSessionDelete(sessionStopRequest?: SessionStopRequest, options?: RawAxiosRequestConfig) {
+    public serviceSessionDelete(sessionStopRequest: SessionStopRequest, options?: RawAxiosRequestConfig) {
         return SessionResourceApiFp(this.configuration).serviceSessionDelete(sessionStopRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Updates the last activity timestamp for a session to monitor activity.
      * @summary Report session activity
-     * @param {SessionActivityRequest} [sessionActivityRequest] 
+     * @param {SessionActivityRequest} sessionActivityRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SessionResourceApi
      */
-    public serviceSessionPatch(sessionActivityRequest?: SessionActivityRequest, options?: RawAxiosRequestConfig) {
+    public serviceSessionPatch(sessionActivityRequest: SessionActivityRequest, options?: RawAxiosRequestConfig) {
         return SessionResourceApiFp(this.configuration).serviceSessionPatch(sessionActivityRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1327,12 +1878,12 @@ export class SessionResourceApi extends BaseAPI {
     /**
      * Starts a new session for an existing workspace and responds with the URL of the started session.
      * @summary Start a new session
-     * @param {SessionStartRequest} [sessionStartRequest] 
+     * @param {SessionStartRequest} sessionStartRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SessionResourceApi
      */
-    public serviceSessionPost(sessionStartRequest?: SessionStartRequest, options?: RawAxiosRequestConfig) {
+    public serviceSessionPost(sessionStartRequest: SessionStartRequest, options?: RawAxiosRequestConfig) {
         return SessionResourceApiFp(this.configuration).serviceSessionPost(sessionStartRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
@@ -1390,11 +1941,13 @@ export const WorkspaceResourceApiAxiosParamCreator = function (configuration?: C
         /**
          * Deletes a workspace.
          * @summary Delete workspace
-         * @param {WorkspaceDeletionRequest} [workspaceDeletionRequest] 
+         * @param {WorkspaceDeletionRequest} workspaceDeletionRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceWorkspaceDelete: async (workspaceDeletionRequest?: WorkspaceDeletionRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        serviceWorkspaceDelete: async (workspaceDeletionRequest: WorkspaceDeletionRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workspaceDeletionRequest' is not null or undefined
+            assertParamExists('serviceWorkspaceDelete', 'workspaceDeletionRequest', workspaceDeletionRequest)
             const localVarPath = `/service/workspace`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1428,11 +1981,13 @@ export const WorkspaceResourceApiAxiosParamCreator = function (configuration?: C
         /**
          * Creates a new workspace for a user.
          * @summary Create workspace
-         * @param {WorkspaceCreationRequest} [workspaceCreationRequest] 
+         * @param {WorkspaceCreationRequest} workspaceCreationRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceWorkspacePost: async (workspaceCreationRequest?: WorkspaceCreationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        serviceWorkspacePost: async (workspaceCreationRequest: WorkspaceCreationRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workspaceCreationRequest' is not null or undefined
+            assertParamExists('serviceWorkspacePost', 'workspaceCreationRequest', workspaceCreationRequest)
             const localVarPath = `/service/workspace`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1490,11 +2045,11 @@ export const WorkspaceResourceApiFp = function(configuration?: Configuration) {
         /**
          * Deletes a workspace.
          * @summary Delete workspace
-         * @param {WorkspaceDeletionRequest} [workspaceDeletionRequest] 
+         * @param {WorkspaceDeletionRequest} workspaceDeletionRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async serviceWorkspaceDelete(workspaceDeletionRequest?: WorkspaceDeletionRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+        async serviceWorkspaceDelete(workspaceDeletionRequest: WorkspaceDeletionRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.serviceWorkspaceDelete(workspaceDeletionRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['WorkspaceResourceApi.serviceWorkspaceDelete']?.[localVarOperationServerIndex]?.url;
@@ -1503,11 +2058,11 @@ export const WorkspaceResourceApiFp = function(configuration?: Configuration) {
         /**
          * Creates a new workspace for a user.
          * @summary Create workspace
-         * @param {WorkspaceCreationRequest} [workspaceCreationRequest] 
+         * @param {WorkspaceCreationRequest} workspaceCreationRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async serviceWorkspacePost(workspaceCreationRequest?: WorkspaceCreationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserWorkspace>> {
+        async serviceWorkspacePost(workspaceCreationRequest: WorkspaceCreationRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserWorkspace>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.serviceWorkspacePost(workspaceCreationRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['WorkspaceResourceApi.serviceWorkspacePost']?.[localVarOperationServerIndex]?.url;
@@ -1537,21 +2092,21 @@ export const WorkspaceResourceApiFactory = function (configuration?: Configurati
         /**
          * Deletes a workspace.
          * @summary Delete workspace
-         * @param {WorkspaceDeletionRequest} [workspaceDeletionRequest] 
+         * @param {WorkspaceDeletionRequest} workspaceDeletionRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceWorkspaceDelete(workspaceDeletionRequest?: WorkspaceDeletionRequest, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
+        serviceWorkspaceDelete(workspaceDeletionRequest: WorkspaceDeletionRequest, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
             return localVarFp.serviceWorkspaceDelete(workspaceDeletionRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Creates a new workspace for a user.
          * @summary Create workspace
-         * @param {WorkspaceCreationRequest} [workspaceCreationRequest] 
+         * @param {WorkspaceCreationRequest} workspaceCreationRequest 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        serviceWorkspacePost(workspaceCreationRequest?: WorkspaceCreationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserWorkspace> {
+        serviceWorkspacePost(workspaceCreationRequest: WorkspaceCreationRequest, options?: RawAxiosRequestConfig): AxiosPromise<UserWorkspace> {
             return localVarFp.serviceWorkspacePost(workspaceCreationRequest, options).then((request) => request(axios, basePath));
         },
     };
@@ -1580,24 +2135,24 @@ export class WorkspaceResourceApi extends BaseAPI {
     /**
      * Deletes a workspace.
      * @summary Delete workspace
-     * @param {WorkspaceDeletionRequest} [workspaceDeletionRequest] 
+     * @param {WorkspaceDeletionRequest} workspaceDeletionRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkspaceResourceApi
      */
-    public serviceWorkspaceDelete(workspaceDeletionRequest?: WorkspaceDeletionRequest, options?: RawAxiosRequestConfig) {
+    public serviceWorkspaceDelete(workspaceDeletionRequest: WorkspaceDeletionRequest, options?: RawAxiosRequestConfig) {
         return WorkspaceResourceApiFp(this.configuration).serviceWorkspaceDelete(workspaceDeletionRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Creates a new workspace for a user.
      * @summary Create workspace
-     * @param {WorkspaceCreationRequest} [workspaceCreationRequest] 
+     * @param {WorkspaceCreationRequest} workspaceCreationRequest 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkspaceResourceApi
      */
-    public serviceWorkspacePost(workspaceCreationRequest?: WorkspaceCreationRequest, options?: RawAxiosRequestConfig) {
+    public serviceWorkspacePost(workspaceCreationRequest: WorkspaceCreationRequest, options?: RawAxiosRequestConfig) {
         return WorkspaceResourceApiFp(this.configuration).serviceWorkspacePost(workspaceCreationRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }

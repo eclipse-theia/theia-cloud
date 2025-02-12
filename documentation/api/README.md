@@ -7,7 +7,9 @@ All URIs are relative to *http://localhost*
 
 | Class | Method | HTTP request | Description |
 |------------ | ------------- | ------------- | -------------|
+| *AppDefinitionAdminResourceApi* | [**serviceAdminAppdefinitionAppDefinitionNamePatch**](Apis/AppDefinitionAdminResourceApi.md#serviceadminappdefinitionappdefinitionnamepatch) | **PATCH** /service/admin/appdefinition/{appDefinitionName} | Updates an app definition |
 | *AppDefinitionResourceApi* | [**serviceAppdefinitionAppIdGet**](Apis/AppDefinitionResourceApi.md#serviceappdefinitionappidget) | **GET** /service/appdefinition/{appId} | List app definitions |
+| *RootAdminResourceApi* | [**serviceAdminAppIdGet**](Apis/RootAdminResourceApi.md#serviceadminappidget) | **GET** /service/admin/{appId} | Admin Ping |
 | *RootResourceApi* | [**serviceAppIdGet**](Apis/RootResourceApi.md#serviceappidget) | **GET** /service/{appId} | Ping |
 *RootResourceApi* | [**servicePost**](Apis/RootResourceApi.md#servicepost) | **POST** /service | Launch Session |
 | *SessionResourceApi* | [**serviceSessionAppIdUserGet**](Apis/SessionResourceApi.md#servicesessionappiduserget) | **GET** /service/session/{appId}/{user} | List sessions |
@@ -24,11 +26,17 @@ All URIs are relative to *http://localhost*
 ## Documentation for Models
 
  - [ActivityTracker](./Models/ActivityTracker.md)
+ - [AppDefinition](./Models/AppDefinition.md)
  - [AppDefinitionListRequest](./Models/AppDefinitionListRequest.md)
  - [AppDefinitionSpec](./Models/AppDefinitionSpec.md)
+ - [AppDefinitionStatus](./Models/AppDefinitionStatus.md)
+ - [AppDefinitionUpdateRequest](./Models/AppDefinitionUpdateRequest.md)
  - [EnvironmentVars](./Models/EnvironmentVars.md)
  - [LaunchRequest](./Models/LaunchRequest.md)
+ - [ManagedFieldsEntry](./Models/ManagedFieldsEntry.md)
  - [Monitor](./Models/Monitor.md)
+ - [ObjectMeta](./Models/ObjectMeta.md)
+ - [OwnerReference](./Models/OwnerReference.md)
  - [PingRequest](./Models/PingRequest.md)
  - [SessionActivityRequest](./Models/SessionActivityRequest.md)
  - [SessionListRequest](./Models/SessionListRequest.md)

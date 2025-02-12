@@ -49,7 +49,7 @@ Delete workspace
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **WorkspaceDeletionRequest** | [**WorkspaceDeletionRequest**](../Models/WorkspaceDeletionRequest.md)|  | [optional] |
+| **WorkspaceDeletionRequest** | [**WorkspaceDeletionRequest**](../Models/WorkspaceDeletionRequest.md)|  | |
 
 ### Return type
 
@@ -76,7 +76,7 @@ Create workspace
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **WorkspaceCreationRequest** | [**WorkspaceCreationRequest**](../Models/WorkspaceCreationRequest.md)|  | [optional] |
+| **WorkspaceCreationRequest** | [**WorkspaceCreationRequest**](../Models/WorkspaceCreationRequest.md)|  | |
 
 ### Return type
 
