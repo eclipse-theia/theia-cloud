@@ -42,8 +42,8 @@ public class AdminOnlyFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) {
         if (!theiaCloudUser.isAdmin()) {
-            logger.infov("Blocked access to {0} {1} for non-admin user.", requestContext.getMethod(),
-                    requestContext.getUriInfo().getPath());
+            logger.infov("Blocked access to {0} {1} for non-admin user: {2}", requestContext.getMethod(),
+                    requestContext.getUriInfo().getPath(), theiaCloudUser.getIdentifier());
             requestContext.abortWith(Response.status(Response.Status.FORBIDDEN)
                     .entity("Admin privileges required to access this resource.").build());
         }
