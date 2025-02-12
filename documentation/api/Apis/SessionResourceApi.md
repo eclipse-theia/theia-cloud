@@ -51,7 +51,7 @@ Stop session
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **SessionStopRequest** | [**SessionStopRequest**](../Models/SessionStopRequest.md)|  | [optional] |
+| **SessionStopRequest** | [**SessionStopRequest**](../Models/SessionStopRequest.md)|  | |
 
 ### Return type
 
@@ -78,7 +78,7 @@ Report session activity
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **SessionActivityRequest** | [**SessionActivityRequest**](../Models/SessionActivityRequest.md)|  | [optional] |
+| **SessionActivityRequest** | [**SessionActivityRequest**](../Models/SessionActivityRequest.md)|  | |
 
 ### Return type
 
@@ -133,7 +133,7 @@ Start a new session
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **SessionStartRequest** | [**SessionStartRequest**](../Models/SessionStartRequest.md)|  | [optional] |
+| **SessionStartRequest** | [**SessionStartRequest**](../Models/SessionStartRequest.md)|  | |
 
 ### Return type
 

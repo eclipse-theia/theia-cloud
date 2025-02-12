@@ -22,6 +22,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
@@ -224,6 +225,11 @@ public final class K8sUtil {
 
     public boolean hasAppDefinition(String appDefinition) {
         return CLIENT.appDefinitions().get(appDefinition).isPresent();
+    }
+
+    public AppDefinition editAppDefinition(String correlationId, String appDefinition,
+            Consumer<AppDefinition> consumer) {
+        return CLIENT.appDefinitions().edit(correlationId, appDefinition, consumer);
     }
 
     public boolean isMaxInstancesReached(String appDefString) {

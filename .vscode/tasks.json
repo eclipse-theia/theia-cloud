@@ -60,7 +60,7 @@
         "-Dtheia.cloud.app.id=asdfghjkl",
         "-Dquarkus.http.port=8081",
         "-Dtheia.cloud.use.keycloak=true",
-        "-Dquarkus.oidc.auth-server-url=${input:keycloakURL}",
+        "-Dquarkus.oidc.auth-server-url=${input:keycloakURL}/realms/TheiaCloud",
         "-Dquarkus.oidc.client-id=theia-cloud",
         "-Dquarkus.oidc.credentials.secret=publicbutoauth2proxywantsasecret"
       ],
@@ -101,7 +101,7 @@
       "type": "promptString",
       "id": "keycloakURL",
       "description": "Provide the keycloak url",
-      "default": "https://192.168.59.101.nip.io/keycloak/"
+      "default": "https://192.168.59.101.nip.io/keycloak"
     }
   ]
 }

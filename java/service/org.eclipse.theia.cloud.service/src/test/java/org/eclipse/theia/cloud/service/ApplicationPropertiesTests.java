@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -53,5 +54,19 @@ class ApplicationPropertiesTests {
         System.setProperty(THEIACLOUD_USE_KEYCLOAK, "asdasd");
         ApplicationProperties fixture = new ApplicationProperties();
         assertTrue(fixture.isUseKeycloak());
+    }
+
+    @Test
+    void getAdminGroupName_propertyNotSet_returnDefault() {
+        System.clearProperty("theia.cloud.auth.admin.group");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertEquals("theia-cloud/admin", fixture.getAdminGroupName());
+    }
+
+    @Test
+    void getAdminGroupName_propertySet_returnValue() {
+        System.setProperty("theia.cloud.auth.admin.group", "test-admin-group");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertEquals("test-admin-group", fixture.getAdminGroupName());
     }
 }

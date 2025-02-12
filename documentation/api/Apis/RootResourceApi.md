@@ -47,7 +47,7 @@ Launch Session
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **LaunchRequest** | [**LaunchRequest**](../Models/LaunchRequest.md)|  | [optional] |
+| **LaunchRequest** | [**LaunchRequest**](../Models/LaunchRequest.md)|  | |
 
 ### Return type
 

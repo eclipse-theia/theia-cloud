@@ -164,8 +164,16 @@ public class AppDefinitionSpec {
         return minInstances;
     }
 
+    public void setMinInstances(int minInstances) {
+        this.minInstances = minInstances;
+    }
+
     public Integer getMaxInstances() {
         return maxInstances;
+    }
+
+    public void setMaxInstances(Integer maxInstances) {
+        this.maxInstances = maxInstances;
     }
 
     public Integer getTimeout() {
