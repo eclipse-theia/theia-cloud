@@ -46,6 +46,11 @@ export class ConfigStoreServerImpl implements ConfigStoreServer, BackendApplicat
       }
     });
 
+    // Simple health check endpoint
+    configStoreRouter.get('/', async (_req, res) => {
+      res.sendStatus(200);
+    });
+
     app.use(configStoreRestPath, configStoreRouter);
   }
 

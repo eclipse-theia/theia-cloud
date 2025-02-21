@@ -49,3 +49,5 @@ Unset a value via a POST request to the same endpoint like so:
   "value": null
 }
 ```
+
+A simple `GET` endpoint is also provided to allow checking that the config server is available.
