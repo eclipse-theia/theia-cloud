@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
@@ -55,6 +56,7 @@ import jakarta.ws.rs.core.Response.Status;
 class SessionResourceTests {
 
     private static final String APP_ID = "asdfghjkl";
+    private static final String TEST_APP_DEFINITION = "TestAppDefinition";
     private static final String TEST_USER = "TestUser";
     private static final String OTHER_TEST_USER = "OtherTestUser";
     private static final String TEST_SESSION = "TestSession";
@@ -84,7 +86,7 @@ class SessionResourceTests {
     void stop_matchingUser_true() {
         // Prepare
         mockUser(false, TEST_USER);
-        SessionSpec session = mockDefaultSession();
+        Session session = mockDefaultSession();
         SessionStopRequest request = new SessionStopRequest(APP_ID, TEST_USER, TEST_SESSION);
         Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
         Mockito.when(k8sUtil.stopSession(anyString(), eq(TEST_SESSION), eq(TEST_USER))).thenReturn(true);
@@ -105,7 +107,7 @@ class SessionResourceTests {
     void stop_otherUser_throwForbidden() {
         // Prepare
         mockUser(false, OTHER_TEST_USER);
-        SessionSpec session = mockDefaultSession();
+        Session session = mockDefaultSession();
         Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
         // We leave the matching user in the request to verify that the stop is
@@ -131,7 +133,7 @@ class SessionResourceTests {
     void stop_otherUserWithNullName_throwForbidden() {
         // Prepare
         mockUser(false, null);
-        SessionSpec session = mockDefaultSession();
+        Session session = mockDefaultSession();
         Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
         // We leave the matching user in the request to verify that the stop is
@@ -192,7 +194,7 @@ class SessionResourceTests {
     void stop_anonymousUser_throwForbidden() {
         // Prepare
         mockUser(true, null);
-        SessionSpec session = mockDefaultSession();
+        Session session = mockDefaultSession();
         Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
         // We leave the matching user in the request to verify that the stop is
@@ -219,7 +221,7 @@ class SessionResourceTests {
         // Prepare
         Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(false);
         mockUser(true, null);
-        SessionSpec session = mockDefaultSession();
+        Session session = mockDefaultSession();
         Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
         // We leave the matching user in the request to verify that the deletion is
@@ -298,8 +300,8 @@ class SessionResourceTests {
     void performance_matchingUser_SessionPerformance() {
         // Prepare
         mockUser(false, TEST_USER);
-        SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, TEST_USER);
-        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
+        Session session = mockSession(TEST_SESSION, TEST_APP_DEFINITION, TEST_USER);
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
         SessionPerformance sessionPerformance = Mockito.mock(SessionPerformance.class);
         Mockito.when(k8sUtil.reportPerformance(TEST_SESSION)).thenReturn(sessionPerformance);
 
@@ -314,8 +316,8 @@ class SessionResourceTests {
     void performance_noPerformanceData_throwMetricsServerUnavailable() {
         // Prepare
         mockUser(false, TEST_USER);
-        SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, TEST_USER);
-        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
+        Session session = mockSession(TEST_SESSION, TEST_APP_DEFINITION, TEST_USER);
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
         Mockito.when(k8sUtil.reportPerformance(TEST_SESSION)).thenReturn(null);
 
         // Execute
@@ -348,8 +350,8 @@ class SessionResourceTests {
     void performance_otherUser_throwForbidden() {
         // Prepare
         mockUser(false, TEST_USER);
-        SessionSpec sessionSpec = new SessionSpec(TEST_SESSION, APP_ID, OTHER_TEST_USER);
-        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(sessionSpec));
+        Session session = mockSession(TEST_SESSION, TEST_APP_DEFINITION, OTHER_TEST_USER);
+        Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
         // Execute
         TheiaCloudWebException exception = assertThrows(TheiaCloudWebException.class, () -> {
@@ -406,7 +408,7 @@ class SessionResourceTests {
     void start_otherUser_throwForbidden() {
         // Prepare
         mockUser(false, TEST_USER);
-        SessionSpec session = mockDefaultSession();
+        Session session = mockDefaultSession();
         Mockito.when(k8sUtil.findSession(TEST_SESSION)).thenReturn(Optional.of(session));
 
         // We leave the matching user in the request to verify that the stop is
@@ -440,10 +442,24 @@ class SessionResourceTests {
         Mockito.when(user.getIdentifier()).thenReturn(name);
     }
 
-    private SessionSpec mockDefaultSession() {
-        SessionSpec session = Mockito.mock(SessionSpec.class);
-        Mockito.when(session.getName()).thenReturn(TEST_SESSION);
-        Mockito.when(session.getUser()).thenReturn(TEST_USER);
+    private Session mockSession(String name, String appDef, String user) {
+        SessionSpec spec = Mockito.mock(SessionSpec.class);
+        Mockito.when(spec.getName()).thenReturn(name);
+        Mockito.when(spec.getAppDefinition()).thenReturn(appDef);
+        Mockito.when(spec.getUser()).thenReturn(user);
+        return mockSession(spec);
+    }
+
+    private Session mockSession(SessionSpec spec) {
+        Session session = Mockito.mock(Session.class);
+        Mockito.when(session.getSpec()).thenReturn(spec);
         return session;
+    }
+
+    private Session mockDefaultSession() {
+        SessionSpec spec = Mockito.mock(SessionSpec.class);
+        Mockito.when(spec.getName()).thenReturn(TEST_SESSION);
+        Mockito.when(spec.getUser()).thenReturn(TEST_USER);
+        return mockSession(spec);
     }
 }

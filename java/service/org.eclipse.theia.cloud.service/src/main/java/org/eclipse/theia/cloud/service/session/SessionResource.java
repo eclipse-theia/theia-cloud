@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
@@ -149,7 +151,7 @@ public class SessionResource extends BaseResource {
         final String user = theiaCloudUser.getIdentifier();
 
         // Ensure session belongs to the requesting user.
-        SessionSpec existingSession = k8sUtil.findSession(request.sessionName).orElse(null);
+        SessionSpec existingSession = k8sUtil.findSession(request.sessionName).map(Session::getSpec).orElse(null);
         if (existingSession == null) {
             info(correlationId, "Session " + request.sessionName + " does not exist.");
             throw new TheiaCloudWebException(TheiaCloudError.INVALID_SESSION_NAME);
