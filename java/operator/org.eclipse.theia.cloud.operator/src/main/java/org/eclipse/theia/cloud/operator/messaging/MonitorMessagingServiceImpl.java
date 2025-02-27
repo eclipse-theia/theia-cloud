@@ -22,7 +22,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.util.SessionUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.json.JSONObject;
 
@@ -91,7 +93,7 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
     }
 
     protected Optional<String> getURL(Session session) {
-        Optional<String> ip = getIP(session);
+        Optional<String> ip = SessionUtil.getClusterIP(resourceClient, session);
         Optional<Integer> port = getPort(session);
         if (ip.isPresent() && port.isPresent()) {
             return Optional.of("http://" + ip.get() + ":" + port.get() + MONITOR_BASE_PATH + POST_MESSAGE);
@@ -99,18 +101,12 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
         return Optional.empty();
     }
 
-    protected Optional<String> getIP(Session session) {
-        Optional<String> sessionIP = resourceClient.getClusterIPFromSessionName(session.getSpec().getName());
-        return sessionIP;
-    }
-
     protected Optional<Integer> getPort(Session session) {
         String appDefinitionId = session.getSpec().getAppDefinition();
-        Optional<AppDefinition> optionalAppDefinition = resourceClient.appDefinitions().get(appDefinitionId);
-        if (optionalAppDefinition.isPresent()) {
-            return Optional.of(optionalAppDefinition.get().getSpec().getMonitor().getPort());
-        }
-        return Optional.empty();
+        return resourceClient.appDefinitions().get(appDefinitionId)//
+                .map(AppDefinition::getSpec)//
+                .map(AppDefinitionSpec::getMonitor)//
+                .map(AppDefinitionSpec.Monitor::getPort);
     }
 
     protected boolean isEnabled() {
