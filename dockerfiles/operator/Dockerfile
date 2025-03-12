@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk AS builder
+FROM eclipse-temurin:21-jdk AS builder
 RUN apt-get update && apt-get install -y maven
 WORKDIR /operator
 COPY java/common ./common
@@ -12,7 +12,7 @@ RUN cd /operator/common/maven-conf && \
     cd /operator/operator/org.eclipse.theia.cloud.defaultoperator && \
     mvn clean verify --no-transfer-progress
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 RUN mkdir /templates
 WORKDIR /log-config
 COPY java/operator/org.eclipse.theia.cloud.defaultoperator/log4j2.xml .

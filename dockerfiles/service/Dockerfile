@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk AS builder
+FROM eclipse-temurin:21-jdk AS builder
 RUN apt-get update && apt-get install -y maven
 WORKDIR /service
 COPY java/common ./common
@@ -10,7 +10,7 @@ RUN cd /service/common/maven-conf && \
     cd /service/service/org.eclipse.theia.cloud.service && \
     mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=uber-jar --no-transfer-progress
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /service
 COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-1.1.0-SNAPSHOT-runner.jar .
 ENV APPID default-app-id
