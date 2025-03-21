@@ -2,3 +2,4 @@
 .openapi-generator-ignore
 openapitools.json
 .DS_Store
+node/e2e-tests/test-results/.last-run.json

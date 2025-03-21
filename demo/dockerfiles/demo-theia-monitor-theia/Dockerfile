@@ -2,6 +2,7 @@ FROM node:20-bookworm AS build-stage
 RUN apt-get update && apt-get install -y libxkbfile-dev libsecret-1-dev
 WORKDIR /home/theia
 ADD demo/dockerfiles/demo-theia-monitor-theia/package.json ./package.json
+ADD demo/dockerfiles/demo-theia-monitor-theia/yarn.lock ./yarn.lock
 
 ## Link package from local
 ADD theia ./theia
