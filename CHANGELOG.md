@@ -1,6 +1,8 @@
 # Changelog
 
-<!-- ## [1.1.0] - estimated 2025-02 -->
+## [1.0.1] - 2025-03-24
+
+- [java/common] Truncate labels longer than 63 chars [#413](https://github.com/eclipse-theia/theia-cloud/pull/413)
 
 ## [1.0.0] - 2024-11-29
 
