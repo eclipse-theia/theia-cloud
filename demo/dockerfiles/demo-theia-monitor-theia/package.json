@@ -63,7 +63,8 @@
     "@theia/cli": "1.43.1"
   },
   "resolutions": {
-    "inversify": "6.0.3"
+    "inversify": "6.0.3",
+    "**/node-abi": "3.71.0"
   },
   "scripts": {
     "preinstall": "node-gyp install"
