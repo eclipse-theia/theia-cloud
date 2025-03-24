@@ -7,6 +7,10 @@
 - [theia/extensions/monitor-theia] Update Theia dependencies to `^1.55.0` [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
 - [ci] Add Theia CI workflow, add reusable Theia extension publish workflow [#389](https://github.com/eclipse-theia/theia-cloud/pull/388)
 
+## [1.0.1] - 2025-03-24
+
+- [java/common] Truncate labels longer than 63 chars [#413](https://github.com/eclipse-theia/theia-cloud/pull/413)
+
 ## [1.0.0] - 2024-11-29
 
 - [java/operator] Add Theia Cloud Labels on Resources created by operator [#362](https://github.com/eclipse-theia/theia-cloud/pull/362)
