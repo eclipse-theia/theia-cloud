@@ -80,7 +80,7 @@ jobs:
           NPM_CONFIG_PROVENANCE: true
 
       - name: Publish latest version
-        # if: github.event_name == 'release'
+        if: github.event_name == 'release'
         run: npm run publish:latest -w ${{ inputs.package_workspace }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
