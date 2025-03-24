@@ -3,7 +3,7 @@ name: "[NPM] common"
 on:
   push:
     branches:
-      - main
+      - releases/1.0.X
     paths:
       - "node/package-lock.json"
       - "node/common/**"
