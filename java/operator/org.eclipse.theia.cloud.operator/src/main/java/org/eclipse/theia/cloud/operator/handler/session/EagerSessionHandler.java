@@ -30,7 +30,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
-import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.util.JavaUtil;
@@ -136,8 +135,7 @@ public class EagerSessionHandler implements SessionHandler {
                             labels = new HashMap<>();
                             service.getMetadata().setLabels(labels);
                         }
-                        Map<String, String> newLabels = LabelsUtil.createSessionLabels(spec,
-                                appDefinition.get().getSpec());
+                        Map<String, String> newLabels = LabelsUtil.createSessionLabels(session, appDefinition.get());
                         labels.putAll(newLabels);
                         return service;
                     });
@@ -321,13 +319,12 @@ public class EagerSessionHandler implements SessionHandler {
                     + " found. Thus, no cleanup is needed because associated resources are deleted by Kubernets garbage collecion."));
             return true;
         }
-        AppDefinitionSpec appDefinitionSpec = appDefinition.get().getSpec();
 
         // Find service by first filtering all services by the session's corresponding session labels (as added in
         // sessionCreated) and then checking if the service has an owner reference to the session
         String sessionResourceName = session.getMetadata().getName();
         String sessionResourceUID = session.getMetadata().getUid();
-        Map<String, String> sessionLabels = LabelsUtil.createSessionLabels(spec, appDefinitionSpec);
+        Map<String, String> sessionLabels = LabelsUtil.createSessionLabels(session, appDefinition.get());
         // Filtering by withLabels(sessionLabels) because the method requires an exact match of the labels.
         // Additional labels on the service prevent a match and the service has an additional app label.
         // Thus, filter by each session label separately.

@@ -1,11 +1,15 @@
 # Changelog
 
-## [1.1.0] - estimated 2025-02
+## [1.1.0] - estimated 2025-04
 
 - [theia] Introduce new folder `theia` for all theia extensions and an example app to test these [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
 - [node/monitor-theia] Move Theia monitor extension to `theia/extensions/monitor-theia` [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
 - [theia/extensions/monitor-theia] Update Theia dependencies to `^1.55.0` [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
 - [ci] Add Theia CI workflow, add reusable Theia extension publish workflow [#389](https://github.com/eclipse-theia/theia-cloud/pull/388)
+
+### Breaking Changes in 1.1.0
+
+- [java/common] Changed `LabelsUtil.createSessionLabels` to accept `AppDefinition` instead of `AppDefinitionSpec`
 
 ## [1.0.1] - 2025-03-24
 

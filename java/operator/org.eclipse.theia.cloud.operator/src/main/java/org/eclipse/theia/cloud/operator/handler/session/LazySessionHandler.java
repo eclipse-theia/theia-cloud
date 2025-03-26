@@ -160,7 +160,7 @@ public class LazySessionHandler implements SessionHandler {
         AppDefinitionSpec appDefinitionSpec = appDefinition.getSpec();
 
         /* label maps */
-        Map<String, String> labelsToAdd = LabelsUtil.createSessionLabels(session.getSpec(), appDefinitionSpec);
+        Map<String, String> labelsToAdd = LabelsUtil.createSessionLabels(session, appDefinition);
 
         if (hasMaxInstancesReached(appDefinition, session, correlationId)) {
             client.sessions().updateStatus(correlationId, session, s -> {
