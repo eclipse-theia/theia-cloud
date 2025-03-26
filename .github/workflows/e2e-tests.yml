@@ -1,0 +1,165 @@
+name: "[E2E Tests] Minikube"
+
+on:
+  push:
+    branches:
+      - e2e-testing
+  workflow_dispatch:
+    inputs:
+      theia-cloud-helm-branch:
+        description: "Theia Cloud Helm Branch to use"
+        type: string
+        default: "main"
+  schedule:
+    - cron: "0 13 * * 0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-e2e-theia-cloud-minikube-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtests:
+    name: "Run Tests on Minikube (K8s: ${{ matrix.kubernetes }}, Paths: ${{ matrix.paths }}, Ephemeral: ${{ matrix.ephemeral }}, Keycloak: ${{ matrix.keycloak }})"
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        kubernetes: [v1.32.1, v1.31.5, v1.30.9, v1.29.13] # https://kubernetes.io/releases/
+        paths: [true, false]
+        ephemeral: [true, false]
+        keycloak: [true, false]
+    steps:
+      - name: Set Helm Branch for Scheduled Runs
+        if: ${{ github.event_name == 'schedule' }}
+        run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=main" >> $GITHUB_ENV
+
+      - name: Set Helm Branch for Manual Runs
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=${{ github.event.inputs.theia-cloud-helm-branch }}" >> $GITHUB_ENV
+
+      - name: Checkout Theia Cloud
+        uses: actions/checkout@v4
+        with:
+          path: "./theia-cloud"
+
+      - name: Checkout Theia Cloud Helm
+        uses: actions/checkout@v4
+        with:
+          repository: "eclipsesource/theia-cloud-helm"
+          ref: "${{ env.INPUT_THEIA_CLOUD_HELM_BRANCH }}"
+          path: "./theia-cloud-helm"
+
+      - name: Setup Minikube
+        uses: manusa/actions-setup-minikube@92af4db914ab207f837251cd53eb7060e6477614 # v2.11.0
+        with:
+          minikube version: v1.33.1
+          kubernetes version: ${{ matrix.kubernetes }}
+          github token: ${{ secrets.GITHUB_TOKEN }}
+          start args: "--force"
+
+      - name: Enable Minikube Addons
+        run: |
+          minikube addons enable default-storageclass
+          minikube addons enable ingress
+          minikube addons enable metrics-server
+
+      - name: List Minikube Addons
+        run: minikube addons list
+
+      - name: Patch Ingress to allow snippet annotations and restart
+        run: |
+          kubectl -n ingress-nginx patch cm ingress-nginx-controller --patch '{"data":{"allow-snippet-annotations":"true"}}'
+          kubectl -n ingress-nginx delete pod -l app.kubernetes.io/name=ingress-nginx
+
+      # we use the none driver, so minikube should see the same images on the host
+      - name: Build Theia Cloud Images
+        run: |
+          cd theia-cloud
+          docker build --no-cache -t theiacloud/theia-cloud-service:minikube-ci-e2e -f dockerfiles/service/Dockerfile .
+          docker build --no-cache -t theiacloud/theia-cloud-operator:minikube-ci-e2e -f dockerfiles/operator/Dockerfile .
+          docker build --no-cache -t theiacloud/theia-cloud-landing-page:minikube-ci-e2e -f dockerfiles/landing-page/Dockerfile .
+          docker build --no-cache -t theiacloud/theia-cloud-wondershaper:minikube-ci-e2e -f dockerfiles/wondershaper/Dockerfile .
+          docker build --no-cache -t theiacloud/theia-cloud-conversion-webhook:minikube-ci-e2e -f dockerfiles/conversion-webhook/Dockerfile .
+          docker build --no-cache -t theiacloud/theia-cloud-demo:latest -f demo/dockerfiles/demo-theia-docker/Dockerfile demo/dockerfiles/demo-theia-docker/.
+          docker tag theiacloud/theia-cloud-demo:latest theiacloud/theia-cloud-demo:minikube-ci-e2e
+          docker build --no-cache -t theiacloud/theia-cloud-activity-demo:minikube-ci-e2e -f demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile demo/dockerfiles/demo-theia-monitor-vscode/.
+          docker build --no-cache -t theiacloud/theia-cloud-activity-demo-theia:minikube-ci-e2e -f demo/dockerfiles/demo-theia-monitor-theia/Dockerfile .
+
+      - name: Get NGINX Ingress Controller Host
+        id: ingress_info
+        run: |
+          INGRESS_HOST=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')
+          echo "INGRESS_HOST=$INGRESS_HOST" >> $GITHUB_ENV
+
+      - name: Run Terraform
+        run: |
+          cd theia-cloud/terraform/ci-configurations
+          terraform init
+          terraform apply \
+            -var="ingress_ip=${{ env.INGRESS_HOST }}" \
+            -var="use_paths=${{ matrix.paths }}" \
+            -var="use_ephemeral_storage=${{ matrix.ephemeral }}" \
+            -var="enable_keycloak=${{ matrix.keycloak }}" \
+            -auto-approve
+
+      - name: List All Services in All Namespaces
+        run: kubectl get services --all-namespaces
+
+      - name: List All AppDefinitions in All Namespaces
+        run: kubectl get appdefinitions --all-namespaces
+
+      - name: List all Pods Images
+        run: kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq
+
+      - name: Wait for Deployments to be Ready
+        run: |
+          kubectl wait --namespace ingress-nginx --for=condition=available deployment/ingress-nginx-controller --timeout=300s
+          kubectl wait --namespace theia-cloud --for=condition=available deployment/conversion-webhook --timeout=300s
+          kubectl wait --namespace theia-cloud --for=condition=available deployment/landing-page-deployment --timeout=300s
+          kubectl wait --namespace theia-cloud --for=condition=available deployment/operator-deployment --timeout=300s
+          kubectl wait --namespace theia-cloud --for=condition=available deployment/service-deployment --timeout=300s
+
+      # URLs
+      # service: servicex
+      # landing: trynow
+      # instance: instances
+      - name: Access NGINX Ingress URL
+        if: ${{ matrix.paths == false }}
+        run: |
+          curl -LkI "https://trynow.${{ env.INGRESS_HOST }}.nip.io/"
+
+      - name: Access NGINX Ingress URL
+        if: ${{ matrix.paths == true }}
+        run: |
+          curl -LkI "https://${{ env.INGRESS_HOST }}.nip.io/trynow/"
+
+      - name: Get CA cert
+        run: |
+          kubectl get secret theia-cloud-ca-key-pair -n cert-manager -o jsonpath='{.data.tls\.crt}' | base64 --decode > ca.crt
+          ls -al
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies and run tests
+        run: |
+          cd theia-cloud/node
+          npm ci
+          npm run build -w e2e-tests
+          export MATRIX_PATHS=${{ matrix.paths }}
+          export MATRIX_EPHEMERAL=${{ matrix.ephemeral }}
+          export MATRIX_KEYCLOAK=${{ matrix.keycloak }}
+          npm run ui-tests -w e2e-tests
+
+      - name: Upload Playwright test failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-failure-screenshots
+          path: theia-cloud/node/e2e-tests/test-results/**/*.png
+          retention-days: 7
