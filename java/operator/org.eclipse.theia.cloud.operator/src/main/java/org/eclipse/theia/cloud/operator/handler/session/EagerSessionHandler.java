@@ -136,7 +136,7 @@ public class EagerSessionHandler implements SessionHandler {
                             labels = new HashMap<>();
                             service.getMetadata().setLabels(labels);
                         }
-                        Map<String, String> newLabels = LabelsUtil.createSessionLabels(spec,
+                        Map<String, String> newLabels = LabelsUtil.createSessionLabels(session,
                                 appDefinition.get().getSpec());
                         labels.putAll(newLabels);
                         return service;
@@ -327,7 +327,7 @@ public class EagerSessionHandler implements SessionHandler {
         // sessionCreated) and then checking if the service has an owner reference to the session
         String sessionResourceName = session.getMetadata().getName();
         String sessionResourceUID = session.getMetadata().getUid();
-        Map<String, String> sessionLabels = LabelsUtil.createSessionLabels(spec, appDefinitionSpec);
+        Map<String, String> sessionLabels = LabelsUtil.createSessionLabels(session, appDefinitionSpec);
         // Filtering by withLabels(sessionLabels) because the method requires an exact match of the labels.
         // Additional labels on the service prevent a match and the service has an additional app label.
         // Thus, filter by each session label separately.

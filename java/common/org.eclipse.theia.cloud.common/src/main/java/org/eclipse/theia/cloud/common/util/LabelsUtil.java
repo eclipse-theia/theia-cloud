@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 
 public class LabelsUtil {
@@ -33,15 +34,18 @@ public class LabelsUtil {
         return value;
     }
 
-    public static Map<String, String> createSessionLabels(SessionSpec sessionSpec,
-            AppDefinitionSpec appDefinitionSpec) {
+    public static Map<String, String> createSessionLabels(Session session, AppDefinitionSpec appDefinitionSpec) {
+        SessionSpec sessionSpec = session.getSpec();
         Map<String, String> labels = new HashMap<>();
+        String sanitizedUser = sessionSpec.getUser().replaceAll("@", "_at_").replaceAll("[^a-zA-Z0-9]", "_");
+        String sessionLabel = session.getMetadata().getUid() + "-" + sessionSpec.getName();
+
         labels.put(LABEL_KEY_SESSION, LABEL_VALUE_SESSION);
         labels.put(LABEL_KEY_THEIACLOUD, LABEL_VALUE_THEIACLOUD);
-        String sanitizedUser = sessionSpec.getUser().replaceAll("@", "_at_").replaceAll("[^a-zA-Z0-9]", "_");
         labels.put(LABEL_KEY_USER, truncateLabelValue(sanitizedUser));
         labels.put(LABEL_KEY_APPDEF, truncateLabelValue(appDefinitionSpec.getName()));
-        labels.put(LABEL_KEY_SESSION_NAME, truncateLabelValue(sessionSpec.getName()));
+        labels.put(LABEL_KEY_SESSION_NAME, truncateLabelValue(sessionLabel));
+
         return labels;
     }
 
