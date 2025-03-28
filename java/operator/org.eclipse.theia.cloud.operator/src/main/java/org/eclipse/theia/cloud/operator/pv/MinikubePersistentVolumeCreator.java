@@ -64,8 +64,7 @@ public class MinikubePersistentVolumeCreator implements PersistentVolumeCreator 
                     e);
             return Optional.empty();
         }
-        return client.persistentVolumesClient().loadAndCreate(correlationId, persistentVolumeYaml,
-                volume -> volume.addOwnerReference(workspace));
+        return client.persistentVolumesClient().loadAndCreate(correlationId, persistentVolumeYaml);
     }
 
     @Override

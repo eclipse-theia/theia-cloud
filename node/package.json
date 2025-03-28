@@ -31,6 +31,7 @@
   },
   "workspaces": [
     "common",
+    "e2e-tests",
     "config-store",
     "landing-page",
     "testing-page"
