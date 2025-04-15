@@ -48,7 +48,7 @@ jobs:
       - name: Checkout Theia Cloud Helm
         uses: actions/checkout@v4
         with:
-          repository: "eclipsesource/theia-cloud-helm"
+          repository: "eclipse-theia/theia-cloud-helm"
           ref: "${{ env.INPUT_THEIA_CLOUD_HELM_BRANCH }}"
           path: "./theia-cloud-helm"
 

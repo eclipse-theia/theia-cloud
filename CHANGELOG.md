@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0] - estimated 2025-04
+## [1.1.0] - estimated between 2025-04 and 2025-07
 
 - [theia] Introduce new folder `theia` for all theia extensions and an example app to test these [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
 - [node/monitor-theia] Move Theia monitor extension to `theia/extensions/monitor-theia` [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
