@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: placeholder-emailsconfigname
   labels:
-    theiacloud: emails
+    theia-cloud.io/template-purpose: emails
   namespace: placeholder-namespace
   ownerReferences:
     - apiVersion: theia.cloud/v1beta9

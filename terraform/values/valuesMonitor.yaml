@@ -1,11 +1,11 @@
-imagePullPolicy: Always
+imagePullPolicy: IfNotPresent
 
 app:
   id: asdfghjkl
   name: Theia Blueprint
 
 demoApplication:
-  name: theiacloud/theia-cloud-activity-demo:0.12.0-next
+  name: theiacloud/theia-cloud-activity-demo:1.1.0-next
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "0"
@@ -25,7 +25,7 @@ hosts:
     instance: ws
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.12.0-next
+  image: theiacloud/theia-cloud-landing-page:1.1.0-next
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
 
@@ -46,9 +46,10 @@ operator:
   sessionsPerUser: "3"
 
 ingress:
-  instanceName: "theia-cloud-demo-ws-ingress"
   clusterIssuer: letsencrypt-prod
   theiaCloudCommonName: false
+  instances:
+    name: "theia-cloud-demo-ws-ingress"
 
 monitor:
   enable: true

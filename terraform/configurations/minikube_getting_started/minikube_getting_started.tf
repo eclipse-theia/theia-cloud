@@ -58,7 +58,7 @@ resource "kubernetes_persistent_volume" "minikube" {
     access_modes = ["ReadWriteOnce"]
     persistent_volume_source {
       host_path {
-        path = "/data/theiacloud"
+        path = "/data/theia-cloud"
       }
     }
   }

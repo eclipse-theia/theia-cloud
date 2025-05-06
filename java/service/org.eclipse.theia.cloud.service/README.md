@@ -14,6 +14,15 @@ You can run your application in dev mode that enables live coding using:
 
 > **_NOTE:_** Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
 
+## Debug the service
+
+When you have the service running in dev mode you can use the `Attach to Service` debug config to debug the service.
+
+Check the [OpenAPI documentation](../../../documentation/OpenAPI.md) to see how you can send requests to the service.
+
+_Note_: The landing page will not communicate with this service, as it will be hosted on another address.
+Checkout the [testing-page](../../../node/testing-page/README.md) to test requests against the server.
+
 ## Packaging and running the application
 
 The application can be packaged using:
@@ -49,7 +58,7 @@ Or, if you don't have GraalVM installed, you can run the native executable build
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
 ```
 
-You can then execute your native executable with: `./target/service-1.0.0-SNAPSHOT-runner`
+You can then execute your native executable with: `./target/service-1.1.0-SNAPSHOT-runner`
 
 If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
 
@@ -64,8 +73,6 @@ Easily start your RESTful Web Services
 ## Unit tests
 
 Unit tests use the Quarkus test infrastructure.
-
-All tests can be run in Eclipse via launch config [TheiaCloud Service Tests](./TheiaCloud Service Tests.launch).
 
 When running tests from an IDE, the following VM argument might need to be set to enable logging during tests (this is pre-configured in the launch config):
 

@@ -38,7 +38,7 @@ Build the docker image as usual.
 ### Operator cannot set the workspace URL to the Session
 
 This usually happens when using custom host names that are mapped in a hosts definition file (e.g. `/etc/hosts` on Linux) to the local IP of Minikube.
-One [known case](https://github.com/eclipsesource/theia-cloud/issues/150) occurred on MacOS with Docker Desktop:
+One [known case](https://github.com/eclipse-theia/theia-cloud/issues/150) occurred on MacOS with Docker Desktop:
 The VM running Kubernetes does not know the hosts settings of the host operating system.
 Thus, the custom hostname could not be resolved in the cluster and, thus, the operator could not resolve the session pods' addresses.
 

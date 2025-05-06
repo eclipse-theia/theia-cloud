@@ -39,6 +39,7 @@ public class BaseResource {
         logger = Logger.getLogger(getClass().getSuperclass());
     }
 
+    /** @return The correlation id for this request. */
     protected String evaluateRequest(ServiceRequest request) {
         return basicEvaluateRequest(request);
     }
@@ -81,7 +82,7 @@ public class BaseResource {
         // (this might change if the concept of admin users is introduced later)
         if (theiaCloudUser.isAnonymous()) {
             info(correlationId,
-                    "User is unexpectetly considered anonymous and, thus, must not access user scoped resources.");
+                    "User is unexpectedly considered anonymous and, thus, must not access user scoped resources.");
             throw new TheiaCloudWebException(Status.UNAUTHORIZED);
         } else if (request.user == null || request.user.equals(theiaCloudUser.getIdentifier())) {
             return new EvaluatedRequest(correlationId, theiaCloudUser.getIdentifier());
@@ -98,6 +99,10 @@ public class BaseResource {
 
     public void warn(String correlationId, String message) {
         logger.warn(LogMessageUtil.formatLogMessage(correlationId, message));
+    }
+
+    public void warn(String correlationId, String message, Throwable throwable) {
+        logger.warn(LogMessageUtil.formatLogMessage(correlationId, message), throwable);
     }
 
     public void error(String correlationId, String message) {

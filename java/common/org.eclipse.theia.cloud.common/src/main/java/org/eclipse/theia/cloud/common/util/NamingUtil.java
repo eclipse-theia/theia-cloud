@@ -31,6 +31,12 @@ public final class NamingUtil {
 
     public static final char VALID_NAME_SUFFIX = 'z';
 
+    /**
+     * Prefix for names generated based on an app definition and an index. These names are typically used for objects
+     * related to eagerly started instance pods (e.g. services or deployments).
+     */
+    public static final String APP_DEFINITION_INSTANCE_PREFIX = "instance-";
+
     private static final Locale US_LOCALE = new Locale("en", "US");
 
     private NamingUtil() {
@@ -41,7 +47,7 @@ public final class NamingUtil {
      * @see NamingUtil#createName(AppDefinition, int, String)
      */
     public static String createName(AppDefinition appDefinition, int instance) {
-        return createName(appDefinition, instance);
+        return createName(appDefinition, instance, null);
     }
 
     /**
@@ -56,10 +62,10 @@ public final class NamingUtil {
      * same type for an AppDefinition.
      * </p>
      * <p>
-     * The created name contains a "session" prefix, the session's user and app definition, the identifier (if given),
-     * and the last segment of the Session's UID. User, app definition and identifier are shortened to keep the name
-     * within Kubernetes' character limit (63) minus 6 characters. The latter allows Kubernetes to add 6 characters at
-     * the end of deployment pod names while the pod names pod names will still contain the whole name of the deployment
+     * The created name contains a "instance-" prefix, instance number, the identifier (if given), and the last segment
+     * of the App Definition's UID. User, app definition and identifier are shortened to keep the name within
+     * Kubernetes' character limit (63) minus 6 characters. The latter allows Kubernetes to add 6 characters at the end
+     * of deployment pod names while the pod names pod names will still contain the whole name of the deployment
      * </p>
      * 
      * @param appDefinition the {@link AppDefinition}
@@ -69,7 +75,7 @@ public final class NamingUtil {
      * @return the name
      */
     public static String createName(AppDefinition appDefinition, int instance, String identifier) {
-        String prefix = "instance-" + instance;
+        String prefix = APP_DEFINITION_INSTANCE_PREFIX + instance;
         return createName(prefix, identifier, null, appDefinition.getSpec().getName(),
                 appDefinition.getMetadata().getUid());
     }
@@ -174,7 +180,7 @@ public final class NamingUtil {
 
         // If the user is an email address, only take the part before the @ sign because
         // this is usually sufficient to identify the user.
-        String userName = user.split("@")[0];
+        String userName = user != null ? user.split("@")[0] : null;
 
         int infoSegmentLength;
         String shortenedIdentifier = null;

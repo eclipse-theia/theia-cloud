@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import * as vscode from 'vscode';
 
-import { getFromEnv, MONITOR_ENABLE_ACTIVITY_TRACKER, MONITOR_PORT } from './env-variables';
+import { getFromEnv, THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER, THEIACLOUD_MONITOR_PORT } from './env-variables';
 import { ActivityTrackerModule } from './modules/activity-tracker-module';
 import { MessagingModule } from './modules/messaging-module';
 import { MonitorModule } from './monitor-module';
@@ -13,8 +13,8 @@ import { MonitorModule } from './monitor-module';
  * If no values are defined it will fallback to `localhost:8081`
  */
 export function activate(context: vscode.ExtensionContext): void {
-  const hostPort = Number(getFromEnv(MONITOR_PORT) ?? 8081);
-
+  const hostPort = Number(getFromEnv(THEIACLOUD_MONITOR_PORT) ?? 8081);
+  console.debug(`hostPort ${hostPort}`);
   startServer(hostPort);
 }
 
@@ -51,8 +51,11 @@ export function startServer(port: number): void {
  */
 export function getEnabledModules(): MonitorModule[] {
   const modules: MonitorModule[] = [new MessagingModule()];
-  if (getFromEnv(MONITOR_ENABLE_ACTIVITY_TRACKER) === 'true') {
+  if (getFromEnv(THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER) === 'true') {
+    console.debug('ActivityTrackerModule enabled');
     modules.push(new ActivityTrackerModule());
+  } else {
+    console.debug(`ActivityTrackerModule disabled ${getFromEnv(THEIACLOUD_MONITOR_ENABLE_ACTIVITY_TRACKER)}`);
   }
   return modules;
 }

@@ -15,6 +15,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,33 +26,47 @@ import org.junit.jupiter.api.Test;
  */
 class ApplicationPropertiesTests {
 
-    private static final String THEIA_CLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
+    private static final String THEIACLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
 
     @Test
     void isUseKeycloak_propertyTrue_returnTrue() {
-        System.setProperty(THEIA_CLOUD_USE_KEYCLOAK, "true");
+        System.setProperty(THEIACLOUD_USE_KEYCLOAK, "true");
         ApplicationProperties fixture = new ApplicationProperties();
         assertTrue(fixture.isUseKeycloak());
     }
 
     @Test
     void isUseKeycloak_propertyNotSet_returnTrue() {
-        System.clearProperty(THEIA_CLOUD_USE_KEYCLOAK);
+        System.clearProperty(THEIACLOUD_USE_KEYCLOAK);
         ApplicationProperties fixture = new ApplicationProperties();
         assertTrue(fixture.isUseKeycloak());
     }
 
     @Test
     void isUseKeycloak_propertyFalse_returnFalse() {
-        System.setProperty(THEIA_CLOUD_USE_KEYCLOAK, "false");
+        System.setProperty(THEIACLOUD_USE_KEYCLOAK, "false");
         ApplicationProperties fixture = new ApplicationProperties();
         assertFalse(fixture.isUseKeycloak());
     }
 
     @Test
     void isUseKeycloak_propertySetToSomeValue_returnTrue() {
-        System.setProperty(THEIA_CLOUD_USE_KEYCLOAK, "asdasd");
+        System.setProperty(THEIACLOUD_USE_KEYCLOAK, "asdasd");
         ApplicationProperties fixture = new ApplicationProperties();
         assertTrue(fixture.isUseKeycloak());
+    }
+
+    @Test
+    void getAdminGroupName_propertyNotSet_returnDefault() {
+        System.clearProperty("theia.cloud.auth.admin.group");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertEquals("theia-cloud/admin", fixture.getAdminGroupName());
+    }
+
+    @Test
+    void getAdminGroupName_propertySet_returnValue() {
+        System.setProperty("theia.cloud.auth.admin.group", "test-admin-group");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertEquals("test-admin-group", fixture.getAdminGroupName());
     }
 }

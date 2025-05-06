@@ -8,10 +8,10 @@ For more information, please also visit [our website](https://theia-cloud.io/).
 
 ## Feedback, Help and Support
 
-If you encounter any problems feel free to [open an issue](https://github.com/eclipsesource/theia-cloud/issues/new/choose) on the repo.
-For questions and discussions please use the [the Github discussions](https://github.com/eclipsesource/theia-cloud/discussions).
+If you encounter any problems feel free to [open an issue](https://github.com/eclipse-theia/theia-cloud/issues/new/choose) on the repo.
+For questions and discussions please use the [the Github discussions](https://github.com/eclipse-theia/theia-cloud/discussions).
 You can also reach us via [email](mailto:support@theia-cloud.io?subject=Theia_Cloud).
-In addition, EclipseSource also offers [professional support](https://eclipsesource.com/services/developer-support/) for Theia and Theia Cloud.
+In addition, EclipseSource also offers [professional support](https://eclipse-theia.com/services/developer-support/) for Theia and Theia Cloud.
 
 ## Components
 
@@ -45,7 +45,7 @@ From version 0.9.0 onwards, every component in this repository (and the helm cha
 - **Releases:** Standard releases will occur every three months. We recommend to use these for deployments as those are thoroughly tested and are stable versions. You can then update, after three months, when the next version is available.
 - **Pre-Releases:** Pre-release versions will be released on every commit. These versions will be tagged as `<current-version>-next.<git-sha>`. The latest version of a next version is available at `<current-version>-next`. Pre-releases are ideal for testing the latest features and changes or for making contributions. However we do not recommend, to use those versions in deployments.
 
-The [helm charts](https://github.com/eclipsesource/theia-cloud-helm) are referencing the compatible version in their `appVersion` field.
+The [helm charts](https://github.com/eclipse-theia/theia-cloud-helm) are referencing the compatible version in their `appVersion` field.
 
 Since, npm does not allow tags that follow Semver, next artifacts published to npm have the `next` tag instead of `<currentVersion-next>`.
 This means, that those dependencies will be updated to newer version, once they are available. So again, for deployments you should either pin the version to a specific commit or use the released versions.
@@ -77,7 +77,7 @@ All components are deployed as docker images and may be built with docker. See [
 
 ## Installation
 
-We offer a helm chart at <https://github.com/eclipsesource/theia-cloud-helm> which may be used to install Theia Cloud. Please check our getting started guides below as well, which will explain the possible values in more detail.
+We offer a helm chart at <https://github.com/eclipse-theia/theia-cloud-helm> which may be used to install Theia Cloud. Please check our getting started guides below as well, which will explain the possible values in more detail.
 
 We offer three charts:
 
@@ -91,7 +91,7 @@ Older versions (before the introduction of `theia-cloud-crds`) require a manual 
 ### Add & update Theia Cloud helm repo
 
 ```bash
-helm repo add theia-cloud-remote https://github.eclipsesource.com/theia-cloud-helm
+helm repo add theia-cloud-remote https://eclipse-theia.github.io/theia-cloud-helm
 helm repo update
 ```
 
@@ -100,9 +100,9 @@ helm repo update
 ```bash
 helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --set issuer.email=your-mail@example.com
 
-helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theiacloud --create-namespace
+helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theia-cloud --create-namespace
 
-helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theia-cloud
 ```
 
 ### Install the current next version
@@ -112,21 +112,21 @@ Simply add the `--devel` flag:
 ```bash
 helm install theia-cloud-base theia-cloud-remote/theia-cloud-base --set issuer.email=your-mail@example.com --devel
 
-helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theiacloud --create-namespace --devel
+helm install theia-cloud-crds theia-cloud-remote/theia-cloud-crds  --namespace theia-cloud --create-namespace --devel
 
-helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theiacloud --devel
+helm install theia-cloud theia-cloud-remote/theia-cloud --namespace theia-cloud --devel
 ```
 
 ### Optional: switch to the newly created namespace
 
 ```bash
-kubectl config set-context --current --namespace=theiacloud
+kubectl config set-context --current --namespace=theia-cloud
 ```
 
 ### Uninstall
 
 ```bash
-helm uninstall theia-cloud -n theiacloud
+helm uninstall theia-cloud -n theia-cloud
 ```
 
 ### Getting started with

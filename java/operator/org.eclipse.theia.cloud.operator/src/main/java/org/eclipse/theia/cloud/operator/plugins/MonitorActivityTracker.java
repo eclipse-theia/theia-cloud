@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
+import org.eclipse.theia.cloud.common.k8s.resource.OperatorStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
@@ -78,7 +79,9 @@ public class MonitorActivityTracker implements OperatorPlugin {
     }
 
     protected void pingAllSessions() {
-        List<Session> sessions = resourceClient.sessions().list();
+        // Only look at handled sessions (handled sessions have a lastActivity)
+        List<Session> sessions = resourceClient.sessions().list().stream()
+                .filter(session -> OperatorStatus.HANDLED.equals(session.getStatus().getOperatorStatus())).toList();
         String correlationId = generateCorrelationId();
 
         LOGGER.debug("Pinging sessions: " + sessions);

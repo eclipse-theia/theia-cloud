@@ -45,11 +45,19 @@ resource "keycloak_openid_client" "theia-cloud" {
   ]
 }
 
+resource "keycloak_group" "theia_cloud_admin" {
+  realm_id = keycloak_realm.theia-cloud.id
+  name     = "theia-cloud/admin"
+}
+
 resource "keycloak_openid_group_membership_protocol_mapper" "groups" {
   realm_id   = keycloak_realm.theia-cloud.id
   client_id  = keycloak_openid_client.theia-cloud.id
   name       = "groups"
   claim_name = "groups"
+  # Disable full path for group names to just get the group name as configured
+  # and avoid Keycloak prefixing them with a slash
+  full_path = false
 }
 
 resource "keycloak_openid_audience_protocol_mapper" "audience" {

@@ -94,7 +94,7 @@ resource "helm_release" "cert-manager" {
   name             = "cert-manager"
   repository       = "https://charts.jetstack.io"
   chart            = "cert-manager"
-  version          = "v1.11.0"
+  version          = "v1.16.2"
   namespace        = "cert-manager"
   create_namespace = true
 
@@ -109,7 +109,7 @@ resource "helm_release" "nginx-ingress-controller" {
   name             = "nginx-ingress-controller"
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
-  version          = "4.5.2"
+  version          = "4.11.5"
   namespace        = "ingress-nginx"
   create_namespace = true
 
@@ -122,16 +122,21 @@ resource "helm_release" "nginx-ingress-controller" {
     name  = "controller.service.loadBalancerIP"
     value = var.loadBalancerIP
   }
+
+  set {
+    name  = "controller.allowSnippetAnnotations"
+    value = true
+  }
 }
 
 resource "helm_release" "theia-cloud-base" {
   count            = var.install_theia_cloud_base ? 1 : 0
   depends_on       = [helm_release.cert-manager, helm_release.nginx-ingress-controller] # we need to install cert issuers
   name             = "theia-cloud-base"
-  repository       = "https://github.eclipsesource.com/theia-cloud-helm"
+  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud-base"
-  version          = "0.11.1"
-  namespace        = "theiacloud"
+  version          = "1.0.0"
+  namespace        = "theia-cloud"
   create_namespace = true
 
   set {
@@ -144,10 +149,10 @@ resource "helm_release" "theia-cloud-crds" {
   count            = var.install_theia_cloud_crds ? 1 : 0
   depends_on       = [helm_release.theia-cloud-base]
   name             = "theia-cloud-crds"
-  repository       = "https://github.eclipsesource.com/theia-cloud-helm"
+  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud-crds"
-  version          = "0.11.1"
-  namespace        = "theiacloud"
+  version          = "1.0.0"
+  namespace        = "theia-cloud"
   create_namespace = true
 }
 
@@ -174,7 +179,7 @@ resource "helm_release" "keycloak" {
   name             = "keycloak"
   repository       = "https://charts.bitnami.com/bitnami"
   chart            = "keycloak"
-  version          = "13.3.0"
+  version          = "15.1.8"
   namespace        = "keycloak"
   create_namespace = true
 
@@ -228,10 +233,10 @@ resource "helm_release" "theia-cloud" {
   count            = var.install_theia_cloud ? 1 : 0
   depends_on       = [helm_release.keycloak, helm_release.theia-cloud-crds] # wait for keycloak to make the default cert available
   name             = "theia-cloud"
-  repository       = "https://github.eclipsesource.com/theia-cloud-helm"
+  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud"
-  version          = "0.11.1"
-  namespace        = "theiacloud"
+  version          = "1.0.0"
+  namespace        = "theia-cloud"
   create_namespace = true
 
   values = [

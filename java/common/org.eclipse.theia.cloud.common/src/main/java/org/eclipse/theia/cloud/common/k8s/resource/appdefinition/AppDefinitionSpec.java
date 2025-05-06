@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.hub.AppDefinitionHub;
+import org.eclipse.theia.cloud.common.serialization.SensitiveData;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -37,6 +38,7 @@ public class AppDefinitionSpec {
     private String imagePullPolicy;
 
     @JsonProperty("pullSecret")
+    @SensitiveData
     private String pullSecret;
 
     @JsonProperty("uid")
@@ -162,8 +164,16 @@ public class AppDefinitionSpec {
         return minInstances;
     }
 
+    public void setMinInstances(int minInstances) {
+        this.minInstances = minInstances;
+    }
+
     public Integer getMaxInstances() {
         return maxInstances;
+    }
+
+    public void setMaxInstances(Integer maxInstances) {
+        this.maxInstances = maxInstances;
     }
 
     public Integer getTimeout() {
@@ -212,10 +222,11 @@ public class AppDefinitionSpec {
 
     @Override
     public String toString() {
+        final String redactedPullSecret = "***";
         return "AppDefinitionSpec [name=" + name + ", image=" + image + ", imagePullPolicy=" + imagePullPolicy
-                + ", pullSecret=" + pullSecret + ", uid=" + uid + ", port=" + port + ", ingressname=" + ingressname
-                + ", minInstances=" + minInstances + ", maxInstances=" + maxInstances + ", timeout=" + timeout
-                + ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="
+                + ", pullSecret=" + redactedPullSecret + ", uid=" + uid + ", port=" + port + ", ingressname="
+                + ingressname + ", minInstances=" + minInstances + ", maxInstances=" + maxInstances + ", timeout="
+                + timeout + ", requestsMemory=" + requestsMemory + ", requestsCpu=" + requestsCpu + ", limitsMemory="
                 + limitsMemory + ", limitsCpu=" + limitsCpu + ", downlinkLimit=" + downlinkLimit + ", uplinkLimit="
                 + uplinkLimit + ", mountPath=" + mountPath + "]";
     }

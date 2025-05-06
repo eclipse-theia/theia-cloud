@@ -25,19 +25,24 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class ApplicationProperties {
 
-    private static final String THEIA_CLOUD_APP_ID = "theia.cloud.app.id";
-    private static final String THEIA_CLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
+    private static final String THEIACLOUD_APP_ID = "theia.cloud.app.id";
+    private static final String THEIACLOUD_USE_KEYCLOAK = "theia.cloud.use.keycloak";
+    private static final String THEIACLOUD_ADMIN_GROUP_NAME = "theia.cloud.auth.admin.group";
+
+    private static final String DEFAULT_ADMIN_GROUP_NAME = "theia-cloud/admin";
 
     private final Logger logger;
 
     private final boolean useKeycloak;
     private final String appId;
+    private final String adminGroupName;
 
     public ApplicationProperties() {
         logger = Logger.getLogger(getClass());
-        appId = System.getProperty(THEIA_CLOUD_APP_ID, "asdfghjkl");
+        appId = System.getProperty(THEIACLOUD_APP_ID, "asdfghjkl");
+        adminGroupName = System.getProperty(THEIACLOUD_ADMIN_GROUP_NAME, DEFAULT_ADMIN_GROUP_NAME);
         // Only disable keycloak if the value was explicitly set to exactly "false".
-        useKeycloak = !"false".equals(System.getProperty(THEIA_CLOUD_USE_KEYCLOAK));
+        useKeycloak = !"false".equals(System.getProperty(THEIACLOUD_USE_KEYCLOAK));
         if (!useKeycloak) {
             logger.warn("Keycloak integration was disabled. Anonymous requests are allowed!");
         }
@@ -55,5 +60,12 @@ public class ApplicationProperties {
      */
     public boolean isUseKeycloak() {
         return useKeycloak;
+    }
+
+    /**
+     * @return the group name that identifies admin users in the MicroProfile JWT token's groups claim
+     */
+    public String getAdminGroupName() {
+        return adminGroupName;
     }
 }

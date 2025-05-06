@@ -23,14 +23,14 @@ provider "helm" {
 resource "helm_release" "theia-cloud-crds" {
   name             = "theia-cloud-crds"
   chart            = "../../../../theia-cloud-helm/charts/theia-cloud-crds"
-  namespace        = "theiacloud"
+  namespace        = "theia-cloud"
   create_namespace = true
 }
 
 resource "helm_release" "theia-cloud-base" {
   name             = "theia-cloud-base"
   chart            = "../../../../theia-cloud-helm/charts/theia-cloud-base"
-  namespace        = "theiacloud"
+  namespace        = "theia-cloud"
   create_namespace = true
 
   set {

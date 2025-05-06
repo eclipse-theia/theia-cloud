@@ -28,7 +28,7 @@ provider "helm" {
 resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
   chart            = "../../../../theia-cloud-helm/charts/theia-cloud"
-  namespace        = "theiacloud"
+  namespace        = "theia-cloud"
   create_namespace = true
 
   values = [
@@ -82,7 +82,7 @@ resource "helm_release" "theia-cloud" {
 
   set {
     name  = "demoApplication.name"
-    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:0.12.0-next" : "theiacloud/theia-cloud-activity-demo-theia:0.12.0-next"
+    value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:1.1.0-next" : "theiacloud/theia-cloud-activity-demo-theia:1.1.0-next"
   }
 
   set {

@@ -1,14 +1,14 @@
-FROM node:20-bookworm as build-stage
+FROM node:20-bookworm AS build-stage
 RUN apt-get update && apt-get install -y libxkbfile-dev libsecret-1-dev
 WORKDIR /home/theia
 ADD demo/dockerfiles/demo-theia-monitor-theia/package.json ./package.json
+ADD demo/dockerfiles/demo-theia-monitor-theia/yarn.lock ./yarn.lock
 
 ## Link package from local
-ADD node ./node
-WORKDIR /home/theia/node
-RUN npm ci && npm run build -w monitor-theia
+ADD theia ./theia
+WORKDIR /home/theia/theia
+RUN yarn --frozen-lockfile --ignore-scripts && yarn build:workspace @eclipse-theiacloud/monitor-theia
 WORKDIR /home/theia
-RUN sed -i 's/"@eclipse-theiacloud\/monitor-theia": "next"/"@eclipse-theiacloud\/monitor-theia": "file:node\/monitor-theia"/' package.json
 
 RUN yarn --pure-lockfile && \
     NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
@@ -22,7 +22,7 @@ RUN yarn --pure-lockfile && \
     yarn autoclean --force && \
     yarn cache clean
 
-FROM node:20-bookworm-slim as production-stage
+FROM node:20-bookworm-slim AS production-stage
 
 # Use fixed user id 101 to guarantee it matches the app definition
 RUN adduser --system --group --uid 101 theia
@@ -34,7 +34,7 @@ RUN chmod g+rw /home && \
 RUN apt-get update && apt-get install -y wget apt-transport-https && \
     wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | tee /usr/share/keyrings/adoptium.asc && \
     echo "deb [signed-by=/usr/share/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list && \
-    apt-get update && apt-get install -y git openssh-client openssh-server bash libsecret-1-0 temurin-17-jdk maven && \
+    apt-get update && apt-get install -y git openssh-client openssh-server bash libsecret-1-0 temurin-21-jdk maven && \
     apt-get purge -y wget && \
     apt-get clean
 ENV HOME /home/theia

@@ -1,451 +1,155 @@
 {
-  "openapi": "3.0.3",
-  "info": {
-    "title": "Theia Cloud API",
-    "version": "0.12.0"
-  },
-  "paths": {
-    "/service": {
-      "post": {
-        "tags": ["Root Resource"],
-        "summary": "Launch Session",
-        "description": "Launches a session and creates a workspace if required. Responds with the URL of the launched session.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LaunchRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      }
-    },
-    "/service/session": {
-      "post": {
-        "tags": ["Session Resource"],
-        "summary": "Start a new session",
-        "description": "Starts a new session for an existing workspace and responds with the URL of the started session.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SessionStartRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": ["Session Resource"],
-        "summary": "Stop session",
-        "description": "Stops a session.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SessionStopRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      },
-      "patch": {
-        "tags": ["Session Resource"],
-        "summary": "Report session activity",
-        "description": "Updates the last activity timestamp for a session to monitor activity.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SessionActivityRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      }
-    },
-    "/service/session/performance/{appId}/{sessionName}": {
-      "get": {
-        "tags": ["Session Resource"],
-        "summary": "Get performance metrics",
-        "description": "Returns the current CPU and memory usage of the session's pod.",
-        "parameters": [
-          {
-            "name": "appId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sessionName",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionPerformance"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      }
-    },
-    "/service/session/{appId}/{user}": {
-      "get": {
-        "tags": ["Session Resource"],
-        "summary": "List sessions",
-        "description": "List sessions of a user.",
-        "parameters": [
-          {
-            "name": "appId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "user",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SessionSpec"
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      }
-    },
-    "/service/workspace": {
-      "post": {
-        "tags": ["Workspace Resource"],
-        "summary": "Create workspace",
-        "description": "Creates a new workspace for a user.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WorkspaceCreationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserWorkspace"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": ["Workspace Resource"],
-        "summary": "Delete workspace",
-        "description": "Deletes a workspace.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WorkspaceDeletionRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      }
-    },
-    "/service/workspace/{appId}/{user}": {
-      "get": {
-        "tags": ["Workspace Resource"],
-        "summary": "List workspaces",
-        "description": "Lists the workspaces of a user.",
-        "parameters": [
-          {
-            "name": "appId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "user",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserWorkspace"
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      }
-    },
-    "/service/{appId}": {
-      "get": {
-        "tags": ["Root Resource"],
-        "summary": "Ping",
-        "description": "Replies if the service is available.",
-        "parameters": [
-          {
-            "name": "appId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "401": {
-            "description": "Not Authorized"
-          }
-        },
-        "security": [
-          {
-            "SecurityScheme": []
-          }
-        ]
-      }
-    }
-  },
+  "openapi": "3.1.0",
   "components": {
     "schemas": {
-      "EnvironmentVars": {
-        "description": "An object to hold all the ways environment variables can be passed. Not to be used by itself.",
+      "ActivityTracker": {
         "type": "object",
         "properties": {
-          "fromMap": {
-            "description": "Map of environment variables to be passed to Deployment.  Ignored if Theia applications are started eagerly.  Empty by default.",
+          "timeoutAfter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notifyAfter": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AppDefinition": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {
+            "type": "string",
+            "readOnly": true
+          },
+          "kind": {
+            "type": "string",
+            "readOnly": true
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/ObjectMeta"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/AppDefinitionSpec"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AppDefinitionStatus"
+          },
+          "singular": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "crdName": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "plural": {
+            "type": "string",
+            "writeOnly": true
+          },
+          "served": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "storage": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "deprecated": {
+            "type": "boolean",
+            "writeOnly": true
+          },
+          "deprecationWarning": {
+            "type": "string",
+            "writeOnly": true
+          }
+        }
+      },
+      "AppDefinitionListRequest": {
+        "type": "object",
+        "required": ["appId"],
+        "description": "A request to list available app definitions.",
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
+          }
+        }
+      },
+      "AppDefinitionSpec": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "imagePullPolicy": {
+            "type": "string"
+          },
+          "pullSecret": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ingressname": {
+            "type": "string"
+          },
+          "minInstances": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxInstances": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "timeout": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requestsMemory": {
+            "type": "string"
+          },
+          "requestsCpu": {
+            "type": "string"
+          },
+          "limitsMemory": {
+            "type": "string"
+          },
+          "limitsCpu": {
+            "type": "string"
+          },
+          "downlinkLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uplinkLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mountPath": {
+            "type": "string"
+          },
+          "monitor": {
+            "$ref": "#/components/schemas/Monitor"
+          },
+          "options": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             }
           },
-          "fromConfigMaps": {
-            "description": "List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef.  Ignored if Theia applications are started eagerly.  Empty by default.",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "fromSecrets": {
-            "description": "List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef.  Ignored if Theia applications are started eagerly.  Empty by default.",
+          "ingressHostnamePrefixes": {
             "type": "array",
             "items": {
               "type": "string"
@@ -453,127 +157,312 @@
           }
         }
       },
-      "LaunchRequest": {
-        "description": "A request to launch a new session.",
-        "required": ["appId", "user"],
+      "AppDefinitionStatus": {
         "type": "object",
         "properties": {
-          "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
+          "operatorStatus": {
             "type": "string"
+          },
+          "operatorMessage": {
+            "type": "string"
+          }
+        }
+      },
+      "AppDefinitionUpdateRequest": {
+        "type": "object",
+        "required": ["appId"],
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
+          },
+          "minInstances": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The minimum number of instances to run."
+          },
+          "maxInstances": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The maximum number of instances to run."
+          }
+        }
+      },
+      "EnvironmentVars": {
+        "type": "object",
+        "description": "An object to hold all the ways environment variables can be passed. Not to be used by itself.",
+        "properties": {
+          "fromMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Map of environment variables to be passed to Deployment.  Ignored if Theia applications are started eagerly.  Empty by default."
+          },
+          "fromConfigMaps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of ConfigMaps (by name) containing environment variables to be passed to Deployment as envFrom.configMapRef.  Ignored if Theia applications are started eagerly.  Empty by default."
+          },
+          "fromSecrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of Secrets (by name) containing environment variables to be passed to Deployment as envFrom.secretRef.  Ignored if Theia applications are started eagerly.  Empty by default."
+          }
+        }
+      },
+      "FieldsV1": {
+        "type": "object"
+      },
+      "LaunchRequest": {
+        "type": "object",
+        "required": ["appId", "user"],
+        "description": "A request to launch a new session.",
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           },
           "user": {
-            "description": "The user identification, usually the email address.",
-            "type": "string"
+            "type": "string",
+            "description": "The user identification, usually the email address."
           },
           "appDefinition": {
-            "description": "The app to launch. Needs to be set if a new or ephemeral session should be launched. For an existing workspace the last app definition will be used if none is given.",
-            "type": "string"
+            "type": "string",
+            "description": "The app to launch. Needs to be set if a new or ephemeral session should be launched. For an existing workspace the last app definition will be used if none is given."
           },
           "workspaceName": {
-            "description": "The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched.",
-            "type": "string"
+            "type": "string",
+            "description": "The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched."
           },
           "label": {
-            "description": "The label of the workspace to mount/create. If no label is given, a default label will be generated.",
-            "type": "string"
+            "type": "string",
+            "description": "The label of the workspace to mount/create. If no label is given, a default label will be generated."
           },
           "ephemeral": {
-            "description": "If true no workspace will be created for the session.",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "If true no workspace will be created for the session."
           },
           "timeout": {
+            "type": "integer",
             "format": "int32",
-            "description": "Number of minutes to wait for session launch. Default is 3 Minutes.",
-            "type": "integer"
+            "description": "Number of minutes to wait for session launch. Default is 3 Minutes."
           },
           "env": {
-            "description": "Environment variables",
+            "$ref": "#/components/schemas/EnvironmentVars",
             "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/EnvironmentVars"
-              }
-            ]
+            "description": "Environment variables"
+          }
+        }
+      },
+      "ManagedFieldsEntry": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {
+            "type": "string"
+          },
+          "fieldsType": {
+            "type": "string"
+          },
+          "fieldsV1": {
+            "$ref": "#/components/schemas/FieldsV1"
+          },
+          "manager": {
+            "type": "string"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "subresource": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          }
+        }
+      },
+      "Monitor": {
+        "type": "object",
+        "properties": {
+          "port": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activityTracker": {
+            "$ref": "#/components/schemas/ActivityTracker"
+          }
+        }
+      },
+      "ObjectMeta": {
+        "type": "object",
+        "properties": {
+          "annotations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "creationTimestamp": {
+            "type": "string"
+          },
+          "deletionGracePeriodSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deletionTimestamp": {
+            "type": "string"
+          },
+          "finalizers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "generateName": {
+            "type": "string"
+          },
+          "generation": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "labels": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "managedFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManagedFieldsEntry"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "ownerReferences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OwnerReference"
+            }
+          },
+          "resourceVersion": {
+            "type": "string"
+          },
+          "selfLink": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          }
+        }
+      },
+      "OwnerReference": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "blockOwnerDeletion": {
+            "type": "boolean"
+          },
+          "controller": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
           }
         }
       },
       "PingRequest": {
-        "description": "Request to ping the availability of the service.",
-        "required": ["appId"],
         "type": "object",
+        "required": ["appId"],
+        "description": "Request to ping the availability of the service.",
         "properties": {
           "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
-            "type": "string"
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           }
         }
       },
       "SessionActivityRequest": {
-        "description": "A request to report activity for a running session.",
-        "required": ["appId", "sessionName"],
         "type": "object",
+        "required": ["appId", "sessionName"],
+        "description": "A request to report activity for a running session.",
         "properties": {
           "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
-            "type": "string"
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           },
           "sessionName": {
-            "description": "The name of the session for which activity is reported.",
-            "type": "string"
+            "type": "string",
+            "description": "The name of the session for which activity is reported."
           }
         }
       },
       "SessionListRequest": {
-        "description": "A request to list the sessions of a user.",
-        "required": ["appId", "user"],
         "type": "object",
+        "required": ["appId", "user"],
+        "description": "A request to list the sessions of a user.",
         "properties": {
           "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
-            "type": "string"
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           },
           "user": {
-            "description": "The user identification, usually the email address.",
-            "type": "string"
+            "type": "string",
+            "description": "The user identification, usually the email address."
           }
         }
       },
       "SessionPerformance": {
-        "description": "Description of the performance of a session",
-        "required": ["cpuAmount", "cpuFormat", "memoryAmount", "memoryFormat"],
         "type": "object",
+        "required": ["cpuAmount", "cpuFormat", "memoryAmount", "memoryFormat"],
+        "description": "Description of the performance of a session",
         "properties": {
           "cpuAmount": {
-            "description": "Used CPU amount of the workspace",
-            "type": "string"
+            "type": "string",
+            "description": "Used CPU amount of the workspace"
           },
           "cpuFormat": {
-            "description": "Used CPU format of the workspace",
-            "type": "string"
+            "type": "string",
+            "description": "Used CPU format of the workspace"
           },
           "memoryAmount": {
-            "description": "Used memory amount of the workspace",
-            "type": "string"
+            "type": "string",
+            "description": "Used memory amount of the workspace"
           },
           "memoryFormat": {
-            "description": "Used memory format of the workspace",
-            "type": "string"
+            "type": "string",
+            "description": "Used memory format of the workspace"
           }
         }
       },
       "SessionPerformanceRequest": {
-        "description": "A request to list the sessions of a user.",
-        "required": ["appId", "sessionName"],
         "type": "object",
+        "required": ["appId", "sessionName"],
+        "description": "A request to list the sessions of a user.",
         "properties": {
           "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
-            "type": "string"
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           },
           "sessionName": {
-            "description": "The name of the session",
-            "type": "string"
+            "type": "string",
+            "description": "The name of the session"
           }
         }
       },
@@ -622,142 +511,138 @@
         }
       },
       "SessionStartRequest": {
-        "description": "A request to start a session",
-        "required": ["appId", "user", "appDefinition"],
         "type": "object",
+        "required": ["appId", "user", "appDefinition"],
+        "description": "A request to start a session",
         "properties": {
           "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
-            "type": "string"
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           },
           "user": {
-            "description": "The user identification, usually the email address.",
-            "type": "string"
+            "type": "string",
+            "description": "The user identification, usually the email address."
           },
           "appDefinition": {
-            "description": "The app to launch.",
-            "type": "string"
+            "type": "string",
+            "description": "The app to launch."
           },
           "workspaceName": {
-            "description": "The name of the workspace to mount/create.",
-            "type": "string"
+            "type": "string",
+            "description": "The name of the workspace to mount/create."
           },
           "timeout": {
+            "type": "integer",
             "format": "int32",
-            "description": "Number of minutes to wait for session launch. Default is 3 Minutes.",
-            "type": "integer"
+            "description": "Number of minutes to wait for session launch. Default is 3 Minutes."
           },
           "env": {
-            "description": "Environment variables",
+            "$ref": "#/components/schemas/EnvironmentVars",
             "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/EnvironmentVars"
-              }
-            ]
+            "description": "Environment variables"
           }
         }
       },
       "SessionStopRequest": {
-        "description": "A request to stop a session",
-        "required": ["appId", "user", "sessionName"],
         "type": "object",
+        "required": ["appId", "user", "sessionName"],
+        "description": "A request to stop a session",
         "properties": {
           "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
-            "type": "string"
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           },
           "user": {
-            "description": "The user identification, usually the email address.",
-            "type": "string"
+            "type": "string",
+            "description": "The user identification, usually the email address."
           },
           "sessionName": {
-            "description": "The name of the session to stop.",
-            "type": "string"
+            "type": "string",
+            "description": "The name of the session to stop."
           }
         }
       },
       "UserWorkspace": {
-        "description": "Description of a user workspace",
-        "required": ["name", "label", "user", "active"],
         "type": "object",
+        "required": ["name", "label", "user", "active"],
+        "description": "Description of a user workspace",
         "properties": {
           "name": {
-            "description": "The name of the workspace",
-            "type": "string"
+            "type": "string",
+            "description": "The name of the workspace"
           },
           "label": {
-            "description": "The label of the workspace",
-            "type": "string"
+            "type": "string",
+            "description": "The label of the workspace"
           },
           "appDefinition": {
-            "description": "The app this workspace was used with.",
-            "type": "string"
+            "type": "string",
+            "description": "The app this workspace was used with."
           },
           "user": {
-            "description": "The user identification, usually the email address.",
-            "type": "string"
+            "type": "string",
+            "description": "The user identification, usually the email address."
           },
           "active": {
-            "description": "Whether the workspace is in use at the moment.",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the workspace is in use at the moment."
           }
         }
       },
       "WorkspaceCreationRequest": {
-        "description": "Request to create a new workspace.",
-        "required": ["appId", "user"],
         "type": "object",
+        "required": ["appId", "user"],
+        "description": "Request to create a new workspace.",
         "properties": {
           "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
-            "type": "string"
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           },
           "user": {
-            "description": "The user identification, usually the email address.",
-            "type": "string"
+            "type": "string",
+            "description": "The user identification, usually the email address."
           },
           "appDefinition": {
-            "description": "The app this workspace will be used with.",
-            "type": "string"
+            "type": "string",
+            "description": "The app this workspace will be used with."
           },
           "label": {
-            "description": "The label of the workspace",
-            "type": "string"
+            "type": "string",
+            "description": "The label of the workspace"
           }
         }
       },
       "WorkspaceDeletionRequest": {
-        "description": "Request to delete a workspace",
-        "required": ["appId", "user", "workspaceName"],
         "type": "object",
+        "required": ["appId", "user", "workspaceName"],
+        "description": "Request to delete a workspace",
         "properties": {
           "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
-            "type": "string"
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           },
           "user": {
-            "description": "The user identification, usually the email address.",
-            "type": "string"
+            "type": "string",
+            "description": "The user identification, usually the email address."
           },
           "workspaceName": {
-            "description": "The name of the workspace to delete.",
-            "type": "string"
+            "type": "string",
+            "description": "The name of the workspace to delete."
           }
         }
       },
       "WorkspaceListRequest": {
-        "description": "Request to list workspaces of a user.",
-        "required": ["appId", "user"],
         "type": "object",
+        "required": ["appId", "user"],
+        "description": "Request to list workspaces of a user.",
         "properties": {
           "appId": {
-            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied.",
-            "type": "string"
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
           },
           "user": {
-            "description": "The user identification, usually the email address.",
-            "type": "string"
+            "type": "string",
+            "description": "The user identification, usually the email address."
           }
         }
       }
@@ -769,6 +654,548 @@
         "flows": {
           "implicit": {}
         }
+      }
+    }
+  },
+  "info": {
+    "title": "Theia Cloud API",
+    "version": "1.1.0"
+  },
+  "paths": {
+    "/service": {
+      "post": {
+        "summary": "Launch Session",
+        "description": "Launches a session and creates a workspace if required. Responds with the URL of the launched session.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LaunchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Root Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      }
+    },
+    "/service/admin/appdefinition/{appDefinitionName}": {
+      "patch": {
+        "summary": "Updates an app definition",
+        "description": "Updates an app definition's properties. Allowed properties to update are defined by AppDefinitionUpdateRequest.",
+        "parameters": [
+          {
+            "description": "The K8S resource name of the app definition to update.",
+            "name": "appDefinitionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppDefinitionUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDefinition"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["App Definition Admin Resource"]
+      }
+    },
+    "/service/admin/{appId}": {
+      "get": {
+        "summary": "Admin Ping",
+        "description": "Replies with success if the service is available and the user an admin.",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Root Admin Resource"]
+      }
+    },
+    "/service/appdefinition/{appId}": {
+      "get": {
+        "summary": "List app definitions",
+        "description": "List available app definitions.",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppDefinitionSpec"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["App Definition Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      }
+    },
+    "/service/session": {
+      "delete": {
+        "summary": "Stop session",
+        "description": "Stops a session.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionStopRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Session Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Start a new session",
+        "description": "Starts a new session for an existing workspace and responds with the URL of the started session.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionStartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Session Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Report session activity",
+        "description": "Updates the last activity timestamp for a session to monitor activity.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionActivityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Session Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      }
+    },
+    "/service/session/performance/{appId}/{sessionName}": {
+      "get": {
+        "summary": "Get performance metrics",
+        "description": "Returns the current CPU and memory usage of the session's pod.",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sessionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionPerformance"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Session Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      }
+    },
+    "/service/session/{appId}/{user}": {
+      "get": {
+        "summary": "List sessions",
+        "description": "List sessions of a user.",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "user",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SessionSpec"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Session Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      }
+    },
+    "/service/workspace": {
+      "delete": {
+        "summary": "Delete workspace",
+        "description": "Deletes a workspace.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkspaceDeletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Workspace Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create workspace",
+        "description": "Creates a new workspace for a user.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkspaceCreationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWorkspace"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Workspace Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      }
+    },
+    "/service/workspace/{appId}/{user}": {
+      "get": {
+        "summary": "List workspaces",
+        "description": "Lists the workspaces of a user.",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "user",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserWorkspace"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Workspace Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      }
+    },
+    "/service/{appId}": {
+      "get": {
+        "summary": "Ping",
+        "description": "Replies if the service is available.",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "tags": ["Root Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
       }
     }
   }

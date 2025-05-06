@@ -20,6 +20,6 @@ import org.eclipse.microprofile.openapi.annotations.info.Info;
 
 import jakarta.ws.rs.core.Application;
 
-@OpenAPIDefinition(info = @Info(title = "Theia Cloud API", version = "0.12.0"))
+@OpenAPIDefinition(info = @Info(title = "Theia Cloud API", version = "1.1.0"))
 public class TheiaCloudApiApplication extends Application {
 }

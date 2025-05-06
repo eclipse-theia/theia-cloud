@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2022-2023 EclipseSource, STMicroelectronics and others.
+ * Copyright (C) 2022-2025 EclipseSource, STMicroelectronics and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,6 +14,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 package org.eclipse.theia.cloud.service;
+
+import java.util.Set;
 
 import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -32,6 +34,13 @@ import jakarta.inject.Inject;
  * <p>
  * With this, the {@link TheiaCloudUser} can directly be injected into any resource.
  * </p>
+ * <p>
+ * This producer derives the user identity from an OIDC token. Thereby, the following claims from the MicroProfile JWT
+ * specification are used:
+ * <ul>
+ * <li>{@link Claims#email email} - The user's email address as their unique identifier</li>
+ * <li>{@link Claims#groups groups} - The user's groups to determine additional permissions, i.e. admin users</li>
+ * </ul>
  */
 @RequestScoped
 public class TheiaCloudUserProducer {
@@ -40,6 +49,9 @@ public class TheiaCloudUserProducer {
 
     @Inject
     private SecurityIdentity identity;
+
+    @Inject
+    private ApplicationProperties applicationProperties;
 
     @Produces
     @RequestScoped
@@ -56,7 +68,19 @@ public class TheiaCloudUserProducer {
                 logger.error("Cannot create user identity: The email claim is not available. Treat user as anonymous.");
                 return TheiaCloudUser.ANONYMOUS;
             }
-            return new TheiaCloudUser(email);
+
+            // Check if the user is an admin by looking for the configured admin group name in the groups claim.
+            boolean isAdmin = false;
+            Set<String> groupsClaim = jwt.getClaim(Claims.groups);
+            if (groupsClaim != null) {
+                if (groupsClaim.contains(applicationProperties.getAdminGroupName())) {
+                    isAdmin = true;
+                }
+            } else {
+                logger.warn("JWT groups claim is null. Cannot grant additional user privileges.");
+            }
+
+            return new TheiaCloudUser(email, isAdmin);
         } else if (identity.getPrincipal() instanceof AnonymousPrincipal) {
             // When keycloak is disabled, the security identity is authenticated, i.e. not
             // anonymous. However, the user still has no identity and, thus, is regarded as

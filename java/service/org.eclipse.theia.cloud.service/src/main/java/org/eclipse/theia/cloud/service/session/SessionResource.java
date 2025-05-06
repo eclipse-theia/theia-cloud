@@ -162,7 +162,7 @@ public class SessionResource extends BaseResource {
         try {
             performance = k8sUtil.reportPerformance(sessionName);
         } catch (Exception e) {
-            trace(correlationId, "", e);
+            warn(correlationId, "", e);
             performance = null;
         }
         if (performance == null) {

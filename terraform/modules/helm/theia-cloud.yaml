@@ -5,7 +5,7 @@ app:
   name: Theia Cloud
 
 demoApplication:
-  name: theiacloud/theia-cloud-demo:0.12.0-next
+  name: theiacloud/theia-cloud-demo:1.1.0-next
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
@@ -21,7 +21,7 @@ hosts:
     instance: instances
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:0.12.0-next
+  image: theiacloud/theia-cloud-landing-page:1.1.0-next
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: false
 
@@ -39,10 +39,11 @@ operator:
   storageClassName: ""
 
 ingress:
-  instanceName: "theia-cloud-demo-ws-ingress"
   clusterIssuer: letsencrypt-prod
   theiaCloudCommonName: false
   addTLSSecretName: false
+  instances:
+    name: "theia-cloud-demo-ws-ingress"
 
 monitor:
   enable: false

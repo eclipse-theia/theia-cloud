@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk AS builder
+FROM eclipse-temurin:21-jdk AS builder
 RUN apt-get update && apt-get install -y maven
 WORKDIR /service
 COPY java/common ./common
@@ -11,9 +11,9 @@ RUN --mount=type=cache,target=/root/.m2 \
     cd /service/service/org.eclipse.theia.cloud.service && \
     mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=uber-jar
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /service
-COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-0.12.0-SNAPSHOT-runner.jar .
+COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-1.1.0-SNAPSHOT-runner.jar .
 ENV APPID default-app-id
 ENV SERVICE_PORT 8081
 
@@ -30,5 +30,5 @@ ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} \
     -Dquarkus.oidc.auth-server-url=${KEYCLOAK_SERVERURL} \
     -Dquarkus.oidc.client-id=${KEYCLOAK_CLIENTID} \
     -Dquarkus.oidc.credentials.secret=${KEYCLOAK_CLIENTSECRET} \
-    -jar ./service-0.12.0-SNAPSHOT-runner.jar
+    -jar ./service-1.1.0-SNAPSHOT-runner.jar
 CMD [ "" ]

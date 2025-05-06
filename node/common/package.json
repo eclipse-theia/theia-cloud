@@ -1,6 +1,6 @@
 {
   "name": "@eclipse-theiacloud/common",
-  "version": "0.12.0-next",
+  "version": "1.1.0-next",
   "description": "Common functionality for Theia Cloud",
   "license": "EPL-2.0",
   "keywords": [
@@ -15,9 +15,9 @@
   "homepage": "http://theia-cloud.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eclipsesource/theia-cloud.git"
+    "url": "https://github.com/eclipse-theia/theia-cloud.git"
   },
-  "bugs": "https://github.com/eclipsesource/theia-cloud/issues",
+  "bugs": "https://github.com/eclipse-theia/theia-cloud/issues",
   "contributors": [
     {
       "name": "Theia Cloud Project",

@@ -6,6 +6,7 @@
     "node": ">=20.0.0"
   },
   "devDependencies": {
+    "@eclipse-dash/nodejs-wrapper": "^0.0.1",
     "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^6.18.1",
     "@typescript-eslint/parser": "^6.18.1",
@@ -25,12 +26,14 @@
     "lint": "npm run lint --workspaces --if-present && npm run lint:monitor",
     "build:monitor": "cd monitor && npm run build",
     "lint:monitor": "cd monitor && npm run lint",
-    "update:demo:monitor": "cd monitor && npm run update:demo:monitor"
+    "update:demo:monitor": "cd monitor && npm run update:demo:monitor",
+    "license:check": "npx dash-licenses-wrapper --configFile=./configs/license-check-config.json"
   },
   "workspaces": [
     "common",
+    "e2e-tests",
+    "config-store",
     "landing-page",
-    "monitor-theia",
     "testing-page"
   ]
 }

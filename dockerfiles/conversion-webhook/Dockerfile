@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk AS builder
+FROM eclipse-temurin:21-jdk AS builder
 RUN apt-get update && apt-get install -y maven
 WORKDIR /conversion
 COPY java/common ./common
@@ -10,9 +10,11 @@ RUN cd /conversion/common/maven-conf && \
     cd /conversion/conversion/org.eclipse.theia.cloud.conversion && \
     mvn clean package -Dmaven.test.skip=true -Dquarkus.package.type=uber-jar --no-transfer-progress
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /conversion
-COPY --from=builder /conversion/conversion/org.eclipse.theia.cloud.conversion/target/conversion-webhook-0.12.0-SNAPSHOT-runner.jar .
+COPY --from=builder /conversion/conversion/org.eclipse.theia.cloud.conversion/target/conversion-webhook-1.1.0-SNAPSHOT-runner.jar .
 
-ENTRYPOINT java -jar ./conversion-webhook-0.12.0-SNAPSHOT-runner.jar
+ENV CERT_RELOAD_PERIOD=604800
+
+ENTRYPOINT ["java", "-Dquarkus.http.ssl.certificate.reload-period=${CERT_RELOAD_PERIOD}", "-jar", "./conversion-webhook-1.1.0-SNAPSHOT-runner.jar"]
 CMD [ "" ]

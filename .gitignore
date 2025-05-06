@@ -4,3 +4,4 @@ openapitools.json
 .DS_Store
 
 node_modules
+node/e2e-tests/test-results/.last-run.json

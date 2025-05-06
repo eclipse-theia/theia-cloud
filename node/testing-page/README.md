@@ -1,6 +1,6 @@
-# TheiaCloud Testing App
+# Theia Cloud Testing App
 
-This folder contains a simple test app that allows to login via Keycloak and trigger various TheiaCloud endpoints (e.g. session start or stop).
+This folder contains a simple test app that allows to login via Keycloak and trigger various Theia Cloud endpoints (e.g. session start or stop).
 
 ## Usage
 

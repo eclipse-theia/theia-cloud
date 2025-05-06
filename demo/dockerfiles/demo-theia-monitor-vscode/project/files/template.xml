@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<template name="theia-cloud.demo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="template.xsd">
-    <image>my.docker.registry/theia-cloud-demo</image>
-    <limits>
-        <cpu>1</cpu>
-        <memory>2000M</memory>
-    </limits>
-</template>

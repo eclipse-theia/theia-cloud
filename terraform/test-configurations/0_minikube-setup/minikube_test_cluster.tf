@@ -51,7 +51,7 @@ resource "kubernetes_persistent_volume" "minikube" {
     access_modes = ["ReadWriteOnce"]
     persistent_volume_source {
       host_path {
-        path = "/data/theiacloud"
+        path = "/data/theia-cloud"
       }
     }
   }
@@ -124,4 +124,13 @@ module "keycloak" {
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
   valid_redirect_uri              = "*"
+}
+
+# Configure user foo as admin by adding it to the admin group
+resource "keycloak_group_memberships" "admin_group_memberships" {
+  realm_id = module.keycloak.realm.id
+  group_id = module.keycloak.admin_group.id
+  members = [
+    module.keycloak.test_users.foo.username
+  ]
 }
