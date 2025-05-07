@@ -24,6 +24,8 @@ export class ConfigStoreServerImpl implements ConfigStoreServer, BackendApplicat
     const configStoreRouter = Router();
     configStoreRouter.use(json());
 
+    // TODO do we need to process receives keys and values for security reasons?
+    // I.e. should we remove certain characters or character sequences? Or escape them?
     configStoreRouter.post('/', async (req, res) => {
       const { body } = req;
       if (
@@ -48,7 +50,7 @@ export class ConfigStoreServerImpl implements ConfigStoreServer, BackendApplicat
 
     // Simple health check endpoint
     configStoreRouter.get('/', async (_req, res) => {
-      res.sendStatus(200);
+      res.sendStatus(204);
     });
 
     app.use(configStoreRestPath, configStoreRouter);

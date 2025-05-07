@@ -15,10 +15,59 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.util;
 
+import java.util.Optional;
+
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
+import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+
 public final class SessionUtil {
 
     private SessionUtil() {
         // util
     }
 
+    /**
+     * Get the cluster URL of the session pod, if available. This is the cluster internal URL of the pod.
+     *
+     * @param client  The Theia Cloud K8s client to use for the request.
+     * @param session The session to get the cluster IP for.
+     * @return The cluster IP of the session pod, if available.
+     */
+    public static Optional<String> getClusterURL(TheiaCloudClient client, Session session) {
+        Optional<String> ip = getClusterIP(client, session);
+        Optional<Integer> port = getPort(client, session);
+        if (ip.isPresent() && port.isPresent()) {
+            return Optional.of("http://" + ip.get() + ":" + port.get());
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Get the cluster IP of the session pod, if available. The cluster IP is the internal IP address of the pod.
+     *
+     * @param client  The Theia Cloud K8s client to use for the request.
+     * @param session The session to get the cluster IP for.
+     * @return The cluster IP of the session pod, if available.
+     */
+    public static Optional<String> getClusterIP(TheiaCloudClient client, Session session) {
+        Optional<String> sessionIP = client.getClusterIPFromSessionName(session.getSpec().getName());
+        return sessionIP;
+    }
+
+    /**
+     * Get the port that the session's Theia application is running on. This does not consider the port that the OAuth
+     * proxy runs on which is target by external connections.
+     *
+     * @param client  The Theia Cloud K8s client to use for the request.
+     * @param session The session to get the port for.
+     * @return The port of the session pod, if available.
+     */
+    public static Optional<Integer> getPort(TheiaCloudClient client, Session session) {
+        String appDefinitionId = session.getSpec().getAppDefinition();
+        return client.appDefinitions().get(appDefinitionId)//
+                .map(AppDefinition::getSpec)//
+                .map(AppDefinitionSpec::getPort);
+    }
 }
