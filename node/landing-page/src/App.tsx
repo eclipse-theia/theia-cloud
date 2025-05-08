@@ -1,6 +1,12 @@
 import './App.css';
 
-import { AppDefinition, getTheiaCloudConfig, PingRequest, RequestOptions, TheiaCloud } from '@eclipse-theiacloud/common';
+import {
+  AppDefinition,
+  getTheiaCloudConfig,
+  PingRequest,
+  RequestOptions,
+  TheiaCloud
+} from '@eclipse-theiacloud/common';
 import Keycloak, { KeycloakConfig } from 'keycloak-js';
 import { useEffect, useState } from 'react';
 
@@ -59,7 +65,7 @@ function App(): JSX.Element {
 
   if (!initialized) {
     const urlParams = new URLSearchParams(window.location.search);
-    
+
     // Get appDef parameter from URL and set it as the default selection
     if (urlParams.has('appDef') || urlParams.has('appdef')) {
       const pathBlueprintSelection = urlParams.get('appDef') || urlParams.get('appdef');
@@ -75,9 +81,7 @@ function App(): JSX.Element {
           const appDefinition = config.additionalApps.find(
             (appDef: AppDefinition) => appDef.appId === pathBlueprintSelection
           );
-          setSelectedAppName(
-            appDefinition ? appDefinition.appName : pathBlueprintSelection
-          );
+          setSelectedAppName(appDefinition ? appDefinition.appName : pathBlueprintSelection);
           setSelectedAppDefinition(appDefinition ? appDefinition.appId : pathBlueprintSelection);
         } else {
           // If there are no additional apps, just use the application id as the name
@@ -98,7 +102,6 @@ function App(): JSX.Element {
         setGitUri(gitUri);
       }
     }
-
 
     // Get artemisToken parameter from URL.
     if (urlParams.has('artemisToken')) {
@@ -138,24 +141,24 @@ function App(): JSX.Element {
         realm: config.keycloakRealm!,
         clientId: config.keycloakClientId!
       };
-      const keycloak = Keycloak(keycloakConfig);
+      const keycloak = new Keycloak(keycloakConfig);
+
       keycloak
         .init({
           onLoad: 'check-sso',
           redirectUri: window.location.href,
           checkLoginIframe: false
         })
-        .then(auth => {
-          if (auth) {
+        .then(authenticated => {
+          if (authenticated) {
             const parsedToken = keycloak.idTokenParsed;
             if (parsedToken) {
-              // Only finish initialization after the username was set successfully (used in automatic session start)
               const userMail = parsedToken.email;
               setToken(keycloak.idToken);
               setEmail(userMail);
               setUsername(parsedToken.preferred_username ?? userMail);
               setLogoutUrl(keycloak.createLogoutUrl());
-              console.log('Authenticated as ' + parsedToken.preferred_username + '(' + userMail + ')');
+              console.log(`Authenticated as ${parsedToken.preferred_username} (${userMail})`);
             }
           }
         })
@@ -198,7 +201,6 @@ function App(): JSX.Element {
       console.log('Setting autoStart to false');
       setAutoStart(false);
     }
-
   }, [initialized, username]);
 
   /* eslint-enable react-hooks/rules-of-hooks */
@@ -206,15 +208,16 @@ function App(): JSX.Element {
   document.title = `${selectedAppName} - Theia`;
 
   const authenticate = (): void => {
-    const keycloak = Keycloak(keycloakConfig);
+    const keycloak = new Keycloak(keycloakConfig);
+
     keycloak
       .init({
         onLoad: 'login-required',
         redirectUri: window.location.href,
         checkLoginIframe: false
       })
-      .then((auth: any) => {
-        if (!auth) {
+      .then((authenticated: boolean) => {
+        if (!authenticated) {
           window.location.reload();
         } else {
           const parsedToken = keycloak.idTokenParsed;
@@ -224,7 +227,7 @@ function App(): JSX.Element {
             setEmail(userMail);
             setUsername(parsedToken.preferred_username ?? userMail);
             setLogoutUrl(keycloak.createLogoutUrl());
-            console.log('Authenticated as ' + parsedToken.preferred_username + '(' + userMail + ')');
+            console.log(`Authenticated as ${parsedToken.preferred_username} (${userMail})`);
           }
         }
       })
@@ -233,7 +236,7 @@ function App(): JSX.Element {
         setError('Authentication failed');
       });
   };
-
+  
   const handleStartSession = (appDefinition: string): void => {
     setLoading(true);
     setError(undefined);
@@ -266,7 +269,7 @@ function App(): JSX.Element {
           retries: 5,
           accessToken: token
         };
-        
+
         /*
         const sessionStartRequest: SessionStartRequest = {
           serviceUrl: config.serviceUrl,
@@ -302,35 +305,32 @@ function App(): JSX.Element {
           });
         */
 
-          const launchRequest = {
-            serviceUrl: config.serviceUrl,
-            appId: config.appId,
-            user: email!,
-            appDefinition: appDefinition,
-            workspaceName: workspace,
-            env: {
-              fromMap: {
-                THEIA: 'true',
-                ARTEMIS_TOKEN: artemisToken!,
-                ARTEMIS_URL: artemisUrl!,
-                GIT_URI: gitUri!,
-                GIT_USER: gitUser!,
-                GIT_MAIL: gitMail!
-              }
-            } 
-          };
+        const launchRequest = {
+          serviceUrl: config.serviceUrl,
+          appId: config.appId,
+          user: email!,
+          appDefinition: appDefinition,
+          workspaceName: workspace,
+          env: {
+            fromMap: {
+              THEIA: 'true',
+              ARTEMIS_TOKEN: artemisToken!,
+              ARTEMIS_URL: artemisUrl!,
+              GIT_URI: gitUri!,
+              GIT_USER: gitUser!,
+              GIT_MAIL: gitMail!
+            }
+          }
+        };
 
-          //TheiaCloud.launchAndRedirect(
-          //config.useEphemeralStorage
-          //  ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5, email)
-          //  : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5, email, workspace),
-          
-          // TheiaCloud.Session.list
+        //TheiaCloud.launchAndRedirect(
+        //config.useEphemeralStorage
+        //  ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5, email)
+        //  : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5, email, workspace),
 
-          TheiaCloud.launchAndRedirect(
-            launchRequest,
-            requestOptions
-          )
+        // TheiaCloud.Session.list
+
+        TheiaCloud.launchAndRedirect(launchRequest, requestOptions)
           .catch((err: Error) => {
             if (err && (err as any).status === 473) {
               setError(
@@ -344,7 +344,6 @@ function App(): JSX.Element {
           .finally(() => {
             setLoading(false);
           });
-          
       })
       .catch((_err: Error) => {
         setError(
@@ -375,19 +374,14 @@ function App(): JSX.Element {
               <p>
                 {needsLogin ? (
                   <LoginButton login={authenticate} />
+                ) : autoStart ? (
+                  <LaunchApp
+                    appName={selectedAppName}
+                    appDefinition={selectedAppDefinition}
+                    onStartSession={handleStartSession}
+                  />
                 ) : (
-                  autoStart ? (
-                    <LaunchApp
-                      appName={selectedAppName}
-                      appDefinition={selectedAppDefinition}
-                      onStartSession={handleStartSession}
-                    />
-                  ) : (
-                    <SelectApp
-                      appDefinitions={config.additionalApps}
-                      onStartSession={handleStartSession}
-                    />
-                  )
+                  <SelectApp appDefinitions={config.additionalApps} onStartSession={handleStartSession} />
                 )}
               </p>
             </div>
