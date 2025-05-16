@@ -29,7 +29,7 @@ import picocli.CommandLine;
 
 public abstract class TheiaCloudOperatorLauncher {
 
-    static final String COR_ID_INIT = "init";
+    protected static final String COR_ID_INIT = "init";
 
     private static final Logger LOGGER = LogManager.getLogger(TheiaCloudOperatorLauncher.class);
 
