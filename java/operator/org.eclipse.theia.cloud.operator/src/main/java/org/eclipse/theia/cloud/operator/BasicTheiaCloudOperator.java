@@ -47,38 +47,38 @@ import io.fabric8.kubernetes.client.Watcher;
 
 public class BasicTheiaCloudOperator implements TheiaCloudOperator {
 
-    private static final ScheduledExecutorService STOP_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
-    private static final ScheduledExecutorService WATCH_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    protected static final ScheduledExecutorService STOP_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    protected static final ScheduledExecutorService WATCH_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
 
     private static final Logger LOGGER = LogManager.getLogger(BasicTheiaCloudOperator.class);
 
-    private static final String COR_ID_APPDEFINITIONPREFIX = "appdefinition-watch-";
-    private static final String COR_ID_WORKSPACEPREFIX = "workspace-watch-";
-    private static final String COR_ID_SESSIONPREFIX = "session-watch-";
-    private static final String COR_ID_TIMEOUTPREFIX = "timeout-";
+    protected static final String COR_ID_APPDEFINITIONPREFIX = "appdefinition-watch-";
+    protected static final String COR_ID_WORKSPACEPREFIX = "workspace-watch-";
+    protected static final String COR_ID_SESSIONPREFIX = "session-watch-";
+    protected static final String COR_ID_TIMEOUTPREFIX = "timeout-";
 
     @Inject
-    private TheiaCloudClient resourceClient;
+    protected TheiaCloudClient resourceClient;
 
     @Inject
     protected Set<OperatorPlugin> operatorPlugins;
 
     @Inject
-    private AppDefinitionHandler appDefinitionAddedHandler;
+    protected AppDefinitionHandler appDefinitionAddedHandler;
 
     @Inject
-    private WorkspaceHandler workspaceHandler;
+    protected WorkspaceHandler workspaceHandler;
 
     @Inject
-    private SessionHandler sessionHandler;
+    protected SessionHandler sessionHandler;
 
     @Inject
-    private TheiaCloudOperatorArguments arguments;
+    protected TheiaCloudOperatorArguments arguments;
 
-    private final Map<String, AppDefinition> appDefinitionCache = new ConcurrentHashMap<>();
-    private final Map<String, Workspace> workspaceCache = new ConcurrentHashMap<>();
-    private final Map<String, Session> sessionCache = new ConcurrentHashMap<>();
-    private final Set<SpecWatch<?>> watches = new LinkedHashSet<>();
+    protected final Map<String, AppDefinition> appDefinitionCache = new ConcurrentHashMap<>();
+    protected final Map<String, Workspace> workspaceCache = new ConcurrentHashMap<>();
+    protected final Map<String, Session> sessionCache = new ConcurrentHashMap<>();
+    protected final Set<SpecWatch<?>> watches = new LinkedHashSet<>();
 
     @Override
     public void start() {
