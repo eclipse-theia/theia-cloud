@@ -34,6 +34,7 @@ export default new ContainerModule(bind => {
       return WebSocketConnectionProvider.createProxy(context.container, MESSAGING_SERVICE_PATH, client);
     })
     .inSingletonScope();
+  bind(MessagingFrontendContribution).toSelf().inSingletonScope();
   bind(FrontendApplicationContribution).to(MessagingFrontendContribution);
 
   // activity tracker service
@@ -45,5 +46,6 @@ export default new ContainerModule(bind => {
       return WebSocketConnectionProvider.createProxy(context.container, ACTIVITY_TRACKER_SERVICE_PATH, client);
     })
     .inSingletonScope();
+  bind(ActivityTrackerFrontendContribution).toSelf().inSingletonScope();
   bind(FrontendApplicationContribution).to(ActivityTrackerFrontendContribution);
 });
