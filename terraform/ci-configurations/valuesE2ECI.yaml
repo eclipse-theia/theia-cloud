@@ -32,7 +32,7 @@ operator:
   cloudProvider: "MINIKUBE"
   bandwidthLimiter: "WONDERSHAPER"
   wondershaperImage: theiacloud/theia-cloud-wondershaper:minikube-ci-e2e
-  sessionsPerUser: "1"
+  sessionsPerUser: "3"
   storageClassName: "default"
   requestedStorage: "250Mi"
   replicas: 2

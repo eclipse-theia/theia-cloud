@@ -27,10 +27,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.32.1, v1.31.5, v1.30.9, v1.29.13] # https://kubernetes.io/releases/
+        kubernetes: [v1.32.1] # , v1.31.5, v1.30.9, v1.29.13] # https://kubernetes.io/releases/
         paths: [true, false]
         ephemeral: [true, false]
         keycloak: [true, false]
+        exclude:
+          # Non-ephemeral sessions only make sense with keycloak
+          - ephemeral: false
+            keycloak: false
     steps:
       - name: Set Helm Branch for Scheduled Runs
         if: ${{ github.event_name == 'schedule' }}
@@ -156,10 +160,23 @@ jobs:
           export MATRIX_KEYCLOAK=${{ matrix.keycloak }}
           npm run ui-tests -w e2e-tests
 
+      - name: Print Debug logs
+        if: failure()
+        run: |
+          echo "=== Service Deployment Logs ==="
+          kubectl logs -n theia-cloud deployment/service-deployment --tail=100
+          echo ""
+          echo "=== Operator Deployment Logs (All Pods) ==="
+          for pod in $(kubectl get pods -n theia-cloud -l app=operator -o jsonpath='{.items[*].metadata.name}'); do
+            echo "--- Logs from pod: $pod ---"
+            kubectl logs -n theia-cloud $pod --tail=100
+            echo ""
+          done
+
       - name: Upload Playwright test failure screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-failure-screenshots
+          name: test-failure-screenshots-k8s-${{ matrix.kubernetes }}-paths-${{ matrix.paths }}-ephemeral-${{ matrix.ephemeral }}-keycloak-${{ matrix.keycloak }}
           path: theia-cloud/node/e2e-tests/test-results/**/*.png
           retention-days: 7

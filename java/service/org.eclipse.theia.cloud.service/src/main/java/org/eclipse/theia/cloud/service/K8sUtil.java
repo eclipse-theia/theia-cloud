@@ -248,7 +248,10 @@ public final class K8sUtil {
 
         long sessionsOfAppDef = CLIENT.sessions().list().stream() // All sessions
                 .filter(s -> s.getSpec().getAppDefinition().equals(appDefString)) // That are from the appDefinition
-                .filter(s -> s.getStatus() == null || !s.getStatus().hasError()) // That are not in error state
+                .filter(s -> s.getStatus() == null || (!s.getStatus().hasError() // Count sessions not in error state
+                                                                                 // with URL
+                        && (s.getStatus().getUrl() != null && !s.getStatus().getUrl().isBlank())))
+
                 .count();
         return sessionsOfAppDef >= maxInstances;
     }

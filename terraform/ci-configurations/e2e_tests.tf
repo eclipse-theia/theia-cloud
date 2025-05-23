@@ -209,7 +209,7 @@ resource "kubectl_manifest" "theia-cloud-monitor-vscode" {
     ingressname: theia-cloud-demo-ws-ingress
     ingressHostnamePrefixes: []
     minInstances: 0
-    maxInstances: 10
+    maxInstances: 1
     timeout: 6
     requestsMemory: 1000M
     requestsCpu: 100m
