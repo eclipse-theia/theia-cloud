@@ -15,7 +15,7 @@ spec:
     - name: http
       port: placeholder-port 
       protocol: TCP
-      targetPort: web
+      targetPort: application
     placeholder-monitor-port
 
   selector:

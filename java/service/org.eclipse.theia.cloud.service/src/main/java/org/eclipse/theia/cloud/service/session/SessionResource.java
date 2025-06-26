@@ -36,9 +36,9 @@ import org.eclipse.theia.cloud.service.TheiaCloudWebException;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 import io.quarkus.security.Authenticated;
-import io.smallrye.common.annotation.Blocking;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
 import jakarta.annotation.security.PermitAll;
@@ -70,7 +70,8 @@ public class SessionResource extends BaseResource {
     @Inject
     public SessionResource(Vertx vertx, ApplicationProperties applicationProperties) {
         super(applicationProperties);
-        webClient = WebClient.create(vertx);
+        WebClientOptions options = new WebClientOptions().setFollowRedirects(false);
+        webClient = WebClient.create(vertx, options);
     }
 
     @Operation(summary = "List sessions", description = "List sessions of a user.")
@@ -201,9 +202,8 @@ public class SessionResource extends BaseResource {
     @APIResponse(responseCode = "474", description = "Session not found.")
     @APIResponse(responseCode = "500", description = "Internal server error while setting config value or other unexpected errors.")
     @APIResponse(responseCode = "580", description = "Config store not available.")
-    @Blocking
     @NoAnonymousAccess
-    public Uni<Void> setConfigValue(@PathParam("session") String sessionName, SessionSetConfigValueRequest request) {
+    public void setConfigValue(@PathParam("session") String sessionName, SessionSetConfigValueRequest request) {
         String correlationId = evaluateRequest(request);
         String user = theiaCloudUser.getIdentifier();
 
@@ -225,43 +225,41 @@ public class SessionResource extends BaseResource {
         }
 
         String configStoreUrl = sessionPodClusterUrl.get() + CONFIG_STORE_PATH;
+        logger.info("Config store URL: " + configStoreUrl);
 
-        // First, ping the config store to see if it is available.
-        // Second, send the request to set the config value.
-        return webClient.getAbs(configStoreUrl).timeout(CONFIG_STORE_HTTP_TIMEOUT).send()
-                // Handle ping response. Theia returns a 404 if the config store is not installed.
-                .map(pingResponse -> {
-                    if (pingResponse.statusCode() < 200 || pingResponse.statusCode() >= 300) {
-                        String message = MessageFormat.format(
-                                "Failed to reach config store of session '{0}' with app definition '{1}'. Config store is probably not installed in application.",
-                                sessionName, session.getSpec().getAppDefinition());
-                        error(correlationId, message);
-                        throw new TheiaCloudWebException(TheiaCloudError.CONFIG_STORE_NOT_AVAILABLE);
-                    }
-                    return new JsonObject().put(request.key, request.value);
-                })
-                // send post request to config store
-                .flatMap(body -> {
-                    trace(correlationId,
-                            MessageFormat.format("Successfully pinged config store at: %s", configStoreUrl));
-                    return webClient.postAbs(configStoreUrl).timeout(CONFIG_STORE_HTTP_TIMEOUT).sendJsonObject(body);
-                }).onItem().invoke(setValueResponse -> {
-                    if (setValueResponse.statusCode() < 200 || setValueResponse.statusCode() >= 300) {
-                        error(correlationId,
-                                "Failed to set config value with HTTP status code: " + setValueResponse.statusCode());
-                        throw new InternalServerErrorException("Failed to set config value.");
-                    }
-                    info(correlationId, "Config value set successfully for key: " + request.key);
-                })
-                // Do not return anything to the client
-                .replaceWithVoid()
-                // Handle unexpected errors that were not thrown and logged by the above code
-                .onFailure(throwable -> !(throwable instanceof TheiaCloudWebException
-                        || throwable instanceof InternalServerErrorException))
-                .transform(throwable -> {
-                    error(correlationId, "Unexpected error while trying to set config value.", throwable);
-                    return new InternalServerErrorException("Unexpected error while trying to set config value.");
-                });
+        try {
+            // First, ping the config store to see if it is available.
+            var pingResponse = webClient.getAbs(configStoreUrl).timeout(CONFIG_STORE_HTTP_TIMEOUT).send().await().indefinitely();
+            
+            // Handle ping response. Theia returns a 404 if the config store is not installed.
+            if (pingResponse.statusCode() < 200 || pingResponse.statusCode() >= 300) {
+                String message = MessageFormat.format(
+                        "Failed to reach config store of session '{0}' with app definition '{1}'. Config store is probably not installed in application.",
+                        sessionName, session.getSpec().getAppDefinition());
+                error(correlationId, message);
+                throw new TheiaCloudWebException(TheiaCloudError.CONFIG_STORE_NOT_AVAILABLE);
+            }
+
+            trace(correlationId, MessageFormat.format("Successfully pinged config store at: %s", configStoreUrl));
+
+            // Second, send the request to set the config value.
+            JsonObject body = new JsonObject().put("key", request.key).put("value", request.value);
+            var setValueResponse = webClient.postAbs(configStoreUrl).timeout(CONFIG_STORE_HTTP_TIMEOUT).sendJsonObject(body).await().indefinitely();
+            
+            if (setValueResponse.statusCode() < 200 || setValueResponse.statusCode() >= 300) {
+                error(correlationId, "Failed to set config value with HTTP status code: " + setValueResponse.statusCode());
+                throw new InternalServerErrorException("Failed to set config value.");
+            }
+            
+            info(correlationId, "Config value set successfully for key: " + request.key);
+            
+        } catch (TheiaCloudWebException | InternalServerErrorException e) {
+            // Re-throw expected exceptions
+            throw e;
+        } catch (Exception e) {
+            error(correlationId, "Unexpected error while trying to set config value.", e);
+            throw new InternalServerErrorException("Unexpected error while trying to set config value.");
+        }
     }
 
     protected boolean isOwner(String user, SessionSpec session) {
