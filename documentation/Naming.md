@@ -11,7 +11,7 @@ Below are guidelines for commonly used naming conventions specific to this proje
 Use `theia.cloud` in hierarchical structures and identifiers. Examples include:
 
 - **Java package/jar names**: `org.eclipse.theia.cloud`
-- **Java system properties**: `-Dtheia.cloud.app.id=yourAppId`
+- **Java system properties**: `-Dtheia.cloud.service.auth.token=yourServiceAuthToken`
 - **Kubernetes group names/metadata**: `theia.cloud`, `theia.cloud/v1beta9`, `sessions.theia.cloud`
 - **Theia command identifiers**: `theia.cloud.monitor.activity.report`
 

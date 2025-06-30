@@ -61,7 +61,7 @@ public class AppDefinitionAdminResourceTests {
 
     @BeforeEach
     public void setUp() {
-        Mockito.when(applicationProperties.getAppId()).thenReturn(APP_ID);
+        Mockito.when(applicationProperties.getServiceAuthToken()).thenReturn(APP_ID);
     }
 
     @SuppressWarnings("unchecked")
