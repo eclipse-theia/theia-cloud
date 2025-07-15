@@ -14,3 +14,17 @@ jobs:
       image-name: ghcr.io/ls1intum/theia/landing-page
       docker-context: .
     secrets: inherit
+  build-and-push-operator:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@main
+    with:
+      docker-file: dockerfiles/operator/Dockerfile
+      image-name: ghcr.io/ls1intum/theia/operator
+      docker-context: .
+    secrets: inherit
+  build-and-push-service:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@main
+    with:
+      docker-file: dockerfiles/service/Dockerfile
+      image-name: ghcr.io/ls1intum/theia/service
+      docker-context: .
+    secrets: inherit
