@@ -45,6 +45,23 @@ public final class SessionUtil {
     }
 
     /**
+     * Get the internal cluster URL of the session pod, if available. This is the cluster internal URL of the internal
+     * service that bypasses OAuth2 proxy for service-to-service communication.
+     *
+     * @param client  The Theia Cloud K8s client to use for the request.
+     * @param session The session to get the internal cluster IP for.
+     * @return The internal cluster URL of the session pod, if available.
+     */
+    public static Optional<String> getInternalClusterURL(TheiaCloudClient client, Session session) {
+        Optional<String> ip = getInternalClusterIP(client, session);
+        Optional<Integer> port = getInternalPort();
+        if (ip.isPresent() && port.isPresent()) {
+            return Optional.of("http://" + ip.get() + ":" + port.get());
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Get the cluster IP of the session pod, if available. The cluster IP is the internal IP address of the pod.
      *
      * @param client  The Theia Cloud K8s client to use for the request.
@@ -53,6 +70,19 @@ public final class SessionUtil {
      */
     public static Optional<String> getClusterIP(TheiaCloudClient client, Session session) {
         Optional<String> sessionIP = client.getClusterIPFromSessionName(session.getSpec().getName());
+        return sessionIP;
+    }
+
+    /**
+     * Get the internal cluster IP of the session pod, if available. The internal cluster IP is the IP address of the
+     * internal service that bypasses OAuth2 proxy for service-to-service communication.
+     *
+     * @param client  The Theia Cloud K8s client to use for the request.
+     * @param session The session to get the internal cluster IP for.
+     * @return The internal cluster IP of the session pod, if available.
+     */
+    public static Optional<String> getInternalClusterIP(TheiaCloudClient client, Session session) {
+        Optional<String> sessionIP = client.getInternalClusterIPFromSessionName(session.getSpec().getName());
         return sessionIP;
     }
 
@@ -69,5 +99,15 @@ public final class SessionUtil {
         return client.appDefinitions().get(appDefinitionId)//
                 .map(AppDefinition::getSpec)//
                 .map(AppDefinitionSpec::getPort);
+    }
+
+    /**
+     * Get the internal service port for service-to-service communication. This is a fixed port (3001) that the internal
+     * services use to bypass OAuth2 proxy.
+     *
+     * @return The internal service port (3001).
+     */
+    public static Optional<Integer> getInternalPort() {
+        return Optional.of(3001);
     }
 }

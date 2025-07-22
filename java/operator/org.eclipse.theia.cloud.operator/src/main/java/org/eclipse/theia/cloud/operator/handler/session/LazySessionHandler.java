@@ -216,6 +216,19 @@ public class LazySessionHandler implements SessionHandler {
             return false;
         }
 
+        /* Create internal service for this session */
+        Optional<Service> internalServiceToUse = createAndApplyInternalService(correlationId, sessionResourceName,
+                sessionResourceUID, session, appDefinitionSpec, labelsToAdd);
+        if (internalServiceToUse.isEmpty()) {
+            LOGGER.error(
+                    formatLogMessage(correlationId, "Unable to create internal service for session " + sessionSpec));
+            client.sessions().updateStatus(correlationId, session, s -> {
+                s.setOperatorStatus(OperatorStatus.ERROR);
+                s.setOperatorMessage("Failed to create internal service.");
+            });
+            return false;
+        }
+
         if (arguments.isUseKeycloak()) {
             /* Create config maps for this session */
             List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client.kubernetes(), client.namespace(),
@@ -233,8 +246,8 @@ public class LazySessionHandler implements SessionHandler {
                 return true;
             }
             createAndApplyEmailConfigMap(correlationId, sessionResourceName, sessionResourceUID, session, labelsToAdd);
-            createAndApplyProxyConfigMap(correlationId, sessionResourceName, sessionResourceUID, session,
-                    appDefinition, labelsToAdd);
+            createAndApplyProxyConfigMap(correlationId, sessionResourceName, sessionResourceUID, session, appDefinition,
+                    labelsToAdd);
         }
 
         /* Create deployment for this session */
@@ -395,6 +408,24 @@ public class LazySessionHandler implements SessionHandler {
                 serviceYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, labelsToAdd);
     }
 
+    protected Optional<Service> createAndApplyInternalService(String correlationId, String sessionResourceName,
+            String sessionResourceUID, Session session, AppDefinitionSpec appDefinitionSpec,
+            Map<String, String> labelsToAdd) {
+        Map<String, String> replacements = TheiaCloudServiceUtil.getInternalServiceReplacements(client.namespace(),
+                session, appDefinitionSpec);
+        String serviceYaml;
+        try {
+            serviceYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
+                    AddedHandlerUtil.TEMPLATE_INTERNAL_SERVICE_YAML, replacements, correlationId);
+        } catch (IOException | URISyntaxException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Error while adjusting internal service template for session " + session), e);
+            return Optional.empty();
+        }
+        return K8sUtil.loadAndCreateServiceWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
+                serviceYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, labelsToAdd);
+    }
+
     protected void createAndApplyEmailConfigMap(String correlationId, String sessionResourceName,
             String sessionResourceUID, Session session, Map<String, String> labelsToAdd) {
         Map<String, String> replacements = TheiaCloudConfigMapUtil.getEmailConfigMapReplacements(client.namespace(),
@@ -408,8 +439,8 @@ public class LazySessionHandler implements SessionHandler {
             return;
         }
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-                configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
-                labelsToAdd, configmap -> {
+                configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, labelsToAdd,
+                configmap -> {
                     configmap.setData(Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST,
                             session.getSpec().getUser()));
                 });
@@ -428,8 +459,8 @@ public class LazySessionHandler implements SessionHandler {
             return;
         }
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-                configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
-                labelsToAdd, configMap -> {
+                configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, labelsToAdd,
+                configMap -> {
                     String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, session);
                     int port = appDefinition.getSpec().getPort();
                     AddedHandlerUtil.updateProxyConfigMap(client.kubernetes(), client.namespace(), configMap, host,
@@ -453,8 +484,8 @@ public class LazySessionHandler implements SessionHandler {
             return;
         }
         K8sUtil.loadAndCreateDeploymentWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
-                deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0,
-                labelsToAdd, deployment -> {
+                deploymentYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, labelsToAdd,
+                deployment -> {
 
                     LOGGER.debug("Setting session labels");
                     Map<String, String> labels = deployment.getSpec().getTemplate().getMetadata().getLabels();

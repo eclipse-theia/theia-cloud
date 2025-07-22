@@ -36,7 +36,6 @@ import org.eclipse.theia.cloud.service.TheiaCloudWebException;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
 
 import io.quarkus.security.Authenticated;
-import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.mutiny.core.Vertx;
@@ -218,19 +217,22 @@ public class SessionResource extends BaseResource {
             throw new TheiaCloudWebException(Status.FORBIDDEN);
         }
 
-        Optional<String> sessionPodClusterUrl = SessionUtil.getClusterURL(k8sUtil.CLIENT, session);
-        if (sessionPodClusterUrl.isEmpty()) {
-            error(correlationId, "Could not determine cluster URL for Session " + session);
-            throw new InternalServerErrorException("Could not get session pod URL");
+        // Use internal service URL for service-to-service communication to bypass OAuth2 proxy
+
+        Optional<String> sessionPodInternalUrl = SessionUtil.getInternalClusterURL(k8sUtil.CLIENT, session);
+        if (sessionPodInternalUrl.isEmpty()) {
+            error(correlationId, "Could not determine internal cluster URL for Session " + session);
+            throw new InternalServerErrorException("Could not get session internal service URL");
         }
 
-        String configStoreUrl = sessionPodClusterUrl.get() + CONFIG_STORE_PATH;
-        logger.info("Config store URL: " + configStoreUrl);
+        String configStoreUrl = sessionPodInternalUrl.get() + CONFIG_STORE_PATH;
+        logger.info("Config store URL (internal): " + configStoreUrl);
 
         try {
             // First, ping the config store to see if it is available.
-            var pingResponse = webClient.getAbs(configStoreUrl).timeout(CONFIG_STORE_HTTP_TIMEOUT).send().await().indefinitely();
-            
+            var pingResponse = webClient.getAbs(configStoreUrl).timeout(CONFIG_STORE_HTTP_TIMEOUT).send().await()
+                    .indefinitely();
+
             // Handle ping response. Theia returns a 404 if the config store is not installed.
             if (pingResponse.statusCode() < 200 || pingResponse.statusCode() >= 300) {
                 String message = MessageFormat.format(
@@ -244,15 +246,17 @@ public class SessionResource extends BaseResource {
 
             // Second, send the request to set the config value.
             JsonObject body = new JsonObject().put("key", request.key).put("value", request.value);
-            var setValueResponse = webClient.postAbs(configStoreUrl).timeout(CONFIG_STORE_HTTP_TIMEOUT).sendJsonObject(body).await().indefinitely();
-            
+            var setValueResponse = webClient.postAbs(configStoreUrl).timeout(CONFIG_STORE_HTTP_TIMEOUT)
+                    .sendJsonObject(body).await().indefinitely();
+
             if (setValueResponse.statusCode() < 200 || setValueResponse.statusCode() >= 300) {
-                error(correlationId, "Failed to set config value with HTTP status code: " + setValueResponse.statusCode());
+                error(correlationId,
+                        "Failed to set config value with HTTP status code: " + setValueResponse.statusCode());
                 throw new InternalServerErrorException("Failed to set config value.");
             }
-            
+
             info(correlationId, "Config value set successfully for key: " + request.key);
-            
+
         } catch (TheiaCloudWebException | InternalServerErrorException e) {
             // Re-throw expected exceptions
             throw e;
