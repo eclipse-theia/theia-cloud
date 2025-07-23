@@ -14,6 +14,7 @@ import {
   SessionPerformance,
   SessionPerformanceRequest as ClientSessionPerformanceRequest,
   SessionResourceApi,
+  SessionSetConfigValueRequest as ClientSessionSetConfigValueRequest,
   SessionSpec,
   SessionStartRequest as ClientSessionStartRequest,
   SessionStopRequest as ClientSessionStopRequest,
@@ -111,6 +112,11 @@ export namespace SessionStartRequest {
 export type SessionStopRequest = ClientSessionStopRequest & ServiceRequest;
 export namespace SessionStopRequest {
   export const KIND = 'sessionStopRequest';
+}
+
+export type SessionSetConfigValueRequest = ClientSessionSetConfigValueRequest & ServiceRequest;
+export namespace SessionSetConfigValueRequest {
+  export const KIND = 'sessionSetConfigValueRequest';
 }
 
 export type SessionActivityRequest = ClientSessionActivityRequest & ServiceRequest;
@@ -233,6 +239,23 @@ export namespace TheiaCloud {
       );
     }
 
+    export async function setConfigValue(
+      sessionName: string,
+      request: SessionSetConfigValueRequest,
+      options: RequestOptions = {}
+    ): Promise<void> {
+      const { accessToken, retries, timeout } = options;
+      const sessionSetConfigValueRequest = { kind: SessionSetConfigValueRequest.KIND, ...request };
+      return call(
+        () =>
+          sessionApi(request.serviceUrl, accessToken).serviceSessionSessionConfigPost(
+            sessionName,
+            sessionSetConfigValueRequest,
+            createConfig(timeout)
+          ),
+        retries
+      );
+    }
     export async function reportSessionActivity(
       request: SessionActivityRequest,
       options: RequestOptions = {}
