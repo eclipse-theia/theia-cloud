@@ -81,7 +81,7 @@ public interface TheiaCloudClient extends NamespacedKubernetesClient {
         try (final KubernetesClient client = new KubernetesClientBuilder().build()) {
             ServiceList svcList = client.services().inNamespace(namespace()).list();
             for (Service svc : svcList.getItems()) {
-                if (svc.getMetadata().getName().endsWith("-internal")) {
+                if (svc.getMetadata().getName().endsWith("-int")) {
                     continue;
                 }
                 for (OwnerReference ownerReference : svc.getMetadata().getOwnerReferences()) {
@@ -98,7 +98,7 @@ public interface TheiaCloudClient extends NamespacedKubernetesClient {
         try (final KubernetesClient client = new KubernetesClientBuilder().build()) {
             ServiceList svcList = client.services().inNamespace(namespace()).list();
             for (Service svc : svcList.getItems()) {
-                if (!svc.getMetadata().getName().endsWith("-internal")) {
+                if (!svc.getMetadata().getName().endsWith("-int")) {
                     continue;
                 }
                 for (OwnerReference ownerReference : svc.getMetadata().getOwnerReferences()) {
