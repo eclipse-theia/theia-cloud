@@ -55,11 +55,11 @@ public final class TheiaCloudServiceUtil {
     }
 
     public static String getInternalServiceName(Session session) {
-        return NamingUtil.createName(session) + "-internal";
+        return NamingUtil.createNameWithSuffix(session, "int");
     }
 
     public static String getInternalServiceName(AppDefinition appDefinition, int instance) {
-        return NamingUtil.createName(appDefinition, instance) + "-internal";
+        return NamingUtil.createNameWithSuffix(appDefinition, instance, "int");
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Service service) {

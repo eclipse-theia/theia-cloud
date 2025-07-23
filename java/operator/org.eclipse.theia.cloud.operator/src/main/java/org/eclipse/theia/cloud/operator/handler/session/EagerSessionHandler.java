@@ -278,9 +278,9 @@ public class EagerSessionHandler implements SessionHandler {
         List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
                 appDefinitionResourceUID);
 
-        // Filter for external services (those without "-internal" suffix)
+        // Filter for external services (those without "-int" suffix)
         List<Service> existingExternalServices = existingServices.stream()
-                .filter(service -> !service.getMetadata().getName().endsWith("-internal")).collect(Collectors.toList());
+                .filter(service -> !service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
 
         Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
                 sessionResourceUID, existingExternalServices);
@@ -313,9 +313,9 @@ public class EagerSessionHandler implements SessionHandler {
         List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
                 appDefinitionResourceUID);
 
-        // Filter for internal services (those with "-internal" suffix)
+        // Filter for internal services (those with "-int" suffix)
         List<Service> existingInternalServices = existingServices.stream()
-                .filter(service -> service.getMetadata().getName().endsWith("-internal")).collect(Collectors.toList());
+                .filter(service -> service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
 
         Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
                 sessionResourceUID, existingInternalServices);
@@ -418,9 +418,9 @@ public class EagerSessionHandler implements SessionHandler {
 
         // Separate external and internal services
         List<Service> externalServices = services.stream()
-                .filter(service -> !service.getMetadata().getName().endsWith("-internal")).collect(Collectors.toList());
+                .filter(service -> !service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
         List<Service> internalServices = services.stream()
-                .filter(service -> service.getMetadata().getName().endsWith("-internal")).collect(Collectors.toList());
+                .filter(service -> service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
 
         if (externalServices.size() != 1) {
             LOGGER.error(formatLogMessage(correlationId, "Expected exactly one external service owned by session "

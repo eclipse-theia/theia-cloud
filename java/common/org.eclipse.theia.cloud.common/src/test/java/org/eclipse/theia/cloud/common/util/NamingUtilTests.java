@@ -16,6 +16,7 @@
 package org.eclipse.theia.cloud.common.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
@@ -110,6 +111,59 @@ class NamingUtilTests {
 
         String result = NamingUtil.createName(workspace, "longidentifier");
         assertEquals("ws-longidentif-some-userna-test-app-de-381261d79c23", result);
+    }
+
+    @Test
+    void createNameWithSuffix_AppDefinitionAndInstance() {
+        AppDefinition appDefinition = createAppDefinition();
+
+        String result = NamingUtil.createNameWithSuffix(appDefinition, 1, "internal");
+        assertEquals("instance-1-some-app-defini-381261d79c23-internal", result);
+    }
+
+    @Test
+    void createNameWithSuffix_Session() {
+        Session session = createSession();
+
+        String result = NamingUtil.createNameWithSuffix(session, "internal");
+        assertEquals("session-some-username-test-app-definit-426930ea37d7-internal", result);
+    }
+
+    @Test
+    void createNameWithSuffix_AppDefinitionWithLongSuffix() {
+        AppDefinition appDefinition = createAppDefinition();
+
+        String result = NamingUtil.createNameWithSuffix(appDefinition, 1, "very-long-suffix-for-testing");
+        // Ensure the suffix is preserved and the total length doesn't exceed limit
+        assertTrue(result.endsWith("-very-long-suffix-for-testing"));
+        assertTrue(result.length() <= NamingUtil.VALID_NAME_LIMIT);
+        assertTrue(result.startsWith("instance-1"));
+    }
+
+    @Test
+    void createNameWithSuffix_VerifyLengthAndSuffixPreservation() {
+        Session session = createSession();
+        AppDefinition appDefinition = createAppDefinition();
+
+        // Test with regular suffix
+        String sessionResult = NamingUtil.createNameWithSuffix(session, "internal");
+        String appDefResult = NamingUtil.createNameWithSuffix(appDefinition, 1, "internal");
+
+        // Verify all results end with the suffix
+        assertTrue(sessionResult.endsWith("-internal"));
+        assertTrue(appDefResult.endsWith("-internal"));
+
+        // Verify all results are within length limit
+        assertTrue(sessionResult.length() <= NamingUtil.VALID_NAME_LIMIT);
+        assertTrue(appDefResult.length() <= NamingUtil.VALID_NAME_LIMIT);
+
+        // Verify all results start with expected prefixes
+        assertTrue(sessionResult.startsWith("session-"));
+        assertTrue(appDefResult.startsWith("instance-1-"));
+
+        // Verify the results are still valid Kubernetes names (no invalid characters)
+        assertTrue(sessionResult.matches("[a-z0-9-]+"));
+        assertTrue(appDefResult.matches("[a-z0-9-]+"));
     }
 
     private AppDefinition createAppDefinition() {
