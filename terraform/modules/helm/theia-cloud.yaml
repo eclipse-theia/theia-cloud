@@ -1,5 +1,10 @@
 imagePullPolicy: Always
 
+# Service configuration
+service:
+  authToken: asdfghjkl
+
+# Legacy app configuration (deprecated - use service.authToken instead)
 app:
   id: asdfghjkl
   name: Theia Cloud

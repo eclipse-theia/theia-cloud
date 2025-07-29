@@ -69,4 +69,43 @@ class ApplicationPropertiesTests {
         ApplicationProperties fixture = new ApplicationProperties();
         assertEquals("test-admin-group", fixture.getAdminGroupName());
     }
+
+    @Test
+    void getServiceAuthToken_newPropertySet_returnValue() {
+        System.clearProperty("theia.cloud.app.id");
+        System.setProperty("theia.cloud.service.auth.token", "new-auth-token");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertEquals("new-auth-token", fixture.getServiceAuthToken());
+    }
+
+    @Test
+    void getServiceAuthToken_onlyOldPropertySet_returnValue() {
+        System.clearProperty("theia.cloud.service.auth.token");
+        System.setProperty("theia.cloud.app.id", "old-app-id");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertEquals("old-app-id", fixture.getServiceAuthToken());
+    }
+
+    @Test
+    void getServiceAuthToken_bothPropertiesSet_newPropertyTakesPrecedence() {
+        System.setProperty("theia.cloud.service.auth.token", "new-auth-token");
+        System.setProperty("theia.cloud.app.id", "old-app-id");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertEquals("new-auth-token", fixture.getServiceAuthToken());
+    }
+
+    @Test
+    void getServiceAuthToken_noPropertiesSet_returnDefault() {
+        System.clearProperty("theia.cloud.service.auth.token");
+        System.clearProperty("theia.cloud.app.id");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertEquals("asdfghjkl", fixture.getServiceAuthToken());
+    }
+
+    @Test
+    void getAppId_deprecatedMethod_returnsSameAsNewMethod() {
+        System.setProperty("theia.cloud.service.auth.token", "test-token");
+        ApplicationProperties fixture = new ApplicationProperties();
+        assertEquals(fixture.getServiceAuthToken(), fixture.getAppId());
+    }
 }

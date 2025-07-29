@@ -1,5 +1,6 @@
 imagePullPolicy: IfNotPresent
 
+# Legacy app configuration (deprecated - use service.authToken instead)
 app:
   id: asdfghjkl
   name: Theia Blueprint
@@ -42,6 +43,7 @@ keycloak:
   cookieSecret: "s-p4GxfRlPa_BI1XsLuvE2ihNOqYD1vmewWcXcpYjr0="
 
 service:
+  authToken: asdfghjkl
   protocol: https
 
 operator:

@@ -40,7 +40,7 @@
       "args": [
         "compile",
         "quarkus:dev",
-        "-Dtheia.cloud.app.id=asdfghjkl",
+        "-Dtheia.cloud.service.auth.token=asdfghjkl",
         "-Dquarkus.http.port=8081",
         "-Dtheia.cloud.use.keycloak=false"
       ],
@@ -57,7 +57,7 @@
       "args": [
         "compile",
         "quarkus:dev",
-        "-Dtheia.cloud.app.id=asdfghjkl",
+        "-Dtheia.cloud.service.auth.token=asdfghjkl",
         "-Dquarkus.http.port=8081",
         "-Dtheia.cloud.use.keycloak=true",
         "-Dquarkus.oidc.auth-server-url=${input:keycloakURL}/realms/TheiaCloud",

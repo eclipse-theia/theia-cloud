@@ -13,7 +13,11 @@ RUN cd /service/common/maven-conf && \
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /service
 COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-1.1.0-SNAPSHOT-runner.jar .
+
+# Support both new and legacy environment variable names
+ENV SERVICE_AUTH_TOKEN default-app-id
 ENV APPID default-app-id
+
 ENV SERVICE_PORT 8081
 
 
@@ -24,7 +28,8 @@ ENV KEYCLOAK_CLIENTID theia-cloud
 ENV KEYCLOAK_CLIENTSECRET publicbutoauth2proxywantsasecret
 ENV KEYCLOAK_ADMIN_GROUP theia-cloud/admin
 
-ENTRYPOINT java -Dtheia.cloud.app.id=${APPID} \
+# Use SERVICE_AUTH_TOKEN if set, otherwise fall back to APPID for backwards compatibility
+ENTRYPOINT java -Dtheia.cloud.service.auth.token=${SERVICE_AUTH_TOKEN:-${APPID}} \
     -Dquarkus.http.port=${SERVICE_PORT} \
     -Dtheia.cloud.auth.admin.group=${KEYCLOAK_ADMIN_GROUP} \
     -Dtheia.cloud.use.keycloak=${KEYCLOAK_ENABLE} \
