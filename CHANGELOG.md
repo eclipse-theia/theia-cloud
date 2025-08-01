@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.1] - 2025-08-01
+
+- [java/operator] Create missing internal services in eager start app definition handler [#441](https://github.com/eclipse-theia/theia-cloud/pull/441)
+
 ## [1.1.0] - 2025-08-01
 
 - [theia] Introduce new folder `theia` for all Theia extensions and an example app to test these [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
