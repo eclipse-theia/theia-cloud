@@ -63,7 +63,8 @@ import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.ServiceResource;
 
 /**
- * A {@link SessionAddedHandler} that relies on the fact that the app definition handler created spare deployments to
+ * A {@link SessionAddedHandler} that relies on the fact that the app definition
+ * handler created spare deployments to
  * use.
  */
 public class EagerSessionHandler implements SessionHandler {
@@ -218,11 +219,14 @@ public class EagerSessionHandler implements SessionHandler {
             }
 
             // Add/update annotation to the session pod to trigger a sync with the Kubelet.
-            // Otherwise, the pod might not be updated with the new email list for the OAuth proxy in time.
-            // This is the case because ConfigMap changes are not propagated to the pod immediately but during a
+            // Otherwise, the pod might not be updated with the new email list for the OAuth
+            // proxy in time.
+            // This is the case because ConfigMap changes are not propagated to the pod
+            // immediately but during a
             // periodic sync. See
             // https://kubernetes.io/docs/concepts/configuration/configmap/#mounted-configmaps-are-updated-automatically
-            // NOTE that this is still not a one hundred percent guarantee that the pod is updated in time.
+            // NOTE that this is still not a one hundred percent guarantee that the pod is
+            // updated in time.
             try {
                 LOGGER.info(formatLogMessage(correlationId, "Adding update annotation to pods..."));
                 client.kubernetes().pods().list().getItems().forEach(pod -> {
@@ -363,7 +367,7 @@ public class EagerSessionHandler implements SessionHandler {
         HTTPIngressPath httpIngressPath = new HTTPIngressPath();
         http.getPaths().add(httpIngressPath);
         httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
-        httpIngressPath.setPathType("Prefix");
+        httpIngressPath.setPathType("ImplementationSpecific");
 
         IngressBackend ingressBackend = new IngressBackend();
         httpIngressPath.setBackend(ingressBackend);
@@ -384,7 +388,8 @@ public class EagerSessionHandler implements SessionHandler {
         SessionSpec spec = session.getSpec();
         LOGGER.info(formatLogMessage(correlationId, "Handling sessionDeleted " + spec));
 
-        // Find app definition for session. If it's not there anymore, we don't need to clean up because the resources
+        // Find app definition for session. If it's not there anymore, we don't need to
+        // clean up because the resources
         // are deleted by Kubernetes garbage collection.
         String appDefinitionID = spec.getAppDefinition();
         Optional<AppDefinition> appDefinition = client.appDefinitions().get(appDefinitionID);
@@ -394,17 +399,22 @@ public class EagerSessionHandler implements SessionHandler {
             return true;
         }
 
-        // Find external and internal services by first filtering all services by the session's corresponding session
+        // Find external and internal services by first filtering all services by the
+        // session's corresponding session
         // labels (as added in
-        // sessionCreated) and then checking if the service has an owner reference to the session
+        // sessionCreated) and then checking if the service has an owner reference to
+        // the session
         String sessionResourceName = session.getMetadata().getName();
         String sessionResourceUID = session.getMetadata().getUid();
         Map<String, String> sessionLabels = LabelsUtil.createSessionLabels(session, appDefinition.get());
-        // Filtering by withLabels(sessionLabels) because the method requires an exact match of the labels.
-        // Additional labels on the service prevent a match and the service has an additional app label.
+        // Filtering by withLabels(sessionLabels) because the method requires an exact
+        // match of the labels.
+        // Additional labels on the service prevent a match and the service has an
+        // additional app label.
         // Thus, filter by each session label separately.
         // We rely on the fact that the session labels are unique for each session.
-        // We cannot rely on owner references because they might have been cleaned up automatically by Kubernetes.
+        // We cannot rely on owner references because they might have been cleaned up
+        // automatically by Kubernetes.
         // While this should not happen, it did on Minikube.
         FilterWatchListDeletable<Service, ServiceList, ServiceResource<Service>> servicesFilter = client.services();
         for (Entry<String, String> entry : sessionLabels.entrySet()) {
@@ -438,7 +448,8 @@ public class EagerSessionHandler implements SessionHandler {
         String serviceName = ownedService.getMetadata().getName();
 
         // Remove owner reference and user specific labels from the service
-        // Allow retries because in rare cases the update fails. It is not clear why but might be caused by the owner
+        // Allow retries because in rare cases the update fails. It is not clear why but
+        // might be caused by the owner
         // reference being removed by Kubernetes garbage collection.
         // The retries aim to stabilize the clean up process.
         Service cleanedService = null;
@@ -548,7 +559,8 @@ public class EagerSessionHandler implements SessionHandler {
             return false;
         }
 
-        // Delete the pod to clean temporary workspace files. The deployment recreates a fresh pod automatically.
+        // Delete the pod to clean temporary workspace files. The deployment recreates a
+        // fresh pod automatically.
         try {
             Optional<Pod> pod = client.kubernetes().pods().list().getItems().stream()
                     .filter(p -> p.getMetadata().getName().startsWith(deploymentName)).findAny();

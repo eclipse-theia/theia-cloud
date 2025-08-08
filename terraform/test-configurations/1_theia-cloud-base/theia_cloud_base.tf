@@ -12,7 +12,7 @@ data "terraform_remote_state" "minikube" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = data.terraform_remote_state.minikube.outputs.host
     client_certificate     = data.terraform_remote_state.minikube.outputs.client_certificate
     client_key             = data.terraform_remote_state.minikube.outputs.client_key
@@ -33,8 +33,10 @@ resource "helm_release" "theia-cloud-base" {
   namespace        = "theia-cloud"
   create_namespace = true
 
-  set {
-    name  = "issuer.email"
-    value = var.cert_manager_issuer_email
-  }
+  set = [
+    {
+      name  = "issuer.email"
+      value = var.cert_manager_issuer_email
+    }
+  ]
 }
