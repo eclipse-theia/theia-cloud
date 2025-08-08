@@ -1,5 +1,7 @@
 # Changelog
 
+## [1.2.0] - estimated between 2025-11 and 2026-02
+
 ## [1.1.1] - 2025-08-01
 
 - [java/operator] Create missing internal services in eager start app definition handler [#441](https://github.com/eclipse-theia/theia-cloud/pull/441)
