@@ -45,7 +45,7 @@ resource "google_compute_address" "host_ip" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = module.cluster.cluster_host
     token                  = module.cluster.cluster_token
     cluster_ca_certificate = module.cluster.cluster_ca_certificate
