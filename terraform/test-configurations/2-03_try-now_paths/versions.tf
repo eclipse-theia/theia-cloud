@@ -2,13 +2,13 @@ terraform {
   required_providers {
     helm = {
       source  = "hashicorp/helm"
-      version = ">= 2.9.0"
+      version = ">= 3.0.2"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
-      version = ">= 1.14.0"
+      version = ">= 1.19.0"
     }
   }
 
-  required_version = ">= 1.4.0"
+  required_version = ">= 1.12.2"
 }

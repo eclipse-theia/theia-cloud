@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.33.3, v1.32.7, v1.31.11] # https://kubernetes.io/releases/
+        kubernetes: [v1.34.1, v1.33.5, v1.32.9, v1.31.13] # https://kubernetes.io/releases/
         paths: [true, false]
         ephemeral: [true, false]
         keycloak: [true, false]
@@ -57,9 +57,9 @@ jobs:
           path: "./theia-cloud-helm"
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@92af4db914ab207f837251cd53eb7060e6477614 # v2.11.0
+        uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
         with:
-          minikube version: v1.33.1
+          minikube version: v1.36.0
           kubernetes version: ${{ matrix.kubernetes }}
           github token: ${{ secrets.GITHUB_TOKEN }}
           start args: "--force"

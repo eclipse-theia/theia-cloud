@@ -9,7 +9,7 @@
     "src"
   ],
   "dependencies": {
-    "@eclipse-theiacloud/config-store": "1.1.2"
+    "@eclipse-theiacloud/config-store": "1.2.0-next"
   },
   "peerDependencies": {
     "@theia/core": "^1.55.0"
