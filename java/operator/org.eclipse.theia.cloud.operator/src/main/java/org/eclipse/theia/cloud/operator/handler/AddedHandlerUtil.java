@@ -88,6 +88,7 @@ public final class AddedHandlerUtil {
     public static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
 
     public static final String INGRESS_REWRITE_PATH = "(/|$)(.*)";
+    public static final String INGRESS_PATH_TYPE = "ImplementationSpecific";
 
     private static final HostnameVerifier ALL_GOOD_HOSTNAME_VERIFIER = new HostnameVerifier() {
         @Override

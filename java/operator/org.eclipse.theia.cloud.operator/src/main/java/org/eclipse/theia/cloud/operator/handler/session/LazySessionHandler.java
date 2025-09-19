@@ -553,7 +553,7 @@ public class LazySessionHandler implements SessionHandler {
                 HTTPIngressPath httpIngressPath = new HTTPIngressPath();
                 http.getPaths().add(httpIngressPath);
                 httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
-                httpIngressPath.setPathType("Prefix");
+                httpIngressPath.setPathType(AddedHandlerUtil.INGRESS_PATH_TYPE);
 
                 IngressBackend ingressBackend = new IngressBackend();
                 httpIngressPath.setBackend(ingressBackend);
