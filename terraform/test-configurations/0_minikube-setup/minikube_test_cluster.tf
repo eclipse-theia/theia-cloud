@@ -26,7 +26,7 @@ module "cluster" {
   cpus         = 4
   disk_size    = "51200mb"
   memory       = "8192mb"
-  driver       = "virtualbox"
+  driver       = "kvm2"
 }
 
 provider "kubernetes" {

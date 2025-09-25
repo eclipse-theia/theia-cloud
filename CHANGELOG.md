@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.2] - 2025-09-26
+
+- [java/operator] Use ingress path type ImplementationSpecific instead of Prefix [#449](https://github.com/eclipse-theia/theia-cloud/pull/449)
+
 ## [1.1.1] - 2025-08-01
 
 - [java/operator] Create missing internal services in eager start app definition handler [#441](https://github.com/eclipse-theia/theia-cloud/pull/441)
