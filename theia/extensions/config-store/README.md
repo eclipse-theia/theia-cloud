@@ -15,7 +15,7 @@ To install the Config Store extension, add it to your Theia application's packag
 ```json
 {
   "dependencies": {
-    "@eclipse-theiacloud/config-store": "1.1.1"
+    "@eclipse-theiacloud/config-store": "1.1.2"
   }
 }
 ```
