@@ -54,6 +54,7 @@ function App(): JSX.Element {
   const [username, setUsername] = useState<string>();
   const [token, setToken] = useState<string>();
   const [logoutUrl, setLogoutUrl] = useState<string>();
+  const [user, setUser] = useState<string>();
 
   const [gitUri, setGitUri] = useState<string>();
   const [gitUser, setGitUser] = useState<string>();
@@ -135,6 +136,14 @@ function App(): JSX.Element {
       }
     }
 
+    // Get user parameter from URL (for anonymous mode when Keycloak is disabled).
+    if (urlParams.has('user')) {
+      const user = urlParams.get('user');
+      if (user) {
+        setUser(user);
+      }
+    }
+
     if (config.useKeycloak) {
       keycloakConfig = {
         url: config.keycloakAuthUrl,
@@ -180,6 +189,11 @@ function App(): JSX.Element {
       return;
     }
 
+    if (!config.useKeycloak && !user) {
+      console.log('No user set yet but required for anonymous mode');
+      return;
+    }
+
     console.log('App init or username changed');
     console.log('Selected app definition: ' + selectedAppDefinition);
     console.log('Selected app name: ' + selectedAppName);
@@ -201,7 +215,7 @@ function App(): JSX.Element {
       console.log('Setting autoStart to false');
       setAutoStart(false);
     }
-  }, [initialized, username]);
+  }, [initialized, username, user]);
 
   /* eslint-enable react-hooks/rules-of-hooks */
 
@@ -259,7 +273,7 @@ function App(): JSX.Element {
             //                                                                                   ^^^^^^^^^^^^^^^^^^^^^ we need this part
             // First we split at the / character, get the last part, split at the - character and get the first part
             const repoName = gitUri?.split('/').pop()?.split('-')[0] ?? Math.random().toString().substring(2, 10);
-            workspace = 'ws-' + appDefinition + '-' + repoName + '-' + username;
+            workspace = 'ws-' + appDefinition + '-' + repoName + '-' + (config.useKeycloak ? username : user);
             console.log('Launching ' + appDefinition + ' with persistent workspace ' + workspace);
           }
         }
@@ -274,7 +288,7 @@ function App(): JSX.Element {
         const sessionStartRequest: SessionStartRequest = {
           serviceUrl: config.serviceUrl,
           appId: config.appId,
-          user: email!,
+          user: config.useKeycloak ? email! : user!,
           appDefinition,
           workspaceName: workspace,
           timeout: 180,
@@ -308,7 +322,7 @@ function App(): JSX.Element {
         const launchRequest = {
           serviceUrl: config.serviceUrl,
           appId: config.appId,
-          user: email!,
+          user: config.useKeycloak ? email! : user!,
           appDefinition: appDefinition,
           workspaceName: workspace,
           env: {
