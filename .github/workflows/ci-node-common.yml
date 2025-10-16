@@ -28,5 +28,3 @@ jobs:
       id-token: write
     with:
       package_workspace: common
-    secrets:
-      npm-token: ${{ secrets.NPM_TOKEN }}

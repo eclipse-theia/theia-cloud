@@ -26,5 +26,3 @@ jobs:
       id-token: write
     with:
       package_workspace: extensions/monitor-theia
-    secrets:
-      npm-token: ${{ secrets.NPM_TOKEN }}
