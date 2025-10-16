@@ -572,7 +572,21 @@ public class LazySessionHandler implements SessionHandler {
     }
 
     @Override
-    public boolean sessionDeleted(Session session, String correlationId) {
+    public synchronized boolean sessionDeleted(Session session, String correlationId) {
+        try {
+            return doSessionDeleted(session, correlationId);
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Kubernetes API error while deleting session: " + session.getSpec().getName()), e);
+            return false;
+        } catch (Exception e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Unexpected error while deleting session: " + session.getSpec().getName()), e);
+            return false;
+        }
+    }
+
+    protected boolean doSessionDeleted(Session session, String correlationId) {
         /* session information */
         SessionSpec sessionSpec = session.getSpec();
 
@@ -581,13 +595,16 @@ public class LazySessionHandler implements SessionHandler {
 
         Optional<AppDefinition> optionalAppDefinition = client.appDefinitions().get(appDefinitionID);
         if (optionalAppDefinition.isEmpty()) {
-            LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID + " found."));
+            LOGGER.error(formatLogMessage(correlationId, "No App Definition with name " + appDefinitionID
+                    + " found. Cannot clean up for session " + sessionSpec.getName()));
             return false;
         }
 
+        AppDefinition appDefinition = optionalAppDefinition.get();
+
         /* find ingress */
-        String appDefinitionResourceName = optionalAppDefinition.get().getMetadata().getName();
-        String appDefinitionResourceUID = optionalAppDefinition.get().getMetadata().getUid();
+        String appDefinitionResourceName = appDefinition.getMetadata().getName();
+        String appDefinitionResourceUID = appDefinition.getMetadata().getUid();
         Optional<Ingress> ingress = K8sUtil.getExistingIngress(client.kubernetes(), client.namespace(),
                 appDefinitionResourceName, appDefinitionResourceUID);
         if (ingress.isEmpty()) {
@@ -596,11 +613,31 @@ public class LazySessionHandler implements SessionHandler {
             return false;
         }
 
-        String path = ingressPathProvider.getPath(optionalAppDefinition.get(), session);
-        TheiaCloudIngressUtil.removeIngressRule(client.kubernetes(), client.namespace(), ingress.get(), path,
-                correlationId);
+        String path = ingressPathProvider.getPath(appDefinition, session);
 
+        // Build list of all hosts that were used during session creation
+        List<String> hostsToClean = new ArrayList<>();
+        final String instancesHost = arguments.getInstancesHost();
+        hostsToClean.add(instancesHost);
+        List<String> ingressHostnamePrefixes = appDefinition.getSpec().getIngressHostnamePrefixes();
+        if (ingressHostnamePrefixes != null) {
+            for (String prefix : ingressHostnamePrefixes) {
+                hostsToClean.add(prefix + instancesHost);
+            }
+        }
+
+        // Remove ingress rules for all hosts
+        boolean cleanupSuccess = TheiaCloudIngressUtil.removeIngressRules(client.kubernetes(),
+                client.namespace(), ingress.get(), path, hostsToClean, correlationId);
+
+        if (!cleanupSuccess) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Failed to remove ingress rules for session " + sessionSpec.getName()));
+            return false;
+        }
+
+        LOGGER.info(formatLogMessage(correlationId,
+                "Successfully cleaned up ingress rules for session " + sessionSpec.getName()));
         return true;
     }
-
 }
