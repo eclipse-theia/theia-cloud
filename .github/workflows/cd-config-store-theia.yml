@@ -26,5 +26,3 @@ jobs:
       id-token: write
     with:
       package_workspace: extensions/config-store
-    secrets:
-      npm-token: ${{ secrets.NPM_TOKEN }}

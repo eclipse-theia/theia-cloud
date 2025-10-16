@@ -54,12 +54,10 @@ jobs:
         if: github.event_name == 'push' && steps.version_check.outputs.is_next_version == 'true'
         run: npm run publish:next -w ${{ inputs.package_workspace }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
           NPM_CONFIG_PROVENANCE: true
 
       - name: Publish latest version
         if: github.event_name == 'release'
         run: npm run publish:latest -w ${{ inputs.package_workspace }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
           NPM_CONFIG_PROVENANCE: true
