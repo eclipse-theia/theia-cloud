@@ -4,6 +4,21 @@ httpRelativePath: "/keycloak/"
 auth:
   adminUser: admin
 
+image:
+  # Configure using repository bitnamilegacy because bitnami has removed the bitnami repository in favor of a paid service
+  repository: bitnamilegacy/keycloak
+
+postgresql:
+  # Configure using repository bitnamilegacy because bitnami has removed the bitnami repository in favor of a paid service
+  image:
+    repository: bitnamilegacy/postgresql
+  volumePermissions:
+    image:
+      repository: bitnamilegacy/os-shell
+  metrics:
+    image:
+      repository: bitnamilegacy/bitnami-exporter
+
 ingress:
   enabled: true
   ingressClassName: "nginx"
