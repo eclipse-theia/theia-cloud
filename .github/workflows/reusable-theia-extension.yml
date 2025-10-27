@@ -44,6 +44,11 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
 
+      # Ensure npm 11.5.1 or later for trusted publishing
+      # Will no longer be needed when using Node.js 24+
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: |
           sudo apt-get install libsecret-1-dev
