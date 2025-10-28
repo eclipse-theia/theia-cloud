@@ -8,7 +8,8 @@ export namespace TheiaCloudConfig {
       typeof thing.serviceUrl === 'string' &&
       typeof thing.appDefinition === 'string' &&
       typeof thing.useKeycloak === 'boolean' &&
-      typeof thing.useEphemeralStorage === 'boolean'
+      typeof thing.useEphemeralStorage === 'boolean' &&
+      (thing.footerLinks === undefined || typeof thing.footerLinks === 'object')
     );
   }
 }
@@ -43,6 +44,24 @@ export interface KeycloakConfig {
   keycloakClientId: string;
 }
 
+export interface FooterLink {
+  text: string;
+  url: string;
+  target?: '_blank' | '_self';
+  rel?: string;
+}
+
+export interface FooterLinksConfig {
+  attribution?: {
+    text?: string;
+    url?: string;
+    version?: string;
+  };
+  bugReport?: FooterLink;
+  featureRequest?: FooterLink;
+  about?: FooterLink;
+}
+
 /** Configures additional, optional properties for the landing page. */
 export interface LandingPageConfig {
   additionalApps: AppDefinition[];
@@ -51,6 +70,7 @@ export interface LandingPageConfig {
   infoText: string;
   loadingText: string;
   logoFileExtension: string;
+  footerLinks?: FooterLinksConfig;
 }
 
 export type TheiaCloudConfig = AppDefinition &

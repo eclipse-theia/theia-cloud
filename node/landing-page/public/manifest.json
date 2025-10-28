@@ -1,14 +1,14 @@
 {
-  "short_name": "Theia Cloud",
-  "name": "Theia Cloud - Try Now",
+  "short_name": "TUM Theia Cloud",
+  "name": "TUM Theia Cloud - Online IDE",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "48x48 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "assets/logos/theia-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
     },
     {
-      "src": "logo512.png",
+      "src": "assets/logos/theia-logo.png",
       "type": "image/png",
       "sizes": "512x512"
     }

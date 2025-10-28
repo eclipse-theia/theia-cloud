@@ -1,41 +1,58 @@
 /* eslint-disable max-len */
 import './Header.css';
+import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
-  email: string | undefined;
-  authenticate: () => void;
-  logoutUrl: string | undefined;
+  email?: string;
+  authenticate?: () => void;
+  logoutUrl?: string;
 }
+
+// Function to generate Gravatar URL from email using a simple hash
+const getGravatarUrl = (email: string, size: number = 40): string => {
+  // Simple hash function for demo purposes
+  // In production, you might want to use a proper MD5 library
+  let hash = 0;
+  const str = email.toLowerCase().trim();
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  const hashStr = Math.abs(hash).toString(16).padStart(8, '0');
+  return `https://www.gravatar.com/avatar/${hashStr}?s=${size}&d=identicon&r=pg`;
+};
 
 export const Header = ({ email, authenticate, logoutUrl }: HeaderProps): JSX.Element => (
   <div className='header'>
-    {email ? (
-      <p>{email}</p>
-    ) : (
-      <p>
-        <a onClick={authenticate}>
-          <svg>
-            <title>login</title>
-            <path
-              transform='translate(20, 7)'
-              d='M12.219 26.156h6.094c1.156 0 2.125-0.406 2.875-1.188 0.75-0.75 1.219-1.75 1.219-2.875v-12.219c0-1.125-0.469-2.125-1.219-2.875s-1.75-1.188-2.875-1.188h-6.094v2.563h6.094c0.875 0 1.531 0.656 1.531 1.5v12.219c0 0.844-0.656 1.531-1.531 1.531h-6.094v2.531zM0 13.563v4.875c0 0.563 0.469 1.031 1.031 1.031h5.688v3.844c0 0.344 0.156 0.625 0.469 0.781 0.125 0.031 0.281 0.031 0.344 0.031 0.219 0 0.406-0.063 0.563-0.219l7.344-7.344c0.281-0.281 0.25-0.844 0-1.156l-7.344-7.313c-0.25-0.25-0.563-0.281-0.906-0.188-0.313 0.156-0.469 0.406-0.469 0.75v3.875h-5.688c-0.563 0-1.031 0.469-1.031 1.031z'
-            ></path>
-          </svg>
-        </a>
-      </p>
-    )}
-    {logoutUrl && (
-      <p>
-        <a href={logoutUrl}>
-          <svg>
-            <title>logout</title>
-            <path
-              transform='translate(20, 7)'
-              d='M0 9.875v12.219c0 1.125 0.469 2.125 1.219 2.906 0.75 0.75 1.719 1.156 2.844 1.156h6.125v-2.531h-6.125c-0.844 0-1.5-0.688-1.5-1.531v-12.219c0-0.844 0.656-1.5 1.5-1.5h6.125v-2.563h-6.125c-1.125 0-2.094 0.438-2.844 1.188-0.75 0.781-1.219 1.75-1.219 2.875zM6.719 13.563v4.875c0 0.563 0.5 1.031 1.063 1.031h5.656v3.844c0 0.344 0.188 0.625 0.5 0.781 0.125 0.031 0.25 0.031 0.313 0.031 0.219 0 0.406-0.063 0.563-0.219l7.344-7.344c0.344-0.281 0.313-0.844 0-1.156l-7.344-7.313c-0.438-0.469-1.375-0.188-1.375 0.563v3.875h-5.656c-0.563 0-1.063 0.469-1.063 1.031z'
-            ></path>
-          </svg>
-        </a>
-      </p>
-    )}
+    <div className='header__app-name'>
+      <h1 className='header__title'>TUM Theia Cloud</h1>
+    </div>
+    <div className='header__actions'>
+      <ThemeToggle />
+      {email ? (
+        <div className='header__user-info'>
+          <img 
+            src={getGravatarUrl(email, 40)} 
+            alt="User Avatar" 
+            className='header__avatar'
+          />
+          <span className='header__email'>{email}</span>
+        </div>
+      ) : authenticate ? (
+        <button className='header__login-btn' onClick={authenticate}>
+          Login
+        </button>
+      ) : null}
+      {logoutUrl && (
+        <button 
+          className='header__logout-btn'
+          onClick={() => window.location.href = logoutUrl}
+          data-testid="logoutButton"
+        >
+          Logout
+        </button>
+      )}
+    </div>
   </div>
 );

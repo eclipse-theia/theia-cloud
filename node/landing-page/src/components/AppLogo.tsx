@@ -6,5 +6,5 @@ interface AppLogoProps {
   fileExtension: string;
 }
 export const AppLogo: React.FC<AppLogoProps> = ({ fileExtension }: AppLogoProps) => (
-  <img className='logo' src={`logo.${fileExtension}`}></img>
+  <img className='logo' src={`./images/logos/theia-logo.${fileExtension}`}></img>
 );

@@ -19,6 +19,9 @@ import { LaunchApp } from './components/LaunchApp';
 import { SelectApp } from './components/SelectApp';
 import { Loading } from './components/Loading';
 import { LoginButton } from './components/LoginButton';
+import { VantaBackground } from './components/VantaBackground';
+import { Imprint } from './components/Imprint';
+import { Privacy } from './components/Privacy';
 
 // global state to be kept between render calls
 let initialized = false;
@@ -30,6 +33,42 @@ function App(): JSX.Element {
   const [config] = useState(() => getTheiaCloudConfig());
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState<'home' | 'imprint' | 'privacy'>('home');
+
+  // Handle URL routing
+  useEffect(() => {
+    const updatePageFromUrl = () => {
+      const path = window.location.pathname;
+      if (path === '/imprint') {
+        setCurrentPage('imprint');
+      } else if (path === '/privacy') {
+        setCurrentPage('privacy');
+      } else {
+        setCurrentPage('home');
+      }
+    };
+
+    // Initial load
+    updatePageFromUrl();
+
+    // Listen for browser back/forward navigation
+    window.addEventListener('popstate', updatePageFromUrl);
+
+    return () => {
+      window.removeEventListener('popstate', updatePageFromUrl);
+    };
+  }, []);
+
+  // Navigation handler that updates both state and URL
+  const handleNavigation = (page: 'home' | 'imprint' | 'privacy') => {
+    const path = page === 'home' ? '/' : `/${page}`;
+    
+    // Update URL without page reload
+    window.history.pushState({}, '', path);
+    
+    // Update state
+    setCurrentPage(page);
+  };
 
   if (config === undefined) {
     return (
@@ -221,9 +260,9 @@ function App(): JSX.Element {
 
   /* eslint-enable react-hooks/rules-of-hooks */
 
-  document.title = `${selectedAppName} - Theia`;
+  document.title = `TUM Theia Cloud`;
 
-  const authenticate = (): void => {
+  const authenticate: () => void = (): void => {
     const keycloak = new Keycloak(keycloakConfig);
 
     keycloak
@@ -373,48 +412,77 @@ function App(): JSX.Element {
   const needsLogin = config.useKeycloak && !token;
   const logoFileExtension = config.logoFileExtension ?? 'svg';
 
+  // Render different pages based on currentPage state
+  if (currentPage === 'imprint') {
+    return (
+      <div className='App'>
+        <VantaBackground>
+          <Imprint onNavigate={handleNavigation} />
+        </VantaBackground>
+      </div>
+    );
+  }
+
+  if (currentPage === 'privacy') {
+    return (
+      <div className='App'>
+        <VantaBackground>
+          <Privacy onNavigate={handleNavigation} />
+        </VantaBackground>
+      </div>
+    );
+  }
+
   return (
     <div className='App'>
-      {config.useKeycloak ? (
-        <Header email={email} authenticate={authenticate} logoutUrl={logoutUrl} />
-      ) : (
-        <div className='header'></div>
-      )}
-      <div className='body'>
-        {loading ? (
-          <Loading logoFileExtension={logoFileExtension} text={config.loadingText} />
-        ) : (
-          <div>
+        <VantaBackground>
+        <Header 
+          email={config.useKeycloak ? email : undefined} 
+          authenticate={config.useKeycloak ? authenticate : undefined} 
+          logoutUrl={config.useKeycloak ? logoutUrl : undefined} 
+        />
+        <div className='body'>
+          {loading ? (
+            <Loading logoFileExtension={logoFileExtension} text={config.loadingText} />
+          ) : (
             <div>
-              <AppLogo fileExtension={logoFileExtension} />
-              <p>
-                {needsLogin ? (
-                  <LoginButton login={authenticate} />
-                ) : autoStart ? (
-                  <LaunchApp
-                    appName={selectedAppName}
-                    appDefinition={selectedAppDefinition}
-                    onStartSession={handleStartSession}
-                  />
-                ) : (
-                  <SelectApp appDefinitions={config.additionalApps} onStartSession={handleStartSession} />
-                )}
-              </p>
+              <div>
+                <div style={{ marginTop: '2rem' }}></div>
+                <AppLogo fileExtension={logoFileExtension} />
+                <h2 className="App__title">Choose your Online IDE</h2>
+                <p>
+                  {needsLogin ? (
+                    <LoginButton login={authenticate} />
+                  ) : autoStart ? (
+                    <LaunchApp
+                      appName={selectedAppName}
+                      appDefinition={selectedAppDefinition}
+                      onStartSession={handleStartSession}
+                    />
+                  ) : (
+                    <SelectApp appDefinitions={config.additionalApps} onStartSession={handleStartSession} />
+                  )}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
-        <ErrorComponent message={error} />
-        {!error && (
-          <Info
-            usesLogin={config.useKeycloak}
-            disable={config.disableInfo}
-            text={config.infoText}
-            title={config.infoTitle}
-          />
-        )}
-        <Footer selectedAppDefinition={autoStart ? selectedAppDefinition : ''} />
+          )}
+          <ErrorComponent message={error} />
+          {!error && (
+            <Info
+              usesLogin={config.useKeycloak}
+              disable={config.disableInfo}
+              text={config.infoText}
+              title={config.infoTitle}
+            />
+          )}
+        </div>
+        <Footer
+          selectedAppDefinition={autoStart ? selectedAppDefinition : ''}
+          onNavigate={handleNavigation}
+          footerLinks={config.footerLinks}
+        />
+        </VantaBackground>
       </div>
-    </div>
   );
 }
 
