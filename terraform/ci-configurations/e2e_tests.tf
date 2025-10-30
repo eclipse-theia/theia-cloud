@@ -23,7 +23,7 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     config_path = "~/.kube/config"
   }
 }
@@ -100,10 +100,12 @@ resource "helm_release" "theia-cloud-crds" {
   namespace        = "theia-cloud"
   create_namespace = true
 
-  set {
-    name  = "conversion.image"
-    value = "theiacloud/theia-cloud-conversion-webhook:minikube-ci-e2e"
-  }
+  set = [
+    {
+      name  = "conversion.image"
+      value = "theiacloud/theia-cloud-conversion-webhook:minikube-ci-e2e"
+    }
+  ]
 }
 
 resource "helm_release" "theia-cloud-base" {
@@ -114,10 +116,12 @@ resource "helm_release" "theia-cloud-base" {
   namespace        = "theia-cloud"
   create_namespace = true
 
-  set {
-    name  = "issuer.email"
-    value = "jdoe@theia-cloud.io"
-  }
+  set = [
+    {
+      name  = "issuer.email"
+      value = "jdoe@theia-cloud.io"
+    }
+  ]
 }
 
 resource "helm_release" "theia-cloud" {
@@ -132,30 +136,27 @@ resource "helm_release" "theia-cloud" {
     "${file("${path.module}/valuesE2ECI.yaml")}"
   ]
 
-  set {
+  set = [{
     name  = "hosts.usePaths"
     value = var.use_paths
-  }
-
-  set {
-    name  = "hosts.configuration.baseHost"
-    value = "${var.ingress_ip}.nip.io"
-  }
-
-  set {
-    name  = "landingPage.ephemeralStorage"
-    value = var.use_ephemeral_storage
-  }
-
-  set {
-    name  = "keycloak.enable"
-    value = var.enable_keycloak
-  }
-
-  set {
-    name  = "keycloak.authUrl"
-    value = "https://${var.ingress_ip}.nip.io/keycloak/"
-  }
+    },
+    {
+      name  = "hosts.configuration.baseHost"
+      value = "${var.ingress_ip}.nip.io"
+    },
+    {
+      name  = "landingPage.ephemeralStorage"
+      value = var.use_ephemeral_storage
+    },
+    {
+      name  = "keycloak.enable"
+      value = var.enable_keycloak
+    },
+    {
+      name  = "keycloak.authUrl"
+      value = "https://${var.ingress_ip}.nip.io/keycloak/"
+    }
+  ]
 }
 
 resource "kubectl_manifest" "theia-cloud-monitor-theia" {
