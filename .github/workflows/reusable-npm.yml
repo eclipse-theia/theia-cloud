@@ -7,9 +7,6 @@ on:
         required: true
         type: string
         description: The package's workspace path relative to the node directory.
-    secrets:
-      npm-token:
-        required: true
 
 permissions:
   contents: read
