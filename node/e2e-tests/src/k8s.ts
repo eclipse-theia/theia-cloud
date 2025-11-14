@@ -14,39 +14,39 @@ kc.loadFromDefault();
 export const k8sApi = kc.makeApiClient(CustomObjectsApi);
 
 export async function deleteAllSessions(): Promise<void> {
-  const sessions: any = await k8sApi.listNamespacedCustomObject(
-    resourceGroup,
-    sessionVersion,
+  const sessions: any = await k8sApi.listNamespacedCustomObject({
+    group: resourceGroup,
+    version: sessionVersion,
     namespace,
-    sessionPlural
-  );
+    plural: sessionPlural
+  });
 
-  for (const resource of sessions.body.items) {
-    await k8sApi.deleteNamespacedCustomObject(
-      resourceGroup,
-      sessionVersion,
+  for (const resource of sessions.items) {
+    await k8sApi.deleteNamespacedCustomObject({
+      group: resourceGroup,
+      version: sessionVersion,
       namespace,
-      sessionPlural,
-      resource.metadata.name
-    );
+      plural: sessionPlural,
+      name: resource.metadata.name
+    });
   }
 }
 
 export async function deleteAllWorkspaces(): Promise<void> {
-  const sessions: any = await k8sApi.listNamespacedCustomObject(
-    resourceGroup,
-    workspaceVersion,
+  const sessions: any = await k8sApi.listNamespacedCustomObject({
+    group: resourceGroup,
+    version: workspaceVersion,
     namespace,
-    workspacePlural
-  );
+    plural: workspacePlural
+  });
 
-  for (const resource of sessions.body.items) {
-    await k8sApi.deleteNamespacedCustomObject(
-      resourceGroup,
-      workspaceVersion,
+  for (const resource of sessions.items) {
+    await k8sApi.deleteNamespacedCustomObject({
+      group: resourceGroup,
+      version: workspaceVersion,
       namespace,
-      workspacePlural,
-      resource.metadata.name
-    );
+      plural: workspacePlural,
+      name: resource.metadata.name
+    });
   }
 }
