@@ -165,3 +165,33 @@ variable "cloud_provider" {
     error_message = "Valid values are: MINIKUBE, GKE, K8S"
   }
 }
+
+variable "install_cert_manager" {
+  description = "Whether to install cert-manager"
+  type        = bool
+  default     = true
+}
+
+variable "cert_manager_version" {
+  description = "Version of cert-manager to install"
+  type        = string
+  default     = "v1.17.4"
+}
+
+variable "cert_manager_namespace" {
+  description = "Namespace for cert-manager installation"
+  type        = string
+  default     = "cert-manager"
+}
+
+variable "install_selfsigned_issuer" {
+  description = "Whether to install an additional self-signed ClusterIssuer for Keycloak"
+  type        = bool
+  default     = false
+}
+
+variable "cert_manager_issuer_email" {
+  description = "Email address used to create certificates (required for letsencrypt-prod issuer)"
+  type        = string
+  default     = ""
+}
