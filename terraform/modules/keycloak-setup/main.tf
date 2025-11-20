@@ -279,8 +279,11 @@ locals {
       hostname = var.hostname
       strict   = false
     }
-    http-relative-path = var.keycloak_http_relative_path
     additionalOptions = [
+      {
+        name  = "http-relative-path"
+        value = var.keycloak_http_relative_path
+      },
       {
         name  = "admin"
         value = var.keycloak_admin_username
