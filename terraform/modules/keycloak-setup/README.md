@@ -9,7 +9,9 @@ This Terraform module deploys Keycloak in a Kubernetes cluster using the officia
 - Deploys Keycloak with configurable resources and replicas
 - Optional integrated PostgreSQL database deployment
 - Kubernetes Ingress support with TLS
+- **Optional cert-manager installation** (can be disabled if already installed)
 - Cert-manager integration for automatic certificate generation
+- Optional self-signed ClusterIssuer for local development
 - Support for Minikube, GKE, and generic Kubernetes clusters
 - Configurable HTTP relative path (e.g., `/keycloak/`)
 
@@ -17,13 +19,14 @@ This Terraform module deploys Keycloak in a Kubernetes cluster using the officia
 
 The following components must be installed in your Kubernetes cluster before using this module:
 
-1. **cert-manager** (if using TLS): For automatic certificate generation
-2. **nginx-ingress-controller** (if using ingress): For routing traffic to Keycloak
-3. **Persistent Volume provisioner**: For PostgreSQL data persistence (if using integrated database)
+1. **nginx-ingress-controller** (if using ingress): For routing traffic to Keycloak
+2. **Persistent Volume provisioner**: For PostgreSQL data persistence (if using integrated database)
+
+Note: cert-manager can be installed automatically by this module (default) or you can disable it if already present in your cluster.
 
 ## Usage
 
-### Minikube Example
+### Minikube Example (with cert-manager installation)
 
 ```hcl
 module "keycloak" {
@@ -33,6 +36,10 @@ module "keycloak" {
   keycloak_admin_password    = "admin"
   postgres_password          = "admin"
 
+  # Cert-manager installation
+  install_cert_manager       = true
+  install_selfsigned_issuer  = true
+
   # Minikube-specific configuration
   postgres_storage_class       = "manual"
   postgres_volume_permissions  = true
@@ -41,7 +48,7 @@ module "keycloak" {
 }
 ```
 
-### GKE Example
+### GKE Example (with Let's Encrypt)
 
 ```hcl
 module "keycloak" {
@@ -50,6 +57,10 @@ module "keycloak" {
   hostname                   = "keycloak.example.com"
   keycloak_admin_password    = var.keycloak_admin_password
   postgres_password          = var.postgres_password
+
+  # Cert-manager installation
+  install_cert_manager        = true
+  cert_manager_issuer_email   = "admin@example.com"
 
   # GKE-specific configuration
   postgres_storage_class       = "standard-rwo"
@@ -62,6 +73,24 @@ module "keycloak" {
   keycloak_resource_requests_memory = "2Gi"
   keycloak_resource_limits_cpu      = "2"
   keycloak_resource_limits_memory   = "4Gi"
+}
+```
+
+### Using Existing cert-manager Installation
+
+```hcl
+module "keycloak" {
+  source = "../../modules/keycloak-setup"
+
+  hostname                   = "keycloak.example.com"
+  keycloak_admin_password    = var.keycloak_admin_password
+  postgres_password          = var.postgres_password
+
+  # Use existing cert-manager
+  install_cert_manager        = false
+  ingress_cert_manager_cluster_issuer = "my-existing-issuer"
+
+  postgres_storage_class       = "standard"
 }
 ```
 
@@ -129,6 +158,16 @@ module "keycloak" {
 | `ingress_cert_manager_common_name`    | `string`      | `""`      | The common name for the certificate          |
 | `ingress_annotations`                 | `map(string)` | `{}`      | Additional annotations for ingress           |
 | `ingress_tls_secret_name`             | `string`      | `""`      | Name of TLS secret (auto-generated if empty) |
+
+### Cert-Manager Configuration
+
+| Name                       | Type     | Default          | Description                                                          |
+| -------------------------- | -------- | ---------------- | -------------------------------------------------------------------- |
+| `install_cert_manager`     | `bool`   | `true`           | Whether to install cert-manager                                      |
+| `cert_manager_version`     | `string` | `"v1.17.4"`      | Version of cert-manager to install                                   |
+| `cert_manager_namespace`   | `string` | `"cert-manager"` | Namespace for cert-manager installation                              |
+| `install_selfsigned_issuer`| `bool`   | `false`          | Whether to install self-signed ClusterIssuer for Keycloak            |
+| `cert_manager_issuer_email`| `string` | `""`             | Email address for certificates (required for letsencrypt-prod)       |
 
 ### Other Configuration
 

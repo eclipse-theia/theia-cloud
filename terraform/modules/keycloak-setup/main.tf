@@ -1,7 +1,40 @@
+resource "helm_release" "cert_manager" {
+  count            = var.install_cert_manager ? 1 : 0
+  name             = "cert-manager"
+  repository       = "https://charts.jetstack.io"
+  chart            = "cert-manager"
+  version          = var.cert_manager_version
+  namespace        = var.cert_manager_namespace
+  create_namespace = true
+
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+}
+
+resource "kubectl_manifest" "keycloak_selfsigned_issuer" {
+  count      = var.install_selfsigned_issuer ? 1 : 0
+  depends_on = [helm_release.cert_manager]
+
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name = "keycloak-selfsigned-issuer"
+    }
+    spec = {
+      selfSigned = {}
+    }
+  })
+}
+
 resource "kubernetes_namespace" "keycloak" {
   metadata {
     name = var.keycloak_namespace
   }
+
+  depends_on = [helm_release.cert_manager]
 }
 
 data "http" "keycloak_crd" {
@@ -334,11 +367,13 @@ resource "kubernetes_ingress_v1" "keycloak" {
       {
         "nginx.ingress.kubernetes.io/proxy-buffer-size"       = "128k"
         "nginx.ingress.kubernetes.io/proxy-busy-buffers-size" = "128k"
-        "cert-manager.io/cluster-issuer"                      = var.ingress_cert_manager_cluster_issuer
-        "cert-manager.io/common-name"                         = var.ingress_cert_manager_common_name
-        "acme.cert-manager.io/http01-edit-in-place"           = "true"
-        "acme.cert-manager.io/http01-ingress-path-type"       = "ImplementationSpecific"
       },
+      var.ingress_tls_enabled ? {
+        "cert-manager.io/cluster-issuer"                = var.ingress_cert_manager_cluster_issuer
+        "cert-manager.io/common-name"                   = var.ingress_cert_manager_common_name != "" ? var.ingress_cert_manager_common_name : var.hostname
+        "acme.cert-manager.io/http01-edit-in-place"     = "true"
+        "acme.cert-manager.io/http01-ingress-path-type" = "ImplementationSpecific"
+      } : {},
       var.ingress_annotations
     )
   }
