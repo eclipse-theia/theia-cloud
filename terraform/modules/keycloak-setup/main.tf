@@ -7,10 +7,12 @@ resource "helm_release" "cert_manager" {
   namespace        = var.cert_manager_namespace
   create_namespace = true
 
-  set {
-    name  = "installCRDs"
-    value = "true"
-  }
+  set = [
+    {
+      name  = "installCRDs"
+      value = "true"
+    }
+  ]
 }
 
 resource "kubectl_manifest" "keycloak_selfsigned_issuer" {
@@ -261,24 +263,12 @@ resource "kubernetes_service" "postgres" {
   }
 }
 
-resource "kubernetes_secret" "keycloak_admin" {
-  metadata {
-    name      = "keycloak-initial-admin"
-    namespace = kubernetes_namespace.keycloak.metadata[0].name
-  }
 
-  data = {
-    username = var.keycloak_admin_username
-    password = var.keycloak_admin_password
-  }
-
-  type = "Opaque"
-}
 
 locals {
   tls_secret_name = var.ingress_tls_secret_name != "" ? var.ingress_tls_secret_name : "${var.hostname}-tls"
 
-  keycloak_spec = var.postgres_enabled ? {
+  keycloak_spec_base = {
     instances = var.keycloak_replicas
     http = {
       httpEnabled = true
@@ -290,42 +280,16 @@ locals {
       strict   = false
     }
     http-relative-path = var.keycloak_http_relative_path
-    db = {
-      vendor   = "postgres"
-      host     = kubernetes_service.postgres[0].metadata[0].name
-      port     = 5432
-      database = var.postgres_database
-      usernameSecret = {
-        name = kubernetes_secret.postgres[0].metadata[0].name
-        key  = "username"
+    additionalOptions = [
+      {
+        name  = "admin"
+        value = var.keycloak_admin_username
+      },
+      {
+        name  = "admin-password"
+        value = var.keycloak_admin_password
       }
-      passwordSecret = {
-        name = kubernetes_secret.postgres[0].metadata[0].name
-        key  = "password"
-      }
-    }
-    resources = {
-      requests = {
-        cpu    = var.keycloak_resource_requests_cpu
-        memory = var.keycloak_resource_requests_memory
-      }
-      limits = {
-        cpu    = var.keycloak_resource_limits_cpu
-        memory = var.keycloak_resource_limits_memory
-      }
-    }
-    } : {
-    instances = var.keycloak_replicas
-    http = {
-      httpEnabled = true
-      httpPort    = 8080
-      tlsSecret   = var.ingress_tls_enabled ? local.tls_secret_name : null
-    }
-    hostname = {
-      hostname = var.hostname
-      strict   = false
-    }
-    http-relative-path = var.keycloak_http_relative_path
+    ]
     resources = {
       requests = {
         cpu    = var.keycloak_resource_requests_cpu
@@ -337,6 +301,26 @@ locals {
       }
     }
   }
+
+  keycloak_spec = merge(
+    local.keycloak_spec_base,
+    var.postgres_enabled ? {
+      db = {
+        vendor   = "postgres"
+        host     = kubernetes_service.postgres[0].metadata[0].name
+        port     = 5432
+        database = var.postgres_database
+        usernameSecret = {
+          name = kubernetes_secret.postgres[0].metadata[0].name
+          key  = "username"
+        }
+        passwordSecret = {
+          name = kubernetes_secret.postgres[0].metadata[0].name
+          key  = "password"
+        }
+      }
+    } : { db = null }
+  )
 }
 
 resource "kubectl_manifest" "keycloak_instance" {
@@ -352,7 +336,6 @@ resource "kubectl_manifest" "keycloak_instance" {
 
   depends_on = [
     kubectl_manifest.keycloak_operator,
-    kubernetes_secret.keycloak_admin,
     kubernetes_service.postgres
   ]
 }
