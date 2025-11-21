@@ -76,6 +76,16 @@ locals {
     for idx, doc in local.operator_manifests :
     "${doc.kind}-${doc.metadata.name}-${idx}" => doc
   }
+
+  # local_exec_quotes is a helper function to deal with different handling of
+  # quotes between linux and windows. On linux, it will output "'". On windows,
+  # it will output "".
+  local_exec_quotes = startswith(abspath(path.module), "/") ? "'" : ""
+  jsonpatch = jsonencode([{
+    "op"    = "add",
+    "path"  = "/spec/template/spec/containers/0/args/-",
+    "value" = "--default-ssl-certificate=keycloak/${var.hostname}-tls"
+  }])
 }
 
 resource "kubectl_manifest" "keycloak_operator" {
@@ -268,18 +278,28 @@ resource "kubernetes_service" "postgres" {
 locals {
   tls_secret_name = var.ingress_tls_secret_name != "" ? var.ingress_tls_secret_name : "${var.hostname}-tls"
 
+  keycloak_protocol = var.ingress_tls_enabled ? "https://" : "http://"
+
   keycloak_spec_base = {
     instances = var.keycloak_replicas
     http = {
       httpEnabled = true
       httpPort    = 8080
-      tlsSecret   = var.ingress_tls_enabled ? local.tls_secret_name : null
+    }
+    ingress = {
+      enabled = false
     }
     hostname = {
-      hostname = var.hostname
-      strict   = false
+      # hostname v2 including protocol and path
+      hostname = "${local.keycloak_protocol}${var.hostname}${var.keycloak_http_relative_path}"
+      strict   = true
     }
     additionalOptions = [
+      # Tell Keycloak to use X-Forwarded-* from nginx
+      {
+        name  = "proxy-headers"
+        value = "xforwarded"
+      },
       {
         name  = "http-relative-path"
         value = var.keycloak_http_relative_path
@@ -394,6 +414,16 @@ resource "kubernetes_ingress_v1" "keycloak" {
         }
       }
     }
+  }
+
+
+  # We expect that kubectl context was configured by a previous module.
+  # After keycloak was set up with tls enabled, we use the created tls secret as the default ssl-secret of the nginx-ingress-controller. 
+  # Below command connects to the cluster in the local environment and patches the ingress-controller accordingly. 
+  # Theia Cloud is then installed with path based hosts reusing the same certificate. 
+  # Sleep 5 seconds at the end as there might be a brief delay between the ingress controller reporting available and it actually being ready to serve traffic
+  provisioner "local-exec" {
+    command = "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-nginx -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ingress-nginx wait --for condition=available deploy/ingress-nginx-controller --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s && sleep 5"
   }
 
   depends_on = [
