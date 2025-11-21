@@ -51,6 +51,21 @@ public final class NamingUtil {
     }
 
     /**
+     * Creates a string that can be used as a name for a Kubernetes object with a suffix. The suffix is always preserved
+     * in full and other parts are shortened accordingly to stay within length limits.
+     * 
+     * @param appDefinition the {@link AppDefinition}
+     * @param instance      instance id
+     * @param suffix        the suffix to append to the name. Must not be null or blank.
+     * @return the name with suffix
+     */
+    public static String createNameWithSuffix(AppDefinition appDefinition, int instance, String suffix) {
+        String prefix = APP_DEFINITION_INSTANCE_PREFIX + instance;
+        return createNameWithSuffix(prefix, null, appDefinition.getSpec().getName(),
+                appDefinition.getMetadata().getUid(), suffix);
+    }
+
+    /**
      * Creates a string that can be used as a name for a Kubernetes object. When the same arguments are passed to this
      * method again, the resulting name will be the same. For different arguments the resulting name will be unique in
      * the cluster.
@@ -86,6 +101,19 @@ public final class NamingUtil {
     public static String createName(Session session) {
         return createName("session", null, session.getSpec().getUser(), session.getSpec().getAppDefinition(),
                 session.getMetadata().getUid());
+    }
+
+    /**
+     * Creates a string that can be used as a name for a Kubernetes object with a suffix. The suffix is always preserved
+     * in full and other parts are shortened accordingly to stay within length limits.
+     * 
+     * @param session the {@link Session}
+     * @param suffix  the suffix to append to the name. Must not be null or blank.
+     * @return the name with suffix
+     */
+    public static String createNameWithSuffix(Session session, String suffix) {
+        return createNameWithSuffix("session", session.getSpec().getUser(), session.getSpec().getAppDefinition(),
+                session.getMetadata().getUid(), suffix);
     }
 
     /**
@@ -157,6 +185,54 @@ public final class NamingUtil {
     }
 
     /**
+     * Builds a valid Kubernetes object names with a suffix. The suffix is always preserved in full and other parts are
+     * shortened accordingly to stay within length limits.
+     * 
+     * @param prefix        The prefix to start the object name with. Should start with a letter and be at most 13
+     *                      characters long. Longer prefixes are possible but might lead to other info being cut short.
+     * @param user          The user, may be <code>null</code>
+     * @param appDefinition The app definition name, may be <code>null</code>
+     * @param uid           a unique Kubernetes object id that the name relates to. I.e. the UID of a session when
+     *                      creating the name of a session deployment.
+     * @param suffix        the suffix to append to the name. Must not be null or blank.
+     * @return the joined and valid Kubernetes name with suffix
+     */
+    private static String createNameWithSuffix(String prefix, String user, String appDefinition, String uid,
+            String suffix) {
+        /*
+         * Kubenertes UIDs are standardized UUIDs/GUIDs. This means the uid string will have a length of 36. We take the
+         * last segment with length 12 to generate unique names for each Session even if user and app definition are the
+         * same.
+         */
+        String shortUid = trimUid(uid);
+
+        // If the user is an email address, only take the part before the @ sign because
+        // this is usually sufficient to identify the user.
+        String userName = user != null ? user.split("@")[0] : null;
+
+        // Calculate available space considering the suffix
+        String validSuffix = suffix != null && !suffix.isBlank() ? suffix : null;
+        if (validSuffix == null) {
+            throw new IllegalArgumentException("Suffix must not be null or blank");
+        }
+
+        int suffixLength = validSuffix.length() + 1; // +1 for the "-" separator
+        int availableLength = VALID_NAME_LIMIT - suffixLength;
+
+        // Calculate lengths for the variable parts, ensuring we reserve space for prefix, uid, and separators
+        int fixedPartsLength = prefix.length() + 1 + shortUid.length(); // +1 for separator before uid
+        int availableForVariableParts = Math.max(0, availableLength - fixedPartsLength);
+
+        // Divide remaining space between user and app definition
+        int infoSegmentLength = availableForVariableParts > 0 ? Math.max(1, availableForVariableParts / 2) : 0;
+
+        String shortUserName = trimLength(userName, infoSegmentLength);
+        String shortAppDef = trimLength(appDefinition, infoSegmentLength);
+
+        return asValidName(prefix, shortUserName, shortAppDef, shortUid, validSuffix);
+    }
+
+    /**
      * Builds a valid Kubernetes object names. Except for the prefix, all segments are limited to a fixed number of
      * characters to ensure that the resulting name includes information from all parameters.
      * 
@@ -206,8 +282,8 @@ public final class NamingUtil {
     }
 
     private static String trimLength(String text, int maxLength) {
-        if (text == null) {
-            return text;
+        if (text == null || maxLength <= 0) {
+            return null;
         }
         return text.substring(0, Math.min(text.length(), maxLength));
     }

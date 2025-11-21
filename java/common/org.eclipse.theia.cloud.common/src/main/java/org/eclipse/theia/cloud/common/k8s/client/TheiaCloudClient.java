@@ -81,6 +81,26 @@ public interface TheiaCloudClient extends NamespacedKubernetesClient {
         try (final KubernetesClient client = new KubernetesClientBuilder().build()) {
             ServiceList svcList = client.services().inNamespace(namespace()).list();
             for (Service svc : svcList.getItems()) {
+                if (svc.getMetadata().getName().endsWith("-int")) {
+                    continue;
+                }
+                for (OwnerReference ownerReference : svc.getMetadata().getOwnerReferences()) {
+                    if (sessionName.equals(ownerReference.getName()) && "Session".equals(ownerReference.getKind())) {
+                        return Optional.of(svc.getSpec().getClusterIP());
+                    }
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    default Optional<String> getInternalClusterIPFromSessionName(String sessionName) {
+        try (final KubernetesClient client = new KubernetesClientBuilder().build()) {
+            ServiceList svcList = client.services().inNamespace(namespace()).list();
+            for (Service svc : svcList.getItems()) {
+                if (!svc.getMetadata().getName().endsWith("-int")) {
+                    continue;
+                }
                 for (OwnerReference ownerReference : svc.getMetadata().getOwnerReferences()) {
                     if (sessionName.equals(ownerReference.getName()) && "Session".equals(ownerReference.getKind())) {
                         return Optional.of(svc.getSpec().getClusterIP());

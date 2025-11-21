@@ -27,10 +27,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.32.1, v1.31.5, v1.30.9, v1.29.13] # https://kubernetes.io/releases/
+        kubernetes: [v1.34.1, v1.33.5, v1.32.9, v1.31.13] # https://kubernetes.io/releases/
         paths: [true, false]
         ephemeral: [true, false]
         keycloak: [true, false]
+        exclude:
+          # Non-ephemeral sessions only make sense with keycloak
+          - ephemeral: false
+            keycloak: false
     steps:
       - name: Set Helm Branch for Scheduled Runs
         if: ${{ github.event_name == 'schedule' }}
@@ -53,9 +57,9 @@ jobs:
           path: "./theia-cloud-helm"
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@92af4db914ab207f837251cd53eb7060e6477614 # v2.11.0
+        uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
         with:
-          minikube version: v1.33.1
+          minikube version: v1.37.0
           kubernetes version: ${{ matrix.kubernetes }}
           github token: ${{ secrets.GITHUB_TOKEN }}
           start args: "--force"
@@ -71,8 +75,11 @@ jobs:
 
       - name: Patch Ingress to allow snippet annotations and restart
         run: |
-          kubectl -n ingress-nginx patch cm ingress-nginx-controller --patch '{"data":{"allow-snippet-annotations":"true"}}'
-          kubectl -n ingress-nginx delete pod -l app.kubernetes.io/name=ingress-nginx
+          kubectl -n ingress-nginx patch configmap ingress-nginx-controller \
+            --type merge \
+            -p '{"data":{"allow-snippet-annotations":"true","annotations-risk-level":"Critical"}}'
+          kubectl -n ingress-nginx rollout restart deployment ingress-nginx-controller
+          kubectl -n ingress-nginx rollout status deployment ingress-nginx-controller --timeout=90s
 
       # we use the none driver, so minikube should see the same images on the host
       - name: Build Theia Cloud Images
@@ -95,9 +102,24 @@ jobs:
           echo "INGRESS_HOST=$INGRESS_HOST" >> $GITHUB_ENV
 
       - name: Run Terraform
+        id: terraform_apply
+        continue-on-error: true
         run: |
           cd theia-cloud/terraform/ci-configurations
           terraform init
+          terraform apply \
+            -var="ingress_ip=${{ env.INGRESS_HOST }}" \
+            -var="use_paths=${{ matrix.paths }}" \
+            -var="use_ephemeral_storage=${{ matrix.ephemeral }}" \
+            -var="enable_keycloak=${{ matrix.keycloak }}" \
+            -auto-approve
+
+      - name: Retry Terraform Apply
+        if: steps.terraform_apply.outcome == 'failure'
+        run: |
+          echo "Waiting 30 seconds before retrying..."
+          sleep 30
+          cd theia-cloud/terraform/ci-configurations
           terraform apply \
             -var="ingress_ip=${{ env.INGRESS_HOST }}" \
             -var="use_paths=${{ matrix.paths }}" \
@@ -156,10 +178,23 @@ jobs:
           export MATRIX_KEYCLOAK=${{ matrix.keycloak }}
           npm run ui-tests -w e2e-tests
 
+      - name: Print Debug logs
+        if: failure()
+        run: |
+          echo "=== Service Deployment Logs ==="
+          kubectl logs -n theia-cloud deployment/service-deployment --tail=100
+          echo ""
+          echo "=== Operator Deployment Logs (All Pods) ==="
+          for pod in $(kubectl get pods -n theia-cloud -l app=operator -o jsonpath='{.items[*].metadata.name}'); do
+            echo "--- Logs from pod: $pod ---"
+            kubectl logs -n theia-cloud $pod --tail=100
+            echo ""
+          done
+
       - name: Upload Playwright test failure screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-failure-screenshots
+          name: test-failure-screenshots-k8s-${{ matrix.kubernetes }}-paths-${{ matrix.paths }}-ephemeral-${{ matrix.ephemeral }}-keycloak-${{ matrix.keycloak }}
           path: theia-cloud/node/e2e-tests/test-results/**/*.png
           retention-days: 7

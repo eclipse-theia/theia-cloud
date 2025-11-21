@@ -26,7 +26,7 @@ module "cluster" {
   cpus         = 4
   disk_size    = "51200mb"
   memory       = "8192mb"
-  driver       = "virtualbox"
+  driver       = "kvm2"
 }
 
 provider "kubernetes" {
@@ -58,7 +58,7 @@ resource "kubernetes_persistent_volume" "minikube" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = module.cluster.cluster_host
     client_certificate     = module.cluster.cluster_client_certificate
     client_key             = module.cluster.cluster_client_key

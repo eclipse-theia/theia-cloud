@@ -1,6 +1,6 @@
 {
   "name": "@eclipse-theiacloud/monitor-theia",
-  "version": "1.1.0-next",
+  "version": "1.2.0-next",
   "keywords": [
     "theia-extension"
   ],
@@ -24,8 +24,8 @@
     "src"
   ],
   "peerDependencies": {
-    "@theia/core": "^1.55.0",
-    "@theia/plugin-ext": "^1.55.0"
+    "@theia/core": "^1.64.0",
+    "@theia/plugin-ext": "^1.64.0"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",

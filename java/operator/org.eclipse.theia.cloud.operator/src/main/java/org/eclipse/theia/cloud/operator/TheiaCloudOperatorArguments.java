@@ -177,7 +177,7 @@ public class TheiaCloudOperatorArguments {
      * @deprecated Use {@link #getServiceAuthToken()} instead. This method is maintained for backwards compatibility.
      * @return the configured service auth token
      */
-    @Deprecated(since = "1.1.0", forRemoval = true)
+    @Deprecated(since = "1.2.0", forRemoval = true)
     public String getAppId() {
         return getServiceAuthTokenWithFallback();
     }

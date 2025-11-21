@@ -72,6 +72,7 @@ public final class AddedHandlerUtil {
 
     public static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     public static final String TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML = "/templateServiceWithoutOAuthProxy.yaml";
+    public static final String TEMPLATE_INTERNAL_SERVICE_YAML = "/templateInternalService.yaml";
     public static final String TEMPLATE_CONFIGMAP_EMAILS_YAML = "/templateConfigmapEmails.yaml";
     public static final String TEMPLATE_CONFIGMAP_YAML = "/templateConfigmap.yaml";
     public static final String TEMPLATE_DEPLOYMENT_YAML = "/templateDeployment.yaml";
@@ -87,6 +88,7 @@ public final class AddedHandlerUtil {
     public static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
 
     public static final String INGRESS_REWRITE_PATH = "(/|$)(.*)";
+    public static final String INGRESS_PATH_TYPE = "ImplementationSpecific";
 
     private static final HostnameVerifier ALL_GOOD_HOSTNAME_VERIFIER = new HostnameVerifier() {
         @Override

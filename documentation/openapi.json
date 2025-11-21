@@ -466,6 +466,24 @@
           }
         }
       },
+      "SessionSetConfigValueRequest": {
+        "type": "object",
+        "required": ["appId", "key", "value"],
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "The App Id of this Theia Cloud instance. Request without a matching Id will be denied."
+          },
+          "key": {
+            "type": "string",
+            "description": "The configuration key"
+          },
+          "value": {
+            "type": ["string", "null"],
+            "description": "The configuration value"
+          }
+        }
+      },
       "SessionSpec": {
         "type": "object",
         "properties": {
@@ -659,7 +677,7 @@
   },
   "info": {
     "title": "Theia Cloud API",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "paths": {
     "/service": {
@@ -1019,6 +1037,59 @@
           },
           "403": {
             "description": "Not Allowed"
+          }
+        },
+        "tags": ["Session Resource"],
+        "security": [
+          {
+            "SecurityScheme": []
+          }
+        ]
+      }
+    },
+    "/service/session/{session}/config": {
+      "post": {
+        "summary": "Set config value",
+        "description": "Sets a config value in the config store if it is available. This requires the @eclipse-theiacloud/config-store Theia extension to be present in the application.",
+        "parameters": [
+          {
+            "description": "The name of the session",
+            "name": "session",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionSetConfigValueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Config value set successfully."
+          },
+          "403": {
+            "description": "User does not own the session."
+          },
+          "474": {
+            "description": "Session not found."
+          },
+          "500": {
+            "description": "Internal server error while setting config value or other unexpected errors."
+          },
+          "580": {
+            "description": "Config store not available."
+          },
+          "401": {
+            "description": "Not Authorized"
           }
         },
         "tags": ["Session Resource"],

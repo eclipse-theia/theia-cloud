@@ -7,7 +7,7 @@ data "terraform_remote_state" "minikube" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = data.terraform_remote_state.minikube.outputs.host
     client_certificate     = data.terraform_remote_state.minikube.outputs.client_certificate
     client_key             = data.terraform_remote_state.minikube.outputs.client_key
@@ -33,64 +33,49 @@ resource "helm_release" "theia-cloud" {
     "${file("${path.module}/../../values/valuesDemo.yaml")}"
   ]
 
-  set {
+  set = [{
     name = "hosts.usePaths"
     # Need to hand in boolean as string as terraform converts boolean to 1 resp. 0.
     # See https://github.com/hashicorp/terraform-provider-helm/issues/208
     value = "true"
-  }
-
-  set {
-    name  = "ingress.addTLSSecretName"
-    value = "true"
-  }
-
-  set {
-    name  = "hosts.configuration.service"
-    value = "service"
-  }
-
-  set {
-    name  = "hosts.configuration.landing"
-    value = "try"
-  }
-
-  set {
-    name  = "hosts.configuration.instance"
-    value = "instances"
-  }
-
-
-  set {
-    name  = "hosts.configuration.baseHost"
-    value = data.terraform_remote_state.minikube.outputs.hostname
-  }
-
-  set {
-    name  = "keycloak.authUrl"
-    value = "https://${data.terraform_remote_state.minikube.outputs.hostname}/keycloak/"
-  }
-
-  set {
-    name  = "operator.cloudProvider"
-    value = "MINIKUBE"
-  }
-
-  set {
-    name  = "ingress.clusterIssuer"
-    value = "theia-cloud-selfsigned-issuer"
-  }
-
-  set {
-    name  = "ingress.theiaCloudCommonName"
-    value = true
-  }
-
-  # Comment in to only pull missing images. This is needed to use images built locally in Minikube
-  # set {
-  #   name  = "imagePullPolicy"
-  #   value = "IfNotPresent"
-  # }
+    },
+    {
+      name  = "ingress.addTLSSecretName"
+      value = "true"
+    },
+    {
+      name  = "hosts.configuration.service"
+      value = "service"
+    },
+    {
+      name  = "hosts.configuration.landing"
+      value = "try"
+    },
+    {
+      name  = "hosts.configuration.instance"
+      value = "instances"
+    },
+    {
+      name  = "hosts.configuration.baseHost"
+      value = data.terraform_remote_state.minikube.outputs.hostname
+    },
+    {
+      name  = "keycloak.authUrl"
+      value = "https://${data.terraform_remote_state.minikube.outputs.hostname}/keycloak/"
+    },
+    {
+      name  = "operator.cloudProvider"
+      value = "MINIKUBE"
+    },
+    {
+      name  = "ingress.clusterIssuer"
+      value = "theia-cloud-selfsigned-issuer"
+    },
+    {
+      name  = "ingress.theiaCloudCommonName"
+      value = true
+    }
+  ]
 }
 
 resource "kubectl_manifest" "cdt-cloud-demo" {

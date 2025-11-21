@@ -17,7 +17,7 @@ on:
         required: true
 
 env:
-  VERSION: 1.1.0-next
+  VERSION: 1.2.0-next
 
 jobs:
   check-version:

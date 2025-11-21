@@ -7,9 +7,6 @@ on:
         required: true
         type: string
         description: The package's workspace path relative to the node directory.
-    secrets:
-      npm-token:
-        required: true
 
 permissions:
   contents: read
@@ -67,6 +64,11 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
 
+      # Ensure npm 11.5.1 or later for trusted publishing
+      # Will no longer be needed when using Node.js 24+
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: |
           sudo apt-get install libsecret-1-dev
@@ -76,12 +78,10 @@ jobs:
         if: github.event_name == 'push' && steps.version_check.outputs.is_next_version == 'true'
         run: npm run publish:next -w ${{ inputs.package_workspace }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
           NPM_CONFIG_PROVENANCE: true
 
       - name: Publish latest version
         if: github.event_name == 'release'
         run: npm run publish:latest -w ${{ inputs.package_workspace }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm-token }}
           NPM_CONFIG_PROVENANCE: true

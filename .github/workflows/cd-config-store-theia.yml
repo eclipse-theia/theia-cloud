@@ -1,0 +1,28 @@
+name: "[THEIA] Publish config-store"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "theia/yarn.lock"
+      - "theia/extensions/config-store/**"
+      # Publish when a workflow has changed (this is needed to detect version updates)
+      - ".github/workflows/cd-config-store.yml"
+      - ".github/workflows/reusable-theia-extension.yml"
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  run:
+    uses: ./.github/workflows/reusable-theia-extension.yml
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      package_workspace: extensions/config-store

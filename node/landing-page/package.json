@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@eclipse-theiacloud/common": "1.1.0-next",
+    "@eclipse-theiacloud/common": "1.2.0-next",
     "keycloak-js": "20.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -22,6 +22,6 @@
     "@vitejs/plugin-react": "^4.2.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
-    "vite": "^5.2.0"
+    "vite": "^7.2.2"
   }
 }

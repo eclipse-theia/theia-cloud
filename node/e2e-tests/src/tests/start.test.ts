@@ -42,15 +42,15 @@ test.describe('Start Session', () => {
     expect(browserUrl).toContain(baseURL!.replace('trynow', 'instances'));
 
     /* check created session */
-    const resources: any = await k8sApi.listNamespacedCustomObject(
-      resourceGroup,
-      sessionVersion,
+    const resources: any = await k8sApi.listNamespacedCustomObject({
+      group: resourceGroup,
+      version: sessionVersion,
       namespace,
-      sessionPlural
-    );
-    expect(resources.body.items).toHaveLength(1);
+      plural: sessionPlural
+    });
+    expect(resources.items).toHaveLength(1);
 
-    const sessionUrl = resources.body.items[0].status.url;
+    const sessionUrl = resources.items[0].status.url;
     expect(sessionUrl).toBeDefined();
     const normalizedBrowserUrl = new URL(browserUrl);
     const normalizedSessionUrl = new URL(sessionUrl.startsWith('http') ? sessionUrl : `https://${sessionUrl}`);

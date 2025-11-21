@@ -113,6 +113,12 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
                     appDefinitionResourceUID, instance, appDefinition, arguments.isUseKeycloak(), labelsToAdd);
         }
 
+        /* Create missing internal services for this app definition */
+        for (int instance : missingServiceIds) {
+            createAndApplyInternalService(client.kubernetes(), client.namespace(), correlationId,
+                    appDefinitionResourceName, appDefinitionResourceUID, instance, appDefinition, labelsToAdd);
+        }
+
         if (arguments.isUseKeycloak()) {
             /* Get existing configmaps for this app definition */
             List<ConfigMap> existingConfigMaps = K8sUtil.getExistingConfigMaps(client.kubernetes(), client.namespace(),
@@ -133,13 +139,11 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
             /* Create missing configmaps for this app definition */
             for (int instance : missingProxyIds) {
                 createAndApplyProxyConfigMap(client.kubernetes(), client.namespace(), correlationId,
-                        appDefinitionResourceName, appDefinitionResourceUID, instance, appDefinition,
-                        labelsToAdd);
+                        appDefinitionResourceName, appDefinitionResourceUID, instance, appDefinition, labelsToAdd);
             }
             for (int instance : missingEmailIds) {
                 createAndApplyEmailConfigMap(client.kubernetes(), client.namespace(), correlationId,
-                        appDefinitionResourceName, appDefinitionResourceUID, instance, appDefinition,
-                        labelsToAdd);
+                        appDefinitionResourceName, appDefinitionResourceUID, instance, appDefinition, labelsToAdd);
             }
         }
 
@@ -177,8 +181,25 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
             return;
         }
         K8sUtil.loadAndCreateServiceWithOwnerReference(client, namespace, correlationId, serviceYaml, AppDefinition.API,
-                AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
-                labelsToAdd);
+                AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0, labelsToAdd);
+    }
+
+    protected void createAndApplyInternalService(NamespacedKubernetesClient client, String namespace,
+            String correlationId, String appDefinitionResourceName, String appDefinitionResourceUID, int instance,
+            AppDefinition appDefinition, Map<String, String> labelsToAdd) {
+        Map<String, String> replacements = TheiaCloudServiceUtil.getInternalServiceReplacements(namespace,
+                appDefinition, instance);
+        String serviceYaml;
+        try {
+            serviceYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(
+                    AddedHandlerUtil.TEMPLATE_INTERNAL_SERVICE_YAML, replacements, correlationId);
+        } catch (IOException | URISyntaxException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Error while adjusting internal service template for instance number " + instance), e);
+            return;
+        }
+        K8sUtil.loadAndCreateServiceWithOwnerReference(client, namespace, correlationId, serviceYaml, AppDefinition.API,
+                AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0, labelsToAdd);
     }
 
     protected void createAndApplyDeployment(NamespacedKubernetesClient client, String namespace, String correlationId,
@@ -199,8 +220,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
         }
         K8sUtil.loadAndCreateDeploymentWithOwnerReference(client, namespace, correlationId, deploymentYaml,
                 AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
-                labelsToAdd,
-                deployment -> {
+                labelsToAdd, deployment -> {
                     bandwidthLimiter.limit(deployment, appDefinition.getSpec().getDownlinkLimit(),
                             appDefinition.getSpec().getUplinkLimit(), correlationId);
                     AddedHandlerUtil.removeEmptyResources(deployment);
@@ -228,8 +248,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
         }
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
                 AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
-                labelsToAdd,
-                configMap -> {
+                labelsToAdd, configMap -> {
                     String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, instance);
                     int port = appDefinition.getSpec().getPort();
                     AddedHandlerUtil.updateProxyConfigMap(client, namespace, configMap, host, port);

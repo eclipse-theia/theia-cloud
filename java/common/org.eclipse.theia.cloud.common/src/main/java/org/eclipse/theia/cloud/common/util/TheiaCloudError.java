@@ -47,6 +47,10 @@ public class TheiaCloudError {
     public static final TheiaCloudError SESSION_USER_NO_SESSIONS = new TheiaCloudError(554,
             "No sessions allowed for this user.");
 
+    // server errors: 58x optional features
+    public static final TheiaCloudError CONFIG_STORE_NOT_AVAILABLE = new TheiaCloudError(580,
+            "The Theia Cloud Config Store is not available. It needs to be installed in the application.");
+
     private final int code;
     private final String reason;
 

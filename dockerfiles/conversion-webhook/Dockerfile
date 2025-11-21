@@ -12,9 +12,9 @@ RUN cd /conversion/common/maven-conf && \
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /conversion
-COPY --from=builder /conversion/conversion/org.eclipse.theia.cloud.conversion/target/conversion-webhook-1.1.0-SNAPSHOT-runner.jar .
+COPY --from=builder /conversion/conversion/org.eclipse.theia.cloud.conversion/target/conversion-webhook-1.2.0-SNAPSHOT-runner.jar .
 
 ENV CERT_RELOAD_PERIOD=604800
 
-ENTRYPOINT ["java", "-Dquarkus.http.ssl.certificate.reload-period=${CERT_RELOAD_PERIOD}", "-jar", "./conversion-webhook-1.1.0-SNAPSHOT-runner.jar"]
+ENTRYPOINT ["java", "-Dquarkus.http.ssl.certificate.reload-period=${CERT_RELOAD_PERIOD}", "-jar", "./conversion-webhook-1.2.0-SNAPSHOT-runner.jar"]
 CMD [ "" ]

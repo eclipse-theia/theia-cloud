@@ -13,7 +13,8 @@ import {
   WorkspaceListRequest,
   PingRequest,
   LaunchRequest,
-  SessionPerformanceRequest
+  SessionPerformanceRequest,
+  SessionSetConfigValueRequest
 } from '@eclipse-theiacloud/common';
 
 const KEYCLOAK_CONFIG: KeycloakConfig = {
@@ -33,6 +34,8 @@ function App() {
   const [email, setEmail] = useState<string>();
   const [user, setUser] = useState('');
   const [resourceName, setResourceName] = useState('');
+  const [configKey, setConfigKey] = useState('');
+  const [configValue, setConfigValue] = useState('');
 
   useEffect(() => {
     const keycloak = Keycloak(KEYCLOAK_CONFIG);
@@ -168,6 +171,15 @@ function App() {
     };
     return TheiaCloud.Session.getSessionPerformance(request, generateRequestOptions(accessToken));
   };
+  const setSessionConfigValue = (user: string, accessToken?: string) => {
+    const request: SessionSetConfigValueRequest = {
+      appId: APP_ID,
+      key: configKey,
+      value: configValue,
+      serviceUrl: SERVICE_URL
+    };
+    return TheiaCloud.Session.setConfigValue(resourceName, request, generateRequestOptions(accessToken));
+  };
 
   // App definition requests
   const listAppDefinitions = (user: string, accessToken?: string) => {
@@ -208,6 +220,18 @@ function App() {
         <button onClick={() => executeRequest(stopSession)}>Stop Session</button>
         <button onClick={() => executeRequest(reportSessionPerformance)}>Report Session Performance</button>
       </p>
+      <div>
+        <p>Session Key Value Config:</p>
+        <p>
+          <span>Key:</span>
+          <input type='text' value={configKey} onChange={ev => setConfigKey(ev.target.value)} />
+        </p>
+        <p>
+          <span>Value:</span>
+          <input type='text' value={configValue} onChange={ev => setConfigValue(ev.target.value)} />
+        </p>
+        <button onClick={() => executeRequest(setSessionConfigValue)}>Set Config Value</button>
+      </div>
       <p>
         <button onClick={() => executeRequest(listWorkspaces)}>List Workspaces</button>
         <button onClick={() => executeRequest(createWorkspace)}>Create Workspace</button>

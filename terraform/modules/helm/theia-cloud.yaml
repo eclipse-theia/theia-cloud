@@ -10,7 +10,6 @@ app:
   name: Theia Cloud
 
 demoApplication:
-  name: theiacloud/theia-cloud-demo:1.1.0-next
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "30"
@@ -26,7 +25,6 @@ hosts:
     instance: instances
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:1.1.0-next
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: false
 

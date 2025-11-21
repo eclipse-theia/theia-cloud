@@ -6,7 +6,7 @@ app:
   name: Theia Blueprint
 
 demoApplication:
-  name: theiacloud/theia-cloud-activity-demo:1.1.0-next
+  name: theiacloud/theia-cloud-activity-demo:1.2.0-next
   pullSecret: ""
   timeoutStrategy: "FIXEDTIME"
   timeoutLimit: "0"
@@ -26,7 +26,7 @@ hosts:
     instance: ws
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:1.1.0-next
+  image: theiacloud/theia-cloud-landing-page:1.2.0-next
   appDefinition: "theia-cloud-demo"
   ephemeralStorage: true
 

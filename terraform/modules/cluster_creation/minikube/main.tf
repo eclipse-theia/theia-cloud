@@ -39,6 +39,13 @@ resource "minikube_cluster" "cluster" {
   ]
 
   provisioner "local-exec" {
-    command = "kubectl config use-context ${var.cluster_name}"
+    command = <<-EOT
+    kubectl config use-context ${var.cluster_name}
+    kubectl -n ingress-nginx patch configmap ingress-nginx-controller \
+      --type merge \
+      -p '{"data":{"allow-snippet-annotations":"true","annotations-risk-level":"Critical"}}'
+    kubectl -n ingress-nginx rollout restart deployment ingress-nginx-controller
+    kubectl -n ingress-nginx rollout status deployment ingress-nginx-controller --timeout=90s
+  EOT
   }
 }

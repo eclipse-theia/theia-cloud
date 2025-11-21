@@ -41,6 +41,7 @@ public final class TheiaCloudServiceUtil {
     public static final String SERVICE_NAME = "service";
 
     public static final String PLACEHOLDER_SERVICENAME = "placeholder-servicename";
+    public static final String PLACEHOLDER_SERVICENAME_INTERNAL = "placeholder-servicename-internal";
 
     private TheiaCloudServiceUtil() {
     }
@@ -51,6 +52,14 @@ public final class TheiaCloudServiceUtil {
 
     public static String getServiceName(Session session) {
         return NamingUtil.createName(session);
+    }
+
+    public static String getInternalServiceName(Session session) {
+        return NamingUtil.createNameWithSuffix(session, "int");
+    }
+
+    public static String getInternalServiceName(AppDefinition appDefinition, int instance) {
+        return NamingUtil.createNameWithSuffix(appDefinition, instance, "int");
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Service service) {
@@ -89,6 +98,27 @@ public final class TheiaCloudServiceUtil {
         replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
         replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinitionSpec.getPort()));
         putMonitorReplacements(appDefinitionSpec, replacements);
+        return replacements;
+    }
+
+    public static Map<String, String> getInternalServiceReplacements(String namespace, Session session,
+            AppDefinitionSpec appDefinitionSpec) {
+        Map<String, String> replacements = new LinkedHashMap<String, String>();
+        replacements.put(PLACEHOLDER_SERVICENAME_INTERNAL, getInternalServiceName(session));
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP, TheiaCloudHandlerUtil.getAppSelector(session));
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinitionSpec.getPort()));
+        return replacements;
+    }
+
+    public static Map<String, String> getInternalServiceReplacements(String namespace, AppDefinition appDefinition,
+            int instance) {
+        Map<String, String> replacements = new LinkedHashMap<String, String>();
+        replacements.put(PLACEHOLDER_SERVICENAME_INTERNAL, getInternalServiceName(appDefinition, instance));
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_APP,
+                TheiaCloudHandlerUtil.getAppSelector(appDefinition, instance));
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_NAMESPACE, namespace);
+        replacements.put(TheiaCloudHandlerUtil.PLACEHOLDER_PORT, String.valueOf(appDefinition.getSpec().getPort()));
         return replacements;
     }
 

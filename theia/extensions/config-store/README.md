@@ -1,12 +1,53 @@
-# Backend Communication Example
+# Config Store Extension
 
-The example extension demonstrates how to communicate with backend services.
-It contains the following two backend service examples:
+The Config Store extension provides a mechanism to store and manage configuration values within a Theia application. It allows clients to set, get, and remove configuration values, and notifies clients about changes to these values.
 
-- `ConfigStoreServer`: Can be called by the client to create a "Hello World" string. The client provides a name as a parameter, and the server returns the name prefixed with "Hello" (ex: "World" as a parameter returns "Hello World").
-- `ConfigStoreWithClientService`: Same as `ConfigStoreServer`, but the name parameter is not directly passed by the client in the first call. Instead, the backend services retrieves the name to say "Hello" to from the client again (`BackendClient`). This example shows how to implement call backs from the backend to the client.
-  Further, the example contributes two commands to trigger both types of backend calls.
+## Features
 
-## How to use the backend communication example
+- Store and retrieve configuration values.
+- Notify clients about configuration value changes.
+- REST API for setting and unsetting values: This is the crucial feature for the Theia Cloud use case because this enables injecting configuration (e.g. credentials) when a session pod is already running.
 
-In the running application, trigger the command "Say hello on the backend" or "Say hello on the backend with a callback to the client" via the command palette (F1 => "Say Hello"). A message will be printed out on the console from where you launched the application.
+## Installation
+
+To install the Config Store extension, add it to your Theia application's package.json dependencies:
+
+```json
+{
+  "dependencies": {
+    "@eclipse-theiacloud/config-store": "1.2.0-next"
+  }
+}
+```
+
+## Usage
+
+For an example on how to listen to change events and set, get, unset values of the config store,
+see the [example extension](../../examples/config-store-example/).
+
+### REST API
+
+The Config Store extension exposes a REST endpoint at `/theia-cloud/config-store` for managing configuration values. You can use this API to set and remove configuration values. It is not possible to read out values via the REST endpoint. This is done to protect potentially sensitive values (e.g. credentials).
+
+Assume your Theia instance is locally running at <http://localhost:3000>.
+The endpoint then is <<http://localhost:3000//theia-cloud/config-store>.
+
+Set a value via a `POST` request with a JSON body like so:
+
+```json
+{
+  "key": "my_value_key",
+  "value": "my_value"
+}
+```
+
+Unset a value via a POST request to the same endpoint like so:
+
+```json
+{
+  "key": "my_value_key",
+  "value": null
+}
+```
+
+A simple `GET` endpoint is also provided to allow checking that the config server is available.

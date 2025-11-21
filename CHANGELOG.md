@@ -1,11 +1,27 @@
 # Changelog
 
-## [1.1.0] - estimated between 2025-04 and 2025-07
+## [1.2.0] - estimated between 2025-11 and 2026-05
 
-- [theia] Introduce new folder `theia` for all theia extensions and an example app to test these [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
+## [1.1.2] - 2025-09-26
+
+- [java/operator] Use ingress path type ImplementationSpecific instead of Prefix [#449](https://github.com/eclipse-theia/theia-cloud/pull/449)
+
+## [1.1.1] - 2025-08-01
+
+- [java/operator] Create missing internal services in eager start app definition handler [#441](https://github.com/eclipse-theia/theia-cloud/pull/441)
+
+## [1.1.0] - 2025-08-01
+
+- [theia] Introduce new folder `theia` for all Theia extensions and an example app to test these [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
 - [node/monitor-theia] Move Theia monitor extension to `theia/extensions/monitor-theia` [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
 - [theia/extensions/monitor-theia] Update Theia dependencies to `^1.55.0` [#389](https://github.com/eclipse-theia/theia-cloud/pull/389)
 - [ci] Add Theia CI workflow, add reusable Theia extension publish workflow [#389](https://github.com/eclipse-theia/theia-cloud/pull/388)
+- [java] Fix and improve eager start handling [#393](https://github.com/eclipse-theia/theia-cloud/pull/393), [#396](https://github.com/eclipse-theia/theia-cloud/pull/396)
+- [java/service] Add admin user concept and app definition scaling endpoint [#400](https://github.com/eclipse-theia/theia-cloud/pull/400)
+- [docker] Provide ARM64 images [#404](https://github.com/eclipse-theia/theia-cloud/pull/404), [#408](https://github.com/eclipse-theia/theia-cloud/pull/408)
+- [java/common] Truncate labels longer than 63 chars [#413](https://github.com/eclipse-theia/theia-cloud/pull/413), [#417](https://github.com/eclipse-theia/theia-cloud/pull/417)
+- [java/conversion] Allow to set conversion webhook certificate reload period [#410](https://github.com/eclipse-theia/theia-cloud/pull/410)
+- [all components] Introduce config store Theia extension and REST endpoint [#432](https://github.com/eclipse-theia/theia-cloud/pull/432), [#438](https://github.com/eclipse-theia/theia-cloud/pull/438)
 
 ### Breaking Changes in 1.1.0
 

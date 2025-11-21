@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -126,6 +127,21 @@ public class EagerSessionHandler implements SessionHandler {
             return false;
         }
 
+        /* get an internal service to use */
+        Entry<Optional<Service>, Boolean> reserveInternalServiceResult = reserveInternalService(client.kubernetes(),
+                client.namespace(), appDefinitionResourceName, appDefinitionResourceUID, appDefinitionID,
+                sessionResourceName, sessionResourceUID, correlationId);
+        if (reserveInternalServiceResult.getValue()) {
+            LOGGER.info(formatLogMessage(correlationId, "Found an already reserved internal service"));
+            return true;
+        }
+        Optional<Service> internalServiceToUse = reserveInternalServiceResult.getKey();
+        if (internalServiceToUse.isEmpty()) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "No Internal Service for app definition " + appDefinitionID + " found."));
+            return false;
+        }
+
         try {
             client.services().inNamespace(client.namespace()).withName(serviceToUse.get().getMetadata().getName())
                     .edit(service -> {
@@ -142,6 +158,25 @@ public class EagerSessionHandler implements SessionHandler {
         } catch (KubernetesClientException e) {
             LOGGER.error(formatLogMessage(correlationId,
                     "Error while adding labels to service " + (serviceToUse.get().getMetadata().getName())), e);
+            return false;
+        }
+
+        try {
+            client.services().inNamespace(client.namespace())
+                    .withName(internalServiceToUse.get().getMetadata().getName()).edit(service -> {
+                        LOGGER.debug("Setting session labels on internal service");
+                        Map<String, String> labels = service.getMetadata().getLabels();
+                        if (labels == null) {
+                            labels = new HashMap<>();
+                            service.getMetadata().setLabels(labels);
+                        }
+                        Map<String, String> newLabels = LabelsUtil.createSessionLabels(session, appDefinition.get());
+                        labels.putAll(newLabels);
+                        return service;
+                    });
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while adding labels to internal service "
+                    + (internalServiceToUse.get().getMetadata().getName())), e);
             return false;
         }
 
@@ -243,13 +278,17 @@ public class EagerSessionHandler implements SessionHandler {
         List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
                 appDefinitionResourceUID);
 
+        // Filter for external services (those without "-int" suffix)
+        List<Service> existingExternalServices = existingServices.stream()
+                .filter(service -> !service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
+
         Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
-                sessionResourceUID, existingServices);
+                sessionResourceUID, existingExternalServices);
         if (alreadyReservedService.isPresent()) {
             return JavaUtil.tuple(alreadyReservedService, true);
         }
 
-        Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingServices,
+        Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingExternalServices,
                 appDefinitionResourceUID);
         if (serviceToUse.isEmpty()) {
             return JavaUtil.tuple(serviceToUse, false);
@@ -263,6 +302,41 @@ public class EagerSessionHandler implements SessionHandler {
         } catch (KubernetesClientException e) {
             LOGGER.error(formatLogMessage(correlationId,
                     "Error while editing service " + (serviceToUse.get().getMetadata().getName())), e);
+            return JavaUtil.tuple(Optional.empty(), false);
+        }
+        return JavaUtil.tuple(serviceToUse, false);
+    }
+
+    protected synchronized Entry<Optional<Service>, Boolean> reserveInternalService(NamespacedKubernetesClient client,
+            String namespace, String appDefinitionResourceName, String appDefinitionResourceUID, String appDefinitionID,
+            String sessionResourceName, String sessionResourceUID, String correlationId) {
+        List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
+                appDefinitionResourceUID);
+
+        // Filter for internal services (those with "-int" suffix)
+        List<Service> existingInternalServices = existingServices.stream()
+                .filter(service -> service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
+
+        Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
+                sessionResourceUID, existingInternalServices);
+        if (alreadyReservedService.isPresent()) {
+            return JavaUtil.tuple(alreadyReservedService, true);
+        }
+
+        Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingInternalServices,
+                appDefinitionResourceUID);
+        if (serviceToUse.isEmpty()) {
+            return JavaUtil.tuple(serviceToUse, false);
+        }
+
+        /* add our session as owner to the internal service */
+        try {
+            client.services().inNamespace(namespace).withName(serviceToUse.get().getMetadata().getName())
+                    .edit(service -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, sessionResourceName,
+                            sessionResourceUID, service));
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Error while editing internal service " + (serviceToUse.get().getMetadata().getName())), e);
             return JavaUtil.tuple(Optional.empty(), false);
         }
         return JavaUtil.tuple(serviceToUse, false);
@@ -289,7 +363,7 @@ public class EagerSessionHandler implements SessionHandler {
         HTTPIngressPath httpIngressPath = new HTTPIngressPath();
         http.getPaths().add(httpIngressPath);
         httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
-        httpIngressPath.setPathType("Prefix");
+        httpIngressPath.setPathType(AddedHandlerUtil.INGRESS_PATH_TYPE);
 
         IngressBackend ingressBackend = new IngressBackend();
         httpIngressPath.setBackend(ingressBackend);
@@ -320,7 +394,8 @@ public class EagerSessionHandler implements SessionHandler {
             return true;
         }
 
-        // Find service by first filtering all services by the session's corresponding session labels (as added in
+        // Find external and internal services by first filtering all services by the session's corresponding session
+        // labels (as added in
         // sessionCreated) and then checking if the service has an owner reference to the session
         String sessionResourceName = session.getMetadata().getName();
         String sessionResourceUID = session.getMetadata().getUid();
@@ -337,14 +412,29 @@ public class EagerSessionHandler implements SessionHandler {
         }
         List<Service> services = servicesFilter.list().getItems();
         if (services.isEmpty()) {
-            LOGGER.error(formatLogMessage(correlationId, "No Service owned by session " + spec.getName() + " found."));
-            return false;
-        } else if (services.size() > 1) {
-            LOGGER.error(formatLogMessage(correlationId,
-                    "Multiple Services owned by session " + spec.getName() + " found. This should never happen."));
+            LOGGER.error(formatLogMessage(correlationId, "No Services owned by session " + spec.getName() + " found."));
             return false;
         }
-        Service ownedService = services.get(0);
+
+        // Separate external and internal services
+        List<Service> externalServices = services.stream()
+                .filter(service -> !service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
+        List<Service> internalServices = services.stream()
+                .filter(service -> service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
+
+        if (externalServices.size() != 1) {
+            LOGGER.error(formatLogMessage(correlationId, "Expected exactly one external service owned by session "
+                    + spec.getName() + " but found " + externalServices.size()));
+            return false;
+        }
+        if (internalServices.size() != 1) {
+            LOGGER.error(formatLogMessage(correlationId, "Expected exactly one internal service owned by session "
+                    + spec.getName() + " but found " + internalServices.size()));
+            return false;
+        }
+
+        Service ownedService = externalServices.get(0);
+        Service ownedInternalService = internalServices.get(0);
         String serviceName = ownedService.getMetadata().getName();
 
         // Remove owner reference and user specific labels from the service
@@ -375,6 +465,36 @@ public class EagerSessionHandler implements SessionHandler {
                 } else {
                     LOGGER.error(formatLogMessage(correlationId, "Error while editing service " + serviceName
                             + " after " + editServiceAttempts + " attempts"), e);
+                    return false;
+                }
+            }
+        }
+
+        // Remove owner reference and user specific labels from the internal service
+        String internalServiceName = ownedInternalService.getMetadata().getName();
+        Service cleanedInternalService = null;
+        int editInternalServiceAttempts = 0;
+        boolean editInternalServiceSuccess = false;
+        while (editInternalServiceAttempts < 3 && !editInternalServiceSuccess) {
+            try {
+                cleanedInternalService = client.services().withName(internalServiceName).edit(service -> {
+                    TheiaCloudHandlerUtil.removeOwnerReferenceFromItem(correlationId, sessionResourceName,
+                            sessionResourceUID, service);
+                    service.getMetadata().getLabels().keySet().removeAll(LabelsUtil.getSessionSpecificLabelKeys());
+                    return service;
+                });
+                LOGGER.info(formatLogMessage(correlationId,
+                        "Removed owner reference and user-specific session labels from internal service: "
+                                + internalServiceName));
+                editInternalServiceSuccess = true;
+            } catch (KubernetesClientException e) {
+                editInternalServiceAttempts++;
+                if (editInternalServiceAttempts < 3) {
+                    LOGGER.warn(formatLogMessage(correlationId, "Attempt " + editInternalServiceAttempts
+                            + " failed while editing internal service " + internalServiceName), e);
+                } else {
+                    LOGGER.error(formatLogMessage(correlationId, "Error while editing internal service "
+                            + internalServiceName + " after " + editInternalServiceAttempts + " attempts"), e);
                     return false;
                 }
             }

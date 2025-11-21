@@ -94,14 +94,16 @@ resource "helm_release" "cert-manager" {
   name             = "cert-manager"
   repository       = "https://charts.jetstack.io"
   chart            = "cert-manager"
-  version          = "v1.16.2"
+  version          = "v1.17.4"
   namespace        = "cert-manager"
   create_namespace = true
 
-  set {
-    name  = "installCRDs"
-    value = "true"
-  }
+  set = [
+    {
+      name  = "installCRDs"
+      value = "true"
+    }
+  ]
 }
 
 resource "helm_release" "nginx-ingress-controller" {
@@ -109,24 +111,33 @@ resource "helm_release" "nginx-ingress-controller" {
   name             = "nginx-ingress-controller"
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
-  version          = "4.11.5"
+  version          = "4.13.0"
   namespace        = "ingress-nginx"
   create_namespace = true
 
-  set {
-    name  = "fullnameOverride"
-    value = "ingress-nginx"
-  }
-
-  set {
-    name  = "controller.service.loadBalancerIP"
-    value = var.loadBalancerIP
-  }
-
-  set {
-    name  = "controller.allowSnippetAnnotations"
-    value = true
-  }
+  set = [
+    {
+      name  = "fullnameOverride"
+      value = "ingress-nginx"
+    },
+    {
+      name  = "controller.service.loadBalancerIP"
+      value = var.loadBalancerIP
+    },
+    {
+      name  = "controller.allowSnippetAnnotations"
+      value = true
+    },
+    # Below two are added for backward compatibility with 1.1.1 which used Prefix pythType at some places. After 1.2.0 we should check if we may remove them again
+    {
+      name  = "controller.admissionWebhooks.enabled"
+      value = false
+    },
+    {
+      name  = "controller.config.enable-snippet"
+      value = "true"
+    }
+  ]
 }
 
 resource "helm_release" "theia-cloud-base" {
@@ -135,14 +146,16 @@ resource "helm_release" "theia-cloud-base" {
   name             = "theia-cloud-base"
   repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud-base"
-  version          = "1.0.0"
+  version          = "1.1.2"
   namespace        = "theia-cloud"
   create_namespace = true
 
-  set {
-    name  = "issuer.email"
-    value = var.cert_manager_issuer_email
-  }
+  set = [
+    {
+      name  = "issuer.email"
+      value = var.cert_manager_issuer_email
+    }
+  ]
 }
 
 resource "helm_release" "theia-cloud-crds" {
@@ -151,7 +164,7 @@ resource "helm_release" "theia-cloud-crds" {
   name             = "theia-cloud-crds"
   repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud-crds"
-  version          = "1.0.0"
+  version          = "1.1.2"
   namespace        = "theia-cloud"
   create_namespace = true
 }
@@ -187,45 +200,50 @@ resource "helm_release" "keycloak" {
     "${templatefile("${path.module}/keycloak.yaml", { cluster-issuer = var.cert_manager_cluster_issuer, common-name = var.cert_manager_common_name })}"
   ]
 
-  set {
-    name  = "postgresql.enabled"
-    value = var.postgresql_enabled
-  }
-  set {
-    name  = "ingress.hostname"
-    value = var.hostname
-  }
-  set {
-    name  = "global.storageClass"
-    value = var.postgresql_storageClass
-  }
-  set {
-    name  = "service.type"
-    value = var.service_type
-  }
-  set {
-    name  = "postgresql.volumePermissions.enabled"
-    value = var.postgresql_volumePermissions
-  }
-  set_sensitive {
-    name  = "auth.adminPassword"
-    value = var.keycloak_admin_password
-  }
-  set_sensitive {
-    name  = "postgresql.auth.postgresPassword"
-    value = var.postgres_postgres_password
-  }
-  set_sensitive {
-    name  = "postgresql.auth.password"
-    value = var.postgres_password
-  }
+  set = [
+    {
+      name  = "postgresql.enabled"
+      value = var.postgresql_enabled
+    },
+    {
+      name  = "ingress.hostname"
+      value = var.hostname
+    },
+    {
+      name  = "global.storageClass"
+      value = var.postgresql_storageClass
+    },
+    {
+      name  = "service.type"
+      value = var.service_type
+    },
+    {
+      name  = "postgresql.volumePermissions.enabled"
+      value = var.postgresql_volumePermissions
+    }
+  ]
+  set_sensitive = [
+    {
+      name  = "auth.adminPassword"
+      value = var.keycloak_admin_password
+    },
+    {
+      name  = "postgresql.auth.postgresPassword"
+      value = var.postgres_postgres_password
+    },
+    {
+      name  = "postgresql.auth.password"
+      value = var.postgres_password
+    }
+  ]
 
   # We expect that kubectl context was configured by a previous module.
   # After keycloak was set up with tls enabled, we use the created tls secret as the default ssl-secret of the nginx-ingress-controller. 
   # Below command connects to the cluster in the local environment and patches the ingress-controller accordingly. 
   # Theia Cloud is then installed with path based hosts reusing the same certificate. 
+  # Sleep 5 seconds at the end as there might be a brief delay between the ingress controller reporting available and it actually being ready to serve traffic
   provisioner "local-exec" {
-    command = "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-nginx -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl wait pods -n ingress-nginx -l app.kubernetes.io/component=controller --for condition=Ready --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s"
+    command = "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-nginx -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ingress-nginx wait --for condition=available deploy/ingress-nginx-controller --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s && sleep 5"
   }
 }
 
@@ -235,7 +253,7 @@ resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
   repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud"
-  version          = "1.0.0"
+  version          = "1.1.3"
   namespace        = "theia-cloud"
   create_namespace = true
 
@@ -243,18 +261,18 @@ resource "helm_release" "theia-cloud" {
     "${file("${path.module}/theia-cloud.yaml")}"
   ]
 
-  set {
-    name  = "hosts.configuration.baseHost"
-    value = var.hostname
-  }
-
-  set {
-    name  = "keycloak.authUrl"
-    value = "https://${var.hostname}/keycloak/"
-  }
-
-  set {
-    name  = "operator.cloudProvider"
-    value = var.cloudProvider
-  }
+  set = [
+    {
+      name  = "hosts.configuration.baseHost"
+      value = var.hostname
+    },
+    {
+      name  = "keycloak.authUrl"
+      value = "https://${var.hostname}/keycloak/"
+    },
+    {
+      name  = "operator.cloudProvider"
+      value = var.cloudProvider
+    }
+  ]
 }

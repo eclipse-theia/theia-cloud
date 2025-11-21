@@ -12,7 +12,7 @@ RUN cd /service/common/maven-conf && \
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /service
-COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-1.1.0-SNAPSHOT-runner.jar .
+COPY --from=builder /service/service/org.eclipse.theia.cloud.service/target/service-1.2.0-SNAPSHOT-runner.jar .
 
 # Support both new and legacy environment variable names
 ENV SERVICE_AUTH_TOKEN default-app-id
@@ -36,5 +36,5 @@ ENTRYPOINT java -Dtheia.cloud.service.auth.token=${SERVICE_AUTH_TOKEN:-${APPID}}
     -Dquarkus.oidc.auth-server-url=${KEYCLOAK_SERVERURL} \
     -Dquarkus.oidc.client-id=${KEYCLOAK_CLIENTID} \
     -Dquarkus.oidc.credentials.secret=${KEYCLOAK_CLIENTSECRET} \
-    -jar ./service-1.1.0-SNAPSHOT-runner.jar
+    -jar ./service-1.2.0-SNAPSHOT-runner.jar
 CMD [ "" ]
