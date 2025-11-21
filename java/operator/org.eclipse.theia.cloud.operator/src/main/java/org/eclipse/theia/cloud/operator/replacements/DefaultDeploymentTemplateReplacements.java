@@ -49,6 +49,8 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     public static final String PLACEHOLDER_MEMORY_REQUESTS = "placeholder-memory-requests";
     public static final String PLACEHOLDER_UID = "placeholder-uid";
 
+    public static final String PLACEHOLDER_ENV_SERVICE_AUTH_TOKEN = "placeholder-env-service-auth-token";
+    /** @deprecated Use PLACEHOLDER_ENV_SERVICE_AUTH_TOKEN instead */
     public static final String PLACEHOLDER_ENV_APP_ID = "placeholder-env-app-id";
     public static final String PLACEHOLDER_ENV_SERVICE_URL = "placeholder-env-service-url";
     public static final String PLACEHOLDER_ENV_SESSION_UID = "placeholder-env-session-uid";
@@ -126,7 +128,9 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 
     protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, Optional<Session> session) {
         Map<String, String> environmentVariables = new LinkedHashMap<String, String>();
-        environmentVariables.put(PLACEHOLDER_ENV_APP_ID, arguments.getAppId());
+        // Set both new and old placeholders for backwards compatibility
+        environmentVariables.put(PLACEHOLDER_ENV_SERVICE_AUTH_TOKEN, arguments.getServiceAuthToken());
+        environmentVariables.put(PLACEHOLDER_ENV_APP_ID, arguments.getServiceAuthToken());
         environmentVariables.put(PLACEHOLDER_ENV_SERVICE_URL, arguments.getServiceUrl());
         environmentVariables.put(PLACEHOLDER_ENV_SESSION_UID, session.map(s -> s.getMetadata().getUid()).orElse(""));
         environmentVariables.put(PLACEHOLDER_ENV_SESSION_NAME, session.map(s -> s.getSpec().getName()).orElse(""));

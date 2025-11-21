@@ -35,7 +35,7 @@ public class BaseResource {
 
     public BaseResource(ApplicationProperties applicationProperties) {
         this.applicationProperties = applicationProperties;
-        appId = applicationProperties.getAppId();
+        appId = applicationProperties.getServiceAuthToken();
         logger = Logger.getLogger(getClass().getSuperclass());
     }
 

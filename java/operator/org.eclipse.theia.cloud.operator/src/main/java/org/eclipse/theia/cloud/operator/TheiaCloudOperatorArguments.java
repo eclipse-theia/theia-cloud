@@ -17,6 +17,7 @@
 package org.eclipse.theia.cloud.operator;
 
 import picocli.CommandLine.Option;
+import java.util.logging.Logger;
 
 public class TheiaCloudOperatorArguments {
 
@@ -64,7 +65,10 @@ public class TheiaCloudOperatorArguments {
             "--sessionsPerUser" }, description = "Number of active sessions a single user is allowed to start.", required = false)
     private Integer sessionsPerUser;
 
-    @Option(names = { "--appId" }, description = "Application ID necessary for service calls", required = false)
+    @Option(names = { "--serviceAuthToken" }, description = "Service authentication token necessary for service calls", required = false)
+    private String serviceAuthToken;
+    
+    @Option(names = { "--appId" }, description = "(Deprecated) Use --serviceAuthToken instead. Application ID necessary for service calls", required = false, hidden = true)
     private String appId;
 
     @Option(names = {
@@ -162,8 +166,20 @@ public class TheiaCloudOperatorArguments {
         return monitorInterval;
     }
 
+    /**
+     * @return the configured service auth token
+     */
+    public String getServiceAuthToken() {
+        return getServiceAuthTokenWithFallback();
+    }
+    
+    /**
+     * @deprecated Use {@link #getServiceAuthToken()} instead. This method is maintained for backwards compatibility.
+     * @return the configured service auth token
+     */
+    @Deprecated(since = "1.2.0", forRemoval = true)
     public String getAppId() {
-        return appId;
+        return getServiceAuthTokenWithFallback();
     }
 
     public String getInstancesHost() {
@@ -221,11 +237,31 @@ public class TheiaCloudOperatorArguments {
     public String getOAuth2ProxyVersion() {
         return oAuth2ProxyVersion;
     }
+    
+    /**
+     * Get the service auth token with fallback to deprecated app id argument.
+     * Logs a deprecation warning if the old argument is used.
+     */
+    private String getServiceAuthTokenWithFallback() {
+        if (serviceAuthToken != null) {
+            return serviceAuthToken;
+        }
+        
+        if (appId != null) {
+            Logger logger = Logger.getLogger(TheiaCloudOperatorArguments.class.getName());
+            logger.warning("Using deprecated command line argument '--appId'. " +
+                          "Please migrate to '--serviceAuthToken' in your configuration.");
+            return appId;
+        }
+        
+        return null;
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((serviceAuthToken == null) ? 0 : serviceAuthToken.hashCode());
         result = prime * result + ((appId == null) ? 0 : appId.hashCode());
         result = prime * result + ((bandwidthLimiter == null) ? 0 : bandwidthLimiter.hashCode());
         result = prime * result + ((cloudProvider == null) ? 0 : cloudProvider.hashCode());
@@ -263,6 +299,11 @@ public class TheiaCloudOperatorArguments {
         if (getClass() != obj.getClass())
             return false;
         TheiaCloudOperatorArguments other = (TheiaCloudOperatorArguments) obj;
+        if (serviceAuthToken == null) {
+            if (other.serviceAuthToken != null)
+                return false;
+        } else if (!serviceAuthToken.equals(other.serviceAuthToken))
+            return false;
         if (appId == null) {
             if (other.appId != null)
                 return false;
@@ -361,7 +402,7 @@ public class TheiaCloudOperatorArguments {
                 + enableMonitor + ", enableActivityTracker=" + enableActivityTracker + ", monitorInterval="
                 + monitorInterval + ", cloudProvider=" + cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter
                 + ", wondershaperImage=" + wondershaperImage + ", serviceUrl=" + serviceUrl + ", sessionsPerUser="
-                + sessionsPerUser + ", appId=" + appId + ", instancesHost=" + instancesHost + ", usePaths=" + usePaths
+                + sessionsPerUser + ", serviceAuthToken=" + serviceAuthToken + ", appId=" + appId + ", instancesHost=" + instancesHost + ", usePaths=" + usePaths
                 + ", instancesPath=" + instancesPath + ", storageClassName=" + storageClassName + ", requestedStorage="
                 + requestedStorage + ", keycloakURL=" + keycloakURL + ", keycloakRealm=" + keycloakRealm
                 + ", keycloakClientId=" + keycloakClientId + ", leaderLeaseDuration=" + leaderLeaseDuration

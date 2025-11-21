@@ -42,6 +42,8 @@ spec:
               cpu: placeholder-cpu-requests
               memory: placeholder-memory-requests
           env:
+          - name: THEIACLOUD_SERVICE_AUTH_TOKEN
+            value: placeholder-env-service-auth-token
           - name: THEIACLOUD_APP_ID
             value: placeholder-env-app-id
           - name: THEIACLOUD_SERVICE_URL

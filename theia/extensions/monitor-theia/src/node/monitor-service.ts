@@ -12,10 +12,29 @@ export class DefaultTheiaCloudBackendMonitorService implements TheiaCloudBackend
    * Returns true if ran in theia cloud context
    */
   isRunningOnTheiaCloud(): boolean {
-    const appId = process.env.THEIACLOUD_APP_ID;
+    const serviceAuthToken = this.getServiceAuthToken();
     const serviceUrl = process.env.THEIACLOUD_SERVICE_URL;
     const sessionName = process.env.THEIACLOUD_SESSION_NAME;
-    return appId && serviceUrl && sessionName ? true : false;
+    return serviceAuthToken && serviceUrl && sessionName ? true : false;
+  }
+
+  /**
+   * Get the service auth token with fallback to deprecated app id environment variable.
+   */
+  private getServiceAuthToken(): string | undefined {
+    const serviceAuthToken = process.env.THEIACLOUD_SERVICE_AUTH_TOKEN;
+    if (serviceAuthToken) {
+      return serviceAuthToken;
+    }
+    
+    const appId = process.env.THEIACLOUD_APP_ID;
+    if (appId) {
+      console.warn('Using deprecated environment variable \'THEIACLOUD_APP_ID\'. ' +
+                   'Please migrate to \'THEIACLOUD_SERVICE_AUTH_TOKEN\' in your configuration.');
+      return appId;
+    }
+    
+    return undefined;
   }
 
   async getEnabledBackendModules(): Promise<MonitorBackendModule[]> {

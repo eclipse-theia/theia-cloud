@@ -1,6 +1,6 @@
 import './App.css';
 
-import { AppDefinition, getTheiaCloudConfig, LaunchRequest, PingRequest, TheiaCloud } from '@eclipse-theiacloud/common';
+import { AppDefinition, getTheiaCloudConfig, LaunchRequest, PingRequest, TheiaCloud, TheiaCloudConfig } from '@eclipse-theiacloud/common';
 import Keycloak, { KeycloakConfig } from 'keycloak-js';
 import { useEffect, useState } from 'react';
 
@@ -144,16 +144,16 @@ function App(): JSX.Element {
     setError(undefined);
 
     // first check if the service is available. if not we are doing maintenance and should adapt the error message accordingly
-    TheiaCloud.ping(PingRequest.create(config.serviceUrl, config.appId))
+    TheiaCloud.ping(PingRequest.create(config.serviceUrl, TheiaCloudConfig.getServiceAuthToken(config)))
       .then(() => {
         // ping successful continue with launch
         const workspace = config.useEphemeralStorage
           ? undefined
-          : 'ws-' + config.appId + '-' + selectedAppDefinition + '-' + email;
+          : 'ws-' + TheiaCloudConfig.getServiceAuthToken(config) + '-' + selectedAppDefinition + '-' + email;
         TheiaCloud.launchAndRedirect(
           config.useEphemeralStorage
-            ? LaunchRequest.ephemeral(config.serviceUrl, config.appId, appDefinition, 5, email)
-            : LaunchRequest.createWorkspace(config.serviceUrl, config.appId, appDefinition, 5, email, workspace),
+            ? LaunchRequest.ephemeral(config.serviceUrl, TheiaCloudConfig.getServiceAuthToken(config), appDefinition, 5, email)
+            : LaunchRequest.createWorkspace(config.serviceUrl, TheiaCloudConfig.getServiceAuthToken(config), appDefinition, 5, email, workspace),
           { timeout: 60000, retries: 5, accessToken: token }
         )
           .catch((err: Error) => {
