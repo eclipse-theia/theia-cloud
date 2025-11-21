@@ -145,7 +145,7 @@ module "keycloak" {
 | `postgres_storage_class`      | `string` | `""`            | Storage class for PostgreSQL PVC (empty = default) |
 | `postgres_storage_size`       | `string` | `"10Gi"`        | Storage size for PostgreSQL PVC                    |
 | `postgres_volume_permissions` | `bool`   | `false`         | Enable init container for volume permissions       |
-| `postgres_image`              | `string` | `"postgres:16"` | PostgreSQL Docker image                            |
+| `postgres_image`              | `string` | `"postgres:17"` | PostgreSQL Docker image                            |
 
 ### Ingress Configuration
 
@@ -161,13 +161,13 @@ module "keycloak" {
 
 ### Cert-Manager Configuration
 
-| Name                       | Type     | Default          | Description                                                          |
-| -------------------------- | -------- | ---------------- | -------------------------------------------------------------------- |
-| `install_cert_manager`     | `bool`   | `true`           | Whether to install cert-manager                                      |
-| `cert_manager_version`     | `string` | `"v1.17.4"`      | Version of cert-manager to install                                   |
-| `cert_manager_namespace`   | `string` | `"cert-manager"` | Namespace for cert-manager installation                              |
-| `install_selfsigned_issuer`| `bool`   | `false`          | Whether to install self-signed ClusterIssuer for Keycloak            |
-| `cert_manager_issuer_email`| `string` | `""`             | Email address for certificates (required for letsencrypt-prod)       |
+| Name                        | Type     | Default          | Description                                                    |
+| --------------------------- | -------- | ---------------- | -------------------------------------------------------------- |
+| `install_cert_manager`      | `bool`   | `true`           | Whether to install cert-manager                                |
+| `cert_manager_version`      | `string` | `"v1.17.4"`      | Version of cert-manager to install                             |
+| `cert_manager_namespace`    | `string` | `"cert-manager"` | Namespace for cert-manager installation                        |
+| `install_selfsigned_issuer` | `bool`   | `false`          | Whether to install self-signed ClusterIssuer for Keycloak      |
+| `cert_manager_issuer_email` | `string` | `""`             | Email address for certificates (required for letsencrypt-prod) |
 
 ### Other Configuration
 
