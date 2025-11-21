@@ -14,8 +14,6 @@ on:
     paths:
       - "theia/**"
       - ".github/workflows/eclipse-npm-license-check-theia.yml"
-  schedule:
-    - cron: "0 4 * * *" # Runs every day at 4am: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events-schedule
 
 jobs:
   License-check:
