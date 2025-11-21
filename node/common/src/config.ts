@@ -4,20 +4,20 @@ export namespace TheiaCloudConfig {
       !!thing &&
       typeof thing === 'object' &&
       (typeof thing.appId === 'string' || typeof thing.serviceAuthToken === 'string') &&
-      (typeof thing.appName === 'string' || typeof thing.serviceAuthToken === 'string') &&
+      typeof thing.appName === 'string' &&
       typeof thing.serviceUrl === 'string' &&
       typeof thing.appDefinition === 'string' &&
       typeof thing.useKeycloak === 'boolean' &&
       typeof thing.useEphemeralStorage === 'boolean'
     );
   }
-  
+
   export function getServiceAuthToken(config: TheiaCloudConfig): string {
     if ('serviceAuthToken' in config && config.serviceAuthToken) {
       return config.serviceAuthToken;
     }
     if ('appId' in config && config.appId) {
-      console.warn('Using deprecated property \'appId\'. Please migrate to \'serviceAuthToken\' in your configuration.');
+      console.warn("Using deprecated property 'appId'. Please migrate to 'serviceAuthToken' in your configuration.");
       return config.appId;
     }
     throw new Error('Neither serviceAuthToken nor appId found in configuration');
@@ -43,7 +43,7 @@ interface BaseTheiaCloudConfig {
   useEphemeralStorage: boolean;
 }
 export interface AppDefinition {
-  /** @deprecated Use serviceAuthToken instead */
+  /** @deprecated Use ServiceConfig#serviceAuthToken instead */
   appId: string;
   appName: string;
 }

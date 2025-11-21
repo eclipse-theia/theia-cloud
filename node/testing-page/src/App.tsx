@@ -173,7 +173,7 @@ function App() {
   };
   const setSessionConfigValue = (user: string, accessToken?: string) => {
     const request: SessionSetConfigValueRequest = {
-      appId: APP_ID,
+      appId: SERVICE_AUTH_TOKEN,
       key: configKey,
       value: configValue,
       serviceUrl: SERVICE_URL
