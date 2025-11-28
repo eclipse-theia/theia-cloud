@@ -126,6 +126,10 @@ public class TheiaCloudOperatorArguments {
             "--oAuth2ProxyVersion" }, description = "The version to use of the quay.io/oauth2-proxy/oauth2-proxy image.", required = false, defaultValue = "latest")
     private String oAuth2ProxyVersion;
 
+    @Option(names = {
+            "--ingressPathSuffix" }, description = "The suffix appended to ingress paths. For nginx use '(/|$)(.*)'. For HAProxy use empty string.", required = false, defaultValue = "(/|$)(.*)")
+    private String ingressPathSuffix;
+
     public boolean isUseKeycloak() {
         return useKeycloak;
     }
@@ -237,6 +241,10 @@ public class TheiaCloudOperatorArguments {
     public String getOAuth2ProxyVersion() {
         return oAuth2ProxyVersion;
     }
+
+    public String getIngressPathSuffix() {
+        return ingressPathSuffix;
+    }
     
     /**
      * Get the service auth token with fallback to deprecated app id argument.
@@ -287,6 +295,7 @@ public class TheiaCloudOperatorArguments {
         result = prime * result + (usePaths ? 1231 : 1237);
         result = prime * result + ((wondershaperImage == null) ? 0 : wondershaperImage.hashCode());
         result = prime * result + ((oAuth2ProxyVersion == null) ? 0 : oAuth2ProxyVersion.hashCode());
+        result = prime * result + ((ingressPathSuffix == null) ? 0 : ingressPathSuffix.hashCode());
         return result;
     }
 
@@ -393,6 +402,11 @@ public class TheiaCloudOperatorArguments {
                 return false;
         } else if (!oAuth2ProxyVersion.equals(other.oAuth2ProxyVersion))
             return false;
+        if (ingressPathSuffix == null) {
+            if (other.ingressPathSuffix != null)
+                return false;
+        } else if (!ingressPathSuffix.equals(other.ingressPathSuffix))
+            return false;
         return true;
     }
 
@@ -408,7 +422,7 @@ public class TheiaCloudOperatorArguments {
                 + ", keycloakClientId=" + keycloakClientId + ", leaderLeaseDuration=" + leaderLeaseDuration
                 + ", leaderRenewDeadline=" + leaderRenewDeadline + ", leaderRetryPeriod=" + leaderRetryPeriod
                 + ", maxWatchIdleTime=" + maxWatchIdleTime + ", continueOnException=" + continueOnException
-                + ", oAuth2ProxyVersion=" + oAuth2ProxyVersion + "]";
+                + ", oAuth2ProxyVersion=" + oAuth2ProxyVersion + ", ingressPathSuffix=" + ingressPathSuffix + "]";
     }
 
 }

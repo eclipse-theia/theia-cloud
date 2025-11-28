@@ -362,7 +362,7 @@ public class EagerSessionHandler implements SessionHandler {
 
         HTTPIngressPath httpIngressPath = new HTTPIngressPath();
         http.getPaths().add(httpIngressPath);
-        httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
+        httpIngressPath.setPath(path + arguments.getIngressPathSuffix());
         httpIngressPath.setPathType(AddedHandlerUtil.INGRESS_PATH_TYPE);
 
         IngressBackend ingressBackend = new IngressBackend();
@@ -567,7 +567,7 @@ public class EagerSessionHandler implements SessionHandler {
     protected synchronized void removeIngressRule(String correlationId, AppDefinition appDefinition, Ingress ingress,
             Integer instance) throws KubernetesClientException {
         final String ruleHttpPath = ingressPathProvider.getPath(appDefinition, instance)
-                + AddedHandlerUtil.INGRESS_REWRITE_PATH;
+                + arguments.getIngressPathSuffix();
         client.ingresses().resource(ingress.getMetadata().getName()).edit(ingressToUpdate -> {
             ingressToUpdate.getSpec().getRules().removeIf(rule -> {
                 if (rule.getHttp() == null) {

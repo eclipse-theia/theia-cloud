@@ -2,6 +2,17 @@ variable "install_ingress_controller" {
   description = "Whether to install the nginx ingress controller"
 }
 
+variable "ingress_controller_type" {
+  description = "Type of ingress controller to use (nginx or haproxy)"
+  type        = string
+  default     = "nginx"
+
+  validation {
+    condition     = contains(["nginx", "haproxy"], var.ingress_controller_type)
+    error_message = "Valid values are 'nginx' or 'haproxy'."
+  }
+}
+
 variable "install_theia_cloud_base" {
   description = "Whether to install theia cloud base"
   default     = true
@@ -107,7 +118,7 @@ resource "helm_release" "cert-manager" {
 }
 
 resource "helm_release" "nginx-ingress-controller" {
-  count            = var.install_ingress_controller ? 1 : 0
+  count            = var.install_ingress_controller && var.ingress_controller_type == "nginx" ? 1 : 0
   name             = "nginx-ingress-controller"
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
@@ -140,9 +151,31 @@ resource "helm_release" "nginx-ingress-controller" {
   ]
 }
 
+# TODO JF: check values
+resource "helm_release" "haproxy-ingress-controller" {
+  count            = var.install_ingress_controller && var.ingress_controller_type == "haproxy" ? 1 : 0
+  name             = "haproxy-ingress"
+  repository       = "https://haproxy-ingress.github.io/charts"
+  chart            = "haproxy-ingress"
+  version          = "0.15.0"
+  namespace        = "ingress-haproxy"
+  create_namespace = true
+
+  set = [
+    {
+      name  = "controller.ingressClassResource.enabled"
+      value = true
+    },
+    {
+      name  = "controller.service.loadBalancerIP"
+      value = var.loadBalancerIP
+    }
+  ]
+}
+
 resource "helm_release" "theia-cloud-base" {
   count            = var.install_theia_cloud_base ? 1 : 0
-  depends_on       = [helm_release.cert-manager, helm_release.nginx-ingress-controller] # we need to install cert issuers
+  depends_on       = [helm_release.cert-manager, helm_release.nginx-ingress-controller, helm_release.haproxy-ingress-controller] # we need to install cert issuers
   name             = "theia-cloud-base"
   repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud-base"
@@ -171,7 +204,7 @@ resource "helm_release" "theia-cloud-crds" {
 
 resource "kubectl_manifest" "selfsigned_issuer" {
   count      = var.install_selfsigned_issuer ? 1 : 0
-  depends_on = [helm_release.cert-manager, helm_release.nginx-ingress-controller] # we need to install cert issuers
+  depends_on = [helm_release.cert-manager, helm_release.nginx-ingress-controller, helm_release.haproxy-ingress-controller] # we need to install cert issuers
   yaml_body  = file("${path.module}/clusterissuer-selfsigned.yaml")
 }
 
@@ -188,7 +221,7 @@ locals {
 }
 
 resource "helm_release" "keycloak" {
-  depends_on       = [helm_release.theia-cloud-base, kubectl_manifest.selfsigned_issuer] # we need an existing issuer
+  depends_on       = [helm_release.theia-cloud-base, kubectl_manifest.selfsigned_issuer, helm_release.nginx-ingress-controller, helm_release.haproxy-ingress-controller] # we need an existing issuer
   name             = "keycloak"
   repository       = "https://charts.bitnami.com/bitnami"
   chart            = "keycloak"
@@ -237,13 +270,14 @@ resource "helm_release" "keycloak" {
     }
   ]
 
+  # TODO JF: check how do this with haproxy
   # We expect that kubectl context was configured by a previous module.
-  # After keycloak was set up with tls enabled, we use the created tls secret as the default ssl-secret of the nginx-ingress-controller. 
+  # After keycloak was set up with tls enabled, we use the created tls secret as the default ssl-secret of the ingress-controller. 
   # Below command connects to the cluster in the local environment and patches the ingress-controller accordingly. 
   # Theia Cloud is then installed with path based hosts reusing the same certificate. 
   # Sleep 5 seconds at the end as there might be a brief delay between the ingress controller reporting available and it actually being ready to serve traffic
   provisioner "local-exec" {
-    command = "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-nginx -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ingress-nginx wait --for condition=available deploy/ingress-nginx-controller --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s && sleep 5"
+    command = var.ingress_controller_type == "nginx" ? "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-nginx -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ingress-nginx wait --for condition=available deploy/ingress-nginx-controller --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s && sleep 5" : "kubectl patch deploy haproxy-ingress --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-haproxy -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ingress-haproxy wait --for condition=available deploy/haproxy-ingress --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s && sleep 5"
   }
 }
 

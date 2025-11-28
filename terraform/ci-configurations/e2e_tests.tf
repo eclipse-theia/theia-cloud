@@ -46,12 +46,14 @@ resource "kubernetes_persistent_volume" "minikube" {
   }
 }
 
+# TODO JF also test haproxy
 module "helm" {
   source = "../modules/helm"
 
   depends_on = [kubernetes_persistent_volume.minikube]
 
   install_ingress_controller   = false
+  ingress_controller_type      = "nginx"
   install_theia_cloud_base     = false
   install_theia_cloud_crds     = false
   install_theia_cloud          = false
