@@ -3,13 +3,24 @@ export namespace TheiaCloudConfig {
     return (
       !!thing &&
       typeof thing === 'object' &&
-      typeof thing.appId === 'string' &&
+      (typeof thing.appId === 'string' || typeof thing.serviceAuthToken === 'string') &&
       typeof thing.appName === 'string' &&
       typeof thing.serviceUrl === 'string' &&
       typeof thing.appDefinition === 'string' &&
       typeof thing.useKeycloak === 'boolean' &&
       typeof thing.useEphemeralStorage === 'boolean'
     );
+  }
+
+  export function getServiceAuthToken(config: TheiaCloudConfig): string {
+    if ('serviceAuthToken' in config && config.serviceAuthToken) {
+      return config.serviceAuthToken;
+    }
+    if ('appId' in config && config.appId) {
+      console.warn("Using deprecated property 'appId'. Please migrate to 'serviceAuthToken' in your configuration.");
+      return config.appId;
+    }
+    throw new Error('Neither serviceAuthToken nor appId found in configuration');
   }
 }
 
@@ -32,8 +43,13 @@ interface BaseTheiaCloudConfig {
   useEphemeralStorage: boolean;
 }
 export interface AppDefinition {
+  /** @deprecated Use ServiceConfig#serviceAuthToken instead */
   appId: string;
   appName: string;
+}
+
+export interface ServiceConfig {
+  serviceAuthToken: string;
 }
 
 export interface KeycloakConfig {
@@ -52,7 +68,10 @@ export interface LandingPageConfig {
   logoFileExtension: string;
 }
 
-export type TheiaCloudConfig = AppDefinition &
+export type TheiaCloudConfig = (
+  | (AppDefinition & Partial<ServiceConfig>)
+  | (Pick<AppDefinition, 'appName'> & ServiceConfig)
+) &
   BaseTheiaCloudConfig &
   Partial<KeycloakConfig> &
   Partial<LandingPageConfig>;
