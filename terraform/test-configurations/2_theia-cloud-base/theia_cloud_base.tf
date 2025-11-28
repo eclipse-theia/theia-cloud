@@ -7,7 +7,7 @@ data "terraform_remote_state" "minikube" {
   backend = "local"
 
   config = {
-    path = "${path.module}/../0_minikube-setup/terraform.tfstate"
+    path = "${path.module}/../1_dependencies/terraform.tfstate"
   }
 }
 

@@ -22,19 +22,24 @@ concurrency:
 
 jobs:
   runtests:
-    name: "Run Tests on Minikube (K8s: ${{ matrix.kubernetes }}, Paths: ${{ matrix.paths }}, Ephemeral: ${{ matrix.ephemeral }}, Keycloak: ${{ matrix.keycloak }})"
+    name: "Run Tests on Minikube (K8s: ${{ matrix.kubernetes }}, Ingress: ${{ matrix.ingress }}, Paths: ${{ matrix.paths }}, Ephemeral: ${{ matrix.ephemeral }}, Keycloak: ${{ matrix.keycloak }}, EagerStart: ${{ matrix.eagerStart }})"
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.34.1, v1.33.5, v1.32.9, v1.31.13] # https://kubernetes.io/releases/
+        kubernetes: [v1.34.1, v1.31.13] # https://kubernetes.io/releases/
         paths: [true, false]
         ephemeral: [true, false]
         keycloak: [true, false]
+        ingress: [nginx, haproxy]
+        eagerStart: [true, false]
         exclude:
           # Non-ephemeral sessions only make sense with keycloak
           - ephemeral: false
             keycloak: false
+          # Eager start does not support persistent storage (workspaces)
+          - ephemeral: false
+            eagerStart: true
     steps:
       - name: Set Helm Branch for Scheduled Runs
         if: ${{ github.event_name == 'schedule' }}
@@ -67,19 +72,36 @@ jobs:
       - name: Enable Minikube Addons
         run: |
           minikube addons enable default-storageclass
-          minikube addons enable ingress
           minikube addons enable metrics-server
+
+      - name: Enable Minikube Ingress Addon (nginx only)
+        if: matrix.ingress == 'nginx'
+        run: minikube addons enable ingress
 
       - name: List Minikube Addons
         run: minikube addons list
 
-      - name: Patch Ingress to allow snippet annotations and restart
+      - name: Patch Ingress to allow snippet annotations and restart (nginx only)
+        if: matrix.ingress == 'nginx'
         run: |
           kubectl -n ingress-nginx patch configmap ingress-nginx-controller \
             --type merge \
             -p '{"data":{"allow-snippet-annotations":"true","annotations-risk-level":"Critical"}}'
           kubectl -n ingress-nginx rollout restart deployment ingress-nginx-controller
           kubectl -n ingress-nginx rollout status deployment ingress-nginx-controller --timeout=90s
+
+      - name: Deploy HAProxy Ingress Controller
+        if: matrix.ingress == 'haproxy'
+        run: |
+          helm repo add haproxy-ingress https://haproxy-ingress.github.io/charts
+          helm repo update
+          helm install haproxy-ingress haproxy-ingress/haproxy-ingress \
+            --version 0.15.1 \
+            --namespace ingress-haproxy \
+            --create-namespace \
+            --set controller.ingressClassResource.enabled=true \
+            --set controller.service.type=ClusterIP
+          kubectl -n ingress-haproxy wait --for=condition=available deployment/haproxy-ingress --timeout=300s
 
       # we use the none driver, so minikube should see the same images on the host
       - name: Build Theia Cloud Images
@@ -95,10 +117,14 @@ jobs:
           docker build --no-cache -t theiacloud/theia-cloud-activity-demo:minikube-ci-e2e -f demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile demo/dockerfiles/demo-theia-monitor-vscode/.
           docker build --no-cache -t theiacloud/theia-cloud-activity-demo-theia:minikube-ci-e2e -f demo/dockerfiles/demo-theia-monitor-theia/Dockerfile .
 
-      - name: Get NGINX Ingress Controller Host
+      - name: Get Ingress Controller Host
         id: ingress_info
         run: |
-          INGRESS_HOST=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')
+          if [ "${{ matrix.ingress }}" == "nginx" ]; then
+            INGRESS_HOST=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.spec.clusterIP}')
+          else
+            INGRESS_HOST=$(kubectl get svc -n ingress-haproxy haproxy-ingress -o jsonpath='{.spec.clusterIP}')
+          fi
           echo "INGRESS_HOST=$INGRESS_HOST" >> $GITHUB_ENV
 
       - name: Run Terraform
@@ -112,6 +138,8 @@ jobs:
             -var="use_paths=${{ matrix.paths }}" \
             -var="use_ephemeral_storage=${{ matrix.ephemeral }}" \
             -var="enable_keycloak=${{ matrix.keycloak }}" \
+            -var="ingress_controller_type=${{ matrix.ingress }}" \
+            -var="eager_start=${{ matrix.eagerStart }}" \
             -auto-approve
 
       - name: Retry Terraform Apply
@@ -125,6 +153,8 @@ jobs:
             -var="use_paths=${{ matrix.paths }}" \
             -var="use_ephemeral_storage=${{ matrix.ephemeral }}" \
             -var="enable_keycloak=${{ matrix.keycloak }}" \
+            -var="ingress_controller_type=${{ matrix.ingress }}" \
+            -var="eager_start=${{ matrix.eagerStart }}" \
             -auto-approve
 
       - name: List All Services in All Namespaces
@@ -138,7 +168,11 @@ jobs:
 
       - name: Wait for Deployments to be Ready
         run: |
-          kubectl wait --namespace ingress-nginx --for=condition=available deployment/ingress-nginx-controller --timeout=300s
+          if [ "${{ matrix.ingress }}" == "nginx" ]; then
+            kubectl wait --namespace ingress-nginx --for=condition=available deployment/ingress-nginx-controller --timeout=300s
+          else
+            kubectl wait --namespace ingress-haproxy --for=condition=available deployment/haproxy-ingress --timeout=300s
+          fi
           kubectl wait --namespace theia-cloud --for=condition=available deployment/conversion-webhook --timeout=300s
           kubectl wait --namespace theia-cloud --for=condition=available deployment/landing-page-deployment --timeout=300s
           kubectl wait --namespace theia-cloud --for=condition=available deployment/operator-deployment --timeout=300s
@@ -181,20 +215,61 @@ jobs:
       - name: Print Debug logs
         if: failure()
         run: |
+          echo "=== All Ingresses ==="
+          kubectl get ingress --all-namespaces -o wide
+
+          echo ""
+          echo "=== Ingress Details ==="
+          kubectl describe ingress --all-namespaces
+
+          echo ""
+          echo "=== All Services ==="
+          kubectl get svc --all-namespaces -o wide
+
+          echo ""
+          echo "=== All Pods Status ==="
+          kubectl get pods --all-namespaces -o wide
+
+          echo ""
+          echo "=== Landing Page Deployment Logs ==="
+          kubectl logs -n theia-cloud deployment/landing-page-deployment --tail=200
+
+          echo ""
           echo "=== Service Deployment Logs ==="
-          kubectl logs -n theia-cloud deployment/service-deployment --tail=100
+          kubectl logs -n theia-cloud deployment/service-deployment --tail=200
+
           echo ""
           echo "=== Operator Deployment Logs (All Pods) ==="
           for pod in $(kubectl get pods -n theia-cloud -l app=operator -o jsonpath='{.items[*].metadata.name}'); do
             echo "--- Logs from pod: $pod ---"
-            kubectl logs -n theia-cloud $pod --tail=100
+            kubectl logs -n theia-cloud $pod --tail=200
             echo ""
           done
+
+          echo ""
+          echo "=== Ingress Controller Logs ==="
+          if [ "${{ matrix.ingress }}" == "nginx" ]; then
+            kubectl logs -n ingress-nginx deployment/ingress-nginx-controller --tail=200
+          else
+            kubectl logs -n ingress-haproxy deployment/haproxy-ingress --tail=200
+          fi
+
+          echo ""
+          echo "=== Sessions in theia-cloud namespace ==="
+          kubectl get sessions -n theia-cloud -o yaml || echo "No sessions found"
+
+          echo ""
+          echo "=== Workspaces in theia-cloud namespace ==="
+          kubectl get workspaces -n theia-cloud -o yaml || echo "No workspaces found"
+
+          echo ""
+          echo "=== Events in theia-cloud namespace ==="
+          kubectl get events -n theia-cloud --sort-by='.lastTimestamp'
 
       - name: Upload Playwright test failure screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-failure-screenshots-k8s-${{ matrix.kubernetes }}-paths-${{ matrix.paths }}-ephemeral-${{ matrix.ephemeral }}-keycloak-${{ matrix.keycloak }}
+          name: test-failure-screenshots-k8s-${{ matrix.kubernetes }}-ingress-${{ matrix.ingress }}-paths-${{ matrix.paths }}-ephemeral-${{ matrix.ephemeral }}-keycloak-${{ matrix.keycloak }}-eagerstart-${{ matrix.eagerStart }}
           path: theia-cloud/node/e2e-tests/test-results/**/*.png
           retention-days: 7

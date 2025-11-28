@@ -74,13 +74,13 @@ public final class TheiaCloudIngressUtil {
     }
 
     public static void removeIngressRule(NamespacedKubernetesClient client, String namespace, Ingress ingress,
-            String path, String correlationId) {
+            String path, String pathSuffix, String correlationId) {
         client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName())
-                .edit(JavaUtil.toUnary(ingressToEdit -> removeIngressRule(ingressToEdit, path, correlationId)));
+                .edit(JavaUtil.toUnary(ingressToEdit -> removeIngressRule(ingressToEdit, path, pathSuffix, correlationId)));
     }
 
-    private static void removeIngressRule(Ingress ingressToEdit, String path, String correlationId) {
-        String ingressPath = path + AddedHandlerUtil.INGRESS_REWRITE_PATH;
+    private static void removeIngressRule(Ingress ingressToEdit, String path, String pathSuffix, String correlationId) {
+        String ingressPath = path + pathSuffix;
         IngressRule ruleToDelete = null;
         for (IngressRule rule : ingressToEdit.getSpec().getRules()) {
             HTTPIngressRuleValue ingressRuleValue = rule.getHttp();
@@ -112,18 +112,19 @@ public final class TheiaCloudIngressUtil {
      * @param namespace     the namespace
      * @param ingress       the ingress resource to modify
      * @param path          the path to remove (without the rewrite suffix)
+     * @param pathSuffix    the path suffix used when the ingress rule was created
      * @param hosts         the list of hosts for which to remove rules
      * @param correlationId the correlation ID for logging
      * @return true if at least one rule was removed, false otherwise
      */
     public static boolean removeIngressRules(NamespacedKubernetesClient client, String namespace, Ingress ingress,
-            String path, List<String> hosts, String correlationId) {
+            String path, String pathSuffix, List<String> hosts, String correlationId) {
         AtomicInteger removedCount = new AtomicInteger(0);
 
         try {
             client.network().v1().ingresses().inNamespace(namespace).withName(ingress.getMetadata().getName())
                     .edit(JavaUtil.toUnary(ingressToEdit -> {
-                        int count = removeIngressRules(ingressToEdit, path, hosts, correlationId);
+                        int count = removeIngressRules(ingressToEdit, path, pathSuffix, hosts, correlationId);
                         removedCount.set(count);
                     }));
         } catch (Exception e) {
@@ -140,13 +141,14 @@ public final class TheiaCloudIngressUtil {
      * 
      * @param ingressToEdit the ingress being edited
      * @param path          the path to remove (without the rewrite suffix)
+     * @param pathSuffix    the path suffix used when the ingress rule was created
      * @param hosts         the list of hosts for which to remove rules
      * @param correlationId the correlation ID for logging
      * @return the number of rules removed
      */
-    private static int removeIngressRules(Ingress ingressToEdit, String path, List<String> hosts,
+    private static int removeIngressRules(Ingress ingressToEdit, String path, String pathSuffix, List<String> hosts,
             String correlationId) {
-        String ingressPath = path + AddedHandlerUtil.INGRESS_REWRITE_PATH;
+        String ingressPath = path + pathSuffix;
         AtomicInteger removedCount = new AtomicInteger(0);
 
         // Remove rules matching the path across all specified hosts

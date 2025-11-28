@@ -1,0 +1,99 @@
+# Theia Cloud - Project Info
+
+## Overview
+Theia Cloud simplifies deployment of Theia-based IDEs on Kubernetes using a convention-over-configuration approach. It provides a Java-based Kubernetes Operator, REST Service, and web components.
+
+## Repository Structure
+
+### Java Components (`java/`)
+Located in `java/` with subfolders:
+- `common/` - Shared library and Maven configuration (parent POM in `common/maven-conf/`)
+- `operator/` - Kubernetes Operator
+  - `org.eclipse.theia.cloud.operator/` - Reusable operator library
+  - `org.eclipse.theia.cloud.defaultoperator/` - Production-ready default implementation
+- `service/org.eclipse.theia.cloud.service/` - Quarkus-based REST API
+- `conversion/` - CRD conversion webhook
+
+**Java Stack**: Java 21, Maven, Guice (DI), Fabric8 Kubernetes Client, Quarkus (service only), Picocli (CLI), Log4j2
+
+### Node.js Components (`node/`)
+NPM workspaces monorepo with packages:
+- `common/` - Shared TypeScript API library (`@eclipse-theiacloud/common`), published to npm
+- `landing-page/` - React landing page (Vite)
+- `e2e-tests/` - End-to-end tests
+- `testing-page/` - Local testing UI for the REST service
+- `monitor/` - VSCode extension for activity tracking (separate from workspaces, uses webpack)
+
+**Node Stack**: Node 20.10.0+, TypeScript, npm workspaces, ESLint, Prettier
+
+### Theia Extensions (`theia/`)
+Yarn/Lerna monorepo for Theia-specific extensions:
+- `extensions/monitor-theia/` - Activity monitor as Theia extension
+- `extensions/config-store/` - Configuration store extension
+- `examples/` - Example applications
+
+**Theia Stack**: Yarn 1.x, Lerna, TypeScript 5.4.x
+
+### Infrastructure
+- `dockerfiles/` - Docker images for operator, service, landing-page, wondershaper, conversion-webhook
+- `terraform/` - Terraform modules and configurations for deployment
+- `demo/` - Demo Theia applications and docker configurations
+
+## Naming Conventions
+
+See [documentation/Naming.md](documentation/Naming.md) for detailed naming conventions.
+
+Key points:
+- Use `theia.cloud` for Java packages and K8s groups
+- Use `THEIACLOUD_*` for environment variables (not `THEIA_CLOUD_*` - conflicts with Theia)
+- Use `theia-cloud` (kebab-case) for npm packages, files, and k8s namespaces
+- Avoid `theiacloud` without separators (reserved for Docker/npm usernames)
+
+## Custom Resource Definitions (CRDs)
+
+Three main CRDs managed by the operator:
+- **AppDefinition** - Defines an application (image, ports, resource limits, timeouts)
+- **Workspace** - Persisted storage owned by a user
+- **Session** - Active user session. References user information, the AppDefinition, and (optional) Workspace to use. 
+
+## Building
+
+See [documentation/Building.md](documentation/Building.md) for detailed build instructions.
+
+All components are containerized and built from the repository root using Docker:
+```bash
+docker build -t <image-name> -f dockerfiles/<component>/Dockerfile .
+```
+
+## Testing
+
+### Java Unit Tests (Service)
+- Use Quarkus test infrastructure
+- Naming pattern: `MethodName_StateUnderTest_ExpectedBehavior` (e.g., `authenticate_anonymousUser_throwForbidden`)
+- IDE VM argument for logging: `-Djava.util.logging.manager=org.jboss.logmanager.LogManager`
+
+### E2E Tests (`node/e2e-tests/`)
+- Uses Playwright with `@theia/playwright` for browser automation
+- Tests login, logout, and session start flows against a running Theia Cloud instance
+- Run with: `npm run ui-tests` (requires `INGRESS_HOST` env var)
+- Interacts with Kubernetes API to verify session/workspace creation
+- Supports both Keycloak-enabled and anonymous modes (`MATRIX_KEYCLOAK` env var)
+
+### Node/Theia Unit Tests
+- No unit tests currently exist for `node/` packages or `theia/` extensions
+
+## Versioning
+
+- All components share the same version number (currently 1.2.0-SNAPSHOT)
+- Releases every 3 months; pre-releases on every commit tagged `<version>-next.<git-sha>`
+- npm uses `next` tag for pre-releases (not semver-compatible `<version>-next`)
+
+## Key Dependencies
+
+| Component | Key Dependencies |
+|-----------|------------------|
+| Operator | Fabric8 Kubernetes Client, Guice, Picocli |
+| Service | Quarkus, RESTEasy JAX-RS |
+| Node common | Axios, UUID |
+| Landing page | React, Vite |
+| Monitor (VSCode) | Express |

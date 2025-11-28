@@ -13,6 +13,12 @@ variable "keycloak_admin_password" {
   default     = "admin"
 }
 
+variable "ingress_controller_type" {
+  description = "Type of ingress controller to use (nginx or haproxy)"
+  type        = string
+  default     = "nginx"
+}
+
 provider "minikube" {
   kubernetes_version = var.kubernetes_version
 }
@@ -21,11 +27,12 @@ module "cluster" {
   source = "../../modules/cluster_creation/minikube/"
 
   # adjust values below
-  cluster_name = "minikube"
-  cpus         = 4
-  disk_size    = "51200mb"
-  memory       = "8192mb"
-  driver       = "virtualbox"
+  cluster_name            = "minikube"
+  cpus                    = 4
+  disk_size               = "51200mb"
+  memory                  = "8192mb"
+  driver                  = "virtualbox"
+  ingress_controller_type = var.ingress_controller_type
 }
 
 provider "kubernetes" {
@@ -85,7 +92,8 @@ module "helm" {
 
   depends_on = [module.host]
 
-  install_ingress_controller   = false
+  install_ingress_controller   = var.ingress_controller_type == "haproxy" ? true : false
+  ingress_controller_type      = var.ingress_controller_type
   cert_manager_issuer_email    = var.cert_manager_issuer_email
   cert_manager_cluster_issuer  = "theia-cloud-selfsigned-issuer"
   cert_manager_common_name     = "${module.host.host}.nip.io"

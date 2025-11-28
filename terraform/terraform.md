@@ -2,6 +2,10 @@
 
 We use [Terraform](https://www.terraform.io/) to provide configuration files for trying out Theia Cloud in multiple environments.
 
+## Ingress Controller Options
+
+The Theia Cloud Terraform charts support two ingress controller options: **NGINX** (default) and **HAProxy**.
+
 ## Install Terraform
 
 Please follow the official installation instruction at <https://developer.hashicorp.com/terraform/downloads?product_intent=terraform>.
