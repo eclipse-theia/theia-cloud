@@ -21,12 +21,26 @@ output "cluster_ca_certificate" {
   sensitive   = true
 }
 
-output "hostname" {
-  description = "nip.io hostname that can be used for ingresses with this cluster."
-  value       = "${module.host.host}.nip.io"
+output "ingress_controller_type" {
+  description = "Type of ingress controller configured for this cluster."
+  value       = var.ingress_controller_type
 }
 
-output "keycloak" {
-  description = "Keycloak"
-  value       = "${module.host.host}.nip.io/keycloak"
+output "next_steps" {
+  description = "Instructions for the next step."
+  value       = <<-EOT
+    Minikube cluster has been created successfully!
+    
+    IMPORTANT: Before proceeding to step 1_dependencies, you must start minikube tunnel:
+    
+      minikube tunnel
+    
+    Keep this running in a separate terminal. The tunnel is required for the ingress
+    controller to obtain an external IP and function properly.
+    
+    Once the tunnel is running, proceed to the 1_dependencies directory and run:
+    
+      terraform init
+      terraform apply
+  EOT
 }

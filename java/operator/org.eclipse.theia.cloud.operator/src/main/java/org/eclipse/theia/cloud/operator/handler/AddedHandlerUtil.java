@@ -87,6 +87,11 @@ public final class AddedHandlerUtil {
 
     public static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
 
+    /**
+     * @deprecated Use {@link org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments#getIngressPathSuffix()} instead.
+     *             This constant is nginx-specific and does not work with other ingress controllers like HAProxy.
+     */
+    @Deprecated(since = "1.2.0", forRemoval = true)
     public static final String INGRESS_REWRITE_PATH = "(/|$)(.*)";
     public static final String INGRESS_PATH_TYPE = "ImplementationSpecific";
 

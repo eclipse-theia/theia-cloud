@@ -26,6 +26,12 @@ variable "postgres_password" {
   sensitive   = true
 }
 
+variable "ingress_controller_type" {
+  description = "Type of ingress controller to use (nginx or haproxy)"
+  type        = string
+  default     = "nginx"
+}
+
 provider "google" {
   project = var.project_id
   zone    = var.location
@@ -63,6 +69,7 @@ module "helm" {
   source = "../../modules/helm"
 
   install_ingress_controller  = true
+  ingress_controller_type     = var.ingress_controller_type
   cert_manager_issuer_email   = var.cert_manager_issuer_email
   cert_manager_cluster_issuer = "letsencrypt-prod"
   cert_manager_common_name    = "${google_compute_address.host_ip.address}.sslip.io"

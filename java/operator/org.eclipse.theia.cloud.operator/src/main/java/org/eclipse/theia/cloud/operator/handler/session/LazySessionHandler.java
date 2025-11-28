@@ -552,7 +552,7 @@ public class LazySessionHandler implements SessionHandler {
 
                 HTTPIngressPath httpIngressPath = new HTTPIngressPath();
                 http.getPaths().add(httpIngressPath);
-                httpIngressPath.setPath(path + AddedHandlerUtil.INGRESS_REWRITE_PATH);
+                httpIngressPath.setPath(path + arguments.getIngressPathSuffix());
                 httpIngressPath.setPathType(AddedHandlerUtil.INGRESS_PATH_TYPE);
 
                 IngressBackend ingressBackend = new IngressBackend();
@@ -628,7 +628,7 @@ public class LazySessionHandler implements SessionHandler {
 
         // Remove ingress rules for all hosts
         boolean cleanupSuccess = TheiaCloudIngressUtil.removeIngressRules(client.kubernetes(),
-                client.namespace(), ingress.get(), path, hostsToClean, correlationId);
+                client.namespace(), ingress.get(), path, arguments.getIngressPathSuffix(), hostsToClean, correlationId);
 
         if (!cleanupSuccess) {
             LOGGER.error(formatLogMessage(correlationId,

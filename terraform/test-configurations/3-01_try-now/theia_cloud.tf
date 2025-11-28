@@ -2,7 +2,7 @@ data "terraform_remote_state" "minikube" {
   backend = "local"
 
   config = {
-    path = "${path.module}/../0_minikube-setup/terraform.tfstate"
+    path = "${path.module}/../1_dependencies/terraform.tfstate"
   }
 }
 
@@ -33,15 +33,10 @@ resource "helm_release" "theia-cloud" {
     "${file("${path.module}/../../values/valuesDemo.yaml")}"
   ]
 
-  set = [{
-    name = "hosts.usePaths"
-    # Need to hand in boolean as string as terraform converts boolean to 1 resp. 0.
-    # See https://github.com/hashicorp/terraform-provider-helm/issues/208
-    value = "true"
-    },
+  set = [
     {
-      name  = "ingress.addTLSSecretName"
-      value = "true"
+      name  = "hosts.configuration.baseHost"
+      value = data.terraform_remote_state.minikube.outputs.hostname
     },
     {
       name  = "hosts.configuration.service"
@@ -53,11 +48,7 @@ resource "helm_release" "theia-cloud" {
     },
     {
       name  = "hosts.configuration.instance"
-      value = "instances"
-    },
-    {
-      name  = "hosts.configuration.baseHost"
-      value = data.terraform_remote_state.minikube.outputs.hostname
+      value = "ws"
     },
     {
       name  = "keycloak.authUrl"
@@ -74,8 +65,12 @@ resource "helm_release" "theia-cloud" {
     {
       name  = "ingress.theiaCloudCommonName"
       value = true
+    },
+    {
+      name  = "ingress.controller"
+      value = data.terraform_remote_state.minikube.outputs.ingress_controller_type
     }
-  ]
+    ]
 }
 
 resource "kubectl_manifest" "cdt-cloud-demo" {

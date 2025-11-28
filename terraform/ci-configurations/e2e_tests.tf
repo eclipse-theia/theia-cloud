@@ -18,6 +18,18 @@ variable "enable_keycloak" {
   type        = bool
 }
 
+variable "ingress_controller_type" {
+  description = "Type of ingress controller to use (nginx or haproxy)"
+  type        = string
+  default     = "nginx"
+}
+
+variable "eager_start" {
+  description = "Whether to enable eager start for sessions"
+  type        = bool
+  default     = false
+}
+
 provider "kubernetes" {
   config_path = "~/.kube/config"
 }
@@ -52,6 +64,7 @@ module "helm" {
   depends_on = [kubernetes_persistent_volume.minikube]
 
   install_ingress_controller   = false
+  ingress_controller_type      = var.ingress_controller_type
   install_theia_cloud_base     = false
   install_theia_cloud_crds     = false
   install_theia_cloud          = false
@@ -155,8 +168,16 @@ resource "helm_release" "theia-cloud" {
     {
       name  = "keycloak.authUrl"
       value = "https://${var.ingress_ip}.nip.io/keycloak/"
+    },
+    {
+      name  = "ingress.controller"
+      value = var.ingress_controller_type
+    },
+    {
+      name  = "operator.eagerStart"
+      value = var.eager_start
     }
-  ]
+    ]
 }
 
 resource "kubectl_manifest" "theia-cloud-monitor-theia" {
@@ -175,7 +196,7 @@ resource "kubectl_manifest" "theia-cloud-monitor-theia" {
     port: 3000
     ingressname: theia-cloud-demo-ws-ingress
     ingressHostnamePrefixes: []
-    minInstances: 0
+    minInstances: ${var.eager_start ? 1 : 0}
     maxInstances: 10
     timeout: 6
     requestsMemory: 1000M
@@ -209,7 +230,7 @@ resource "kubectl_manifest" "theia-cloud-monitor-vscode" {
     port: 3000
     ingressname: theia-cloud-demo-ws-ingress
     ingressHostnamePrefixes: []
-    minInstances: 0
+    minInstances: ${var.eager_start ? 1 : 0}
     maxInstances: 10
     timeout: 6
     requestsMemory: 1000M

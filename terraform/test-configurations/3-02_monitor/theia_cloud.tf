@@ -12,7 +12,7 @@ data "terraform_remote_state" "minikube" {
   backend = "local"
 
   config = {
-    path = "${path.module}/../0_minikube-setup/terraform.tfstate"
+    path = "${path.module}/../1_dependencies/terraform.tfstate"
   }
 }
 
@@ -79,6 +79,10 @@ resource "helm_release" "theia-cloud" {
     {
       name  = "demoApplication.monitor.port"
       value = var.use_vscode_extension ? 8081 : 3000
+    },
+    {
+      name  = "ingress.controller"
+      value = data.terraform_remote_state.minikube.outputs.ingress_controller_type
     }
-  ]
+    ]
 }
