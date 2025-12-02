@@ -380,35 +380,6 @@ resource "kubectl_manifest" "keycloak_instance" {
   ]
 }
 
-resource "terraform_data" "wait_for_keycloak_instance" {
-  provisioner "local-exec" {
-    command = "kubectl wait keycloak/keycloak -n ${kubernetes_namespace.keycloak.metadata[0].name} --for=condition=Ready --timeout=3m"
-  }
-
-  depends_on = [
-    kubectl_manifest.keycloak_instance
-  ]
-}
-
-resource "terraform_data" "wait_for_keycloak_http" {
-  provisioner "local-exec" {
-    command = <<-EOT
-      echo "Waiting for Keycloak pods to be ready..."
-      kubectl wait pods -n ${kubernetes_namespace.keycloak.metadata[0].name} -l app=keycloak --for=condition=Ready --timeout=5m
-      echo "Waiting for Keycloak service endpoint..."
-      kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/keycloak-service -n ${kubernetes_namespace.keycloak.metadata[0].name} --timeout=2m
-      echo "Keycloak is ready!"
-      echo "Waiting additional time for Keycloak authentication to be fully initialized..."
-      sleep 10
-    EOT
-  }
-
-  depends_on = [
-    terraform_data.wait_for_keycloak_instance,
-    kubernetes_ingress_v1.keycloak
-  ]
-}
-
 resource "kubernetes_ingress_v1" "keycloak" {
   count = var.ingress_enabled ? 1 : 0
 
@@ -462,17 +433,51 @@ resource "kubernetes_ingress_v1" "keycloak" {
     }
   }
 
+  depends_on = [
+    kubernetes_namespace.keycloak
+  ]
+}
 
-  # We expect that kubectl context was configured by a previous module.
-  # After keycloak was set up with tls enabled, we use the created tls secret as the default ssl-secret of the nginx-ingress-controller.
-  # Below command connects to the cluster in the local environment and patches the ingress-controller accordingly.
-  # Theia Cloud is then installed with path based hosts reusing the same certificate.
-  # Sleep 5 seconds at the end as there might be a brief delay between the ingress controller reporting available and it actually being ready to serve traffic
+resource "terraform_data" "wait_for_keycloak_instance" {
   provisioner "local-exec" {
-    command = "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-nginx -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ingress-nginx wait --for condition=available deploy/ingress-nginx-controller --timeout=90s && kubectl wait certificate -n keycloak ${var.hostname}-tls --for condition=Ready --timeout=90s && sleep 5"
+    command = <<-EOT
+      echo "Waiting for Keycloak resource to report ready..."
+      kubectl wait keycloak/keycloak -n ${kubernetes_namespace.keycloak.metadata[0].name} --for=condition=Ready --timeout=3m
+      echo "Waiting for Keycloak pods to be ready..."
+      kubectl wait pods -n ${kubernetes_namespace.keycloak.metadata[0].name} -l app=keycloak --for=condition=Ready --timeout=3m
+      echo "Waiting for Keycloak service endpoint..."
+      kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/keycloak-service -n ${kubernetes_namespace.keycloak.metadata[0].name} --timeout=2m
+      echo "Keycloak is ready!"
+      echo "Waiting additional 5 for Keycloak authentication to be fully initialized..."
+      sleep 5
+    EOT
   }
 
   depends_on = [
-    terraform_data.wait_for_keycloak_instance
+    kubectl_manifest.keycloak_instance
+  ]
+}
+
+resource "terraform_data" "wait_for_certificate" {
+  count = var.ingress_enabled && var.ingress_tls_enabled ? 1 : 0
+
+  provisioner "local-exec" {
+    command = "kubectl wait certificate -n ${kubernetes_namespace.keycloak.metadata[0].name} ${local.tls_secret_name} --for=condition=Ready --timeout=3m"
+  }
+
+  depends_on = [
+    kubernetes_ingress_v1.keycloak
+  ]
+}
+
+resource "terraform_data" "patch_ingress_controller" {
+  count = var.ingress_enabled && var.ingress_tls_enabled ? 1 : 0
+
+  provisioner "local-exec" {
+    command = "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-nginx -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ingress-nginx wait --for condition=available deploy/ingress-nginx-controller --timeout=90s"
+  }
+
+  depends_on = [
+    terraform_data.wait_for_certificate
   ]
 }
