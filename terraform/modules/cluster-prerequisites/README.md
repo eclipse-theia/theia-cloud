@@ -1,6 +1,7 @@
-# Keycloak Setup Module
+# Cluster Prerequisites Setup Module
 
-This Terraform module deploys Keycloak in a Kubernetes cluster using the official Keycloak Operator. It replaces the deprecated Bitnami Helm chart approach with a native Kubernetes operator installation.
+This Terraform module sets up various prerequisites of Theia Cloud in a running cluster.
+The module offers various customization options via variables including skipping some of the prerequisites (e.g. Keycloak) if they are already installed another way.
 
 ## Features
 
@@ -30,7 +31,7 @@ Note: cert-manager can be installed automatically by this module (default) or yo
 
 ```hcl
 module "keycloak" {
-  source = "../../modules/keycloak-setup"
+  source = "../../modules/cluster-prerequisites"
 
   hostname                   = "192.168.49.2.nip.io"
   keycloak_admin_password    = "admin"
@@ -52,7 +53,7 @@ module "keycloak" {
 
 ```hcl
 module "keycloak" {
-  source = "../../modules/keycloak-setup"
+  source = "../../modules/cluster-prerequisites"
 
   hostname                   = "keycloak.example.com"
   keycloak_admin_password    = var.keycloak_admin_password
@@ -80,7 +81,7 @@ module "keycloak" {
 
 ```hcl
 module "keycloak" {
-  source = "../../modules/keycloak-setup"
+  source = "../../modules/cluster-prerequisites"
 
   hostname                   = "keycloak.example.com"
   keycloak_admin_password    = var.keycloak_admin_password
@@ -98,7 +99,7 @@ module "keycloak" {
 
 ```hcl
 module "keycloak" {
-  source = "../../modules/keycloak-setup"
+  source = "../../modules/cluster-prerequisites"
 
   hostname                = "keycloak.example.com"
   keycloak_admin_password = var.keycloak_admin_password
@@ -200,7 +201,7 @@ This module replaces the deprecated Bitnami Helm chart with the official Keycloa
 ### Migration Steps
 
 1. **Backup Data**: Export realms and data from existing Keycloak instance
-2. **Update Module Reference**: Change from `helm` module to `keycloak-setup` module
+2. **Update Module Reference**: Change from `helm` module to `cluster-prerequisites` module
 3. **Update Variables**: Some variable names have changed (see mapping below)
 4. **Apply Changes**: Run `terraform apply` to deploy new Keycloak
 5. **Restore Data**: Import realms and data into new instance
@@ -289,7 +290,3 @@ postgres_volume_permissions = true
 - [Keycloak Operator Documentation](https://www.keycloak.org/operator/installation)
 - [Keycloak on Kubernetes Guide](https://www.keycloak.org/operator/basic-deployment)
 - [Keycloak K8s Resources Repository](https://github.com/keycloak/keycloak-k8s-resources)
-
-## License
-
-This module follows the same license as the parent project.

@@ -113,7 +113,7 @@ module "host" {
 # }
 
 module "keycloak_setup" {
-  source = "../../modules/keycloak-setup"
+  source = "../../modules/cluster-prerequisites"
 
   hostname                            = "${module.host.host}.nip.io"
   keycloak_admin_password             = var.keycloak_admin_password
@@ -129,10 +129,11 @@ module "keycloak_setup" {
 }
 
 provider "keycloak" {
-  client_id                = "admin-cli"
-  username                 = "admin"
-  password                 = var.keycloak_admin_password
-  url                      = module.keycloak_setup.keycloak_url
+  client_id = "admin-cli"
+  username  = "admin"
+  password  = var.keycloak_admin_password
+  # Normalize URL: strip a trailing slash "/" if present because this URL should not end with a slash
+  url                      = trimsuffix(module.keycloak_setup.keycloak_url, "/")
   tls_insecure_skip_verify = true
   initial_login            = false
   client_timeout           = 60
