@@ -1,6 +1,6 @@
 variable "kubernetes_version" {
   description = "Kubernetes version to use"
-  default     = "v1.26.3"
+  default     = "v1.33.6"
 }
 
 variable "cert_manager_issuer_email" {
