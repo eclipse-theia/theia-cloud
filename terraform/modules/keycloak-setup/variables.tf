@@ -78,7 +78,7 @@ variable "keycloak_version" {
 variable "keycloak_http_relative_path" {
   description = "HTTP relative path for Keycloak"
   type        = string
-  default     = "/keycloak"
+  default     = "/keycloak/"
 }
 
 variable "keycloak_replicas" {

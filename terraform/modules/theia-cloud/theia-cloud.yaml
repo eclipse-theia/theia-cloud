@@ -1,0 +1,52 @@
+imagePullPolicy: Always
+
+# Service configuration
+service:
+  authToken: asdfghjkl
+
+# Legacy app configuration (deprecated - use service.authToken instead)
+app:
+  id: asdfghjkl
+  name: Theia Cloud
+
+demoApplication:
+  pullSecret: ""
+  timeoutStrategy: "FIXEDTIME"
+  timeoutLimit: "30"
+  imagePullPolicy: IfNotPresent
+  # This overrides the default value and does not write the default values to the app definition
+  monitor: null
+
+hosts:
+  usePaths: true
+  configuration:
+    service: servicex
+    landing: trynow
+    instance: instances
+
+landingPage:
+  appDefinition: "theia-cloud-demo"
+  ephemeralStorage: false
+
+keycloak:
+  enable: true
+  realm: "TheiaCloud"
+  clientId: "theia-cloud"
+  clientSecret: "publicbutoauth2proxywantsasecret"
+  cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
+
+operator:
+  eagerStart: false
+  bandwidthLimiter: "WONDERSHAPER"
+  sessionsPerUser: "1"
+  storageClassName: ""
+
+ingress:
+  clusterIssuer: letsencrypt-prod
+  theiaCloudCommonName: false
+  addTLSSecretName: false
+  instances:
+    name: "theia-cloud-demo-ws-ingress"
+
+monitor:
+  enable: false
