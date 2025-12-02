@@ -274,7 +274,6 @@ resource "kubernetes_service" "postgres" {
 }
 
 
-
 locals {
   tls_secret_name = var.ingress_tls_secret_name != "" ? var.ingress_tls_secret_name : "${var.hostname}-tls"
 
@@ -294,6 +293,32 @@ locals {
       hostname = "${local.keycloak_protocol}${var.hostname}${var.keycloak_http_relative_path}"
       strict   = true
     }
+    # Use "unsupported" pod template to set admin credentials via environment variables.
+    # Despite the name "unsupported", this is officially supported by the Keycloak Operator,
+    # see https://www.keycloak.org/operator/advanced-configuration#_pod_template
+    # For the admin credentials see https://www.keycloak.org/server/configuration#_creating_the_initial_admin_user
+    unsupported = {
+      podTemplate = {
+        spec = {
+          containers = [
+            {
+              name = "keycloak"
+              env = [
+                {
+                  name  = "KC_BOOTSTRAP_ADMIN_USERNAME"
+                  value = var.keycloak_admin_username
+                },
+                {
+                  name  = "KC_BOOTSTRAP_ADMIN_PASSWORD"
+                  value = var.keycloak_admin_password
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+
     additionalOptions = [
       # Tell Keycloak to use X-Forwarded-* from nginx
       {
@@ -303,14 +328,6 @@ locals {
       {
         name  = "http-relative-path"
         value = var.keycloak_http_relative_path
-      },
-      {
-        name  = "admin"
-        value = var.keycloak_admin_username
-      },
-      {
-        name  = "admin-password"
-        value = var.keycloak_admin_password
       }
     ]
     resources = {
@@ -381,6 +398,8 @@ resource "terraform_data" "wait_for_keycloak_http" {
       echo "Waiting for Keycloak service endpoint..."
       kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/keycloak-service -n ${kubernetes_namespace.keycloak.metadata[0].name} --timeout=2m
       echo "Keycloak is ready!"
+      echo "Waiting additional time for Keycloak authentication to be fully initialized..."
+      sleep 10
     EOT
   }
 
