@@ -1,12 +1,12 @@
 # Minikube Keycloak Setup Test Configuration
 
-This test configuration demonstrates the use of the `keycloak-setup` module without the deprecated `helm` module. It provides a complete, standalone Keycloak deployment on Minikube.
+This test configuration demonstrates the use of the `cluster-prerequisites` module without the deprecated `helm` module. It provides a complete, standalone Keycloak deployment on Minikube.
 
 ## What This Configuration Includes
 
 1. **Minikube Cluster Creation**: Sets up a local Kubernetes cluster
 2. **Nginx Ingress Controller**: Deployed directly via Helm (not through the helm module)
-3. **Cert-Manager**: Installed by the keycloak-setup module
+3. **Cert-Manager**: Installed by the cluster-prerequisites module
 4. **Self-Signed ClusterIssuer**: For local TLS certificates
 5. **Keycloak**: Deployed using the official Keycloak Operator
 6. **PostgreSQL**: Integrated database deployment
@@ -14,12 +14,12 @@ This test configuration demonstrates the use of the `keycloak-setup` module with
 
 ## Key Differences from Old Configuration
 
-| Old (0_minikube-setup)             | New (0_minikube-keycloak-setup)            |
-| ---------------------------------- | ------------------------------------------ |
-| Uses `modules/helm` for everything | Uses `modules/keycloak-setup` for Keycloak |
-| Bitnami Helm chart for Keycloak    | Official Keycloak Operator                 |
-| Cert-manager in helm module        | Cert-manager in keycloak-setup module      |
-| nginx-ingress via helm module      | nginx-ingress deployed separately          |
+| Old (0_minikube-setup)             | New (0_minikube-cluster-prerequisites)            |
+| ---------------------------------- | ------------------------------------------------- |
+| Uses `modules/helm` for everything | Uses `modules/cluster-prerequisites` for Keycloak |
+| Bitnami Helm chart for Keycloak    | Official Keycloak Operator                        |
+| Cert-manager in helm module        | Cert-manager in cluster-prerequisites module      |
+| nginx-ingress via helm module      | nginx-ingress deployed separately                 |
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ This test configuration demonstrates the use of the `keycloak-setup` module with
 ### Initialize and Apply
 
 ```bash
-cd terraform/test-configurations/0_minikube-keycloak-setup
+cd terraform/test-configurations/0_minikube-cluster-prerequisites
 terraform init
 terraform apply
 ```
@@ -177,7 +177,7 @@ kubectl logs -n keycloak -l app=keycloak-operator
 
 1. **No Deprecated Dependencies**: Uses official Keycloak Operator instead of Bitnami chart
 2. **Modular**: Keycloak setup is independent of other components
-3. **Self-Contained**: All cert-manager setup included in keycloak-setup module
+3. **Self-Contained**: All cert-manager setup included in cluster-prerequisites module
 4. **Production-Ready**: Same pattern can be used for production deployments
 5. **Easier to Update**: Module can be updated independently
 
