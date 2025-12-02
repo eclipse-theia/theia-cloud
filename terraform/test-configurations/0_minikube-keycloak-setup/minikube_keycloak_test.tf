@@ -128,53 +128,6 @@ module "keycloak_setup" {
   cloud_provider                      = "MINIKUBE"
 }
 
-# Output the Keycloak URL for debugging
-output "debug_keycloak_url" {
-  value = module.keycloak_setup.keycloak_url
-}
-
-# Wait for Keycloak to be fully ready before configuring provider
-resource "time_sleep" "wait_for_keycloak" {
-  depends_on = [module.keycloak_setup]
-  
-  create_duration = "30s"
-}
-
-# Test Keycloak availability before proceeding
-resource "terraform_data" "verify_keycloak_auth" {
-  depends_on = [time_sleep.wait_for_keycloak]
-  
-  provisioner "local-exec" {
-    command = <<-EOT
-      echo "Testing Keycloak authentication..."
-      echo "Attempting to retrieve admin credentials from Keycloak..."
-      
-      # Check if Keycloak created an initial admin secret
-      kubectl get secret -n keycloak keycloak-initial-admin 2>/dev/null && \
-        echo "Found keycloak-initial-admin secret" || \
-        echo "No keycloak-initial-admin secret found"
-      
-      # Try authentication with provided credentials
-      sleep 10
-      RESPONSE=$(curl -k -s -X POST \
-        "https://${module.host.host}.nip.io/keycloak/realms/master/protocol/openid-connect/token" \
-        -d "client_id=admin-cli" \
-        -d "username=admin" \
-        -d "password=${var.keycloak_admin_password}" \
-        -d "grant_type=password")
-      
-      echo "Keycloak response: $RESPONSE"
-      
-      if echo "$RESPONSE" | grep -q "access_token"; then
-        echo "SUCCESS: Keycloak authentication successful"
-      else
-        echo "WARNING: Keycloak authentication test failed. Response: $RESPONSE"
-        echo "This might be expected on first run. Terraform will retry..."
-      fi
-    EOT
-  }
-}
-
 provider "keycloak" {
   client_id                = "admin-cli"
   username                 = "admin"
@@ -189,7 +142,7 @@ module "keycloak" {
   source = "../../modules/keycloak"
 
   depends_on = [
-    terraform_data.verify_keycloak_auth
+    module.keycloak_setup
   ]
 
   hostname                        = "${module.host.host}.nip.io"

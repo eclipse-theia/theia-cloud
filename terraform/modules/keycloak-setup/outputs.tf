@@ -1,13 +1,13 @@
 output "namespace" {
   description = "Keycloak namespace"
   value       = kubernetes_namespace.keycloak.metadata[0].name
-  depends_on  = [terraform_data.wait_for_keycloak_http]
+  depends_on  = [terraform_data.wait_for_keycloak_instance]
 }
 
 output "keycloak_url" {
   description = "Full URL to access Keycloak"
   value       = var.ingress_enabled ? "https://${var.hostname}${var.keycloak_http_relative_path}" : "http://${var.hostname}:8080${var.keycloak_http_relative_path}"
-  depends_on  = [terraform_data.wait_for_keycloak_http]
+  depends_on  = [terraform_data.wait_for_keycloak_instance]
 }
 
 output "admin_username" {
