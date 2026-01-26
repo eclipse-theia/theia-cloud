@@ -1,6 +1,6 @@
 output "namespace" {
   description = "Keycloak namespace"
-  value       = kubernetes_namespace.keycloak.metadata[0].name
+  value       = kubernetes_namespace_v1.keycloak.metadata[0].name
   depends_on  = [terraform_data.wait_for_keycloak_instance]
 }
 
@@ -17,7 +17,7 @@ output "admin_username" {
 
 output "postgres_service_name" {
   description = "PostgreSQL service name"
-  value       = var.postgres_enabled ? kubernetes_service.postgres[0].metadata[0].name : null
+  value       = var.postgres_enabled ? kubernetes_service_v1.postgres[0].metadata[0].name : null
 }
 
 output "keycloak_service_name" {

@@ -195,3 +195,27 @@ variable "cert_manager_issuer_email" {
   type        = string
   default     = ""
 }
+
+variable "install_ingress_controller" {
+  description = "Whether to install the nginx ingress controller"
+  type        = bool
+  default     = false
+}
+
+variable "ingress_controller_version" {
+  description = "Version of nginx ingress controller to install"
+  type        = string
+  default     = "4.13.0"
+}
+
+variable "ingress_controller_namespace" {
+  description = "Namespace for nginx ingress controller installation"
+  type        = string
+  default     = "ingress-nginx"
+}
+
+variable "load_balancer_ip" {
+  description = "External IP for the nginx ingress controller service"
+  type        = string
+  default     = ""
+}
