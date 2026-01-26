@@ -1,6 +1,13 @@
 import './App.css';
 
-import { AppDefinition, getTheiaCloudConfig, LaunchRequest, PingRequest, TheiaCloud, TheiaCloudConfig } from '@eclipse-theiacloud/common';
+import {
+  AppDefinition,
+  getTheiaCloudConfig,
+  LaunchRequest,
+  PingRequest,
+  TheiaCloud,
+  TheiaCloudConfig
+} from '@eclipse-theiacloud/common';
 import Keycloak, { KeycloakConfig } from 'keycloak-js';
 import { useEffect, useState } from 'react';
 
@@ -78,11 +85,11 @@ function App(): JSX.Element {
       }
       if (config.useKeycloak) {
         keycloakConfig = {
-          url: config.keycloakAuthUrl,
+          url: config.keycloakAuthUrl!,
           realm: config.keycloakRealm!,
           clientId: config.keycloakClientId!
         };
-        const keycloak = Keycloak(keycloakConfig);
+        const keycloak = new Keycloak(keycloakConfig!);
         keycloak
           .init({
             onLoad: 'check-sso',
@@ -100,8 +107,8 @@ function App(): JSX.Element {
               }
             }
           })
-          .catch(() => {
-            console.error('Authentication Failed');
+          .catch((err: any) => {
+            console.error('Authentication Failed', err);
           });
       }
     }
@@ -112,7 +119,7 @@ function App(): JSX.Element {
   document.title = `${selectedAppName} - Try Now`;
 
   const authenticate = (): void => {
-    const keycloak = Keycloak(keycloakConfig);
+    const keycloak = new Keycloak(keycloakConfig!);
     keycloak
       .init({
         onLoad: 'login-required',
@@ -132,8 +139,8 @@ function App(): JSX.Element {
           }
         }
       })
-      .catch(() => {
-        console.error('Authentication Failed');
+      .catch((err: any) => {
+        console.error('Authentication Failed', err);
         setError('Authentication failed');
       });
   };
@@ -152,8 +159,21 @@ function App(): JSX.Element {
           : 'ws-' + TheiaCloudConfig.getServiceAuthToken(config) + '-' + selectedAppDefinition + '-' + email;
         TheiaCloud.launchAndRedirect(
           config.useEphemeralStorage
-            ? LaunchRequest.ephemeral(config.serviceUrl, TheiaCloudConfig.getServiceAuthToken(config), appDefinition, 5, email)
-            : LaunchRequest.createWorkspace(config.serviceUrl, TheiaCloudConfig.getServiceAuthToken(config), appDefinition, 5, email, workspace),
+            ? LaunchRequest.ephemeral(
+                config.serviceUrl,
+                TheiaCloudConfig.getServiceAuthToken(config),
+                appDefinition,
+                5,
+                email
+              )
+            : LaunchRequest.createWorkspace(
+                config.serviceUrl,
+                TheiaCloudConfig.getServiceAuthToken(config),
+                appDefinition,
+                5,
+                email,
+                workspace
+              ),
           { timeout: 60000, retries: 5, accessToken: token }
         )
           .catch((err: Error) => {
