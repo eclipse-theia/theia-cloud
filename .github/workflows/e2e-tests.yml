@@ -232,17 +232,17 @@ jobs:
 
           echo ""
           echo "=== Landing Page Deployment Logs ==="
-          kubectl logs -n theia-cloud deployment/landing-page-deployment --tail=200
+          kubectl logs -n theia-cloud deployment/landing-page-deployment
 
           echo ""
           echo "=== Service Deployment Logs ==="
-          kubectl logs -n theia-cloud deployment/service-deployment --tail=200
+          kubectl logs -n theia-cloud deployment/service-deployment
 
           echo ""
           echo "=== Operator Deployment Logs (All Pods) ==="
           for pod in $(kubectl get pods -n theia-cloud -l app=operator -o jsonpath='{.items[*].metadata.name}'); do
             echo "--- Logs from pod: $pod ---"
-            kubectl logs -n theia-cloud $pod --tail=200
+            kubectl logs -n theia-cloud $pod
             echo ""
           done
 
@@ -261,10 +261,6 @@ jobs:
           echo ""
           echo "=== Workspaces in theia-cloud namespace ==="
           kubectl get workspaces -n theia-cloud -o yaml || echo "No workspaces found"
-
-          echo ""
-          echo "=== Events in theia-cloud namespace ==="
-          kubectl get events -n theia-cloud --sort-by='.lastTimestamp'
 
       - name: Upload Playwright test failure screenshots
         if: failure()

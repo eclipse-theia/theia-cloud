@@ -180,16 +180,16 @@ resource "helm_release" "theia-cloud" {
     ]
 }
 
-resource "kubectl_manifest" "theia-cloud-monitor-theia" {
+resource "kubectl_manifest" "theia-cloud-monitor-theia-popup" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
   apiVersion: theia.cloud/v1beta10
   kind: AppDefinition
   metadata:
-    name: theia-cloud-monitor-theia
+    name: theia-cloud-monitor-theia-popup
     namespace: theia-cloud
   spec:
-    name: theia-cloud-monitor-theia
+    name: theia-cloud-monitor-theia-popup
     image: theiacloud/theia-cloud-activity-demo-theia:minikube-ci-e2e
     imagePullPolicy: IfNotPresent
     uid: 101
@@ -198,7 +198,41 @@ resource "kubectl_manifest" "theia-cloud-monitor-theia" {
     ingressHostnamePrefixes: []
     minInstances: ${var.eager_start ? 1 : 0}
     maxInstances: 10
-    timeout: 6
+    timeout: 15
+    requestsMemory: 1000M
+    requestsCpu: 100m
+    limitsMemory: 1200M
+    limitsCpu: "2"
+    downlinkLimit: 30000
+    uplinkLimit: 30000
+    mountPath: /home/project/persisted
+    monitor:
+      port: 3000
+      activityTracker:
+        timeoutAfter: 15
+        notifyAfter: 2
+  EOF
+}
+
+resource "kubectl_manifest" "theia-cloud-monitor-theia-timeout" {
+  depends_on = [helm_release.theia-cloud]
+  yaml_body  = <<-EOF
+  apiVersion: theia.cloud/v1beta10
+  kind: AppDefinition
+  metadata:
+    name: theia-cloud-monitor-theia-timeout
+    namespace: theia-cloud
+  spec:
+    name: theia-cloud-monitor-theia-timeout
+    image: theiacloud/theia-cloud-activity-demo-theia:minikube-ci-e2e
+    imagePullPolicy: IfNotPresent
+    uid: 101
+    port: 3000
+    ingressname: theia-cloud-demo-ws-ingress
+    ingressHostnamePrefixes: []
+    minInstances: ${var.eager_start ? 1 : 0}
+    maxInstances: 10
+    timeout: 15
     requestsMemory: 1000M
     requestsCpu: 100m
     limitsMemory: 1200M
@@ -210,20 +244,20 @@ resource "kubectl_manifest" "theia-cloud-monitor-theia" {
       port: 3000
       activityTracker:
         timeoutAfter: 4
-        notifyAfter: 2
+        notifyAfter: 15
   EOF
 }
 
-resource "kubectl_manifest" "theia-cloud-monitor-vscode" {
+resource "kubectl_manifest" "theia-cloud-monitor-vscode-popup" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
   apiVersion: theia.cloud/v1beta10
   kind: AppDefinition
   metadata:
-    name: theia-cloud-monitor-vscode
+    name: theia-cloud-monitor-vscode-popup
     namespace: theia-cloud
   spec:
-    name: theia-cloud-monitor-vscode
+    name: theia-cloud-monitor-vscode-popup
     image: theiacloud/theia-cloud-activity-demo:minikube-ci-e2e
     imagePullPolicy: IfNotPresent
     uid: 101
@@ -232,7 +266,41 @@ resource "kubectl_manifest" "theia-cloud-monitor-vscode" {
     ingressHostnamePrefixes: []
     minInstances: ${var.eager_start ? 1 : 0}
     maxInstances: 10
-    timeout: 6
+    timeout: 15
+    requestsMemory: 1000M
+    requestsCpu: 100m
+    limitsMemory: 1200M
+    limitsCpu: "2"
+    downlinkLimit: 30000
+    uplinkLimit: 30000
+    mountPath: /home/project/persisted
+    monitor:
+      port: 8081
+      activityTracker:
+        timeoutAfter: 15
+        notifyAfter: 2
+  EOF
+}
+
+resource "kubectl_manifest" "theia-cloud-monitor-vscode-timeout" {
+  depends_on = [helm_release.theia-cloud]
+  yaml_body  = <<-EOF
+  apiVersion: theia.cloud/v1beta10
+  kind: AppDefinition
+  metadata:
+    name: theia-cloud-monitor-vscode-timeout
+    namespace: theia-cloud
+  spec:
+    name: theia-cloud-monitor-vscode-timeout
+    image: theiacloud/theia-cloud-activity-demo:minikube-ci-e2e
+    imagePullPolicy: IfNotPresent
+    uid: 101
+    port: 3000
+    ingressname: theia-cloud-demo-ws-ingress
+    ingressHostnamePrefixes: []
+    minInstances: ${var.eager_start ? 1 : 0}
+    maxInstances: 10
+    timeout: 15
     requestsMemory: 1000M
     requestsCpu: 100m
     limitsMemory: 1200M
@@ -244,9 +312,42 @@ resource "kubectl_manifest" "theia-cloud-monitor-vscode" {
       port: 8081
       activityTracker:
         timeoutAfter: 4
-        notifyAfter: 2
+        notifyAfter: 15
   EOF
 }
 
+resource "kubectl_manifest" "theia-cloud-demo" {
+  depends_on = [helm_release.theia-cloud]
+  yaml_body  = <<-EOF
+  apiVersion: theia.cloud/v1beta10
+  kind: AppDefinition
+  metadata:
+    name: theia-cloud-demo
+    namespace: theia-cloud
+  spec:
+    name: theia-cloud-demo
+    image: theiacloud/theia-cloud-activity-demo-theia:minikube-ci-e2e
+    imagePullPolicy: IfNotPresent
+    uid: 101
+    port: 3000
+    ingressname: theia-cloud-demo-ws-ingress
+    ingressHostnamePrefixes: []
+    minInstances: 0
+    maxInstances: 10
+    timeout: 2
+    requestsMemory: 1000M
+    requestsCpu: 100m
+    limitsMemory: 1200M
+    limitsCpu: "2"
+    downlinkLimit: 30000
+    uplinkLimit: 30000
+    mountPath: /home/project/persisted
+    monitor:
+      port: 3000
+      activityTracker:
+        timeoutAfter: 30
+        notifyAfter: 30
+  EOF
+}
 
 
