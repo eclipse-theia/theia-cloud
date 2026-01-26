@@ -1,7 +1,3 @@
-variable "install_ingress_controller" {
-  description = "Whether to install the nginx ingress controller"
-}
-
 variable "ingress_controller_type" {
   description = "Type of ingress controller to use (nginx or haproxy)"
   type        = string
@@ -28,72 +24,12 @@ variable "install_theia_cloud" {
   default     = true
 }
 
-variable "install_selfsigned_issuer" {
-  description = "Whether to install an additional self signed issuer"
-  default     = false
-}
-
 variable "cert_manager_issuer_email" {
   description = "EMail address used to create certificates."
 }
 
-variable "cert_manager_cluster_issuer" {
-  type = string
-
-  validation {
-    condition     = length(regexall("^(letsencrypt-prod|theia-cloud-selfsigned-issuer|keycloak-selfsigned-issuer)$", var.cert_manager_cluster_issuer)) > 0
-    error_message = "ERROR: Valid values are \"letsencrypt-prod\", \"theia-cloud-selfsigned-issuer\", and \"keycloak-selfsigned-issuer\"!"
-  }
-}
-
-variable "cert_manager_common_name" {
-  description = "The common name for the certificate"
-  default     = ""
-}
-
 variable "hostname" {
   description = "The hostname for all installed services"
-}
-
-variable "service_type" {
-  description = "Kubernetes service type"
-  default     = "LoadBalancer"
-
-}
-
-variable "postgresql_storageClass" {
-  description = "StorageClass for Persistent Volume(s)"
-  default     = ""
-}
-
-variable "postgresql_volumePermissions" {
-  description = "Enable init container that changes the owner and group of the persistent volume"
-  default     = false
-}
-
-variable "keycloak_admin_password" {
-  description = "Keycloak Admin Password"
-  sensitive   = true
-}
-
-variable "postgresql_enabled" {
-  description = "Whether to enable postgreswl"
-  default     = true
-}
-
-variable "postgres_postgres_password" {
-  description = "Keycloak Postgres DB Postgres (Admin) Password"
-  sensitive   = true
-}
-
-variable "postgres_password" {
-  description = "Keycloak Postgres DB Password"
-  sensitive   = true
-}
-
-variable "loadBalancerIP" {
-  description = "External IP for the nginx ingress controller"
-  default     = ""
 }
 
 variable "cloudProvider" {
@@ -101,56 +37,8 @@ variable "cloudProvider" {
   default     = "K8S"
 }
 
-resource "helm_release" "cert-manager" {
-  name             = "cert-manager"
-  repository       = "https://charts.jetstack.io"
-  chart            = "cert-manager"
-  version          = "v1.17.4"
-  namespace        = "cert-manager"
-  create_namespace = true
-
-  set = [
-    {
-      name  = "installCRDs"
-      value = "true"
-    }
-  ]
-}
-
-resource "helm_release" "nginx-ingress-controller" {
+# Note: cert-manager and nginx-ingress must be installed via cluster-prerequisites module first
   count            = var.install_ingress_controller && var.ingress_controller_type == "nginx" ? 1 : 0
-  name             = "nginx-ingress-controller"
-  repository       = "https://kubernetes.github.io/ingress-nginx"
-  chart            = "ingress-nginx"
-  version          = "4.13.0"
-  namespace        = "ingress-nginx"
-  create_namespace = true
-
-  set = [
-    {
-      name  = "fullnameOverride"
-      value = "ingress-nginx"
-    },
-    {
-      name  = "controller.service.loadBalancerIP"
-      value = var.loadBalancerIP
-    },
-    {
-      name  = "controller.allowSnippetAnnotations"
-      value = true
-    },
-    # Below two are added for backward compatibility with 1.1.1 which used Prefix pythType at some places. After 1.2.0 we should check if we may remove them again
-    {
-      name  = "controller.admissionWebhooks.enabled"
-      value = false
-    },
-    {
-      name  = "controller.config.enable-snippet"
-      value = "true"
-    }
-  ]
-}
-
 resource "helm_release" "haproxy-ingress-controller" {
   count            = var.install_ingress_controller && var.ingress_controller_type == "haproxy" ? 1 : 0
   name             = "haproxy-ingress"
@@ -219,6 +107,7 @@ locals {
   }])
 }
 
+# TODO remove keycloak here
 resource "helm_release" "keycloak" {
   depends_on       = [helm_release.theia-cloud-base, kubectl_manifest.selfsigned_issuer, helm_release.nginx-ingress-controller, helm_release.haproxy-ingress-controller] # we need an existing issuer
   name             = "keycloak"
@@ -281,7 +170,7 @@ resource "helm_release" "keycloak" {
 
 resource "helm_release" "theia-cloud" {
   count            = var.install_theia_cloud ? 1 : 0
-  depends_on       = [helm_release.keycloak, helm_release.theia-cloud-crds] # wait for keycloak to make the default cert available
+  depends_on       = [helm_release.theia-cloud-crds]
   name             = "theia-cloud"
   repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud"
