@@ -5,9 +5,16 @@ output "namespace" {
 }
 
 output "keycloak_url" {
-  description = "Full URL to access Keycloak"
-  value       = var.ingress_enabled ? "https://${var.hostname}${var.keycloak_http_relative_path}" : "http://${var.hostname}:8080${var.keycloak_http_relative_path}"
-  depends_on  = [terraform_data.wait_for_keycloak_instance]
+  description = "Full URL to access Keycloak (without trailing slash)"
+  // Trim trailing slash if present to ensure consistent format
+  //and avoid issues with downstream usage of keycloak provider.
+  value = trimsuffix(
+    var.ingress_enabled
+    ? "https://${var.hostname}${var.keycloak_http_relative_path}"
+    : "http://${var.hostname}:8080${var.keycloak_http_relative_path}",
+    "/"
+  )
+  depends_on = [terraform_data.wait_for_keycloak_instance]
 }
 
 output "admin_username" {

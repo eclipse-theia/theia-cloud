@@ -181,7 +181,7 @@ module "keycloak" {
 | Name                    | Description                                  |
 | ----------------------- | -------------------------------------------- |
 | `namespace`             | Keycloak namespace                           |
-| `keycloak_url`          | Full URL to access Keycloak                  |
+| `keycloak_url`          | Full URL to access Keycloak (without trailing slash) |
 | `admin_username`        | Keycloak admin username                      |
 | `postgres_service_name` | PostgreSQL service name (if deployed)        |
 | `keycloak_service_name` | Keycloak service name                        |

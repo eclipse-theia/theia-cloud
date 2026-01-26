@@ -89,7 +89,7 @@ provider "keycloak" {
   client_id      = "admin-cli"
   username       = "admin"
   password       = var.keycloak_admin_password
-  url            = trimsuffix(module.cluster_prerequisites.keycloak_url, "/")
+  url            = module.cluster_prerequisites.keycloak_url
   initial_login  = false
   client_timeout = 60
 }

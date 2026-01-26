@@ -99,8 +99,7 @@ provider "keycloak" {
   client_id = "admin-cli"
   username  = "admin"
   password  = var.keycloak_admin_password
-  # Normalize URL: strip a trailing slash "/" if present because this URL should not end with a slash
-  url                      = trimsuffix(module.keycloak_setup.keycloak_url, "/")
+  url                      = module.keycloak_setup.keycloak_url
   tls_insecure_skip_verify = true
   initial_login            = false
   client_timeout           = 60
