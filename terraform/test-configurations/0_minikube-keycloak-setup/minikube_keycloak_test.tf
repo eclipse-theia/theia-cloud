@@ -72,45 +72,12 @@ provider "kubectl" {
   cluster_ca_certificate = module.cluster.cluster_ca_certificate
 }
 
-provider "http" {
-}
-
 module "host" {
   depends_on = [module.cluster]
 
   source = "matti/urlparse/external"
   url    = module.cluster.cluster_host
 }
-
-# resource "helm_release" "nginx_ingress_controller" {
-#   depends_on       = [module.cluster]
-#   name             = "nginx-ingress-controller"
-#   repository       = "https://kubernetes.github.io/ingress-nginx"
-#   chart            = "ingress-nginx"
-#   version          = "4.13.0"
-#   namespace        = "ingress-nginx"
-#   create_namespace = true
-
-#   set {
-#     name  = "fullnameOverride"
-#     value = "ingress-nginx"
-#   }
-
-#   set {
-#     name  = "controller.allowSnippetAnnotations"
-#     value = true
-#   }
-
-#   set {
-#     name  = "controller.admissionWebhooks.enabled"
-#     value = false
-#   }
-
-#   set {
-#     name  = "controller.config.enable-snippet"
-#     value = "true"
-#   }
-# }
 
 module "keycloak_setup" {
   source = "../../modules/cluster-prerequisites"
