@@ -16,11 +16,6 @@ variable "keycloak_admin_password" {
   sensitive   = true
 }
 
-variable "postgres_postgres_password" {
-  description = "Keycloak Postgres DB Postgres (Admin) Password"
-  sensitive   = true
-}
-
 variable "postgres_password" {
   description = "Keycloak Postgres DB Password"
   sensitive   = true
@@ -50,6 +45,12 @@ resource "google_compute_address" "host_ip" {
   name       = "theia-cloud-ingress-ip"
 }
 
+provider "kubernetes" {
+  host                   = module.cluster.cluster_host
+  token                  = module.cluster.cluster_token
+  cluster_ca_certificate = module.cluster.cluster_ca_certificate
+}
+
 provider "helm" {
   kubernetes = {
     host                   = module.cluster.cluster_host
@@ -65,27 +66,39 @@ provider "kubectl" {
   cluster_ca_certificate = module.cluster.cluster_ca_certificate
 }
 
+module "cluster_prerequisites" {
+  source = "../../modules/cluster-prerequisites"
+
+  hostname                            = "${google_compute_address.host_ip.address}.sslip.io"
+  keycloak_admin_password             = var.keycloak_admin_password
+  postgres_password                   = var.postgres_password
+  install_cert_manager                = true
+  install_ingress_controller          = true
+  install_selfsigned_issuer           = false
+  cert_manager_issuer_email           = var.cert_manager_issuer_email
+  ingress_cert_manager_cluster_issuer = "letsencrypt-prod"
+  load_balancer_ip                    = google_compute_address.host_ip.address
+  cloud_provider                      = "GKE"
+}
+
 module "helm" {
   source = "../../modules/helm"
 
-  install_ingress_controller  = true
+  depends_on = [module.cluster_prerequisites]
   ingress_controller_type     = var.ingress_controller_type
-  cert_manager_issuer_email   = var.cert_manager_issuer_email
+  cert_manager_issuer_email = var.cert_manager_issuer_email
   cert_manager_cluster_issuer = "letsencrypt-prod"
   cert_manager_common_name    = "${google_compute_address.host_ip.address}.sslip.io"
-  hostname                    = "${google_compute_address.host_ip.address}.sslip.io"
-  keycloak_admin_password     = var.keycloak_admin_password
-  postgresql_enabled          = true
-  postgres_postgres_password  = var.postgres_postgres_password
-  postgres_password           = var.postgres_password
-  loadBalancerIP              = google_compute_address.host_ip.address
+  hostname                  = "${google_compute_address.host_ip.address}.sslip.io"
+  cloudProvider             = "GKE"
+  loadBalancerIP            = google_compute_address.host_ip.address
 }
 
 provider "keycloak" {
   client_id      = "admin-cli"
   username       = "admin"
   password       = var.keycloak_admin_password
-  url            = "https://${google_compute_address.host_ip.address}.sslip.io/keycloak"
+  url            = trimsuffix(module.cluster_prerequisites.keycloak_url, "/")
   initial_login  = false
   client_timeout = 60
 }
@@ -93,7 +106,7 @@ provider "keycloak" {
 module "keycloak" {
   source = "../../modules/keycloak"
 
-  depends_on = [module.helm]
+  depends_on = [module.cluster_prerequisites]
 
   hostname                        = "${google_compute_address.host_ip.address}.sslip.io"
   keycloak_test_user_foo_password = "foo"

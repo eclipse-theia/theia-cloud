@@ -3,10 +3,20 @@ variable "kubernetes_version" {
   default     = "v1.34.0"
 }
 
+variable "cert_manager_issuer_email" {
+  description = "EMail address used to create certificates."
+}
+
+variable "keycloak_admin_password" {
+  description = "Keycloak Admin Password"
+  sensitive   = true
+  default     = "admin"
+}
+
 variable "ingress_controller_type" {
   description = "Type of ingress controller to use (nginx or haproxy)"
   type        = string
-  default     = "haproxy" # "nginx"
+  default     = "nginx"
 }
 
 provider "minikube" {
@@ -21,7 +31,7 @@ module "cluster" {
   cpus                    = 4
   disk_size               = "51200mb"
   memory                  = "8192mb"
-  driver                  = "kvm2"
+  driver                  = "virtualbox"
   ingress_controller_type = var.ingress_controller_type
 }
 
@@ -32,7 +42,15 @@ provider "kubernetes" {
   cluster_ca_certificate = module.cluster.cluster_ca_certificate
 }
 
-resource "kubernetes_persistent_volume" "minikube" {
+provider "kubectl" {
+  load_config_file       = false
+  host                   = module.cluster.cluster_host
+  client_certificate     = module.cluster.cluster_client_certificate
+  client_key             = module.cluster.cluster_client_key
+  cluster_ca_certificate = module.cluster.cluster_ca_certificate
+}
+
+resource "kubernetes_persistent_volume_v1" "minikube" {
 
   depends_on = [module.cluster]
 
@@ -62,19 +80,32 @@ provider "helm" {
   }
 }
 
-provider "kubectl" {
-  load_config_file       = false
-  host                   = module.cluster.cluster_host
-  client_certificate     = module.cluster.cluster_client_certificate
-  client_key             = module.cluster.cluster_client_key
-  cluster_ca_certificate = module.cluster.cluster_ca_certificate
-}
-
 module "host" {
   depends_on = [module.cluster]
 
   source = "matti/urlparse/external"
   url    = module.cluster.cluster_host
+}
+
+module "helm" {
+  source = "../../modules/helm"
+
+  depends_on = [module.host]
+
+  install_ingress_controller   = var.ingress_controller_type == "haproxy" ? true : false
+  ingress_controller_type      = var.ingress_controller_type
+  cert_manager_issuer_email    = var.cert_manager_issuer_email
+  cert_manager_cluster_issuer  = "theia-cloud-selfsigned-issuer"
+  cert_manager_common_name     = "${module.host.host}.nip.io"
+  hostname                     = "${module.host.host}.nip.io"
+  keycloak_admin_password      = var.keycloak_admin_password
+  postgresql_enabled           = true
+  postgres_postgres_password   = "admin"
+  postgres_password            = "admin"
+  postgresql_storageClass      = "manual"
+  postgresql_volumePermissions = true
+  service_type                 = "ClusterIP"
+  cloudProvider                = "MINIKUBE"
 }
 
 module "cluster_prerequisites" {
@@ -88,7 +119,7 @@ module "cluster_prerequisites" {
   install_cert_manager                = true
   install_selfsigned_issuer           = true
   cert_manager_issuer_email           = var.cert_manager_issuer_email
-  ingress_cert_manager_cluster_issuer = "keycloak-selfsigned-issuer"
+  ingress_cert_manager_cluster_issuer = "theia-cloud-selfsigned-issuer"
   ingress_cert_manager_common_name    = "${module.host.host}.nip.io"
   postgres_storage_class              = "manual"
   postgres_volume_permissions         = true
@@ -113,14 +144,5 @@ module "keycloak" {
   hostname                        = "${module.host.host}.nip.io"
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
-  valid_redirect_uri              = "*"
-}
-
-# Configure user foo as admin by adding it to the admin group
-resource "keycloak_group_memberships" "admin_group_memberships" {
-  realm_id = module.keycloak.realm.id
-  group_id = module.keycloak.admin_group.id
-  members = [
-    module.keycloak.test_users.foo.username
-  ]
+  valid_redirect_uri              = "https://${module.host.host}.nip.io/*"
 }

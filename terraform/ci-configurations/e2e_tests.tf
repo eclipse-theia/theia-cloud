@@ -88,7 +88,7 @@ provider "keycloak" {
   client_id                = "admin-cli"
   username                 = "admin"
   password                 = "admin"
-  url                      = "https://${var.ingress_ip}.nip.io/keycloak"
+  url                      = trimsuffix(module.cluster_prerequisites.keycloak_url, "/")
   tls_insecure_skip_verify = true # only for minikube self signed
   initial_login            = false
   client_timeout           = 60
@@ -97,7 +97,7 @@ provider "keycloak" {
 module "keycloak" {
   source = "../modules/keycloak"
 
-  depends_on = [module.helm]
+  depends_on = [module.cluster_prerequisites]
 
   hostname                        = "${var.ingress_ip}.nip.io"
   keycloak_test_user_foo_password = "foo"
@@ -315,7 +315,6 @@ resource "kubectl_manifest" "theia-cloud-monitor-vscode-timeout" {
         notifyAfter: 15
   EOF
 }
-
 resource "kubectl_manifest" "theia-cloud-demo" {
   depends_on = [helm_release.theia-cloud]
   yaml_body  = <<-EOF
@@ -349,5 +348,3 @@ resource "kubectl_manifest" "theia-cloud-demo" {
         notifyAfter: 30
   EOF
 }
-
-
