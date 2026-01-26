@@ -95,22 +95,7 @@ resource "kubectl_manifest" "keycloak_realm_import_crd" {
   ]
 }
 
-data "http" "keycloak_operator" {
-  url = "https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${var.keycloak_version}/kubernetes/kubernetes.yml"
-}
-
 locals {
-  operator_manifests_raw = split("---", data.http.keycloak_operator.response_body)
-  operator_manifests = [
-    for doc in local.operator_manifests_raw :
-    yamldecode(doc)
-    if trimspace(doc) != "" && can(yamldecode(doc))
-  ]
-  operator_resources = {
-    for idx, doc in local.operator_manifests :
-    "${doc.kind}-${doc.metadata.name}-${idx}" => doc
-  }
-
   # local_exec_quotes is a helper function to deal with different handling of
   # quotes between linux and windows. On linux, it will output "'". On windows,
   # it will output "".
@@ -122,11 +107,28 @@ locals {
   }])
 }
 
-resource "kubectl_manifest" "keycloak_operator" {
-  for_each           = local.operator_resources
-  yaml_body          = yamlencode(each.value)
-  override_namespace = var.keycloak_namespace
+resource "terraform_data" "keycloak_operator" {
+  input = {
+    namespace = var.keycloak_namespace
+    version   = var.keycloak_version
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      kubectl apply -n ${var.keycloak_namespace} -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${var.keycloak_version}/kubernetes/kubernetes.yml
+      kubectl patch clusterrolebinding keycloak-operator-clusterrole-binding --type='json' -p='[{"op": "replace", "path": "/subjects/0/namespace", "value":"${var.keycloak_namespace}"}]'
+    EOT
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      kubectl delete -n ${self.input.namespace} -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${self.input.version}/kubernetes/kubernetes.yml --ignore-not-found=true || true
+    EOT
+  }
+
   depends_on = [
+    kubernetes_namespace_v1.keycloak,
     kubectl_manifest.keycloak_crd,
     kubectl_manifest.keycloak_realm_import_crd
   ]
@@ -409,7 +411,7 @@ resource "kubectl_manifest" "keycloak_instance" {
   })
 
   depends_on = [
-    kubectl_manifest.keycloak_operator,
+    terraform_data.keycloak_operator,
     kubernetes_service_v1.postgres
   ]
 }
