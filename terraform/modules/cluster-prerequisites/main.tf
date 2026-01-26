@@ -15,9 +15,43 @@ resource "helm_release" "cert_manager" {
   ]
 }
 
+resource "helm_release" "ingress_nginx" {
+  count            = var.install_ingress_controller ? 1 : 0
+  name             = "nginx-ingress-controller"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  version          = var.ingress_controller_version
+  namespace        = var.ingress_controller_namespace
+  create_namespace = true
+
+  set = [
+    {
+      name  = "fullnameOverride"
+      value = "ingress-nginx"
+    },
+    {
+      name  = "controller.service.loadBalancerIP"
+      value = var.load_balancer_ip
+    },
+    {
+      name  = "controller.allowSnippetAnnotations"
+      value = true
+    },
+    # Below two are added for backward compatibility with 1.1.1 which used Prefix pathType at some places. After 1.2.0 we should check if we may remove them again
+    {
+      name  = "controller.admissionWebhooks.enabled"
+      value = false
+    },
+    {
+      name  = "controller.config.enable-snippet"
+      value = "true"
+    }
+  ]
+}
+
 resource "kubectl_manifest" "keycloak_selfsigned_issuer" {
   count      = var.install_selfsigned_issuer ? 1 : 0
-  depends_on = [helm_release.cert_manager]
+  depends_on = [helm_release.cert_manager, helm_release.ingress_nginx]
 
   yaml_body = yamlencode({
     apiVersion = "cert-manager.io/v1"
@@ -31,7 +65,7 @@ resource "kubectl_manifest" "keycloak_selfsigned_issuer" {
   })
 }
 
-resource "kubernetes_namespace" "keycloak" {
+resource "kubernetes_namespace_v1" "keycloak" {
   metadata {
     name = var.keycloak_namespace
   }
@@ -46,7 +80,7 @@ data "http" "keycloak_crd" {
 resource "kubectl_manifest" "keycloak_crd" {
   yaml_body = data.http.keycloak_crd.response_body
   depends_on = [
-    kubernetes_namespace.keycloak
+    kubernetes_namespace_v1.keycloak
   ]
 }
 
@@ -57,7 +91,7 @@ data "http" "keycloak_realm_import_crd" {
 resource "kubectl_manifest" "keycloak_realm_import_crd" {
   yaml_body = data.http.keycloak_realm_import_crd.response_body
   depends_on = [
-    kubernetes_namespace.keycloak
+    kubernetes_namespace_v1.keycloak
   ]
 }
 
@@ -98,12 +132,12 @@ resource "kubectl_manifest" "keycloak_operator" {
   ]
 }
 
-resource "kubernetes_secret" "postgres" {
+resource "kubernetes_secret_v1" "postgres" {
   count = var.postgres_enabled ? 1 : 0
 
   metadata {
     name      = "postgres-credentials"
-    namespace = kubernetes_namespace.keycloak.metadata[0].name
+    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
   }
 
   data = {
@@ -115,12 +149,12 @@ resource "kubernetes_secret" "postgres" {
   type = "Opaque"
 }
 
-resource "kubernetes_persistent_volume_claim" "postgres" {
+resource "kubernetes_persistent_volume_claim_v1" "postgres" {
   count = var.postgres_enabled ? 1 : 0
 
   metadata {
     name      = "postgres-pvc"
-    namespace = kubernetes_namespace.keycloak.metadata[0].name
+    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
   }
 
   spec {
@@ -134,12 +168,12 @@ resource "kubernetes_persistent_volume_claim" "postgres" {
   }
 }
 
-resource "kubernetes_deployment" "postgres" {
+resource "kubernetes_deployment_v1" "postgres" {
   count = var.postgres_enabled ? 1 : 0
 
   metadata {
     name      = "postgres"
-    namespace = kubernetes_namespace.keycloak.metadata[0].name
+    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
     labels = {
       app = "postgres"
     }
@@ -187,7 +221,7 @@ resource "kubernetes_deployment" "postgres" {
             name = "POSTGRES_USER"
             value_from {
               secret_key_ref {
-                name = kubernetes_secret.postgres[0].metadata[0].name
+                name = kubernetes_secret_v1.postgres[0].metadata[0].name
                 key  = "username"
               }
             }
@@ -197,7 +231,7 @@ resource "kubernetes_deployment" "postgres" {
             name = "POSTGRES_PASSWORD"
             value_from {
               secret_key_ref {
-                name = kubernetes_secret.postgres[0].metadata[0].name
+                name = kubernetes_secret_v1.postgres[0].metadata[0].name
                 key  = "password"
               }
             }
@@ -207,7 +241,7 @@ resource "kubernetes_deployment" "postgres" {
             name = "POSTGRES_DB"
             value_from {
               secret_key_ref {
-                name = kubernetes_secret.postgres[0].metadata[0].name
+                name = kubernetes_secret_v1.postgres[0].metadata[0].name
                 key  = "database"
               }
             }
@@ -238,7 +272,7 @@ resource "kubernetes_deployment" "postgres" {
         volume {
           name = "postgres-storage"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.postgres[0].metadata[0].name
+            claim_name = kubernetes_persistent_volume_claim_v1.postgres[0].metadata[0].name
           }
         }
       }
@@ -246,16 +280,16 @@ resource "kubernetes_deployment" "postgres" {
   }
 
   depends_on = [
-    kubernetes_persistent_volume_claim.postgres
+    kubernetes_persistent_volume_claim_v1.postgres
   ]
 }
 
-resource "kubernetes_service" "postgres" {
+resource "kubernetes_service_v1" "postgres" {
   count = var.postgres_enabled ? 1 : 0
 
   metadata {
     name      = "postgres"
-    namespace = kubernetes_namespace.keycloak.metadata[0].name
+    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
   }
 
   spec {
@@ -347,15 +381,15 @@ locals {
     var.postgres_enabled ? {
       db = {
         vendor   = "postgres"
-        host     = kubernetes_service.postgres[0].metadata[0].name
+        host     = kubernetes_service_v1.postgres[0].metadata[0].name
         port     = 5432
         database = var.postgres_database
         usernameSecret = {
-          name = kubernetes_secret.postgres[0].metadata[0].name
+          name = kubernetes_secret_v1.postgres[0].metadata[0].name
           key  = "username"
         }
         passwordSecret = {
-          name = kubernetes_secret.postgres[0].metadata[0].name
+          name = kubernetes_secret_v1.postgres[0].metadata[0].name
           key  = "password"
         }
       }
@@ -369,14 +403,14 @@ resource "kubectl_manifest" "keycloak_instance" {
     kind       = "Keycloak"
     metadata = {
       name      = "keycloak"
-      namespace = kubernetes_namespace.keycloak.metadata[0].name
+      namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
     }
     spec = local.keycloak_spec
   })
 
   depends_on = [
     kubectl_manifest.keycloak_operator,
-    kubernetes_service.postgres
+    kubernetes_service_v1.postgres
   ]
 }
 
@@ -385,7 +419,7 @@ resource "kubernetes_ingress_v1" "keycloak" {
 
   metadata {
     name      = "keycloak"
-    namespace = kubernetes_namespace.keycloak.metadata[0].name
+    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
     annotations = merge(
       {
         "nginx.ingress.kubernetes.io/proxy-buffer-size"       = "128k"
@@ -434,7 +468,8 @@ resource "kubernetes_ingress_v1" "keycloak" {
   }
 
   depends_on = [
-    kubernetes_namespace.keycloak
+    kubernetes_namespace_v1.keycloak,
+    helm_release.ingress_nginx
   ]
 }
 
@@ -442,11 +477,11 @@ resource "terraform_data" "wait_for_keycloak_instance" {
   provisioner "local-exec" {
     command = <<-EOT
       echo "Waiting for Keycloak resource to report ready..."
-      kubectl wait keycloak/keycloak -n ${kubernetes_namespace.keycloak.metadata[0].name} --for=condition=Ready --timeout=3m
+      kubectl wait keycloak/keycloak -n ${kubernetes_namespace_v1.keycloak.metadata[0].name} --for=condition=Ready --timeout=3m
       echo "Waiting for Keycloak pods to be ready..."
-      kubectl wait pods -n ${kubernetes_namespace.keycloak.metadata[0].name} -l app=keycloak --for=condition=Ready --timeout=3m
+      kubectl wait pods -n ${kubernetes_namespace_v1.keycloak.metadata[0].name} -l app=keycloak --for=condition=Ready --timeout=3m
       echo "Waiting for Keycloak service endpoint..."
-      kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/keycloak-service -n ${kubernetes_namespace.keycloak.metadata[0].name} --timeout=2m
+      kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/keycloak-service -n ${kubernetes_namespace_v1.keycloak.metadata[0].name} --timeout=2m
       echo "Keycloak is ready!"
       echo "Waiting additional 5 for Keycloak authentication to be fully initialized..."
       sleep 5
@@ -462,7 +497,7 @@ resource "terraform_data" "wait_for_certificate" {
   count = var.ingress_enabled && var.ingress_tls_enabled ? 1 : 0
 
   provisioner "local-exec" {
-    command = "kubectl wait certificate -n ${kubernetes_namespace.keycloak.metadata[0].name} ${local.tls_secret_name} --for=condition=Ready --timeout=3m"
+    command = "kubectl wait certificate -n ${kubernetes_namespace_v1.keycloak.metadata[0].name} ${local.tls_secret_name} --for=condition=Ready --timeout=3m"
   }
 
   depends_on = [
