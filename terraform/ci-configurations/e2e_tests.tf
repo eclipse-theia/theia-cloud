@@ -88,7 +88,7 @@ provider "keycloak" {
   client_id                = "admin-cli"
   username                 = "admin"
   password                 = "admin"
-  url                      = trimsuffix(module.cluster_prerequisites.keycloak_url, "/")
+  url                      = module.cluster_prerequisites.keycloak_url
   tls_insecure_skip_verify = true # only for minikube self signed
   initial_login            = false
   client_timeout           = 60
