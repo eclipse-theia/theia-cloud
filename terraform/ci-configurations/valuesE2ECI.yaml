@@ -17,11 +17,19 @@ hosts:
 
 landingPage:
   image: theiacloud/theia-cloud-landing-page:minikube-ci-e2e
-  appDefinition: "theia-cloud-monitor-theia"
+  appDefinition: "theia-cloud-monitor-theia-popup"
   ephemeralStorage: true
   additionalApps:
-    theia-cloud-monitor-vscode:
-      label: "Theia with VSCode Monitor"
+    theia-cloud-monitor-theia-popup:
+      label: "Theia Monitor (Popup Test)"
+    theia-cloud-monitor-theia-timeout:
+      label: "Theia Monitor (Timeout Test)"
+    theia-cloud-monitor-vscode-popup:
+      label: "VSCode Monitor (Popup Test)"
+    theia-cloud-monitor-vscode-timeout:
+      label: "VSCode Monitor (Timeout Test)"
+    theia-cloud-demo:
+      label: "Theia Cloud Demo (2min timeout)"
 
 keycloak:
   enable: false
