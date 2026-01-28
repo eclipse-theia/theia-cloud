@@ -72,7 +72,6 @@ module "cluster_prerequisites" {
   cert_manager_issuer_email           = var.cert_manager_issuer_email
   ingress_cert_manager_cluster_issuer = "letsencrypt-prod"
   load_balancer_ip                    = google_compute_address.host_ip.address
-  cloud_provider                      = "GKE"
 }
 
 module "helm" {
@@ -82,7 +81,6 @@ module "helm" {
 
   cert_manager_issuer_email = var.cert_manager_issuer_email
   hostname                  = "${google_compute_address.host_ip.address}.sslip.io"
-  cloudProvider             = "GKE"
 }
 
 provider "keycloak" {
