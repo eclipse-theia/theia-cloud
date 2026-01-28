@@ -13,7 +13,7 @@ The module offers various customization options via variables including skipping
 - **Optional cert-manager installation** (can be disabled if already installed)
 - Cert-manager integration for automatic certificate generation
 - Optional self-signed ClusterIssuer for local development
-- Support for Minikube, GKE, and generic Kubernetes clusters
+- Support for Minikube and generic Kubernetes clusters
 - Configurable HTTP relative path (e.g., `/keycloak/`)
 
 ## Prerequisites
@@ -66,7 +66,6 @@ module "keycloak" {
   # GKE-specific configuration
   postgres_storage_class       = "standard-rwo"
   ingress_cert_manager_cluster_issuer = "letsencrypt-prod"
-  cloud_provider               = "GKE"
 
   # Production resources
   keycloak_replicas            = 2

@@ -42,4 +42,4 @@ module "theia_cloud" {
 - `hostname` (required) - The hostname for Theia Cloud services
 - `keycloak_url` (optional) - The base URL of the Keycloak instance used for authentication. If not provided, it will be constructed from the 'hostname' variable assuming keycloak is hosted at relative path /keycloak/.
 - `cert_manager_issuer_email` (required) - Email address used for certificate management
-- `cloudProvider` (optional, default: `"K8S"`) - The cloud provider (e.g., "K8S", "MINIKUBE", "GKE")
+- `cloudProvider` (optional, default: `"K8S"`) - The cloud provider (e.g., "K8S", "MINIKUBE")
