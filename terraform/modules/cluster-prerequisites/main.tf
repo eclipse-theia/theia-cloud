@@ -168,6 +168,10 @@ resource "kubernetes_persistent_volume_claim_v1" "postgres" {
     }
     storage_class_name = var.postgres_storage_class != "" ? var.postgres_storage_class : null
   }
+
+  # Don't wait for the PVC to be bound - with WaitForFirstConsumer storage classes
+  # (like GKE's standard-rwo), the PVC won't bind until a pod is scheduled to use it
+  wait_until_bound = false
 }
 
 resource "kubernetes_deployment_v1" "postgres" {
@@ -247,6 +251,13 @@ resource "kubernetes_deployment_v1" "postgres" {
                 key  = "database"
               }
             }
+          }
+
+          # Use a subdirectory for PGDATA to avoid issues with lost+found directory
+          # on freshly formatted volumes (common on cloud providers like GKE)
+          env {
+            name  = "PGDATA"
+            value = "/var/lib/postgresql/data/pgdata"
           }
 
           port {
