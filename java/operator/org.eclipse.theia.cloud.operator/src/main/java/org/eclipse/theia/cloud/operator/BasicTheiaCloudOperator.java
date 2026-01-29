@@ -20,14 +20,20 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.generateCorrela
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Deque;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,6 +55,7 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
 
     private static final ScheduledExecutorService STOP_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private static final ScheduledExecutorService WATCH_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    private static final int SESSION_EVENT_QUEUE_SIZE = 1000;
 
     private static final Logger LOGGER = LogManager.getLogger(BasicTheiaCloudOperator.class);
 
@@ -80,9 +87,15 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
     private final Map<String, Session> sessionCache = new ConcurrentHashMap<>();
     private final Set<SpecWatch<?>> watches = new LinkedHashSet<>();
 
+    // Session event scheduling: per-session serialization, cross-session parallelism.
+    private ExecutorService sessionExecutor;
+    private final Map<String, Deque<SessionEvent>> sessionEventQueues = new ConcurrentHashMap<>();
+    private final Map<String, AtomicBoolean> sessionEventRunning = new ConcurrentHashMap<>();
+
     @Override
     public void start() {
         this.operatorPlugins.forEach(plugin -> plugin.start());
+        initSessionExecutor();
         watches.add(initAppDefinitionsAndWatchForChanges());
         watches.add(initWorkspacesAndWatchForChanges());
         watches.add(initSessionsAndWatchForChanges());
@@ -124,7 +137,7 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
     protected SpecWatch<Session> initSessionsAndWatchForChanges() {
         try {
             resourceClient.sessions().list().forEach(this::initSession);
-            SpecWatch<Session> watcher = new SpecWatch<>(sessionCache, this::handleSessionEvent, "Session",
+            SpecWatch<Session> watcher = new SpecWatch<>(sessionCache, this::scheduleSessionEvent, "Session",
                     COR_ID_SESSIONPREFIX);
             resourceClient.sessions().operation().watch(watcher);
             return watcher;
@@ -152,7 +165,19 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
     protected void initSession(Session resource) {
         sessionCache.put(resource.getMetadata().getUid(), resource);
         String uid = resource.getMetadata().getUid();
-        handleSessionEvent(Watcher.Action.ADDED, uid, TheiaCloudOperatorLauncher.COR_ID_INIT);
+        scheduleSessionEvent(Watcher.Action.ADDED, uid, TheiaCloudOperatorLauncher.COR_ID_INIT);
+    }
+
+    protected void scheduleSessionEvent(Watcher.Action action, String uid, String correlationId) {
+        Session session = sessionCache.get(uid);
+        sessionEventQueues.computeIfAbsent(uid, k -> new ConcurrentLinkedDeque<>())
+                .add(new SessionEvent(action, correlationId, session));
+
+        // Ensure only one runner per session UID.
+        AtomicBoolean running = sessionEventRunning.computeIfAbsent(uid, k -> new AtomicBoolean(false));
+        if (running.compareAndSet(false, true)) {
+            sessionExecutor.execute(() -> drainSessionEvents(uid));
+        }
     }
 
     protected void handleAppDefnitionEvent(Watcher.Action action, String uid, String correlationId) {
@@ -205,6 +230,97 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
             if (!arguments.isContinueOnException()) {
                 System.exit(-1);
             }
+        }
+    }
+
+    private void handleSessionEvent(SessionEvent event) {
+        if (event.session == null) {
+            return;
+        }
+        try {
+            switch (event.action) {
+            case ADDED:
+                sessionHandler.sessionAdded(event.session, event.correlationId);
+                break;
+            case DELETED:
+                sessionHandler.sessionDeleted(event.session, event.correlationId);
+                break;
+            case MODIFIED:
+                sessionHandler.sessionModified(event.session, event.correlationId);
+                break;
+            case ERROR:
+                sessionHandler.sessionErrored(event.session, event.correlationId);
+                break;
+            case BOOKMARK:
+                sessionHandler.sessionBookmarked(event.session, event.correlationId);
+                break;
+            }
+        } catch (Exception e) {
+            LOGGER.error(formatLogMessage(event.correlationId, "Error while handling sessions"), e);
+            if (!arguments.isContinueOnException()) {
+                System.exit(-1);
+            }
+        }
+    }
+
+    private void initSessionExecutor() {
+        int threads = arguments.getSessionHandlerThreads();
+        sessionExecutor = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
+                new ArrayBlockingQueue<>(SESSION_EVENT_QUEUE_SIZE), new ThreadPoolExecutor.CallerRunsPolicy());
+    }
+
+    private void drainSessionEvents(String uid) {
+        try {
+            while (true) {
+                SessionEvent event = pollSessionEvent(uid);
+                if (event == null) {
+                    break;
+                }
+                handleSessionEvent(event);
+            }
+        } finally {
+            AtomicBoolean running = sessionEventRunning.get(uid);
+            if (running != null) {
+                running.set(false);
+            }
+            // Handle race: an event can be enqueued after we observe "empty" but before running=false.
+            // In that case, the enqueuer sees running=true and won't schedule a drainer, so we must
+            // recheck after flipping the flag and reschedule if anything is pending.
+            if (hasPendingSessionEvents(uid)) {
+                AtomicBoolean retryRunning = sessionEventRunning.computeIfAbsent(uid, k -> new AtomicBoolean(false));
+                if (retryRunning.compareAndSet(false, true)) {
+                    sessionExecutor.execute(() -> drainSessionEvents(uid));
+                }
+            } else {
+                // Cleanup maps for idle sessions.
+                sessionEventQueues.remove(uid);
+                sessionEventRunning.remove(uid);
+            }
+        }
+    }
+
+    private SessionEvent pollSessionEvent(String uid) {
+        Deque<SessionEvent> queue = sessionEventQueues.get(uid);
+        if (queue != null) {
+            return queue.poll();
+        }
+        return null;
+    }
+
+    private boolean hasPendingSessionEvents(String uid) {
+        Deque<SessionEvent> queue = sessionEventQueues.get(uid);
+        return queue != null && !queue.isEmpty();
+    }
+
+    private static final class SessionEvent {
+        private final Watcher.Action action;
+        private final String correlationId;
+        private final Session session;
+
+        private SessionEvent(Watcher.Action action, String correlationId, Session session) {
+            this.action = action;
+            this.correlationId = correlationId;
+            this.session = session;
         }
     }
 

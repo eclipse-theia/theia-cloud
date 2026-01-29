@@ -119,6 +119,10 @@ public class TheiaCloudOperatorArguments {
     private long maxWatchIdleTime = 1000 * 60 * 60; // 1 Hour
 
     @Option(names = {
+            "--sessionHandlerThreads" }, description = "Number of threads used to handle session events.", required = false)
+    private Integer sessionHandlerThreads;
+
+    @Option(names = {
             "--continueOnException" }, description = "Whether the operator will continue to run in case of unexpected exceptions.", required = false)
     private boolean continueOnException;
 
@@ -230,6 +234,16 @@ public class TheiaCloudOperatorArguments {
         return maxWatchIdleTime;
     }
 
+    public int getSessionHandlerThreads() {
+        if (sessionHandlerThreads != null && sessionHandlerThreads > 0) {
+            return sessionHandlerThreads;
+        }
+        int cores = Runtime.getRuntime().availableProcessors();
+        // Number of cores * 2
+        // Bounded within [4, 32]
+        return Math.min(32, Math.max(4, cores * 2));
+    }
+
     public boolean isContinueOnException() {
         return continueOnException;
     }
@@ -280,6 +294,7 @@ public class TheiaCloudOperatorArguments {
         result = prime * result + (int) (maxWatchIdleTime ^ (maxWatchIdleTime >>> 32));
         result = prime * result + ((monitorInterval == null) ? 0 : monitorInterval.hashCode());
         result = prime * result + ((requestedStorage == null) ? 0 : requestedStorage.hashCode());
+        result = prime * result + ((sessionHandlerThreads == null) ? 0 : sessionHandlerThreads.hashCode());
         result = prime * result + ((serviceUrl == null) ? 0 : serviceUrl.hashCode());
         result = prime * result + ((sessionsPerUser == null) ? 0 : sessionsPerUser.hashCode());
         result = prime * result + ((storageClassName == null) ? 0 : storageClassName.hashCode());
@@ -359,6 +374,11 @@ public class TheiaCloudOperatorArguments {
                 return false;
         } else if (!monitorInterval.equals(other.monitorInterval))
             return false;
+        if (sessionHandlerThreads == null) {
+            if (other.sessionHandlerThreads != null)
+                return false;
+        } else if (!sessionHandlerThreads.equals(other.sessionHandlerThreads))
+            return false;
         if (requestedStorage == null) {
             if (other.requestedStorage != null)
                 return false;
@@ -402,9 +422,10 @@ public class TheiaCloudOperatorArguments {
                 + enableMonitor + ", enableActivityTracker=" + enableActivityTracker + ", monitorInterval="
                 + monitorInterval + ", cloudProvider=" + cloudProvider + ", bandwidthLimiter=" + bandwidthLimiter
                 + ", wondershaperImage=" + wondershaperImage + ", serviceUrl=" + serviceUrl + ", sessionsPerUser="
-                + sessionsPerUser + ", serviceAuthToken=" + serviceAuthToken + ", appId=" + appId + ", instancesHost=" + instancesHost + ", usePaths=" + usePaths
-                + ", instancesPath=" + instancesPath + ", storageClassName=" + storageClassName + ", requestedStorage="
-                + requestedStorage + ", keycloakURL=" + keycloakURL + ", keycloakRealm=" + keycloakRealm
+                + sessionsPerUser + ", serviceAuthToken=" + serviceAuthToken + ", appId=" + appId + ", instancesHost="
+                + instancesHost + ", usePaths=" + usePaths + ", instancesPath=" + instancesPath + ", storageClassName="
+                + storageClassName + ", requestedStorage=" + requestedStorage + ", sessionHandlerThreads="
+                + sessionHandlerThreads + ", keycloakURL=" + keycloakURL + ", keycloakRealm=" + keycloakRealm
                 + ", keycloakClientId=" + keycloakClientId + ", leaderLeaseDuration=" + leaderLeaseDuration
                 + ", leaderRenewDeadline=" + leaderRenewDeadline + ", leaderRetryPeriod=" + leaderRetryPeriod
                 + ", maxWatchIdleTime=" + maxWatchIdleTime + ", continueOnException=" + continueOnException
