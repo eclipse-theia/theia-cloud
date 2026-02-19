@@ -192,7 +192,7 @@ public class IngressManager {
     /**
      * Adds ingress rules according to the specification.
      */
-    public void addRule(Ingress ingress, IngressRuleSpec spec, String correlationId) {
+    public synchronized void addRule(Ingress ingress, IngressRuleSpec spec, String correlationId) {
         try {
             client.ingresses().edit(correlationId, ingress.getMetadata().getName(), ingressToUpdate -> {
                 for (String host : spec.hosts) {
@@ -250,7 +250,7 @@ public class IngressManager {
     /**
      * Removes ingress rule by path (matches any host).
      */
-    public void removeRuleByPath(Ingress ingress, String path, String correlationId) {
+    public synchronized void removeRuleByPath(Ingress ingress, String path, String correlationId) {
         String fullPath = path + AddedHandlerUtil.INGRESS_REWRITE_PATH;
 
         try {
@@ -276,7 +276,7 @@ public class IngressManager {
     /**
      * Removes ingress rules matching path and specific hosts.
      */
-    public boolean removeRulesByPathAndHosts(
+    public synchronized boolean removeRulesByPathAndHosts(
             Ingress ingress,
             String path,
             List<String> hosts,

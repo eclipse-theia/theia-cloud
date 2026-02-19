@@ -44,6 +44,13 @@ public abstract class TheiaCloudOperatorLauncher {
 
             Injector injector = Guice.createInjector(module);
             TheiaCloudOperator theiaCloud = injector.getInstance(TheiaCloudOperator.class);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    theiaCloud.stop();
+                } catch (Exception e) {
+                    LOGGER.error(formatLogMessage(COR_ID_INIT, "Error during operator shutdown"), e);
+                }
+            }, "theia-cloud-operator-shutdown"));
             LOGGER.info(formatLogMessage(COR_ID_INIT, "Launching Theia Cloud Now"));
             theiaCloud.start();
         } catch (Exception e) {

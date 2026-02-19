@@ -377,6 +377,7 @@ function App(): JSX.Element {
           user: config.useKeycloak ? email! : user!,
           appDefinition: appDefinition,
           workspaceName: workspace,
+          ephemeral: workspace === undefined, // No workspace = ephemeral session
           env: {
             fromMap: {
               THEIA: 'true',

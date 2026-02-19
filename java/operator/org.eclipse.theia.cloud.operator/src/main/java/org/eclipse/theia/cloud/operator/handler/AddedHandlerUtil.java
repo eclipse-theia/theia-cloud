@@ -66,6 +66,7 @@ import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.sentry.ISpan;
 import io.sentry.SpanStatus;
 import org.eclipse.theia.cloud.common.tracing.Tracing;
+import org.eclipse.theia.cloud.common.tracing.TraceContext;
 
 public final class AddedHandlerUtil {
 
@@ -139,8 +140,8 @@ public final class AddedHandlerUtil {
         String appDef = session.getSpec().getAppDefinition();
 
         // Extract trace context BEFORE scheduling - the parent span will be finished by the time executor runs
-        java.util.Optional<org.eclipse.theia.cloud.common.tracing.TraceContext> traceContext = 
-            org.eclipse.theia.cloud.common.tracing.TraceContext.fromSpan(parentSpan);
+        java.util.Optional<TraceContext> traceContext = 
+            TraceContext.fromSpan(parentSpan);
 
         EXECUTOR.execute(() -> {
             // Create a new transaction linked to the same trace (parent span is already finished)
@@ -180,7 +181,10 @@ public final class AddedHandlerUtil {
                     try {
                         Thread.sleep(sleepDuration);
                     } catch (InterruptedException e) {
-                        /* silent */
+                        Thread.currentThread().interrupt();
+                        span.setTag("outcome", "cancelled");
+                        Tracing.finishError(span, e);
+                        return;
                     }
 
                     HttpsURLConnection connection;

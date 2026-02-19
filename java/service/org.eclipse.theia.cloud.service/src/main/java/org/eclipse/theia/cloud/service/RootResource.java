@@ -23,6 +23,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.Tag;
 import org.eclipse.microprofile.metrics.Timer;
+import io.sentry.Sentry;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.workspace.UserWorkspace;
@@ -132,6 +133,10 @@ public class RootResource extends BaseResource {
                 k8sUtil.deleteWorkspace(correlationId, workspace.getSpec().getName());
                 throw exception;
             }
+        } catch (Exception exception) {
+            error(correlationId, "Failed to launch session " + request, exception);
+            Sentry.captureException(exception);
+            throw exception;
         } finally {
             // Stop timing and record the measurement
             timerContext.stop();

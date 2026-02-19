@@ -20,4 +20,5 @@ public interface TheiaCloudOperator {
 
     void start();
 
+    void stop();
 }

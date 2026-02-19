@@ -103,13 +103,13 @@ public class EagerWithLazyFallbackSessionHandler implements SessionHandler {
         if (EagerSessionHandler.SESSION_START_STRATEGY_EAGER.equals(strategy)) {
             ISpan span = Tracing.childSpan(parentSpan, "session.eager_cleanup", "Eager session cleanup");
             span.setTag("cleanup.type", "eager");
-            result = eager.sessionDeleted(session, correlationId, parentSpan);
+            result = eager.sessionDeleted(session, correlationId, span);
             span.setTag("outcome", result ? "success" : "failure");
             Tracing.finish(span, result ? SpanStatus.OK : SpanStatus.INTERNAL_ERROR);
         } else {
             ISpan span = Tracing.childSpan(parentSpan, "session.lazy_cleanup", "Lazy session cleanup");
             span.setTag("cleanup.type", "lazy");
-            result = lazy.sessionDeleted(session, correlationId, parentSpan);
+            result = lazy.sessionDeleted(session, correlationId, span);
             span.setTag("outcome", result ? "success" : "failure");
             Tracing.finish(span, result ? SpanStatus.OK : SpanStatus.INTERNAL_ERROR);
         }
