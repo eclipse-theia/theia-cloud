@@ -40,7 +40,7 @@ provider "helm" {
   }
 }
 
-resource "kubernetes_persistent_volume" "minikube" {
+resource "kubernetes_persistent_volume_v1" "minikube" {
   metadata {
     name = "minikube-volume"
   }
@@ -61,7 +61,7 @@ resource "kubernetes_persistent_volume" "minikube" {
 module "helm" {
   source = "../modules/helm"
 
-  depends_on = [kubernetes_persistent_volume.minikube]
+  depends_on = [kubernetes_persistent_volume_v1.minikube]
 
   install_ingress_controller   = false
   ingress_controller_type      = var.ingress_controller_type

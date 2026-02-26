@@ -13,7 +13,7 @@ Run `terraform init` and `terraform apply` in both directories below:
 
 ```bash
 # run before destroying cluster
-terraform state rm kubernetes_persistent_volume.minikube
+terraform state rm kubernetes_persistent_volume_v1.minikube
 ```
 
 ## Theia Cloud Setups

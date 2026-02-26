@@ -70,7 +70,7 @@ Point your browser to the `try_now` output value URL printed to the console at t
 First remove the persistent volume from the terraform state:
 
 ```bash
-terraform state rm kubernetes_persistent_volume.minikube
+terraform state rm kubernetes_persistent_volume_v1.minikube
 ```
 
 Helm uninstall does not remove persistent volume claims, so the destruction of this persistent volume is blocked. The continue with a regular destroy:
