@@ -42,10 +42,14 @@ public class LabelsUtil {
 
     private static final int MAX_LABEL_LENGTH = 63;
 
-    private static String truncateLabelValue(String value) {
+    static String truncateLabelValue(String value) {
         if (value.length() > MAX_LABEL_LENGTH) {
             LOGGER.warning("Label value truncated: " + value);
-            return value.substring(0, MAX_LABEL_LENGTH);
+            String truncated = value.substring(0, MAX_LABEL_LENGTH);
+            while (truncated.length() > 0 && !Character.isLetterOrDigit(truncated.charAt(truncated.length() - 1))) {
+                truncated = truncated.substring(0, truncated.length() - 1);
+            }
+            return truncated;
         }
         return value;
     }

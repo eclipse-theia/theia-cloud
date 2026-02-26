@@ -24,7 +24,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 public final class WorkspaceUtil {
     private static final String SESSION_SUFFIX = "-session";
     private static final String WORKSPACE_PREFIX = "ws-";
-    private static final int WORKSPACE_NAME_LIMIT = NamingUtil.VALID_NAME_LIMIT - SESSION_SUFFIX.length();
+    public static final int WORKSPACE_NAME_LIMIT = NamingUtil.VALID_NAME_LIMIT - SESSION_SUFFIX.length();
 
     private WorkspaceUtil() {
         // util
