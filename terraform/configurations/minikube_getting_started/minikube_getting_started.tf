@@ -1,6 +1,6 @@
 variable "kubernetes_version" {
   description = "Kubernetes version to use"
-  default     = "v1.26.3"
+  default     = "v1.34.0"
 }
 
 variable "cert_manager_issuer_email" {
@@ -50,7 +50,7 @@ provider "kubectl" {
   cluster_ca_certificate = module.cluster.cluster_ca_certificate
 }
 
-resource "kubernetes_persistent_volume" "minikube" {
+resource "kubernetes_persistent_volume_v1" "minikube" {
 
   depends_on = [module.cluster]
 

@@ -24,7 +24,7 @@ provider "kubernetes" {
   cluster_ca_certificate = data.terraform_remote_state.minikube.outputs.cluster_ca_certificate
 }
 
-resource "kubernetes_persistent_volume" "minikube" {
+resource "kubernetes_persistent_volume_v1" "minikube" {
   metadata {
     name = "minikube-volume"
   }
