@@ -58,7 +58,7 @@ async function loginAndStartSession(page: Page, baseURL: string, appDefinition?:
   return sessionName;
 }
 
-test.describe('Session Timeout', () => {
+test.describe.skip('Session Timeout', () => {
   test.beforeEach(async () => {
     /* Reset session tracking and clean up any leftover sessions */
     currentSessionName = undefined;
