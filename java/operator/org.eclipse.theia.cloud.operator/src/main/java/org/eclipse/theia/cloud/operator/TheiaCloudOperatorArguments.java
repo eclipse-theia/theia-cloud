@@ -130,6 +130,24 @@ public class TheiaCloudOperatorArguments {
             "--oAuth2ProxyVersion" }, description = "The version to use of the quay.io/oauth2-proxy/oauth2-proxy image.", required = false, defaultValue = "latest")
     private String oAuth2ProxyVersion;
 
+    @Option(names = {
+            "--enableBuildCaching" }, description = "Whether to enable caching of Theia application builds.", required = false)
+    private boolean enableBuildCaching = false;
+
+    @Option(names = { "--buildCacheUrl" }, description = "The URL of the remote build cache server.", required = false)
+    private String buildCacheUrl;
+
+    @Option(names = {
+            "--enableBuildCachePush" }, description = "Whether sessions are allowed to push to the build cache.", required = false)
+    private boolean enableBuildCachePush = false;
+
+    @Option(names = {
+            "--enableDependencyCaching" }, description = "Whether to enable the dependency cache (Reposilite).", required = false)
+    private boolean enableDependencyCaching = false;
+
+    @Option(names = { "--dependencyCacheUrl" }, description = "The URL of the dependency cache server (Reposilite).", required = false)
+    private String dependencyCacheUrl;
+
     public boolean isUseKeycloak() {
         return useKeycloak;
     }
@@ -279,6 +297,43 @@ public class TheiaCloudOperatorArguments {
         return null;
     }
 
+    /**
+     * Validates that required argument combinations are satisfied.
+     * Must be called after argument parsing.
+     *
+     * @throws IllegalArgumentException if a caching flag is enabled but its URL is missing
+     */
+    public void validate() {
+        if (enableBuildCaching && (buildCacheUrl == null || buildCacheUrl.trim().isEmpty())) {
+            throw new IllegalArgumentException(
+                    "--buildCacheUrl is required when --enableBuildCaching is set");
+        }
+        if (enableDependencyCaching && (dependencyCacheUrl == null || dependencyCacheUrl.trim().isEmpty())) {
+            throw new IllegalArgumentException(
+                    "--dependencyCacheUrl is required when --enableDependencyCaching is set");
+        }
+    }
+
+    public boolean isEnableBuildCaching() {
+        return enableBuildCaching;
+    }
+
+    public String getBuildCacheUrl() {
+        return buildCacheUrl;
+    }
+
+    public boolean isEnableBuildCachePush() {
+        return enableBuildCachePush;
+    }
+
+    public boolean isEnableDependencyCaching() {
+        return enableDependencyCaching;
+    }
+
+    public String getDependencyCacheUrl() {
+        return dependencyCacheUrl;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -310,6 +365,11 @@ public class TheiaCloudOperatorArguments {
         result = prime * result + (usePaths ? 1231 : 1237);
         result = prime * result + ((wondershaperImage == null) ? 0 : wondershaperImage.hashCode());
         result = prime * result + ((oAuth2ProxyVersion == null) ? 0 : oAuth2ProxyVersion.hashCode());
+        result = prime * result + (enableBuildCaching ? 1231 : 1237);
+        result = prime * result + ((buildCacheUrl == null) ? 0 : buildCacheUrl.hashCode());
+        result = prime * result + (enableBuildCachePush ? 1231 : 1237);
+        result = prime * result + (enableDependencyCaching ? 1231 : 1237);
+        result = prime * result + ((dependencyCacheUrl == null) ? 0 : dependencyCacheUrl.hashCode());
         return result;
     }
 
@@ -421,6 +481,22 @@ public class TheiaCloudOperatorArguments {
                 return false;
         } else if (!oAuth2ProxyVersion.equals(other.oAuth2ProxyVersion))
             return false;
+        if (enableBuildCaching != other.enableBuildCaching)
+            return false;
+        if (buildCacheUrl == null) {
+            if (other.buildCacheUrl != null)
+                return false;
+        } else if (!buildCacheUrl.equals(other.buildCacheUrl))
+            return false;
+        if (enableBuildCachePush != other.enableBuildCachePush)
+            return false;
+        if (enableDependencyCaching != other.enableDependencyCaching)
+            return false;
+        if (dependencyCacheUrl == null) {
+            if (other.dependencyCacheUrl != null)
+                return false;
+        } else if (!dependencyCacheUrl.equals(other.dependencyCacheUrl))
+            return false;
         return true;
     }
 
@@ -437,7 +513,10 @@ public class TheiaCloudOperatorArguments {
                 + ", keycloakClientId=" + keycloakClientId + ", leaderLeaseDuration=" + leaderLeaseDuration
                 + ", leaderRenewDeadline=" + leaderRenewDeadline + ", leaderRetryPeriod=" + leaderRetryPeriod
                 + ", maxWatchIdleTime=" + maxWatchIdleTime + ", continueOnException=" + continueOnException
-                + ", oAuth2ProxyVersion=" + oAuth2ProxyVersion + "]";
+                + ", oAuth2ProxyVersion=" + oAuth2ProxyVersion + ", enableBuildCaching=" + enableBuildCaching + ", buildCacheUrl="
+                + buildCacheUrl + ", enableBuildCachePush=" + enableBuildCachePush
+                + ", enableDependencyCaching=" + enableDependencyCaching + ", dependencyCacheUrl="
+                + dependencyCacheUrl + "]";
     }
 
 }

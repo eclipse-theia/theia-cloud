@@ -64,6 +64,7 @@ public abstract class TheiaCloudOperatorLauncher {
             TheiaCloudOperatorArguments arguments = new TheiaCloudOperatorArguments();
             CommandLine commandLine = new CommandLine(arguments).setTrimQuotes(true);
             commandLine.parseArgs(args);
+            arguments.validate();
             LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsed args: " + arguments));
             return arguments;
         } catch (ParameterException e) {

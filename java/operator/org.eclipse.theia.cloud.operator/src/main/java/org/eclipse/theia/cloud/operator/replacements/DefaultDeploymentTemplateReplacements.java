@@ -68,6 +68,18 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     public static final String PLACEHOLDER_ENABLE_ACTIVITY_TRACKER = "placeholder-enable-activity-tracker";
     public static final String PLACEHOLDER_OAUTH2_PROXY_VERSION = "placeholder-oauth2-proxy-version";
 
+    public static final String PLACEHOLDER_ENV_BUILD_CACHE_ENABLED = "placeholder-build-cache-enabled";
+    public static final String PLACEHOLDER_ENV_BUILD_CACHE_URL = "placeholder-build-cache-url";
+    public static final String PLACEHOLDER_ENV_BUILD_CACHE_PUSH = "placeholder-build-cache-push";
+
+    public static final String PLACEHOLDER_ENV_DEPENDENCY_CACHE_ENABLED = "placeholder-dependency-cache-enabled";
+    public static final String PLACEHOLDER_ENV_DEPENDENCY_CACHE_URL = "placeholder-dependency-cache-url";
+
+    public static final String PLACEHOLDER_CA_BUNDLE_PEM_PATH = "placeholder-ca-bundle-pem-path";
+    public static final String PLACEHOLDER_GRADLE_TRUST_OPTS = "placeholder-gradle-trust-opts";
+    public static final String PLACEHOLDER_TRUST_BUNDLE_MOUNT_PATH = "placeholder-trust-bundle-mount-path";
+    public static final String PLACEHOLDER_TRUST_BUNDLE_CONFIGMAP = "placeholder-trust-bundle-configmap";
+
     protected static final String DEFAULT_UID = "1000";
 
     @Inject
@@ -148,6 +160,43 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
             environmentVariables.put(PLACEHOLDER_ENV_SESSION_KEYCLOAK_URL, "");
             environmentVariables.put(PLACEHOLDER_ENV_SESSION_KEYCLOAK_REALM, "");
             environmentVariables.put(PLACEHOLDER_ENV_SESSION_KEYCLOAK_CLIENT_ID, "");
+        }
+
+        if (arguments.isEnableBuildCaching() && arguments.getBuildCacheUrl() != null
+                && !arguments.getBuildCacheUrl().trim().isEmpty()) {
+            environmentVariables.put(PLACEHOLDER_ENV_BUILD_CACHE_ENABLED, "true");
+            environmentVariables.put(PLACEHOLDER_ENV_BUILD_CACHE_URL, arguments.getBuildCacheUrl().trim());
+            environmentVariables.put(PLACEHOLDER_ENV_BUILD_CACHE_PUSH,
+                    arguments.isEnableBuildCachePush() ? "true" : "false");
+        } else {
+            environmentVariables.put(PLACEHOLDER_ENV_BUILD_CACHE_ENABLED, "false");
+            environmentVariables.put(PLACEHOLDER_ENV_BUILD_CACHE_URL, "");
+            environmentVariables.put(PLACEHOLDER_ENV_BUILD_CACHE_PUSH, "false");
+        }
+
+        if (arguments.isEnableDependencyCaching() && arguments.getDependencyCacheUrl() != null
+                && !arguments.getDependencyCacheUrl().trim().isEmpty()) {
+            environmentVariables.put(PLACEHOLDER_ENV_DEPENDENCY_CACHE_ENABLED, "true");
+            environmentVariables.put(PLACEHOLDER_ENV_DEPENDENCY_CACHE_URL,
+                    arguments.getDependencyCacheUrl().trim());
+        } else {
+            environmentVariables.put(PLACEHOLDER_ENV_DEPENDENCY_CACHE_ENABLED, "false");
+            environmentVariables.put(PLACEHOLDER_ENV_DEPENDENCY_CACHE_URL, "");
+        }
+
+        if (arguments.isEnableBuildCaching() && arguments.getBuildCacheUrl() != null
+                && arguments.getBuildCacheUrl().trim().startsWith("https")) {
+            // Only set trust config when using HTTPS for the cache
+            environmentVariables.put(PLACEHOLDER_CA_BUNDLE_PEM_PATH, "/etc/ssl/theia-trust/trust-bundle.pem");
+            environmentVariables.put(PLACEHOLDER_GRADLE_TRUST_OPTS,
+                    "-Djavax.net.ssl.trustStore=/etc/ssl/theia-trust/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit");
+            environmentVariables.put(PLACEHOLDER_TRUST_BUNDLE_MOUNT_PATH, "/etc/ssl/theia-trust");
+            environmentVariables.put(PLACEHOLDER_TRUST_BUNDLE_CONFIGMAP, "theia-internal-trust");
+        } else {
+            environmentVariables.put(PLACEHOLDER_CA_BUNDLE_PEM_PATH, "");
+            environmentVariables.put(PLACEHOLDER_GRADLE_TRUST_OPTS, "");
+            environmentVariables.put(PLACEHOLDER_TRUST_BUNDLE_MOUNT_PATH, "/tmp/trust-bundle-unused");
+            environmentVariables.put(PLACEHOLDER_TRUST_BUNDLE_CONFIGMAP, "trust-bundle-unused");
         }
 
         if (arguments.isEnableMonitor()) {

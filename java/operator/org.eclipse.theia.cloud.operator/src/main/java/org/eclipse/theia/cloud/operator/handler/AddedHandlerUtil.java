@@ -63,6 +63,7 @@ import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.SecretEnvSource;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import io.sentry.ISpan;
 import io.sentry.SpanStatus;
 import org.eclipse.theia.cloud.common.tracing.Tracing;

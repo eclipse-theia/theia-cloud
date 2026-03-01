@@ -83,6 +83,16 @@ spec:
             value: placeholder-keycloak-env-realm
           - name: THEIACLOUD_KEYCLOAK_CLIENT_ID
             value: placeholder-keycloak-env-clientid
+          - name: BUILD_CACHE_ENABLED
+            value: placeholder-build-cache-enabled
+          - name: BUILD_CACHE_URL
+            value: placeholder-build-cache-url
+          - name: BUILD_CACHE_PUSH
+            value: placeholder-build-cache-push
+          - name: DEPENDENCY_CACHE_ENABLED
+            value: placeholder-dependency-cache-enabled
+          - name: DEPENDENCY_CACHE_URL
+            value: placeholder-dependency-cache-url
           - name: DATA_BRIDGE_PORT
             value: placeholder-data-bridge-env-port
           - name: DATA_BRIDGE_ENABLED
@@ -91,6 +101,14 @@ spec:
             value: placeholder-data-bridge-strategy
           - name: THEIA
             value: 1
+          - name: NODE_EXTRA_CA_CERTS
+            value: placeholder-ca-bundle-pem-path
+          - name: GRADLE_OPTS
+            value: placeholder-gradle-trust-opts
+          volumeMounts:
+            - name: trust-bundle
+              mountPath: placeholder-trust-bundle-mount-path
+              readOnly: true
           securityContext:
             runAsUser: placeholder-uid
             runAsGroup: placeholder-uid
@@ -106,3 +124,7 @@ spec:
         - name: oauth2-emails
           configMap:
             name: placeholder-emailsconfigname
+        - name: trust-bundle
+          configMap:
+            name: placeholder-trust-bundle-configmap
+            optional: true
