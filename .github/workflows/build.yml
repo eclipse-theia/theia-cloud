@@ -102,8 +102,7 @@ jobs:
         type=registry,ref=ghcr.io/ls1intum/theia/operator:build-cache
       cache-to: "type=registry,ref=ghcr.io/ls1intum/theia/operator:${{ needs.determine-tag.outputs.cache_tag }},mode=max"
     secrets:
-      docker-secrets: |
-        SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+      docker-secrets: ${{ secrets.SENTRY_AUTH_TOKEN != '' && format('SENTRY_AUTH_TOKEN={0}', secrets.SENTRY_AUTH_TOKEN) || '' }}
 
   build-and-push-service:
     needs: determine-tag
@@ -129,5 +128,4 @@ jobs:
         type=registry,ref=ghcr.io/ls1intum/theia/service:build-cache
       cache-to: "type=registry,ref=ghcr.io/ls1intum/theia/service:${{ needs.determine-tag.outputs.cache_tag }},mode=max"
     secrets:
-      docker-secrets: |
-        SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
+      docker-secrets: ${{ secrets.SENTRY_AUTH_TOKEN != '' && format('SENTRY_AUTH_TOKEN={0}', secrets.SENTRY_AUTH_TOKEN) || '' }}

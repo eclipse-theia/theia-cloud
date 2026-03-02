@@ -83,27 +83,43 @@
                     <target>21</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>io.sentry</groupId>
-                <artifactId>sentry-maven-plugin</artifactId>
-                <version>0.10.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <org>aet</org>
-                    <project>theia</project>
-                    <authToken>${env.SENTRY_AUTH_TOKEN}</authToken>
-                    <url>https://sentry.aet.cit.tum.de</url>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>uploadSourceBundle</goal>
-                            <goal>validateSdkDependencyVersions</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>sentry</id>
+            <activation>
+                <property>
+                    <name>sentry</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.sentry</groupId>
+                        <artifactId>sentry-maven-plugin</artifactId>
+                        <version>0.10.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <org>aet</org>
+                            <project>theia</project>
+                            <authToken>${env.SENTRY_AUTH_TOKEN}</authToken>
+                            <url>https://sentry.aet.cit.tum.de</url>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>uploadSourceBundle</goal>
+                                    <goal>validateSdkDependencyVersions</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
