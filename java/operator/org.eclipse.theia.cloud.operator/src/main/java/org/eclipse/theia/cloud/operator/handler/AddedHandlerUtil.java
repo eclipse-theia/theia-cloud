@@ -141,7 +141,7 @@ public final class AddedHandlerUtil {
         String appDef = session.getSpec().getAppDefinition();
 
         // Extract trace context BEFORE scheduling - the parent span will be finished by the time executor runs
-        java.util.Optional<TraceContext> traceContext = 
+        Optional<TraceContext> traceContext = 
             TraceContext.fromSpan(parentSpan);
 
         EXECUTOR.execute(() -> {

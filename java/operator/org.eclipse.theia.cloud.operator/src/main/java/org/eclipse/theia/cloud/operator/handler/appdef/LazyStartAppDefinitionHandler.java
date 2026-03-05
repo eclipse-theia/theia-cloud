@@ -99,15 +99,15 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
         if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client.kubernetes(),
                 client.namespace(), appDefinition, correlationId)) {
             LOGGER.error(formatLogMessage(correlationId,
-                    "Expected ingress '" + spec.getIngressname() + "' for app definition '" + appDefinitionResourceName
+                    "Expected HTTPRoute '" + spec.getIngressname() + "' for app definition '" + appDefinitionResourceName
                             + "' does not exist. Abort handling app definition."));
             client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
                 s.setOperatorStatus(OperatorStatus.ERROR);
-                s.setOperatorMessage("Ingress does not exist.");
+                s.setOperatorMessage("HTTPRoute does not exist.");
             });
             return false;
         } else {
-            LOGGER.trace(formatLogMessage(correlationId, "Ingress available already"));
+            LOGGER.trace(formatLogMessage(correlationId, "HTTPRoute available already"));
         }
 
         client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {

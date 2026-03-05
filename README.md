@@ -85,6 +85,16 @@ We offer three charts:
 - `theia-cloud-crds` (starting with version 0.8.1) installs the custom resource definitions for Theia Cloud and migration servers for older custom resources. This may be reused by multiple Theia Cloud installations in different namespaces.
 - `theia-cloud` installs the Theia Cloud operators, service, and landing-page. It depends on the two above charts.
 
+### Cluster prerequisites (Gateway API / Envoy Gateway)
+
+Theia Cloud now configures session traffic using Gateway API resources (`HTTPRoute` + `Gateway`).
+
+- Gateway API CRDs must be installed on the cluster.
+- Envoy Gateway must be installed and used as the Gateway controller (GatewayClass should match your Helm value `gateway.className`, default: `envoy`).
+- The operator sets `X-Forwarded-Uri` using Envoy runtime syntax (`%REQ(:PATH)%`) in route rules; on non-Envoy controllers this value may be treated as a literal string.
+
+For setup details, see [documentation/Install.md](documentation/Install.md).
+
 Starting with version 0.8.1 you may use helm upgrade to update to newer Theia Cloud version.\
 Older versions (before the introduction of `theia-cloud-crds`) require a manual uninstall and reinstall as well as a manual CRD upgrade step.
 

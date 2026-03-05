@@ -20,37 +20,42 @@ Please check <https://github.com/kubernetes-sigs/metrics-server#installation> fo
 As of writing this guide the installation command looks like this:\
 `kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml`
 
-### NginX Ingress Controller
+### Gateway API + Envoy Gateway (required)
 
-Follow the installation guide for your platform:\
-<https://kubernetes.github.io/ingress-nginx/deploy/>
+Theia Cloud routes traffic through Gateway API (`HTTPRoute`) and requires Envoy Gateway as controller.
 
-### Global certificate (Only when using paths)
+The operator configures `X-Forwarded-Uri` using Envoy runtime syntax (`%REQ(:PATH)%`) in HTTPRoute rules.
+With non-Envoy Gateway controllers this may be interpreted as a literal value and break path forwarding.
 
-If Theia Cloud is used with paths instead of subdomains, the global HTTPS certificate should exist and be configured as the NginX Ingress Controller's default certificate.
+Install Gateway API CRDs and Envoy Gateway first by following:
 
-You can either provide the default certificate yourself or use a dummy service to initially generate the certificate.
-In [global-certificate.yaml](./platforms/global-certificate.yaml), replace `example.com` with your own host and `letsencrypt-prod` with your certificate issuer of choice.
-Apply the configuration with `kubectl apply -f  ./documentation/platforms/global-certificate.yaml`.
+- Gateway API: <https://gateway-api.sigs.k8s.io/guides/>
+- Envoy Gateway: <https://gateway.envoyproxy.io/latest/install/install-helm/>
 
-Configure the nginx controllers deployment to use the certificate `default-tls` in the default namespace as its default certificate.
-For this, add argument `"--default-ssl-certificate=default/default-tls"` to the container by patching the controller's deployment.
+After installation, verify the controller is available (default class name usually `envoy`):
 
 ```bash
-kubectl patch deploy ingress-nginx-controller --type='json' -n ingress-nginx \
--p '[{ "op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--default-ssl-certificate=default/default-tls" }]'
+kubectl get gatewayclass
+kubectl get gateway -A
 ```
+
+### Global certificate (only when using paths)
+
+If Theia Cloud is configured to use paths instead of subdomains, ensure the configured Gateway listeners cover your base host and use TLS certificates that match that host.
+
+When using the Helm chart-managed Gateway (`gateway.create=true`), listener + certificate references are rendered automatically from chart values.
+When using a shared external Gateway (`gateway.create=false`), configure matching listeners and TLS certificateRefs on that shared Gateway before deploying Theia Cloud.
 
 ## Install
 
 For this demo we will use nip.io hostnames.
 
-Obtain the external IP address of the `ingress-nginx-controller`:
+Obtain the external IP address of your Envoy Gateway service:
 
 ```bash
 $ kubectl get svc --all-namespaces
 NAMESPACE       NAME                                 TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)                      AGE
-ingress-nginx   ingress-nginx-controller             LoadBalancer   10.52.4.129    34.141.62.32   80:32507/TCP,443:32114/TCP   11m
+envoy-gateway-system   envoy-gateway                 LoadBalancer   10.52.4.129    34.141.62.32   80:32507/TCP,443:32114/TCP   11m
 ```
 
 Open `./terraform/values/valuesDemo.yaml` and update the host section to use `subdomain.34.141.62.32.nip.io`:

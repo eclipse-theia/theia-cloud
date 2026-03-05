@@ -49,12 +49,12 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
         try {
             // Verify ingress exists
             ISpan ingressSpan = Tracing.childSpan(tx, "appdef.verify_ingress", "Verify ingress exists");
-            ingressSpan.setData("ingress_name", spec.getIngressname());
+            ingressSpan.setData("route_name", spec.getIngressname());
 
             if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client.kubernetes(),
                     client.namespace(), appDefinition, correlationId)) {
                 LOGGER.error(formatLogMessage(correlationId,
-                        "Expected ingress '" + spec.getIngressname() + "' for app definition '" + appDefName
+                        "Expected HTTPRoute '" + spec.getIngressname() + "' for app definition '" + appDefName
                                 + "' does not exist. Abort handling app definition."));
                 ingressSpan.setTag("outcome", "not_found");
                 Tracing.finish(ingressSpan, SpanStatus.NOT_FOUND);
@@ -65,7 +65,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
             }
             Tracing.finishSuccess(ingressSpan);
 
-            LOGGER.trace(formatLogMessage(correlationId, "Ingress available"));
+            LOGGER.trace(formatLogMessage(correlationId, "HTTPRoute available"));
 
             // Ensure pool has minimum capacity
             ISpan poolSpan = Tracing.childSpan(tx, "appdef.ensure_capacity", "Ensure pool capacity");
@@ -138,11 +138,11 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
         try {
             // Verify ingress exists
             ISpan ingressSpan = Tracing.childSpan(tx, "appdef.verify_ingress", "Verify ingress exists");
-            ingressSpan.setData("ingress_name", spec.getIngressname());
+            ingressSpan.setData("route_name", spec.getIngressname());
 
             if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client.kubernetes(),
                     client.namespace(), appDefinition, correlationId)) {
-                LOGGER.error(formatLogMessage(correlationId, "Expected ingress '" + spec.getIngressname()
+                LOGGER.error(formatLogMessage(correlationId, "Expected HTTPRoute '" + spec.getIngressname()
                         + "' for app definition '" + appDefName + "' does not exist. Abort handling."));
                 ingressSpan.setTag("outcome", "not_found");
                 Tracing.finish(ingressSpan, SpanStatus.NOT_FOUND);

@@ -41,7 +41,7 @@ import org.eclipse.theia.cloud.operator.pool.PrewarmedResourcePool.ReservationRe
 
 import com.google.inject.Inject;
 
-import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.api.model.gatewayapi.v1.HTTPRoute;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.sentry.ISpan;
 import io.sentry.Sentry;
@@ -166,20 +166,20 @@ public class EagerSessionHandler implements SessionHandler {
             AppDefinition appDef = appDefOpt.get();
             Tracing.finishSuccess(appDefSpan);
 
-            // Find ingress
-            ISpan ingressSpan = Tracing.childSpan(span, "eager.find_ingress", "Find ingress");
-            Optional<Ingress> ingressOpt = ingressManager.getIngress(appDef, correlationId);
-            if (ingressOpt.isEmpty()) {
+            // Find HTTPRoute
+            ISpan ingressSpan = Tracing.childSpan(span, "eager.find_route", "Find HTTPRoute");
+            Optional<HTTPRoute> routeOpt = ingressManager.getIngress(appDef, correlationId);
+            if (routeOpt.isEmpty()) {
                 LOGGER.error(formatLogMessage(correlationId,
-                        "No Ingress for app definition " + appDefinitionID + " found."));
-                SessionStatusUtil.markError(client, session, correlationId, "Ingress not available.");
+                        "No HTTPRoute for app definition " + appDefinitionID + " found."));
+                SessionStatusUtil.markError(client, session, correlationId, "HTTPRoute not available.");
                 ingressSpan.setTag("outcome", "not_found");
                 Tracing.finish(ingressSpan, SpanStatus.NOT_FOUND);
                 span.setTag("outcome", "error");
                 Tracing.finish(span, SpanStatus.NOT_FOUND);
                 return EagerSessionAddedOutcome.ERROR;
             }
-            Ingress ingress = ingressOpt.get();
+            HTTPRoute route = routeOpt.get();
             Tracing.finishSuccess(ingressSpan);
 
             // Reserve an instance from the pool
@@ -235,17 +235,17 @@ public class EagerSessionHandler implements SessionHandler {
                 }
             }
 
-            // Add ingress rule
-            ISpan ingressRuleSpan = Tracing.childSpan(span, "eager.add_ingress_rule", "Add ingress rule");
+            // Add HTTPRoute rule
+            ISpan ingressRuleSpan = Tracing.childSpan(span, "eager.add_route_rule", "Add HTTPRoute rule");
             String host;
             try {
-                host = ingressManager.addRuleForEagerSession(ingress, instance.getExternalService(), appDef,
+                host = ingressManager.addRuleForSession(route, instance.getExternalService(), appDef,
                         instance.getInstanceId(), correlationId);
                 ingressRuleSpan.setData("host", host);
                 Tracing.finishSuccess(ingressRuleSpan);
             } catch (KubernetesClientException e) {
-                LOGGER.error(formatLogMessage(correlationId, "Error while editing ingress"), e);
-                SessionStatusUtil.markError(client, session, correlationId, "Failed to edit ingress.");
+                LOGGER.error(formatLogMessage(correlationId, "Error while editing HTTPRoute"), e);
+                SessionStatusUtil.markError(client, session, correlationId, "Failed to edit HTTPRoute.");
                 Tracing.finishError(ingressRuleSpan, e);
                 span.setTag("outcome", "error");
                 Tracing.finish(span, SpanStatus.INTERNAL_ERROR);
@@ -296,12 +296,12 @@ public class EagerSessionHandler implements SessionHandler {
             AppDefinition appDef = appDefOpt.get();
             Tracing.finishSuccess(appDefSpan);
 
-            // Find ingress
-            ISpan ingressSpan = Tracing.childSpan(span, "eager.find_ingress", "Find ingress");
-            Optional<Ingress> ingressOpt = ingressManager.getIngress(appDef, correlationId);
-            if (ingressOpt.isEmpty()) {
+            // Find HTTPRoute
+            ISpan ingressSpan = Tracing.childSpan(span, "eager.find_route", "Find HTTPRoute");
+            Optional<HTTPRoute> routeOpt = ingressManager.getIngress(appDef, correlationId);
+            if (routeOpt.isEmpty()) {
                 LOGGER.error(formatLogMessage(correlationId,
-                        "No Ingress for app definition " + appDefinitionID + " found."));
+                        "No HTTPRoute for app definition " + appDefinitionID + " found."));
                 ingressSpan.setTag("outcome", "not_found");
                 Tracing.finish(ingressSpan, SpanStatus.NOT_FOUND);
                 span.setTag("outcome", "failure");
@@ -322,14 +322,14 @@ public class EagerSessionHandler implements SessionHandler {
             }
             span.setData("instance_id", instanceId);
 
-            // Remove ingress rule
-            ISpan removeIngressSpan = Tracing.childSpan(span, "eager.remove_ingress_rule", "Remove ingress rule");
+            // Remove HTTPRoute rule
+            ISpan removeIngressSpan = Tracing.childSpan(span, "eager.remove_route_rule", "Remove HTTPRoute rule");
             removeIngressSpan.setData("instance_id", instanceId);
             try {
-                ingressManager.removeRuleForEagerSession(ingressOpt.get(), appDef, instanceId, correlationId);
+                ingressManager.removeRulesForSession(routeOpt.get(), appDef, instanceId, correlationId);
                 Tracing.finishSuccess(removeIngressSpan);
             } catch (KubernetesClientException e) {
-                LOGGER.error(formatLogMessage(correlationId, "Error while removing ingress rule"), e);
+                LOGGER.error(formatLogMessage(correlationId, "Error while removing HTTPRoute rule"), e);
                 Tracing.finishError(removeIngressSpan, e);
                 span.setTag("outcome", "failure");
                 Tracing.finish(span, SpanStatus.INTERNAL_ERROR);

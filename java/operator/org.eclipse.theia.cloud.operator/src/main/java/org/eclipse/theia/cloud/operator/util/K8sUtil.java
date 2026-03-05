@@ -37,6 +37,8 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.gatewayapi.v1.HTTPRoute;
+import io.fabric8.kubernetes.api.model.gatewayapi.v1.HTTPRouteList;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
@@ -51,6 +53,7 @@ public final class K8sUtil {
     private static final String CONFIG_MAP = "ConfigMap";
     private static final String SERVICE = "Service";
     private static final String INGRESS = "Ingress";
+    private static final String HTTP_ROUTE = "HTTPRoute";
 
     private K8sUtil() {
     }
@@ -66,6 +69,20 @@ public final class K8sUtil {
             String ownerName, String ownerUid) {
         return getExistingTypesStream(client, namespace, ownerName, ownerUid,
                 client.network().v1().ingresses().list().getItems())//
+                        .findAny();
+    }
+
+    public static Optional<HTTPRoute> getExistingHttpRoute(NamespacedKubernetesClient client,
+            String namespace, String routeName) {
+        return client.resources(HTTPRoute.class, HTTPRouteList.class).inNamespace(namespace).list().getItems().stream()//
+                .filter(route -> routeName.equals(route.getMetadata().getName()))//
+                .findAny();
+    }
+
+    public static Optional<HTTPRoute> getExistingHttpRoute(NamespacedKubernetesClient client,
+            String namespace, String ownerName, String ownerUid) {
+        return getExistingTypesStream(client, namespace, ownerName, ownerUid,
+                client.resources(HTTPRoute.class, HTTPRouteList.class).inNamespace(namespace).list().getItems())//
                         .findAny();
     }
 

@@ -57,7 +57,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
+import io.fabric8.kubernetes.api.model.gatewayapi.v1.HTTPRoute;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
 /**
@@ -174,14 +174,14 @@ public class LazySessionHandler implements SessionHandler {
         }
         Tracing.finishSuccess(limitsSpan);
 
-        // Get ingress
-        ISpan ingressSpan = Tracing.childSpan(span, "lazy.get_ingress", "Get ingress for app definition");
-        Optional<Ingress> ingressOpt = ingressManager.getIngress(appDef, correlationId);
-        if (ingressOpt.isEmpty()) {
-            SessionStatusUtil.markError(client, session, correlationId, "Ingress not available.");
+        // Get HTTPRoute
+        ISpan ingressSpan = Tracing.childSpan(span, "lazy.get_route", "Get HTTPRoute for app definition");
+        Optional<HTTPRoute> routeOpt = ingressManager.getIngress(appDef, correlationId);
+        if (routeOpt.isEmpty()) {
+            SessionStatusUtil.markError(client, session, correlationId, "HTTPRoute not available.");
             ingressSpan.setTag("outcome", "not_found");
             Tracing.finish(ingressSpan, SpanStatus.NOT_FOUND);
-            span.setTag("outcome", "ingress_not_found");
+            span.setTag("outcome", "route_not_found");
             Tracing.finish(span, SpanStatus.NOT_FOUND);
             return false;
         }
@@ -270,19 +270,19 @@ public class LazySessionHandler implements SessionHandler {
                 correlationId);
         Tracing.finishSuccess(deploymentSpan);
 
-        // Add ingress rule
-        ISpan ingressRuleSpan = Tracing.childSpan(span, "lazy.add_ingress_rule", "Add ingress rule");
+        // Add HTTPRoute rule
+        ISpan ingressRuleSpan = Tracing.childSpan(span, "lazy.add_route_rule", "Add HTTPRoute rule");
         String host;
         try {
-            host = ingressManager.addRuleForLazySession(
-                    ingressOpt.get(), serviceOpt.get(), session, appDef, correlationId);
+            host = ingressManager.addRuleForSession(
+                    routeOpt.get(), serviceOpt.get(), appDef, session, correlationId);
             ingressRuleSpan.setData("host", host);
             Tracing.finishSuccess(ingressRuleSpan);
         } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while editing ingress"), e);
-            SessionStatusUtil.markError(client, session, correlationId, "Failed to edit ingress.");
+            LOGGER.error(formatLogMessage(correlationId, "Error while editing HTTPRoute"), e);
+            SessionStatusUtil.markError(client, session, correlationId, "Failed to edit HTTPRoute.");
             Tracing.finishError(ingressRuleSpan, e);
-            span.setTag("outcome", "ingress_rule_failed");
+            span.setTag("outcome", "route_rule_failed");
             Tracing.finish(span, SpanStatus.INTERNAL_ERROR);
             return false;
         }
@@ -327,35 +327,33 @@ public class LazySessionHandler implements SessionHandler {
         AppDefinition appDef = appDefOpt.get();
         Tracing.finishSuccess(appDefSpan);
 
-        ISpan ingressSpan = Tracing.childSpan(span, "lazy.get_ingress", "Get ingress for cleanup");
-        Optional<Ingress> ingressOpt = ingressManager.getIngress(appDef, correlationId);
-        if (ingressOpt.isEmpty()) {
-            LOGGER.error(formatLogMessage(correlationId, "No Ingress found for app definition."));
+        ISpan ingressSpan = Tracing.childSpan(span, "lazy.get_route", "Get HTTPRoute for cleanup");
+        Optional<HTTPRoute> routeOpt = ingressManager.getIngress(appDef, correlationId);
+        if (routeOpt.isEmpty()) {
+            LOGGER.error(formatLogMessage(correlationId, "No HTTPRoute found for app definition."));
             ingressSpan.setTag("outcome", "not_found");
             Tracing.finish(ingressSpan, SpanStatus.NOT_FOUND);
-            span.setTag("outcome", "ingress_not_found");
+            span.setTag("outcome", "route_not_found");
             span.setStatus(SpanStatus.NOT_FOUND);
             return false;
         }
         Tracing.finishSuccess(ingressSpan);
 
-        // Remove ingress rules
-        ISpan removeRulesSpan = Tracing.childSpan(span, "lazy.remove_ingress_rules", "Remove ingress rules");
-        boolean success = ingressManager.removeRulesForLazySession(
-                ingressOpt.get(), session, appDef, correlationId);
-
-        if (!success) {
-            LOGGER.error(formatLogMessage(correlationId, "Failed to remove ingress rules for session"));
+        // Remove HTTPRoute rules
+        ISpan removeRulesSpan = Tracing.childSpan(span, "lazy.remove_route_rules", "Remove HTTPRoute rules");
+        try {
+            ingressManager.removeRulesForSession(routeOpt.get(), appDef, session, correlationId);
+            Tracing.finishSuccess(removeRulesSpan);
+            LOGGER.info(formatLogMessage(correlationId, "Successfully cleaned up HTTPRoute rules for session"));
+            span.setTag("outcome", "success");
+            return true;
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Failed to remove HTTPRoute rules for session"), e);
             removeRulesSpan.setTag("outcome", "failed");
-            Tracing.finish(removeRulesSpan, SpanStatus.INTERNAL_ERROR);
+            Tracing.finishError(removeRulesSpan, e);
             span.setTag("outcome", "remove_rules_failed");
             return false;
         }
-        Tracing.finishSuccess(removeRulesSpan);
-
-        LOGGER.info(formatLogMessage(correlationId, "Successfully cleaned up ingress rules for session"));
-        span.setTag("outcome", "success");
-        return true;
     }
 
     // ========== Helper Methods ==========
