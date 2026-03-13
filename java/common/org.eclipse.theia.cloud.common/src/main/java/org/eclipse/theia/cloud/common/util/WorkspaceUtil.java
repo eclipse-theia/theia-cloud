@@ -51,7 +51,10 @@ public final class WorkspaceUtil {
     }
 
     public static String getStorageName(Workspace workspace) {
-        return NamingUtil.createName(workspace);
+        if (workspace.getSpec().getStorage() == null || workspace.getSpec().getStorage().isEmpty()) {
+            return NamingUtil.createName(workspace);
+        }
+        return workspace.getSpec().getStorage();
     }
 
     public static String generateWorkspaceLabel(String user, String appDefinitionName) {

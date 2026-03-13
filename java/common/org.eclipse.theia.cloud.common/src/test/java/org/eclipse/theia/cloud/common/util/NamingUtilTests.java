@@ -86,7 +86,7 @@ class NamingUtilTests {
         Workspace workspace = createWorkspace();
 
         String result = NamingUtil.createName(workspace, null);
-        assertEquals("ws-some-username-test-app-definiti-381261d79c23", result);
+        assertEquals("ws-some-username-test-app-definiti-abe3457f2dd0", result);
     }
 
     @Test
@@ -94,7 +94,7 @@ class NamingUtilTests {
         Workspace workspace = createWorkspace();
 
         String result = NamingUtil.createName(workspace, " ");
-        assertEquals("ws-some-username-test-app-definiti-381261d79c23", result);
+        assertEquals("ws-some-username-test-app-definiti-abe3457f2dd0", result);
     }
 
     @Test
@@ -102,7 +102,7 @@ class NamingUtilTests {
         Workspace workspace = createWorkspace();
 
         String result = NamingUtil.createName(workspace, "");
-        assertEquals("ws-some-username-test-app-definiti-381261d79c23", result);
+        assertEquals("ws-some-username-test-app-definiti-abe3457f2dd0", result);
     }
 
     @Test
@@ -110,7 +110,7 @@ class NamingUtilTests {
         Workspace workspace = createWorkspace();
 
         String result = NamingUtil.createName(workspace, "longidentifier");
-        assertEquals("ws-longidentif-some-userna-test-app-de-381261d79c23", result);
+        assertEquals("ws-longidentif-some-userna-test-app-de-abe3457f2dd0", result);
     }
 
     @Test
