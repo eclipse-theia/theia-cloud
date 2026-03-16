@@ -1,0 +1,41 @@
+{
+  "self": {
+    "name": "theia-cloud",
+    "license": "EPL-2.0",
+    "description": "SCANOSS configuration for Theia Cloud"
+  },
+  "settings": {
+    "skip": {
+      "patterns": {
+        "scanning": [
+          "**/node_modules/",
+          "**/dist/",
+          "**/build/",
+          "**/target/",
+          "**/*.min.*",
+          "**/*.generated.*",
+          "**/*.graphml",
+          "**/*.vsix",
+          "documentation/**"
+        ],
+        "fingerprinting": ["*.log", "*.tmp", "**/*test*.*"]
+      }
+    }
+  },
+  "bom": {
+    "include": [
+      { "purl": "pkg:github/eclipsesource/theia-cloud" },
+      { "purl": "pkg:github/eclipse-theia/theia-cloud" },
+      { "purl": "pkg:npm/%40eclipse-theiacloud/common" },
+      { "purl": "pkg:npm/theiacloud-test" }
+    ],
+    "remove": [
+      {
+        "path": "demo/dockerfiles/demo-theia-monitor-vscode/theia-cloud-monitor-1.1.1.vsix",
+        "purl": "pkg:github/eclipse-theia/theia-cloud",
+        "comment": "Build artifact; suppress baseline finding"
+      }
+    ],
+    "replace": []
+  }
+}

@@ -1,0 +1,38 @@
+name: SCANOSS PR Scan
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  #  pull-requests: write
+  checks: write
+  actions: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run SCANOSS
+        id: scan
+        uses: scanoss/code-scan-action@7da0dbb413e636a18f262a4d930f72fab12cc80d # v1.4.0
+        with:
+          dependencies.enabled: false
+          policies: undeclared
+          policies.halt_on_failure: true
+          scanossSettings: true
+          settingsFilepath: .scanoss.json
+
+      - name: Save raw results
+        run: |
+          echo "Results at: ${{ steps.scan.outputs.result-filepath }}"
+          cp "${{ steps.scan.outputs.result-filepath }}" scanoss-results.json
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: scanoss-baseline-results
+          path: scanoss-results.json
