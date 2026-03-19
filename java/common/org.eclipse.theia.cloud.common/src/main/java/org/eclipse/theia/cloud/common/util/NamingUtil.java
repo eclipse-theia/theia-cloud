@@ -167,7 +167,7 @@ public final class NamingUtil {
      * </p>
      * <p>
      * The created name contains a "workspace" prefix, the workspace's user and app definition, the identifier (if
-     * given), and the last segment of the Workspace's UID. User, app definition and identifier are shortened to keep
+     * given), and the last segment of a sha256 hash of the Workspace name. User, app definition and identifier are shortened to keep
      * the name within Kubernetes' character limit (63).
      * </p>
      * 
@@ -178,10 +178,9 @@ public final class NamingUtil {
      */
     public static String createName(Workspace workspace, String identifier) {
         /*
-         * Kubenertes UIDs are standardized UUIDs/GUIDs. This means the uid string will have a length of 36. Unique part
-         * of the name will consist of the workspace uuid followed by the identifier. Parts will be separated with "-".
-         * This must be shorter than {@link NamingUtil.VALID_NAME_LIMIT} We fill remaining space with additional
-         * information about the workspace. This may be trimmed away however.
+         * Using a hash of the workspace name instead of the workspace UID ensures this method returns the same result
+         * even if the workspace custom resource is recreated.
+         * This makes PVC names deterministic, which helps with backup and restore operations.
          */
         return createName("ws", identifier, workspace.getSpec().getUser(), workspace.getSpec().getAppDefinition(),
                 sha256Hash(workspace.getSpec().getName()));

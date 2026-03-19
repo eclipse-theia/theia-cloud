@@ -51,7 +51,7 @@ public final class WorkspaceUtil {
     }
 
     public static String getStorageName(Workspace workspace) {
-        if (workspace.getSpec().getStorage() == null || workspace.getSpec().getStorage().isEmpty()) {
+        if (!workspace.getSpec().hasStorage()) {
             return NamingUtil.createName(workspace);
         }
         return workspace.getSpec().getStorage();
