@@ -15,6 +15,9 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.util;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
@@ -164,7 +167,7 @@ public final class NamingUtil {
      * </p>
      * <p>
      * The created name contains a "workspace" prefix, the workspace's user and app definition, the identifier (if
-     * given), and the last segment of the Workspace's UID. User, app definition and identifier are shortened to keep
+     * given), and the last segment of a sha256 hash of the Workspace name. User, app definition and identifier are shortened to keep
      * the name within Kubernetes' character limit (63).
      * </p>
      * 
@@ -175,13 +178,12 @@ public final class NamingUtil {
      */
     public static String createName(Workspace workspace, String identifier) {
         /*
-         * Kubenertes UIDs are standardized UUIDs/GUIDs. This means the uid string will have a length of 36. Unique part
-         * of the name will consist of the workspace uuid followed by the identifier. Parts will be separated with "-".
-         * This must be shorter than {@link NamingUtil.VALID_NAME_LIMIT} We fill remaining space with additional
-         * information about the workspace. This may be trimmed away however.
+         * Using a hash of the workspace name instead of the workspace UID ensures this method returns the same result
+         * even if the workspace custom resource is recreated.
+         * This makes PVC names deterministic, which helps with backup and restore operations.
          */
         return createName("ws", identifier, workspace.getSpec().getUser(), workspace.getSpec().getAppDefinition(),
-                workspace.getMetadata().getUid());
+                sha256Hash(workspace.getSpec().getName()));
     }
 
     /**
@@ -338,6 +340,31 @@ public final class NamingUtil {
             valid = valid.substring(0, valid.length() - 1) + VALID_NAME_SUFFIX;
         }
         return valid.toLowerCase(US_LOCALE);
+    }
+
+    /**
+     * Computes the SHA-256 hash of the given input string and returns it as a hexadecimal string.
+     *
+     * @param input the string to hash
+     * @return the SHA-256 hash as a lowercase hexadecimal string
+     * @throws RuntimeException if SHA-256 algorithm is not available
+     */
+    private static String sha256Hash(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available", e);
+        }
     }
 
 }
