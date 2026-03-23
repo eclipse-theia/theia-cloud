@@ -53,6 +53,7 @@ jobs:
       - name: Run theia dash-licenses
         shell: bash
         run: |
+          sudo apt-get update
           sudo apt-get install libsecret-1-dev
           yarn --frozen-lockfile --ignore-scripts
           yarn license:check

@@ -226,6 +226,128 @@ export async function waitForSessionDeletion(
   );
 }
 
+const WORKSPACE_LABEL_KEY = 'theia-cloud.io/workspace-name';
+
+export async function deleteAllTheiaCloudPVCs(): Promise<void> {
+  const pvcs = await coreV1Api.listNamespacedPersistentVolumeClaim({
+    namespace,
+    labelSelector: WORKSPACE_LABEL_KEY
+  });
+  for (const pvc of pvcs.items) {
+    const name = pvc.metadata?.name;
+    if (!name) continue;
+    try {
+      await coreV1Api.deleteNamespacedPersistentVolumeClaim({ name, namespace });
+    } catch (error: any) {
+      if (error.code !== 404 && error.response?.statusCode !== 404 && error.statusCode !== 404) {
+        throw error;
+      }
+    }
+  }
+}
+
+export async function deleteAllTheiaCloudPVs(): Promise<void> {
+  const pvs = await coreV1Api.listPersistentVolume({});
+  for (const pv of pvs.items) {
+    const name = pv.metadata?.name;
+    if (!name || !name.startsWith('ws-')) continue;
+    const claimRef = pv.spec?.claimRef;
+    if (claimRef?.namespace !== namespace) continue;
+    try {
+      await coreV1Api.deletePersistentVolume({ name });
+    } catch (error: any) {
+      if (error.code !== 404 && error.response?.statusCode !== 404 && error.statusCode !== 404) {
+        throw error;
+      }
+    }
+  }
+}
+
+export async function waitForPVCDeletion(timeoutMs: number = 30000, intervalMs: number = 2000): Promise<void> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    const pvcs = await coreV1Api.listNamespacedPersistentVolumeClaim({
+      namespace,
+      labelSelector: WORKSPACE_LABEL_KEY
+    });
+    if (pvcs.items.length === 0) {
+      return;
+    }
+    await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+  const pvcs = await coreV1Api.listNamespacedPersistentVolumeClaim({
+    namespace,
+    labelSelector: WORKSPACE_LABEL_KEY
+  });
+  if (pvcs.items.length > 0) {
+    const pvcInfo = pvcs.items.map(p => {
+      const finalizers = p.metadata?.finalizers?.join(',') || 'none';
+      return `${p.metadata?.name} (phase=${p.status?.phase}, finalizers=${finalizers})`;
+    }).join(', ');
+    throw new Error(`PVCs still exist after ${timeoutMs / 1000}s timeout: ${pvcInfo}`);
+  }
+}
+
+export async function waitForPVDeletion(timeoutMs: number = 30000, intervalMs: number = 2000): Promise<void> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    const pvs = await coreV1Api.listPersistentVolume({});
+    const theiaCloudPVs = pvs.items.filter(pv => {
+      const name = pv.metadata?.name;
+      return name && name.startsWith('ws-') && pv.spec?.claimRef?.namespace === namespace;
+    });
+    if (theiaCloudPVs.length === 0) {
+      return;
+    }
+    await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+  const pvs = await coreV1Api.listPersistentVolume({});
+  const theiaCloudPVs = pvs.items.filter(pv => {
+    const name = pv.metadata?.name;
+    return name && name.startsWith('ws-') && pv.spec?.claimRef?.namespace === namespace;
+  });
+  if (theiaCloudPVs.length > 0) {
+    const pvInfo = theiaCloudPVs.map(p => {
+      return `${p.metadata?.name} (phase=${p.status?.phase}, reclaim=${p.spec?.persistentVolumeReclaimPolicy})`;
+    }).join(', ');
+    throw new Error(`PVs still exist after ${timeoutMs / 1000}s timeout: ${pvInfo}`);
+  }
+}
+
+export async function waitForTheiaCloudPodsDeletion(timeoutMs: number = 60000, intervalMs: number = 2000): Promise<void> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    const pods = await coreV1Api.listNamespacedPod({
+      namespace,
+      labelSelector: 'app.kubernetes.io/component=session'
+    });
+    if (pods.items.length === 0) {
+      return;
+    }
+    await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+  const pods = await coreV1Api.listNamespacedPod({
+    namespace,
+    labelSelector: 'app.kubernetes.io/component=session'
+  });
+  if (pods.items.length > 0) {
+    const podInfo = pods.items.map(p =>
+      `${p.metadata?.name} (phase=${p.status?.phase})`
+    ).join(', ');
+    throw new Error(`Session pods still exist after ${timeoutMs / 1000}s timeout: ${podInfo}`);
+  }
+}
+
+export async function cleanupAllResources(): Promise<void> {
+  await deleteAllSessions();
+  await deleteAllWorkspaces();
+  await waitForTheiaCloudPodsDeletion();
+  await deleteAllTheiaCloudPVCs();
+  await deleteAllTheiaCloudPVs();
+  await waitForPVCDeletion();
+  await waitForPVDeletion();
+}
+
 export async function getSession(name: string): Promise<any | undefined> {
   try {
     return await k8sApi.getNamespacedCustomObject({
