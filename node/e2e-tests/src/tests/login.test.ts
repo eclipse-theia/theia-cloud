@@ -1,11 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-import { deleteAllSessions, deleteAllWorkspaces } from '../k8s';
+import { cleanupAllResources } from '../k8s';
 
 test.describe('Login', () => {
   test.beforeEach(async () => {
-    deleteAllSessions();
-    deleteAllWorkspaces();
+    await cleanupAllResources();
   });
 
   test('should work', async ({ page, baseURL }) => {

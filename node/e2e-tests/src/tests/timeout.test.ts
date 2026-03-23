@@ -1,9 +1,8 @@
 import { expect, Page, test, TestInfo } from '@playwright/test';
 
 import {
+  cleanupAllResources,
   collectSessionPodLogs,
-  deleteAllSessions,
-  deleteAllWorkspaces,
   getSession,
   listSessions,
   printSessionPodLogs,
@@ -62,8 +61,7 @@ test.describe.skip('Session Timeout', () => {
   test.beforeEach(async () => {
     /* Reset session tracking and clean up any leftover sessions */
     currentSessionName = undefined;
-    await deleteAllSessions();
-    await deleteAllWorkspaces();
+    await cleanupAllResources();
   });
 
   test.afterEach(async ({}, testInfo: TestInfo) => {
@@ -79,8 +77,7 @@ test.describe.skip('Session Timeout', () => {
     }
 
     /* Clean up sessions and workspaces */
-    await deleteAllSessions();
-    await deleteAllWorkspaces();
+    await cleanupAllResources();
   });
 
   test('session should be terminated after fixed time timeout', async ({ page, baseURL }) => {
