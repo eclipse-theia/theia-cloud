@@ -285,7 +285,7 @@ resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
   repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud"
-  version          = "1.1.3"
+  version          = "1.2.0"
   namespace        = "theia-cloud"
   create_namespace = true
 
@@ -305,6 +305,10 @@ resource "helm_release" "theia-cloud" {
     {
       name  = "operator.cloudProvider"
       value = var.cloudProvider
+    },
+    {
+      name  = "ingress.controller"
+      value = var.ingress_controller_type
     }
   ]
 }

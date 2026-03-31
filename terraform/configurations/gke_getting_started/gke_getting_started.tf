@@ -29,7 +29,7 @@ variable "postgres_password" {
 variable "ingress_controller_type" {
   description = "Type of ingress controller to use (nginx or haproxy)"
   type        = string
-  default     = "nginx"
+  default     = "haproxy"
 }
 
 provider "google" {
@@ -47,7 +47,7 @@ module "cluster" {
 
 resource "google_compute_address" "host_ip" {
   depends_on = [module.cluster]
-  name       = "theia-cloud-nginx-ip"
+  name       = "theia-cloud-ingress-ip"
 }
 
 provider "helm" {
