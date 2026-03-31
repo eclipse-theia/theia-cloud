@@ -178,7 +178,7 @@ resource "helm_release" "theia-cloud-base" {
   name             = "theia-cloud-base"
   repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud-base"
-  version          = "1.1.2"
+  version          = "1.2.0"
   namespace        = "theia-cloud"
   create_namespace = true
 
@@ -196,7 +196,7 @@ resource "helm_release" "theia-cloud-crds" {
   name             = "theia-cloud-crds"
   repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
   chart            = "theia-cloud-crds"
-  version          = "1.1.2"
+  version          = "1.2.0"
   namespace        = "theia-cloud"
   create_namespace = true
 }
