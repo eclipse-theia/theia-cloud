@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.0] - 2026-04-07
+## [1.2.0] - 2026-04-09
 
 - [java/operator] Fix ingress rules not being fully removed on session deletion [#456](https://github.com/eclipse-theia/theia-cloud/pull/456)
 - [docker/landing-page] Use different NGINX base image that no longer requires to run as root [#470](https://github.com/eclipse-theia/theia-cloud/pull/470)

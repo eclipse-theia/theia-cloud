@@ -33,7 +33,9 @@ The keycloak admin password may be passed during the installation. The defaults 
 
 `./configurations/minikube_getting_started` may be used to create a Theia Cloud cluster in minikube.
 
-Please check the variables passed to the modules in `minikube_getting_started.tf` for possible modifications.
+The configuration is split into two steps. By default, HAProxy is used as the ingress controller, which requires `minikube tunnel` to be running before step 1. For nginx, you can proceed directly to step 1 without a tunnel.
+
+Please check the variables passed to the modules in each step's `main.tf` for possible modifications.
 
 #### Prerequisites for Minikube
 
@@ -47,18 +49,33 @@ Then download the minikube virtualbox driver before invoking terraform:
 minikube start --vm=true --driver=virtualbox --download-only
 ```
 
-#### Create Minikube Cluster
+#### Step 0: Create Minikube Cluster
 
 ```bash
-cd configurations/minikube_getting_started
+cd configurations/minikube_getting_started/0_minikube_getting_started
 
 # download required providers
 terraform init
 
-# dry run
-terraform plan
-
 # create the cluster
+terraform apply
+```
+
+The output will display next-step instructions depending on the chosen ingress controller.
+
+#### Step 1: Install Theia Cloud
+
+**For HAProxy (default):** Open a new terminal and start `minikube tunnel` before running step 1. Keep the tunnel running throughout the session.
+
+**For nginx:** Proceed directly without a tunnel.
+
+```bash
+cd ../1_theiacloud-and-dependencies
+
+# download required providers
+terraform init
+
+# install Theia Cloud and all dependencies
 # You will be asked for an email address used by the cert-manager to contact you about expiring certs.
 terraform apply
 ```
@@ -67,15 +84,23 @@ Point your browser to the `try_now` output value URL printed to the console at t
 
 #### Destroy Minikube Cluster
 
-First remove the persistent volume from the terraform state:
+Destroy in reverse order. First remove the persistent volume from the step 1 terraform state:
 
 ```bash
 terraform state rm kubernetes_persistent_volume_v1.minikube
+cd configurations/minikube_getting_started/1_theiacloud-and-dependencies
 ```
 
-Helm uninstall does not remove persistent volume claims, so the destruction of this persistent volume is blocked. The continue with a regular destroy:
+Helm uninstall does not remove persistent volume claims, so the destruction of this persistent volume is blocked. Then continue with a regular destroy of step 1:
 
 ```bash
+terraform destroy
+```
+
+Once step 1 is destroyed, destroy the cluster (step 0):
+
+```bash
+cd ../0_minikube_getting_started
 terraform destroy
 ```
 
