@@ -1,6 +1,20 @@
 # Changelog
 
-## [1.2.0] - estimated between 2025-11 and 2026-05
+## [1.2.0] - 2026-04-07
+
+- [java/operator] Fix ingress rules not being fully removed on session deletion [#456](https://github.com/eclipse-theia/theia-cloud/pull/456)
+- [docker/landing-page] Use different NGINX base image that no longer requires to run as root [#470](https://github.com/eclipse-theia/theia-cloud/pull/470)
+- [all components] Add support for HAProxy as an alternative ingress controller [#473](https://github.com/eclipse-theia/theia-cloud/pull/473)
+- [java/operator] Make workspace storage names deterministic [#481](https://github.com/eclipse-theia/theia-cloud/pull/481)
+- [all components] Rename "App ID" to "Service Auth Token" across all components [#437](https://github.com/eclipse-theia/theia-cloud/pull/437)
+
+### Breaking Changes in 1.2.0
+
+- [docker/landing-page] Landing page container port changed from 80 to 8080 due to switch of base image.
+- [helm] Default ingress controller changed from NGINX to HAProxy. Existing deployments using NGINX must explicitly adapt their values. See [Ingress NGINX Retirement: What You Need to Know](https://www.kubernetes.dev/blog/2025/11/12/ingress-nginx-retirement/) as well.
+- [java/operator] Method signatures of `TheiaCloudIngressUtil.removeIngressRule()` and `removeIngressRules()` changed.
+- [java/operator] `AddedHandlerUtil.INGRESS_REWRITE_PATH` is deprecated; use `TheiaCloudOperatorArguments.getIngressPathSuffix()` instead.
+- [node/common] `TheiaCloudConfig` type now requires either `serviceAuthToken` or deprecated `appId`. The `LaunchRequest` factory functions `createWorkspace` and `existingWorkspace` now expect `serviceAuthToken` as parameter; the old signatures are available as `createWorkspaceWithAppId` and `existingWorkspaceWithAppId` (deprecated).
 
 ## [1.1.2] - 2025-09-26
 

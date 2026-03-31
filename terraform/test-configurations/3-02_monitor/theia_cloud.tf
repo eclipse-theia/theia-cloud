@@ -74,7 +74,7 @@ resource "helm_release" "theia-cloud" {
     },
     {
       name  = "demoApplication.name"
-      value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:1.2.0-next" : "theiacloud/theia-cloud-activity-demo-theia:1.2.0-next"
+      value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:1.2.0" : "theiacloud/theia-cloud-activity-demo-theia:1.2.0"
     },
     {
       name  = "demoApplication.monitor.port"
@@ -84,5 +84,5 @@ resource "helm_release" "theia-cloud" {
       name  = "ingress.controller"
       value = data.terraform_remote_state.minikube.outputs.ingress_controller_type
     }
-    ]
+  ]
 }
