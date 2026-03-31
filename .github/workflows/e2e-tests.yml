@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.34.1, v1.31.13] # https://kubernetes.io/releases/
+        kubernetes: [v1.35.3, v1.33.10] # https://kubernetes.io/releases/
         paths: [true, false]
         ephemeral: [true, false]
         keycloak: [true, false]
