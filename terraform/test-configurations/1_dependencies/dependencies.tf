@@ -97,36 +97,31 @@ locals {
   hostname       = "${local.effective_host}.nip.io"
 }
 
-module "helm" {
-  source = "../../modules/helm"
+module "cluster_prerequisites" {
+  source = "../../modules/cluster-prerequisites"
 
-  depends_on = [module.host, helm_release.haproxy-ingress-controller]
+  depends_on = [kubernetes_persistent_volume_v1.minikube, helm_release.haproxy-ingress-controller]
 
-  install_ingress_controller   = false
-  ingress_controller_type      = data.terraform_remote_state.minikube.outputs.ingress_controller_type
-  cert_manager_issuer_email    = var.cert_manager_issuer_email
-  cert_manager_cluster_issuer  = "keycloak-selfsigned-issuer"
-  cert_manager_common_name     = local.hostname
-  hostname                     = local.hostname
-  keycloak_admin_password      = var.keycloak_admin_password
-  postgresql_enabled           = true
-  postgres_postgres_password   = "admin"
-  postgres_password            = "admin"
-  postgresql_storageClass      = "manual"
-  postgresql_volumePermissions = true
-  service_type                 = "ClusterIP"
-  cloudProvider                = "MINIKUBE"
-  install_selfsigned_issuer    = true
-  install_theia_cloud_base     = false
-  install_theia_cloud_crds     = false
-  install_theia_cloud          = false
+  hostname                            = local.hostname
+  keycloak_admin_password             = var.keycloak_admin_password
+  postgres_password                   = "admin"
+  install_cert_manager                = true
+  install_selfsigned_issuer           = true
+  cert_manager_issuer_email           = var.cert_manager_issuer_email
+  ingress_controller_type             = data.terraform_remote_state.minikube.outputs.ingress_controller_type
+  ingress_class_name                  = data.terraform_remote_state.minikube.outputs.ingress_controller_type
+  ingress_cert_manager_cluster_issuer = "keycloak-selfsigned-issuer"
+  ingress_cert_manager_common_name    = local.hostname
+  postgres_storage_class              = "manual"
+  postgres_volume_permissions         = true
+  cloud_provider                      = "MINIKUBE"
 }
 
 provider "keycloak" {
   client_id                = "admin-cli"
   username                 = "admin"
   password                 = var.keycloak_admin_password
-  url                      = "https://${local.hostname}/keycloak"
+  url                      = module.cluster_prerequisites.keycloak_url
   tls_insecure_skip_verify = true # only for minikube self signed
   initial_login            = false
   client_timeout           = 60
@@ -135,7 +130,7 @@ provider "keycloak" {
 module "keycloak" {
   source = "../../modules/keycloak"
 
-  depends_on = [module.helm]
+  depends_on = [module.cluster_prerequisites]
 
   hostname                        = local.hostname
   keycloak_test_user_foo_password = "foo"

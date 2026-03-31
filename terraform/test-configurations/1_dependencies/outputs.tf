@@ -28,7 +28,7 @@ output "hostname" {
 
 output "keycloak" {
   description = "Keycloak"
-  value       = "${local.hostname}/keycloak"
+  value       = module.cluster_prerequisites.keycloak_url
 }
 
 output "ingress_controller_type" {

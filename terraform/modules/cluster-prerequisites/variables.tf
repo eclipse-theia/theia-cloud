@@ -111,6 +111,17 @@ variable "keycloak_resource_limits_memory" {
   default     = "2Gi"
 }
 
+variable "ingress_controller_type" {
+  description = "Type of ingress controller to use (nginx or haproxy)"
+  type        = string
+  default     = "nginx"
+
+  validation {
+    condition     = contains(["nginx", "haproxy"], var.ingress_controller_type)
+    error_message = "Valid values are 'nginx' or 'haproxy'."
+  }
+}
+
 variable "ingress_enabled" {
   description = "Whether to create Kubernetes Ingress"
   type        = bool

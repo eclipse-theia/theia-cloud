@@ -16,7 +16,7 @@ resource "helm_release" "cert_manager" {
 }
 
 resource "helm_release" "ingress_nginx" {
-  count            = var.install_ingress_controller ? 1 : 0
+  count            = var.install_ingress_controller && var.ingress_controller_type == "nginx" ? 1 : 0
   name             = "nginx-ingress-controller"
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
@@ -45,6 +45,27 @@ resource "helm_release" "ingress_nginx" {
     {
       name  = "controller.config.enable-snippet"
       value = "true"
+    }
+  ]
+}
+
+resource "helm_release" "haproxy-ingress-controller" {
+  count            = var.install_ingress_controller && var.ingress_controller_type == "haproxy" ? 1 : 0
+  name             = "haproxy-ingress"
+  repository       = "https://haproxy-ingress.github.io/charts"
+  chart            = "haproxy-ingress"
+  version          = "0.15.1"
+  namespace        = "ingress-haproxy"
+  create_namespace = true
+
+  set = [
+    {
+      name  = "controller.ingressClassResource.enabled"
+      value = true
+    },
+    {
+      name  = "controller.service.loadBalancerIP"
+      value = var.load_balancer_ip
     }
   ]
 }
@@ -434,10 +455,14 @@ resource "kubernetes_ingress_v1" "keycloak" {
     name      = "keycloak"
     namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
     annotations = merge(
-      {
+      var.ingress_controller_type == "nginx" ? {
         "nginx.ingress.kubernetes.io/proxy-buffer-size"       = "128k"
         "nginx.ingress.kubernetes.io/proxy-busy-buffers-size" = "128k"
-      },
+      } : {},
+      var.ingress_controller_type == "haproxy" ? {
+        "haproxy-ingress.github.io/proxy-body-size"     = "128k"
+        "haproxy-ingress.github.io/timeout-http-request" = "30s"
+      } : {},
       var.ingress_tls_enabled ? {
         "cert-manager.io/cluster-issuer"                = var.ingress_cert_manager_cluster_issuer
         "cert-manager.io/common-name"                   = var.ingress_cert_manager_common_name != "" ? var.ingress_cert_manager_common_name : var.hostname
@@ -519,7 +544,7 @@ resource "terraform_data" "wait_for_certificate" {
 }
 
 resource "terraform_data" "patch_ingress_controller" {
-  count = var.ingress_enabled && var.ingress_tls_enabled ? 1 : 0
+  count = var.ingress_enabled && var.ingress_tls_enabled && var.ingress_controller_type == "nginx" ? 1 : 0
 
   provisioner "local-exec" {
     command = "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-nginx -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ingress-nginx wait --for condition=available deploy/ingress-nginx-controller --timeout=90s"
