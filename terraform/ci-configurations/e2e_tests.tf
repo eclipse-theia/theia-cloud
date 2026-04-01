@@ -81,7 +81,7 @@ module "helm" {
   postgres_postgres_password   = "admin"
   postgres_password            = "admin"
   loadBalancerIP               = ""
-  cloudProvider                = "MINIKUBE"
+  cloud_provider               = "MINIKUBE"
 }
 
 provider "keycloak" {
@@ -99,7 +99,6 @@ module "keycloak" {
 
   depends_on = [module.cluster_prerequisites]
 
-  hostname                        = "${var.ingress_ip}.nip.io"
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
   valid_redirect_uri              = "*"
@@ -177,7 +176,7 @@ resource "helm_release" "theia-cloud" {
       name  = "operator.eagerStart"
       value = var.eager_start
     }
-    ]
+  ]
 }
 
 resource "kubectl_manifest" "theia-cloud-monitor-theia-popup" {

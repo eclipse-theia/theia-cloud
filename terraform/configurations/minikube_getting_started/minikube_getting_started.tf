@@ -105,7 +105,7 @@ module "helm" {
   postgresql_storageClass      = "manual"
   postgresql_volumePermissions = true
   service_type                 = "ClusterIP"
-  cloudProvider                = "MINIKUBE"
+  cloud_provider               = "MINIKUBE"
 }
 
 module "cluster_prerequisites" {
@@ -141,7 +141,6 @@ module "keycloak" {
 
   depends_on = [module.cluster_prerequisites]
 
-  hostname                        = "${module.host.host}.nip.io"
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
   valid_redirect_uri              = "https://${module.host.host}.nip.io/*"

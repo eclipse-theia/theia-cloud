@@ -1,5 +1,5 @@
 variable "hostname" {
-  description = "Hostname for Keycloak ingress"
+  description = "The hostname for the deployment"
   type        = string
 }
 

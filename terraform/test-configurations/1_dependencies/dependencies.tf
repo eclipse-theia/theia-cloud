@@ -132,7 +132,6 @@ module "keycloak" {
 
   depends_on = [module.cluster_prerequisites]
 
-  hostname                        = local.hostname
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
   valid_redirect_uri              = "*"

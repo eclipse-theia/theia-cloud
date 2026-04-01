@@ -70,7 +70,7 @@ resource "helm_release" "theia-cloud" {
       name  = "ingress.controller"
       value = data.terraform_remote_state.minikube.outputs.ingress_controller_type
     }
-    ]
+  ]
 }
 
 resource "kubectl_manifest" "cdt-cloud-demo" {

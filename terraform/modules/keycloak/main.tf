@@ -1,7 +1,3 @@
-variable "hostname" {
-  description = "Hostname for the keycloak instance"
-}
-
 variable "keycloak_test_user_foo_password" {
   description = "Keycloak Foo Test User Password"
   sensitive   = true

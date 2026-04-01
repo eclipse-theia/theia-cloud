@@ -117,6 +117,8 @@ resource "kubectl_manifest" "keycloak_realm_import_crd" {
 }
 
 locals {
+  keycloak_ns = kubernetes_namespace_v1.keycloak.metadata[0].name
+
   # local_exec_quotes is a helper function to deal with different handling of
   # quotes between linux and windows. On linux, it will output "'". On windows,
   # it will output "".
@@ -160,7 +162,7 @@ resource "kubernetes_secret_v1" "postgres" {
 
   metadata {
     name      = "postgres-credentials"
-    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
+    namespace = local.keycloak_ns
   }
 
   data = {
@@ -177,7 +179,7 @@ resource "kubernetes_persistent_volume_claim_v1" "postgres" {
 
   metadata {
     name      = "postgres-pvc"
-    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
+    namespace = local.keycloak_ns
   }
 
   spec {
@@ -200,7 +202,7 @@ resource "kubernetes_deployment_v1" "postgres" {
 
   metadata {
     name      = "postgres"
-    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
+    namespace = local.keycloak_ns
     labels = {
       app = "postgres"
     }
@@ -323,7 +325,7 @@ resource "kubernetes_service_v1" "postgres" {
 
   metadata {
     name      = "postgres"
-    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
+    namespace = local.keycloak_ns
   }
 
   spec {
@@ -346,6 +348,21 @@ locals {
   tls_secret_name = var.ingress_tls_secret_name != "" ? var.ingress_tls_secret_name : "${var.hostname}-tls"
 
   keycloak_protocol = var.ingress_tls_enabled ? "https://" : "http://"
+
+  ingress_controller_annotations = var.ingress_controller_type == "nginx" ? {
+    "nginx.ingress.kubernetes.io/proxy-buffer-size"       = "128k"
+    "nginx.ingress.kubernetes.io/proxy-busy-buffers-size" = "128k"
+    } : var.ingress_controller_type == "haproxy" ? {
+    "haproxy-ingress.github.io/proxy-body-size"      = "128k"
+    "haproxy-ingress.github.io/timeout-http-request" = "30s"
+  } : {}
+
+  ingress_tls_annotations = var.ingress_tls_enabled ? {
+    "cert-manager.io/cluster-issuer"                = var.ingress_cert_manager_cluster_issuer
+    "cert-manager.io/common-name"                   = var.ingress_cert_manager_common_name != "" ? var.ingress_cert_manager_common_name : var.hostname
+    "acme.cert-manager.io/http01-edit-in-place"     = "true"
+    "acme.cert-manager.io/http01-ingress-path-type" = "ImplementationSpecific"
+  } : {}
 
   keycloak_spec_base = {
     instances = var.keycloak_replicas
@@ -437,7 +454,7 @@ resource "kubectl_manifest" "keycloak_instance" {
     kind       = "Keycloak"
     metadata = {
       name      = "keycloak"
-      namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
+      namespace = local.keycloak_ns
     }
     spec = local.keycloak_spec
   })
@@ -453,22 +470,10 @@ resource "kubernetes_ingress_v1" "keycloak" {
 
   metadata {
     name      = "keycloak"
-    namespace = kubernetes_namespace_v1.keycloak.metadata[0].name
+    namespace = local.keycloak_ns
     annotations = merge(
-      var.ingress_controller_type == "nginx" ? {
-        "nginx.ingress.kubernetes.io/proxy-buffer-size"       = "128k"
-        "nginx.ingress.kubernetes.io/proxy-busy-buffers-size" = "128k"
-      } : {},
-      var.ingress_controller_type == "haproxy" ? {
-        "haproxy-ingress.github.io/proxy-body-size"     = "128k"
-        "haproxy-ingress.github.io/timeout-http-request" = "30s"
-      } : {},
-      var.ingress_tls_enabled ? {
-        "cert-manager.io/cluster-issuer"                = var.ingress_cert_manager_cluster_issuer
-        "cert-manager.io/common-name"                   = var.ingress_cert_manager_common_name != "" ? var.ingress_cert_manager_common_name : var.hostname
-        "acme.cert-manager.io/http01-edit-in-place"     = "true"
-        "acme.cert-manager.io/http01-ingress-path-type" = "ImplementationSpecific"
-      } : {},
+      local.ingress_controller_annotations,
+      local.ingress_tls_annotations,
       var.ingress_annotations
     )
   }
@@ -507,7 +512,8 @@ resource "kubernetes_ingress_v1" "keycloak" {
 
   depends_on = [
     kubernetes_namespace_v1.keycloak,
-    helm_release.ingress_nginx
+    helm_release.ingress_nginx,
+    helm_release.haproxy-ingress-controller
   ]
 }
 
@@ -515,11 +521,11 @@ resource "terraform_data" "wait_for_keycloak_instance" {
   provisioner "local-exec" {
     command = <<-EOT
       echo "Waiting for Keycloak resource to report ready..."
-      kubectl wait keycloak/keycloak -n ${kubernetes_namespace_v1.keycloak.metadata[0].name} --for=condition=Ready --timeout=3m
+      kubectl wait keycloak/keycloak -n ${local.keycloak_ns} --for=condition=Ready --timeout=3m
       echo "Waiting for Keycloak pods to be ready..."
-      kubectl wait pods -n ${kubernetes_namespace_v1.keycloak.metadata[0].name} -l app=keycloak --for=condition=Ready --timeout=3m
+      kubectl wait pods -n ${local.keycloak_ns} -l app=keycloak --for=condition=Ready --timeout=3m
       echo "Waiting for Keycloak service endpoint..."
-      kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/keycloak-service -n ${kubernetes_namespace_v1.keycloak.metadata[0].name} --timeout=2m
+      kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/keycloak-service -n ${local.keycloak_ns} --timeout=2m
       echo "Keycloak is ready!"
       echo "Waiting additional 5 for Keycloak authentication to be fully initialized..."
       sleep 5
@@ -535,7 +541,7 @@ resource "terraform_data" "wait_for_certificate" {
   count = var.ingress_enabled && var.ingress_tls_enabled ? 1 : 0
 
   provisioner "local-exec" {
-    command = "kubectl wait certificate -n ${kubernetes_namespace_v1.keycloak.metadata[0].name} ${local.tls_secret_name} --for=condition=Ready --timeout=3m"
+    command = "kubectl wait certificate -n ${local.keycloak_ns} ${local.tls_secret_name} --for=condition=Ready --timeout=3m"
   }
 
   depends_on = [

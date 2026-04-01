@@ -1,40 +1,20 @@
-variable "install_theia_cloud_base" {
-  description = "Whether to install theia cloud base"
-  default     = true
+locals {
+  theia_cloud_helm_repository = "https://eclipse-theia.github.io/theia-cloud-helm"
+  theia_cloud_namespace       = "theia-cloud"
+
+  # base_keycloak: use provided URL or build from hostname
+  base_keycloak = var.keycloak_url != "" ? var.keycloak_url : "https://${var.hostname}/keycloak"
+  # normalized_keycloak_url: ensure a single trailing slash as required by the Theia Cloud Helm chart.
+  normalized_keycloak_url = endswith(local.base_keycloak, "/") ? local.base_keycloak : "${local.base_keycloak}/"
 }
 
-variable "install_theia_cloud_crds" {
-  description = "Whether to install theia cloud crds"
-  default     = true
-}
-
-variable "install_theia_cloud" {
-  description = "Whether to install theia cloud"
-  default     = true
-}
-
-variable "cert_manager_issuer_email" {
-  description = "EMail address used to create certificates."
-}
-
-variable "hostname" {
-  description = "The hostname for all installed services"
-}
-
-variable "cloudProvider" {
-  description = "The cloud provider to use"
-  default     = "K8S"
-}
-
-# Note: cert-manager and nginx-ingress must be installed via cluster-prerequisites module first
 resource "helm_release" "theia-cloud-base" {
   count            = var.install_theia_cloud_base ? 1 : 0
-  depends_on       = [helm_release.cert-manager, helm_release.nginx-ingress-controller, helm_release.haproxy-ingress-controller] # we need to install cert issuers
   name             = "theia-cloud-base"
-  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
+  repository       = local.theia_cloud_helm_repository
   chart            = "theia-cloud-base"
   version          = "1.2.0"
-  namespace        = "theia-cloud"
+  namespace        = local.theia_cloud_namespace
   create_namespace = true
 
   set = [
@@ -49,10 +29,10 @@ resource "helm_release" "theia-cloud-crds" {
   count            = var.install_theia_cloud_crds ? 1 : 0
   depends_on       = [helm_release.theia-cloud-base]
   name             = "theia-cloud-crds"
-  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
+  repository       = local.theia_cloud_helm_repository
   chart            = "theia-cloud-crds"
   version          = "1.2.0"
-  namespace        = "theia-cloud"
+  namespace        = local.theia_cloud_namespace
   create_namespace = true
 }
 
@@ -60,10 +40,10 @@ resource "helm_release" "theia-cloud" {
   count            = var.install_theia_cloud ? 1 : 0
   depends_on       = [helm_release.theia-cloud-crds]
   name             = "theia-cloud"
-  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
+  repository       = local.theia_cloud_helm_repository
   chart            = "theia-cloud"
   version          = "1.2.0"
-  namespace        = "theia-cloud"
+  namespace        = local.theia_cloud_namespace
   create_namespace = true
 
   values = [
@@ -77,11 +57,11 @@ resource "helm_release" "theia-cloud" {
     },
     {
       name  = "keycloak.authUrl"
-      value = "https://${var.hostname}/keycloak/"
+      value = local.normalized_keycloak_url
     },
     {
       name  = "operator.cloudProvider"
-      value = var.cloudProvider
+      value = var.cloud_provider
     },
     {
       name  = "ingress.controller"

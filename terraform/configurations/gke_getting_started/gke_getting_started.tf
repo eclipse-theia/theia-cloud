@@ -83,13 +83,13 @@ module "cluster_prerequisites" {
 module "helm" {
   source = "../../modules/helm"
 
-  depends_on = [module.cluster_prerequisites]
+  depends_on                  = [module.cluster_prerequisites]
   ingress_controller_type     = var.ingress_controller_type
-  cert_manager_issuer_email = var.cert_manager_issuer_email
+  cert_manager_issuer_email   = var.cert_manager_issuer_email
   cert_manager_cluster_issuer = "letsencrypt-prod"
   cert_manager_common_name    = "${google_compute_address.host_ip.address}.sslip.io"
-  hostname                  = "${google_compute_address.host_ip.address}.sslip.io"
-  loadBalancerIP            = google_compute_address.host_ip.address
+  hostname                    = "${google_compute_address.host_ip.address}.sslip.io"
+  loadBalancerIP              = google_compute_address.host_ip.address
 }
 
 provider "keycloak" {
@@ -106,7 +106,6 @@ module "keycloak" {
 
   depends_on = [module.cluster_prerequisites]
 
-  hostname                        = "${google_compute_address.host_ip.address}.sslip.io"
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
   valid_redirect_uri              = "https://${google_compute_address.host_ip.address}.sslip.io/*"
