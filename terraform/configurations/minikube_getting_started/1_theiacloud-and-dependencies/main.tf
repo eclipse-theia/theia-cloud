@@ -1,6 +1,5 @@
 variable "cert_manager_issuer_email" {
   description = "EMail address used to create certificates."
-  default     = "tester@theia-cloud.io"
 }
 
 variable "keycloak_admin_password" {
@@ -9,19 +8,27 @@ variable "keycloak_admin_password" {
   default     = "admin"
 }
 
-data "terraform_remote_state" "minikube" {
+data "terraform_remote_state" "cluster" {
   backend = "local"
 
   config = {
-    path = "${path.module}/../0_minikube-setup/terraform.tfstate"
+    path = "${path.module}/../0_minikube_getting_started/terraform.tfstate"
   }
 }
 
 provider "kubernetes" {
-  host                   = data.terraform_remote_state.minikube.outputs.host
-  client_certificate     = data.terraform_remote_state.minikube.outputs.client_certificate
-  client_key             = data.terraform_remote_state.minikube.outputs.client_key
-  cluster_ca_certificate = data.terraform_remote_state.minikube.outputs.cluster_ca_certificate
+  host                   = data.terraform_remote_state.cluster.outputs.host
+  client_certificate     = data.terraform_remote_state.cluster.outputs.client_certificate
+  client_key             = data.terraform_remote_state.cluster.outputs.client_key
+  cluster_ca_certificate = data.terraform_remote_state.cluster.outputs.cluster_ca_certificate
+}
+
+provider "kubectl" {
+  load_config_file       = false
+  host                   = data.terraform_remote_state.cluster.outputs.host
+  client_certificate     = data.terraform_remote_state.cluster.outputs.client_certificate
+  client_key             = data.terraform_remote_state.cluster.outputs.client_key
+  cluster_ca_certificate = data.terraform_remote_state.cluster.outputs.cluster_ca_certificate
 }
 
 resource "kubernetes_persistent_volume_v1" "minikube" {
@@ -44,28 +51,20 @@ resource "kubernetes_persistent_volume_v1" "minikube" {
 
 provider "helm" {
   kubernetes = {
-    host                   = data.terraform_remote_state.minikube.outputs.host
-    client_certificate     = data.terraform_remote_state.minikube.outputs.client_certificate
-    client_key             = data.terraform_remote_state.minikube.outputs.client_key
-    cluster_ca_certificate = data.terraform_remote_state.minikube.outputs.cluster_ca_certificate
+    host                   = data.terraform_remote_state.cluster.outputs.host
+    client_certificate     = data.terraform_remote_state.cluster.outputs.client_certificate
+    client_key             = data.terraform_remote_state.cluster.outputs.client_key
+    cluster_ca_certificate = data.terraform_remote_state.cluster.outputs.cluster_ca_certificate
   }
-}
-
-provider "kubectl" {
-  load_config_file       = false
-  host                   = data.terraform_remote_state.minikube.outputs.host
-  client_certificate     = data.terraform_remote_state.minikube.outputs.client_certificate
-  client_key             = data.terraform_remote_state.minikube.outputs.client_key
-  cluster_ca_certificate = data.terraform_remote_state.minikube.outputs.cluster_ca_certificate
 }
 
 module "host" {
   source = "matti/urlparse/external"
-  url    = data.terraform_remote_state.minikube.outputs.host
+  url    = data.terraform_remote_state.cluster.outputs.host
 }
 
 resource "helm_release" "haproxy-ingress-controller" {
-  count            = data.terraform_remote_state.minikube.outputs.ingress_controller_type == "haproxy" ? 1 : 0
+  count            = data.terraform_remote_state.cluster.outputs.ingress_controller_type == "haproxy" ? 1 : 0
   name             = "haproxy-ingress"
   repository       = "https://haproxy-ingress.github.io/charts"
   chart            = "haproxy-ingress"
@@ -82,7 +81,7 @@ resource "helm_release" "haproxy-ingress-controller" {
 }
 
 data "kubernetes_service_v1" "haproxy_ingress" {
-  count = data.terraform_remote_state.minikube.outputs.ingress_controller_type == "haproxy" ? 1 : 0
+  count = data.terraform_remote_state.cluster.outputs.ingress_controller_type == "haproxy" ? 1 : 0
 
   depends_on = [helm_release.haproxy-ingress-controller]
 
@@ -93,19 +92,20 @@ data "kubernetes_service_v1" "haproxy_ingress" {
 }
 
 locals {
-  effective_host = data.terraform_remote_state.minikube.outputs.ingress_controller_type == "haproxy" ? data.kubernetes_service_v1.haproxy_ingress[0].status[0].load_balancer[0].ingress[0].ip : module.host.host
-  hostname       = "${local.effective_host}.nip.io"
+  ingress_controller_type = data.terraform_remote_state.cluster.outputs.ingress_controller_type
+  effective_host          = local.ingress_controller_type == "haproxy" ? data.kubernetes_service_v1.haproxy_ingress[0].status[0].load_balancer[0].ingress[0].ip : module.host.host
+  hostname                = "${local.effective_host}.nip.io"
 }
 
 module "helm" {
-  source = "../../modules/helm"
+  source = "../../../modules/helm"
 
   depends_on = [module.host, helm_release.haproxy-ingress-controller]
 
   install_ingress_controller   = false
-  ingress_controller_type      = data.terraform_remote_state.minikube.outputs.ingress_controller_type
+  ingress_controller_type      = local.ingress_controller_type
   cert_manager_issuer_email    = var.cert_manager_issuer_email
-  cert_manager_cluster_issuer  = "keycloak-selfsigned-issuer"
+  cert_manager_cluster_issuer  = "theia-cloud-selfsigned-issuer"
   cert_manager_common_name     = local.hostname
   hostname                     = local.hostname
   keycloak_admin_password      = var.keycloak_admin_password
@@ -116,10 +116,6 @@ module "helm" {
   postgresql_volumePermissions = true
   service_type                 = "ClusterIP"
   cloudProvider                = "MINIKUBE"
-  install_selfsigned_issuer    = true
-  install_theia_cloud_base     = false
-  install_theia_cloud_crds     = false
-  install_theia_cloud          = false
 }
 
 provider "keycloak" {
@@ -133,20 +129,12 @@ provider "keycloak" {
 }
 
 module "keycloak" {
-  source = "../../modules/keycloak"
+  source = "../../../modules/keycloak"
 
   depends_on = [module.helm]
 
   hostname                        = local.hostname
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
-  valid_redirect_uri              = "*"
-}
-
-resource "keycloak_group_memberships" "admin_group_memberships" {
-  realm_id = module.keycloak.realm.id
-  group_id = module.keycloak.admin_group.id
-  members = [
-    module.keycloak.test_users.foo.username
-  ]
+  valid_redirect_uri              = "https://${local.hostname}/*"
 }

@@ -1,9 +1,5 @@
 terraform {
   required_providers {
-    minikube = {
-      source  = "scott-the-programmer/minikube"
-      version = "0.6.0"
-    }
     helm = {
       source  = "hashicorp/helm"
       version = ">= 3.0.2"
@@ -21,6 +17,5 @@ terraform {
       version = ">= 1.19.0"
     }
   }
-
   required_version = ">= 1.12.2"
 }
