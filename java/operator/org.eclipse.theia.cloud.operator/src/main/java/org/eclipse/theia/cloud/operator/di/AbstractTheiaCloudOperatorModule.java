@@ -46,6 +46,7 @@ import org.eclipse.theia.cloud.operator.pv.DefaultPersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.pv.MinikubePersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.pv.PersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.routing.IngressRoutingStrategy;
+import org.eclipse.theia.cloud.operator.routing.OpenShiftRouteRoutingStrategy;
 import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 import org.eclipse.theia.cloud.operator.replacements.DefaultDeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.replacements.DefaultPersistentVolumeTemplateReplacements;
@@ -111,8 +112,7 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
     protected Class<? extends SessionRoutingStrategy> bindSessionRoutingStrategy() {
         switch (arguments.getCloudProvider()) {
         case OPENSHIFT:
-            // TODO: return OpenShiftRouteRoutingStrategy.class once implemented
-            return IngressRoutingStrategy.class;
+            return OpenShiftRouteRoutingStrategy.class;
         case K8S:
         case MINIKUBE:
         default:
