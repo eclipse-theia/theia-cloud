@@ -37,7 +37,7 @@ import org.eclipse.theia.cloud.common.util.JavaUtil;
 import org.eclipse.theia.cloud.common.util.LabelsUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
-import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
+import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 import org.eclipse.theia.cloud.operator.util.K8sUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil;
@@ -49,13 +49,6 @@ import com.google.inject.Inject;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
-import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressPath;
-import io.fabric8.kubernetes.api.model.networking.v1.HTTPIngressRuleValue;
-import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
-import io.fabric8.kubernetes.api.model.networking.v1.IngressBackend;
-import io.fabric8.kubernetes.api.model.networking.v1.IngressRule;
-import io.fabric8.kubernetes.api.model.networking.v1.IngressServiceBackend;
-import io.fabric8.kubernetes.api.model.networking.v1.ServiceBackendPort;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
@@ -76,10 +69,10 @@ public class EagerSessionHandler implements SessionHandler {
     private TheiaCloudClient client;
 
     @Inject
-    protected IngressPathProvider ingressPathProvider;
+    protected TheiaCloudOperatorArguments arguments;
 
     @Inject
-    protected TheiaCloudOperatorArguments arguments;
+    protected SessionRoutingStrategy routingStrategy;
 
     @Override
     public boolean sessionAdded(Session session, String correlationId) {
@@ -101,14 +94,11 @@ public class EagerSessionHandler implements SessionHandler {
 
         String appDefinitionResourceName = appDefinition.get().getMetadata().getName();
         String appDefinitionResourceUID = appDefinition.get().getMetadata().getUid();
-        int port = appDefinition.get().getSpec().getPort();
 
-        /* find ingress */
-        Optional<Ingress> ingress = K8sUtil.getExistingIngress(client.kubernetes(), client.namespace(),
-                appDefinitionResourceName, appDefinitionResourceUID);
-        if (ingress.isEmpty()) {
-            LOGGER.error(
-                    formatLogMessage(correlationId, "No Ingress for app definition " + appDefinitionID + " found."));
+        /* check routing resource exists */
+        if (!routingStrategy.ensureRoutingResourceExists(appDefinition.get(), correlationId)) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "No routing resource for app definition " + appDefinitionID + " found."));
             return false;
         }
 
@@ -248,14 +238,19 @@ public class EagerSessionHandler implements SessionHandler {
             }
         }
 
-        /* adjust the ingress */
+        /* adjust the routing */
         String host;
         try {
-            host = updateIngress(ingress, serviceToUse, appDefinitionID, instance, port, appDefinition.get(),
+            host = routingStrategy.addSessionRouting(session, appDefinition.get(), serviceToUse.get(), instance,
                     correlationId);
         } catch (KubernetesClientException e) {
             LOGGER.error(formatLogMessage(correlationId,
-                    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
+                    "Error while updating routing for session " + session.getMetadata().getName()), e);
+            return false;
+        }
+        if (host == null) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Failed to add routing for session " + session.getMetadata().getName()));
             return false;
         }
 
@@ -340,43 +335,6 @@ public class EagerSessionHandler implements SessionHandler {
             return JavaUtil.tuple(Optional.empty(), false);
         }
         return JavaUtil.tuple(serviceToUse, false);
-    }
-
-    protected synchronized String updateIngress(Optional<Ingress> ingress, Optional<Service> serviceToUse,
-            String appDefinitionID, int instance, int port, AppDefinition appDefinition, String correlationId) {
-        final String host = arguments.getInstancesHost();
-        String path = ingressPathProvider.getPath(appDefinition, instance);
-        client.ingresses().edit(correlationId, ingress.get().getMetadata().getName(),
-                ingressToUpdate -> addIngressRule(ingressToUpdate, serviceToUse.get(), host, port, path));
-        return host + path + "/";
-    }
-
-    protected Ingress addIngressRule(Ingress ingress, Service serviceToUse, String host, int port, String path) {
-        IngressRule ingressRule = new IngressRule();
-        ingress.getSpec().getRules().add(ingressRule);
-
-        ingressRule.setHost(host);
-
-        HTTPIngressRuleValue http = new HTTPIngressRuleValue();
-        ingressRule.setHttp(http);
-
-        HTTPIngressPath httpIngressPath = new HTTPIngressPath();
-        http.getPaths().add(httpIngressPath);
-        httpIngressPath.setPath(path + arguments.getIngressPathSuffix());
-        httpIngressPath.setPathType(AddedHandlerUtil.INGRESS_PATH_TYPE);
-
-        IngressBackend ingressBackend = new IngressBackend();
-        httpIngressPath.setBackend(ingressBackend);
-
-        IngressServiceBackend ingressServiceBackend = new IngressServiceBackend();
-        ingressBackend.setService(ingressServiceBackend);
-        ingressServiceBackend.setName(serviceToUse.getMetadata().getName());
-
-        ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
-        ingressServiceBackend.setPort(serviceBackendPort);
-        serviceBackendPort.setNumber(port);
-
-        return ingress;
     }
 
     @Override
@@ -500,29 +458,26 @@ public class EagerSessionHandler implements SessionHandler {
             }
         }
         Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition.get(), cleanedService);
-
-        // Cleanup ingress rule to prevent further traffic to the session pod
-        Optional<Ingress> ingress = K8sUtil.getExistingIngress(client.kubernetes(), client.namespace(),
-                appDefinition.get().getMetadata().getName(), appDefinition.get().getMetadata().getUid());
-        if (ingress.isEmpty()) {
-            LOGGER.error(
-                    formatLogMessage(correlationId, "No Ingress for app definition " + appDefinitionID + " found."));
-            return false;
-        }
-        // Remove ingress rule
-        try {
-            removeIngressRule(correlationId, appDefinition.get(), ingress.get(), instance);
-        } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId,
-                    "Error while editing ingress " + ingress.get().getMetadata().getName()), e);
-            return false;
-        }
-
-        // Remove owner reference from deployment
         if (instance == null) {
             LOGGER.error(formatLogMessage(correlationId, "Error while getting instance from Service"));
             return false;
         }
+
+        // Cleanup routing rule to prevent further traffic to the session pod
+        try {
+            boolean routingCleanupSuccess = routingStrategy.removeSessionRouting(session, appDefinition.get(), instance,
+                    correlationId);
+            if (!routingCleanupSuccess) {
+                LOGGER.error(formatLogMessage(correlationId, "Failed to remove routing for session " + spec.getName()));
+                return false;
+            }
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error while removing routing for session " + spec.getName()),
+                    e);
+            return false;
+        }
+
+        // Remove owner reference from deployment
         final String deploymentName = TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance);
         try {
             client.kubernetes().apps().deployments().withName(deploymentName).edit(deployment -> TheiaCloudHandlerUtil
@@ -564,20 +519,4 @@ public class EagerSessionHandler implements SessionHandler {
         return true;
     }
 
-    protected synchronized void removeIngressRule(String correlationId, AppDefinition appDefinition, Ingress ingress,
-            Integer instance) throws KubernetesClientException {
-        final String ruleHttpPath = ingressPathProvider.getPath(appDefinition, instance)
-                + arguments.getIngressPathSuffix();
-        client.ingresses().resource(ingress.getMetadata().getName()).edit(ingressToUpdate -> {
-            ingressToUpdate.getSpec().getRules().removeIf(rule -> {
-                if (rule.getHttp() == null) {
-                    LOGGER.warn(formatLogMessage(correlationId,
-                            "Error while removing ingress rule: The rule's HTTP block is null"));
-                    return false;
-                }
-                return rule.getHttp().getPaths().stream().anyMatch(httpPath -> ruleHttpPath.equals(httpPath.getPath()));
-            });
-            return ingressToUpdate;
-        });
-    }
 }
