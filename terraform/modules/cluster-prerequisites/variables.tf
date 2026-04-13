@@ -172,8 +172,8 @@ variable "cloud_provider" {
   type        = string
   default     = "K8S"
   validation {
-    condition     = contains(["MINIKUBE", "K8S"], var.cloud_provider)
-    error_message = "Valid values are: MINIKUBE, K8S"
+    condition     = contains(["MINIKUBE", "K8S", "OPENSHIFT"], var.cloud_provider)
+    error_message = "Valid values are: MINIKUBE, K8S, OPENSHIFT"
   }
 }
 

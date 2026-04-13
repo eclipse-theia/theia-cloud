@@ -1,15 +1,19 @@
 # Changelog
 
-## [Unreleased]
+## [1.3.0] - unreleased
 
 - [java/operator] Add `--oAuth2ProxyImage` operator argument to override the full oauth2-proxy image path (defaults to `quay.io/oauth2-proxy/oauth2-proxy`). This enables pulling the image from a private registry in air-gapped or corporate networks, instead of only configuring the tag via `--oAuth2ProxyVersion`.
 - [all components] Update Node.js from 20 to 24 (LTS)
 - [theia] Update TypeScript from 5.4.5 to 5.9.3 to match the TypeScript version required by `@types/node` 24
+- [java/operator] Add OpenShift support with Route-based session routing [#499](https://github.com/eclipse-theia/theia-cloud/pull/499)
 
 ### Breaking Changes in 1.3.0
 
 - [node][theia] Node.js 24 or later is now required to build the `node/` and `theia/` packages. `engine-strict` is enabled in `node/.npmrc`, so `npm ci` fails on older Node versions.
 - [docker/demo] The `theia-cloud-activity-demo-theia` image now runs on Node 24 (`node:24-bookworm-slim`) instead of Node 20.
+- [java/operator] Ingress and session URL logic extracted from `LazySessionHandler` and `EagerSessionHandler` into the new `SessionRoutingStrategy` interface. Custom operator extensions that override or extend these handlers may need to inject `SessionRoutingStrategy` instead of directly using `IngressPathProvider` and `TheiaCloudIngressUtil`.
+- [java/operator] `TheiaCloudDeploymentUtil.getSessionURL()` methods (which took `IngressPathProvider`) have been removed. Use `SessionRoutingStrategy.getSessionURL()` instead. A new `TheiaCloudDeploymentUtil.extractHost()` utility method is provided.
+- [java/operator, java/service, node/common] The session URL in `SessionStatus.url` (and thus the `/service/session` REST response) now includes the protocol scheme, e.g. `https://ws.example.com/<path>/` instead of `ws.example.com/<path>/`. This is required because OpenShift Routes may be served over `http://` when TLS is disabled. `@eclipse-theiacloud/common` 1.3.0 handles both forms (`launchAndRedirect` only prepends `https://` when the URL does not already start with `http`), but **custom landing pages or tooling that unconditionally prefix the returned URL with `https://` must be updated**, otherwise they will produce `https://https://...`. [#499](https://github.com/eclipse-theia/theia-cloud/pull/499)
 
 ## [1.2.0] - 2026-04-09
 

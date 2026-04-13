@@ -9,12 +9,14 @@ output "keycloak_url" {
   // Trim trailing slash if present to ensure consistent format
   //and avoid issues with downstream usage of keycloak provider.
   value = trimsuffix(
-    var.ingress_enabled
+    var.cloud_provider == "OPENSHIFT"
+    ? "https://${var.hostname}${var.keycloak_http_relative_path}"
+    : var.ingress_enabled
     ? "https://${var.hostname}${var.keycloak_http_relative_path}"
     : "http://${var.hostname}:8080${var.keycloak_http_relative_path}",
     "/"
   )
-  depends_on = [terraform_data.wait_for_keycloak_instance]
+  depends_on = [terraform_data.wait_for_keycloak_instance, terraform_data.wait_for_keycloak_route]
 }
 
 output "admin_username" {
