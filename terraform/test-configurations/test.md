@@ -16,6 +16,12 @@ Run `terraform init` and `terraform apply` in both directories below:
 terraform state rm kubernetes_persistent_volume_v1.minikube
 ```
 
+## OpenShift Setup
+
+For testing on OpenShift (using OpenShift Local / CRC), see [openshift.md](./openshift.md).
+
+- `0_openshift-setup` captures OpenShift connection details for downstream terraform steps.
+
 ## Theia Cloud Setups
 
 Pick an installation in one of below directories and run `terraform init` and `terraform apply`.
