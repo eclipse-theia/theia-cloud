@@ -225,8 +225,9 @@ export namespace TheiaCloud {
 
   export async function launchAndRedirect(request: LaunchRequest, options: RequestOptions = {}): Promise<string> {
     const url = await launch(request, options);
-    console.log(`Redirect to: https://${url}`);
-    location.replace(`https://${url}`);
+    const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+    console.log(`Redirect to: ${fullUrl}`);
+    location.replace(fullUrl);
     return url;
   }
 
