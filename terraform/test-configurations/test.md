@@ -26,10 +26,16 @@ For testing on OpenShift (using OpenShift Local / CRC), see [openshift.md](./ope
 
 Pick an installation in one of below directories and run `terraform init` and `terraform apply`.
 
-- `2-01_try-now` installs a local version of <https://try.theia-cloud.io/>
-- `2-02_monitor` installs a setup that allows to test the monitor (VSCode extension or Theia extension based) with and without authentication
-- `2-03_try-now_paths` installs a local version of <https://try.theia-cloud.io/> using paths instead of subdomains.
-- `2-04_try-now_paths_eager-start` installs a local version of <https://try.theia-cloud.io/> using paths and eager instead of lazy starting of pods. See its [README](./2-04_try-now_paths_eager-start/README.md) for more details.
+- `3-01_try-now` installs a local version of <https://try.theia-cloud.io/>
+- `3-02_monitor` installs a setup that allows to test the monitor (VSCode extension or Theia extension based) with and without authentication
+- `3-03_try-now_paths` installs a local version of <https://try.theia-cloud.io/> using paths instead of subdomains.
+- `3-04_try-now_paths_eager-start` installs a local version of <https://try.theia-cloud.io/> using paths and eager instead of lazy starting of pods. See its [README](./3-04_try-now_paths_eager-start/README.md) for more details.
+
+### OpenShift Setups
+
+These configurations deploy Theia Cloud on an OpenShift cluster (using Routes instead of Ingress). Run `0_openshift-setup` first, see [openshift.md](./openshift.md).
+
+- `4-01_openshift_monitor` installs Theia Cloud with OpenShift Route support and activity monitoring, without Keycloak, using `valuesOpenShiftMonitor.yaml`
 
 ## Getting a Keycloak access token
 
