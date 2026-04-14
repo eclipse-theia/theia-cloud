@@ -66,26 +66,27 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
     @Inject
     private TheiaCloudClient client;
 
-    private OpenShiftClient osClient;
-
-    private OpenShiftClient openShiftClient() {
-        if (osClient == null) {
-            osClient = client.kubernetes().adapt(OpenShiftClient.class);
-        }
-        return osClient;
-    }
-
     @Inject
     private TheiaCloudOperatorArguments arguments;
 
-    private volatile boolean routeConfigLoaded;
+    private boolean initialized;
+    private OpenShiftClient osClient;
     private boolean useTls;
     private Map<String, String> routeAnnotations;
 
-    private void loadRouteConfig() {
-        if (routeConfigLoaded) {
+    /** Package-private constructor for unit tests. */
+    OpenShiftRouteRoutingStrategy(TheiaCloudOperatorArguments arguments) {
+        this.arguments = arguments;
+    }
+
+    OpenShiftRouteRoutingStrategy() {
+    }
+
+    private synchronized void ensureInitialized() {
+        if (initialized) {
             return;
         }
+        osClient = client.kubernetes().adapt(OpenShiftClient.class);
         String namespace = client.namespace();
         ConfigMap cm = client.kubernetes().configMaps().inNamespace(namespace).withName(ROUTE_CONFIG_CM_NAME).get();
         if (cm == null) {
@@ -93,7 +94,7 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
                     + namespace + ". Using defaults (no TLS, no annotations)."));
             this.useTls = false;
             this.routeAnnotations = Map.of();
-            this.routeConfigLoaded = true;
+            this.initialized = true;
             return;
         }
         this.useTls = Boolean.parseBoolean(cm.getData().getOrDefault("useTls", "false"));
@@ -111,68 +112,81 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
         } else {
             this.routeAnnotations = Map.of();
         }
-        this.routeConfigLoaded = true;
+        this.initialized = true;
+    }
+
+    private String protocol() {
+        return useTls ? "https://" : "http://";
     }
 
     @Override
     public boolean ensureRoutingResourceExists(AppDefinition appDefinition, String correlationId) {
-        // No-op: the operator creates session Routes from a classpath template.
-        // There is no template Route on the cluster to attach owner references to.
+        ensureInitialized();
         return true;
     }
 
     @Override
     public synchronized String addSessionRouting(Session session, AppDefinition appDefinition, Service service,
             String correlationId) {
-        return createSessionRoute(session, appDefinition, service, correlationId);
+        ensureInitialized();
+        String routeName = NamingUtil.createNameWithSuffix(session, "route");
+        String hostname = computeSessionHostname(session);
+        return createRoute(routeName, hostname, session, appDefinition, service, correlationId);
     }
 
-    // On OpenShift, Routes are always per-session (keyed by session UID), not per-instance.
-    // The instance parameter is used by IngressRoutingStrategy for path-based routing but is
-    // not applicable to Route-based routing where each session gets its own Route + hostname.
     @Override
     public synchronized String addSessionRouting(Session session, AppDefinition appDefinition, Service service,
             int instance, String correlationId) {
-        return createSessionRoute(session, appDefinition, service, correlationId);
+        ensureInitialized();
+        String routeName = computeInstanceRouteName(appDefinition, instance);
+        String hostname = computeInstanceHostname(appDefinition, instance);
+        return createRoute(routeName, hostname, session, appDefinition, service, correlationId);
     }
 
     @Override
     public synchronized boolean removeSessionRouting(Session session, AppDefinition appDefinition,
             String correlationId) {
-        return deleteSessionRoute(session, correlationId);
+        ensureInitialized();
+        String routeName = NamingUtil.createNameWithSuffix(session, "route");
+        return deleteRoute(routeName, correlationId);
     }
 
-    // On OpenShift, Routes are always per-session (keyed by session UID), not per-instance.
-    // The instance parameter is used by IngressRoutingStrategy for path-based routing but is
-    // not applicable to Route-based routing where each session gets its own Route + hostname.
     @Override
     public synchronized boolean removeSessionRouting(Session session, AppDefinition appDefinition, int instance,
             String correlationId) {
-        return deleteSessionRoute(session, correlationId);
+        ensureInitialized();
+        String routeName = computeInstanceRouteName(appDefinition, instance);
+        return deleteRoute(routeName, correlationId);
     }
 
-    private String createSessionRoute(Session session, AppDefinition appDefinition, Service service,
-            String correlationId) {
-        loadRouteConfig();
+    @Override
+    public synchronized String getSessionURL(AppDefinition appDefinition, Session session) {
+        ensureInitialized();
+        return protocol() + computeSessionHostname(session) + "/";
+    }
 
+    @Override
+    public synchronized String getSessionURL(AppDefinition appDefinition, int instance) {
+        ensureInitialized();
+        return protocol() + computeInstanceHostname(appDefinition, instance) + "/";
+    }
+
+    private String createRoute(String routeName, String hostname, Session session, AppDefinition appDefinition,
+            Service service, String correlationId) {
         String namespace = client.namespace();
-        String sessionRouteName = NamingUtil.createNameWithSuffix(session, "route");
-        String sessionHostname = computeSessionHostname(session);
         String serviceName = service.getMetadata().getName();
 
-        // Check if the Route already exists (idempotency for operator restarts / reconciliation)
-        Route existingRoute = openShiftClient().routes().inNamespace(namespace).withName(sessionRouteName).get();
+        Route existingRoute = osClient.routes().inNamespace(namespace).withName(routeName).get();
         if (existingRoute != null) {
-            LOGGER.info(formatLogMessage(correlationId, "Session Route '" + sessionRouteName
-                    + "' already exists with host '" + existingRoute.getSpec().getHost() + "'"));
-            return existingRoute.getSpec().getHost() + "/";
+            LOGGER.info(formatLogMessage(correlationId, "Route '" + routeName + "' already exists with host '"
+                    + existingRoute.getSpec().getHost() + "'"));
+            return protocol() + existingRoute.getSpec().getHost() + "/";
         }
 
-        // Build replacement map for the template
         Map<String, String> replacements = new HashMap<>();
-        replacements.put("placeholder-routename", sessionRouteName);
+        replacements.put("placeholder-routename", routeName);
         replacements.put("placeholder-namespace", namespace);
-        replacements.put("placeholder-hostname", sessionHostname);
+        replacements.put("placeholder-hostname", hostname);
         replacements.put("placeholder-servicename", serviceName);
 
         String routeYaml;
@@ -181,108 +195,96 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
                     correlationId);
         } catch (IOException | URISyntaxException e) {
             LOGGER.error(formatLogMessage(correlationId,
-                    "Error while loading Route template for session " + session.getMetadata().getName()), e);
+                    "Error while loading Route template for route '" + routeName + "'"), e);
             return null;
         }
 
-        // Parse the YAML into a Route object
-        Route sessionRoute;
+        Route route;
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(routeYaml.getBytes(StandardCharsets.UTF_8))) {
-            sessionRoute = openShiftClient().routes().load(inputStream).item();
+            route = osClient.routes().load(inputStream).item();
         } catch (IOException e) {
             LOGGER.error(formatLogMessage(correlationId,
-                    "Error while parsing Route YAML for session " + session.getMetadata().getName()), e);
+                    "Error while parsing Route YAML for route '" + routeName + "'"), e);
             return null;
         }
-        if (sessionRoute == null) {
-            LOGGER.error(formatLogMessage(correlationId,
-                    "Parsed Route is null for session " + session.getMetadata().getName()));
+        if (route == null) {
+            LOGGER.error(formatLogMessage(correlationId, "Parsed Route is null for route '" + routeName + "'"));
             return null;
         }
 
-        // Set labels: session labels + app label matching the service
         Map<String, String> labels = new HashMap<>(LabelsUtil.createSessionLabels(session, appDefinition));
         labels.put("app", serviceName);
-        sessionRoute.getMetadata().setLabels(labels);
+        route.getMetadata().setLabels(labels);
 
-        // Update the placeholder owner reference to point to the Session CR
         ResourceEdit.<Route> updateOwnerReference(0, Session.API, Session.KIND, session.getMetadata().getName(),
-                session.getMetadata().getUid(), correlationId).accept(sessionRoute);
+                session.getMetadata().getUid(), correlationId).accept(route);
 
-        // Add TLS settings if configured
         if (useTls) {
-            sessionRoute.getSpec().setTls(new TLSConfigBuilder().withTermination("edge").build());
+            route.getSpec().setTls(new TLSConfigBuilder().withTermination("edge").build());
         }
 
-        // Merge in annotations from the ConfigMap
         if (routeAnnotations != null && !routeAnnotations.isEmpty()) {
-            Map<String, String> annotations = sessionRoute.getMetadata().getAnnotations();
+            Map<String, String> annotations = route.getMetadata().getAnnotations();
             if (annotations == null) {
                 annotations = new HashMap<>();
-                sessionRoute.getMetadata().setAnnotations(annotations);
+                route.getMetadata().setAnnotations(annotations);
             }
             annotations.putAll(routeAnnotations);
         }
 
         try {
-            openShiftClient().routes().inNamespace(namespace).resource(sessionRoute).create();
+            osClient.routes().inNamespace(namespace).resource(route).create();
             LOGGER.info(formatLogMessage(correlationId,
-                    "Created session Route '" + sessionRouteName + "' with host '" + sessionHostname + "'"));
+                    "Created Route '" + routeName + "' with host '" + hostname + "'"));
         } catch (Exception e) {
-            LOGGER.error(formatLogMessage(correlationId, "Failed to create session Route '" + sessionRouteName + "'"),
-                    e);
+            LOGGER.error(formatLogMessage(correlationId, "Failed to create Route '" + routeName + "'"), e);
             return null;
         }
 
-        return sessionHostname + "/";
+        return protocol() + hostname + "/";
     }
 
-    private boolean deleteSessionRoute(Session session, String correlationId) {
+    private boolean deleteRoute(String routeName, String correlationId) {
         String namespace = client.namespace();
-        String sessionRouteName = NamingUtil.createNameWithSuffix(session, "route");
 
-        Route existingRoute = openShiftClient().routes().inNamespace(namespace).withName(sessionRouteName).get();
+        Route existingRoute = osClient.routes().inNamespace(namespace).withName(routeName).get();
         if (existingRoute == null) {
-            LOGGER.info(formatLogMessage(correlationId, "Session Route '" + sessionRouteName
-                    + "' not found -- may have been cleaned up by owner reference GC."));
+            LOGGER.info(formatLogMessage(correlationId,
+                    "Route '" + routeName + "' not found -- may have been cleaned up by owner reference GC."));
             return true;
         }
 
         try {
-            openShiftClient().routes().inNamespace(namespace).withName(sessionRouteName).delete();
-            LOGGER.info(formatLogMessage(correlationId, "Deleted session Route '" + sessionRouteName + "'"));
+            osClient.routes().inNamespace(namespace).withName(routeName).delete();
+            LOGGER.info(formatLogMessage(correlationId, "Deleted Route '" + routeName + "'"));
         } catch (Exception e) {
-            LOGGER.error(formatLogMessage(correlationId, "Failed to delete session Route '" + sessionRouteName + "'"),
-                    e);
+            LOGGER.error(formatLogMessage(correlationId, "Failed to delete Route '" + routeName + "'"), e);
             return false;
         }
 
         return true;
     }
 
-    @Override
-    public String getSessionURL(AppDefinition appDefinition, Session session) {
-        loadRouteConfig();
-        String protocol = useTls ? "https://" : "http://";
-        return protocol + computeSessionHostname(session) + "/";
-    }
-
-    @Override
-    public String getSessionURL(AppDefinition appDefinition, int instance) {
-        // On OpenShift, session URLs are only known once a session (with a UID) exists.
-        // For eager-start pre-provisioned instances that have no session yet, return an empty placeholder.
-        return "";
-    }
-
     /**
      * Compute the hostname for a session Route. Uses the full session UID to create a unique subdomain under the
-     * instances host - the same identifier that {@code IngressPathProvider} uses for Ingress paths.
+     * instances host.
      * <p>
      * For example: {@code <full-uid>.ws.apps-crc.testing}
      */
-    private String computeSessionHostname(Session session) {
+    String computeSessionHostname(Session session) {
         String instancesHost = arguments.getInstancesHost();
         String uid = session.getMetadata().getUid();
         return uid + "." + instancesHost;
+    }
+
+    String computeInstanceHostname(AppDefinition appDefinition, int instance) {
+        String instancesHost = arguments.getInstancesHost();
+        String subdomainLabel = NamingUtil.asValidName(
+                appDefinition.getSpec().getName() + "-" + instance, 63);
+        return subdomainLabel + "." + instancesHost;
+    }
+
+    String computeInstanceRouteName(AppDefinition appDefinition, int instance) {
+        return NamingUtil.createNameWithSuffix(appDefinition, instance, "route");
     }
 }
