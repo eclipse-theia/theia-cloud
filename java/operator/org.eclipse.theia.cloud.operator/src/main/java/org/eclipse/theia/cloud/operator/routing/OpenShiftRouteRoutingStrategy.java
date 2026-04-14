@@ -17,9 +17,11 @@ package org.eclipse.theia.cloud.operator.routing;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,29 +32,37 @@ import org.eclipse.theia.cloud.common.util.LabelsUtil;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
+import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import com.google.inject.Inject;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.OwnerReference;
+import org.eclipse.theia.cloud.common.k8s.resource.ResourceEdit;
+
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
-import io.fabric8.openshift.api.model.RouteBuilder;
+import io.fabric8.openshift.api.model.TLSConfigBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
-
 
 /**
  * OpenShift Route-based implementation of {@link SessionRoutingStrategy}.
  * <p>
- * Instead of managing IngressRules on a shared Ingress resource, this strategy
- * creates individual OpenShift Route objects for each session by cloning a template Route.
- * Routes are deleted when sessions end.
+ * Instead of managing IngressRules on a shared Ingress resource, this strategy creates individual OpenShift Route
+ * objects for each session from a classpath YAML template ({@code templateRoute.yaml}). Routes are deleted when
+ * sessions end.
+ * <p>
+ * TLS settings and custom annotations are read from the {@code openshift-route-config} ConfigMap deployed by the Helm
+ * chart.
  * <p>
  * Only subdomain-based routing ({@code usePaths: false}) is supported on OpenShift.
  */
 public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
 
     private static final Logger LOGGER = LogManager.getLogger(OpenShiftRouteRoutingStrategy.class);
+
+    private static final String TEMPLATE_ROUTE_YAML = "/templateRoute.yaml";
+    private static final String ROUTE_CONFIG_CM_NAME = "openshift-route-config";
 
     @Inject
     private TheiaCloudClient client;
@@ -69,45 +79,46 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
     @Inject
     private TheiaCloudOperatorArguments arguments;
 
+    private volatile boolean routeConfigLoaded;
+    private boolean useTls;
+    private Map<String, String> routeAnnotations;
+
+    private void loadRouteConfig() {
+        if (routeConfigLoaded) {
+            return;
+        }
+        String namespace = client.namespace();
+        ConfigMap cm = client.kubernetes().configMaps().inNamespace(namespace).withName(ROUTE_CONFIG_CM_NAME).get();
+        if (cm == null) {
+            LOGGER.warn(formatLogMessage("INIT", "ConfigMap '" + ROUTE_CONFIG_CM_NAME + "' not found in namespace "
+                    + namespace + ". Using defaults (no TLS, no annotations)."));
+            this.useTls = false;
+            this.routeAnnotations = Map.of();
+            this.routeConfigLoaded = true;
+            return;
+        }
+        this.useTls = Boolean.parseBoolean(cm.getData().getOrDefault("useTls", "false"));
+        String annotationsYaml = cm.getData().get("annotations");
+        if (annotationsYaml != null && !annotationsYaml.isBlank()) {
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, String> parsed = Serialization.unmarshal(annotationsYaml, Map.class);
+                this.routeAnnotations = parsed != null ? parsed : Map.of();
+            } catch (Exception e) {
+                LOGGER.warn(formatLogMessage("INIT", "Failed to parse annotations from ConfigMap '"
+                        + ROUTE_CONFIG_CM_NAME + "'. Using empty annotations."), e);
+                this.routeAnnotations = Map.of();
+            }
+        } else {
+            this.routeAnnotations = Map.of();
+        }
+        this.routeConfigLoaded = true;
+    }
+
     @Override
     public boolean ensureRoutingResourceExists(AppDefinition appDefinition, String correlationId) {
-        String namespace = client.namespace();
-        String templateName = appDefinition.getSpec().getIngressname();
-
-        // Check if template Route already has an owner reference for this AppDefinition
-        Route existingRoute = openShiftClient().routes().inNamespace(namespace).withName(templateName).get();
-        if (existingRoute == null) {
-            LOGGER.error(formatLogMessage(correlationId,
-                    "Template Route '" + templateName + "' not found in namespace " + namespace));
-            return false;
-        }
-
-        // Check if owner reference already exists — if so, nothing to do
-        List<OwnerReference> existingRefs = existingRoute.getMetadata().getOwnerReferences();
-        if (existingRefs != null
-                && existingRefs.stream().anyMatch(ref -> appDefinition.getMetadata().getUid().equals(ref.getUid()))) {
-            return true;
-        }
-
-        // Owner reference is missing — add it
-        OwnerReference ownerReference = new OwnerReference();
-        ownerReference.setApiVersion(HasMetadata.getApiVersion(AppDefinition.class));
-        ownerReference.setKind(AppDefinition.KIND);
-        ownerReference.setName(appDefinition.getMetadata().getName());
-        ownerReference.setUid(appDefinition.getMetadata().getUid());
-
-        openShiftClient().routes().inNamespace(namespace).withName(templateName).edit(route -> {
-            List<OwnerReference> refs = route.getMetadata().getOwnerReferences();
-            if (refs == null) {
-                refs = new ArrayList<>();
-                route.getMetadata().setOwnerReferences(refs);
-            }
-            refs.add(ownerReference);
-            return route;
-        });
-        LOGGER.info(formatLogMessage(correlationId,
-                "Added owner reference for AppDefinition to template Route '" + templateName + "'"));
-
+        // No-op: the operator creates session Routes from a classpath template.
+        // There is no template Route on the cluster to attach owner references to.
         return true;
     }
 
@@ -143,51 +154,12 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
 
     private String createSessionRoute(Session session, AppDefinition appDefinition, Service service,
             String correlationId) {
+        loadRouteConfig();
+
         String namespace = client.namespace();
-        String templateName = appDefinition.getSpec().getIngressname();
-
-        // Load the template Route
-        Route template = openShiftClient().routes().inNamespace(namespace).withName(templateName).get();
-        if (template == null) {
-            LOGGER.error(formatLogMessage(correlationId,
-                    "Template Route '" + templateName + "' not found. Cannot create session Route."));
-            return null;
-        }
-
         String sessionRouteName = NamingUtil.createNameWithSuffix(session, "route");
         String sessionHostname = computeSessionHostname(session);
         String serviceName = service.getMetadata().getName();
-
-        // Build labels: session labels + app label matching the service
-        Map<String, String> labels = new HashMap<>(LabelsUtil.createSessionLabels(session, appDefinition));
-        labels.put("app", serviceName);
-
-        // Build owner reference pointing to the Session CR
-        OwnerReference ownerReference = new OwnerReference();
-        ownerReference.setApiVersion(Session.API);
-        ownerReference.setKind(Session.KIND);
-        ownerReference.setName(session.getMetadata().getName());
-        ownerReference.setUid(session.getMetadata().getUid());
-
-        // Inherit annotations from the template (user customizations)
-        Map<String, String> annotations = template.getMetadata().getAnnotations() != null
-                ? new HashMap<>(template.getMetadata().getAnnotations())
-                : new HashMap<>();
-        // Remove Helm-managed annotations that should not be copied to session Routes
-        annotations.remove("meta.helm.sh/release-name");
-        annotations.remove("meta.helm.sh/release-namespace");
-
-        // Build the session Route from the template
-        RouteBuilder routeBuilder = new RouteBuilder().withNewMetadata().withName(sessionRouteName)
-                .withNamespace(namespace).withAnnotations(annotations).withLabels(labels)
-                .addToOwnerReferences(ownerReference).endMetadata().withNewSpec().withHost(sessionHostname).withNewTo()
-                .withKind("Service").withName(serviceName).withWeight(100).endTo().withNewPort()
-                .withNewTargetPort("http").endPort().withWildcardPolicy("None").endSpec();
-
-        // Inherit TLS settings from the template
-        if (template.getSpec().getTls() != null) {
-            routeBuilder.editSpec().withTls(template.getSpec().getTls()).endSpec();
-        }
 
         // Check if the Route already exists (idempotency for operator restarts / reconciliation)
         Route existingRoute = openShiftClient().routes().inNamespace(namespace).withName(sessionRouteName).get();
@@ -197,7 +169,61 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
             return existingRoute.getSpec().getHost() + "/";
         }
 
-        Route sessionRoute = routeBuilder.build();
+        // Build replacement map for the template
+        Map<String, String> replacements = new HashMap<>();
+        replacements.put("placeholder-routename", sessionRouteName);
+        replacements.put("placeholder-namespace", namespace);
+        replacements.put("placeholder-hostname", sessionHostname);
+        replacements.put("placeholder-servicename", serviceName);
+
+        String routeYaml;
+        try {
+            routeYaml = JavaResourceUtil.readResourceAndReplacePlaceholders(TEMPLATE_ROUTE_YAML, replacements,
+                    correlationId);
+        } catch (IOException | URISyntaxException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Error while loading Route template for session " + session.getMetadata().getName()), e);
+            return null;
+        }
+
+        // Parse the YAML into a Route object
+        Route sessionRoute;
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(routeYaml.getBytes(StandardCharsets.UTF_8))) {
+            sessionRoute = openShiftClient().routes().load(inputStream).item();
+        } catch (IOException e) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Error while parsing Route YAML for session " + session.getMetadata().getName()), e);
+            return null;
+        }
+        if (sessionRoute == null) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Parsed Route is null for session " + session.getMetadata().getName()));
+            return null;
+        }
+
+        // Set labels: session labels + app label matching the service
+        Map<String, String> labels = new HashMap<>(LabelsUtil.createSessionLabels(session, appDefinition));
+        labels.put("app", serviceName);
+        sessionRoute.getMetadata().setLabels(labels);
+
+        // Update the placeholder owner reference to point to the Session CR
+        ResourceEdit.<Route> updateOwnerReference(0, Session.API, Session.KIND, session.getMetadata().getName(),
+                session.getMetadata().getUid(), correlationId).accept(sessionRoute);
+
+        // Add TLS settings if configured
+        if (useTls) {
+            sessionRoute.getSpec().setTls(new TLSConfigBuilder().withTermination("edge").build());
+        }
+
+        // Merge in annotations from the ConfigMap
+        if (routeAnnotations != null && !routeAnnotations.isEmpty()) {
+            Map<String, String> annotations = sessionRoute.getMetadata().getAnnotations();
+            if (annotations == null) {
+                annotations = new HashMap<>();
+                sessionRoute.getMetadata().setAnnotations(annotations);
+            }
+            annotations.putAll(routeAnnotations);
+        }
 
         try {
             openShiftClient().routes().inNamespace(namespace).resource(sessionRoute).create();
@@ -219,7 +245,7 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
         Route existingRoute = openShiftClient().routes().inNamespace(namespace).withName(sessionRouteName).get();
         if (existingRoute == null) {
             LOGGER.info(formatLogMessage(correlationId, "Session Route '" + sessionRouteName
-                    + "' not found — may have been cleaned up by owner reference GC."));
+                    + "' not found -- may have been cleaned up by owner reference GC."));
             return true;
         }
 
@@ -236,10 +262,8 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
     }
 
     /**
-     * Compute the hostname for a session Route. Uses the session's UID to create a
-     * unique subdomain under the instances
-     * host. For example: {@code ws-<uid-prefix>.<baseHost>} →
-     * {@code ws-abc123def456.apps-crc.testing}
+     * Compute the hostname for a session Route. Uses the session's UID to create a unique subdomain under the instances
+     * host. For example: {@code ws-<uid-prefix>.<baseHost>} -> {@code ws-abc123def456.apps-crc.testing}
      */
     private String computeSessionHostname(Session session) {
         String instancesHost = arguments.getInstancesHost();
