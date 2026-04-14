@@ -45,8 +45,9 @@ public interface SessionRoutingStrategy {
      * @param appDefinition the AppDefinition for the session
      * @param service       the Service created for the session
      * @param correlationId the correlation ID for logging
-     * @return the session URL (host + path) for this session, or {@code null} if
-     *         routing could not be established
+     * @return the full session URL with protocol (e.g.
+     *         {@code https://host/path/} or {@code http://uid.host/}), or
+     *         {@code null} if routing could not be established
      */
     String addSessionRouting(Session session, AppDefinition appDefinition, Service service, String correlationId);
 
@@ -59,8 +60,9 @@ public interface SessionRoutingStrategy {
      * @param service       the Service to route to
      * @param instance      the instance number for path computation
      * @param correlationId the correlation ID for logging
-     * @return the session URL (host + path) for this session, or {@code null} if
-     *         routing could not be established
+     * @return the full session URL with protocol (e.g.
+     *         {@code https://host/path/} or {@code http://appname-0.host/}), or
+     *         {@code null} if routing could not be established
      */
     String addSessionRouting(Session session, AppDefinition appDefinition, Service service, int instance,
             String correlationId);

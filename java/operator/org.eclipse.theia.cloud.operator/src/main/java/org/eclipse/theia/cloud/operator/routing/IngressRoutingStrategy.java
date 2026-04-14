@@ -94,7 +94,7 @@ public class IngressRoutingStrategy implements SessionRoutingStrategy {
         }
         String path = ingressPathProvider.getPath(appDefinition, instance);
         addSingleIngressRule(ingress.get(), service, appDefinition.getSpec().getPort(), path, correlationId);
-        return arguments.getInstancesHost() + path + "/";
+        return HOST_PROTOCOL + arguments.getInstancesHost() + path + "/";
     }
 
     @Override
@@ -183,7 +183,7 @@ public class IngressRoutingStrategy implements SessionRoutingStrategy {
             }
         });
 
-        return instancesHost + path + "/";
+        return HOST_PROTOCOL + instancesHost + path + "/";
     }
 
     private void addSingleIngressRule(Ingress ingress, Service service, int port, String path, String correlationId) {
