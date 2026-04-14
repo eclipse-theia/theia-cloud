@@ -16,6 +16,7 @@
 package org.eclipse.theia.cloud.operator.routing;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil.HOST_PROTOCOL;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -215,5 +216,17 @@ public class IngressRoutingStrategy implements SessionRoutingStrategy {
         ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
         ingressServiceBackend.setPort(serviceBackendPort);
         serviceBackendPort.setNumber(port);
+    }
+
+    @Override
+    public String getSessionURL(AppDefinition appDefinition, Session session) {
+        String path = ingressPathProvider.getPath(appDefinition, session);
+        return HOST_PROTOCOL + arguments.getInstancesHost() + path + "/";
+    }
+
+    @Override
+    public String getSessionURL(AppDefinition appDefinition, int instance) {
+        String path = ingressPathProvider.getPath(appDefinition, instance);
+        return HOST_PROTOCOL + arguments.getInstancesHost() + path + "/";
     }
 }

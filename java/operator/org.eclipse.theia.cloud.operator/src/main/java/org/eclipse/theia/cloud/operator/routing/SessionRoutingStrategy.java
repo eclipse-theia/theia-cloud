@@ -48,9 +48,9 @@ public interface SessionRoutingStrategy {
      * @return the session URL (host + path) for this session, or {@code null} if
      *         routing could not be established
      */
-     String addSessionRouting(Session session, AppDefinition appDefinition, Service service, String correlationId);
+    String addSessionRouting(Session session, AppDefinition appDefinition, Service service, String correlationId);
 
-     /**
+    /**
      * Create or update routing for a new session (eager start). The routing path is
      * derived from the pre-allocated instance number.
      *
@@ -87,4 +87,28 @@ public interface SessionRoutingStrategy {
      * @return true if cleanup succeeded, false otherwise
      */
     boolean removeSessionRouting(Session session, AppDefinition appDefinition, int instance, String correlationId);
+
+    /**
+     * Compute the full session URL for a given session (lazy start). This does not
+     * create any routing resources; it only computes the URL that the session will
+     * be reachable at.
+     *
+     * @param appDefinition the AppDefinition for the session
+     * @param session       the session
+     * @return the full session URL (e.g.
+     *         {@code https://host/path/} for Ingress or
+     *         {@code https://uid.host/} for Routes)
+     */
+    String getSessionURL(AppDefinition appDefinition, Session session);
+
+    /**
+     * Compute the full session URL for a given instance (eager start). This does
+     * not create any routing resources; it only computes the URL that the session
+     * will be reachable at.
+     *
+     * @param appDefinition the AppDefinition for the session
+     * @param instance      the instance number
+     * @return the full session URL
+     */
+    String getSessionURL(AppDefinition appDefinition, int instance);
 }
