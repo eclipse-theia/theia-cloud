@@ -26,7 +26,6 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
-import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
 
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 
@@ -40,18 +39,16 @@ public final class TheiaCloudDeploymentUtil {
     private TheiaCloudDeploymentUtil() {
     }
 
-    public static String getSessionURL(String host, IngressPathProvider ingressPathProvider,
-            AppDefinition appDefinition, Session session) {
-        return getSessionURL(host, ingressPathProvider.getPath(appDefinition, session));
-    }
-
-    public static String getSessionURL(String host, IngressPathProvider ingressPathProvider,
-            AppDefinition appDefinition, int instance) {
-        return getSessionURL(host, ingressPathProvider.getPath(appDefinition, instance));
-    }
-
-    private static String getSessionURL(String host, String path) {
-        return HOST_PROTOCOL + host + path + "/";
+    /**
+     * Extract the host portion from a full URL by stripping the protocol scheme and
+     * trailing slash.
+     *
+     * @param url a URL such as {@code https://host/path/}
+     * @return the host+path without scheme or trailing slash, e.g.
+     *         {@code host/path}
+     */
+    public static String extractHost(String url) {
+        return url.replaceFirst("^https?://", "").replaceFirst("/$", "");
     }
 
     public static String getDeploymentName(AppDefinition appDefinition, int instance) {

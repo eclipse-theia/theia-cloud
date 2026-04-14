@@ -34,7 +34,6 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSp
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
-import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.replacements.DeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
@@ -67,9 +66,6 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
 
     @Inject
     protected TheiaCloudOperatorArguments arguments;
-
-    @Inject
-    protected IngressPathProvider ingressPathProvider;
 
     @Inject
     protected SessionRoutingStrategy routingStrategy;
@@ -251,7 +247,8 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
                 AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
                 labelsToAdd, configMap -> {
-                    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, instance);
+                    String host = TheiaCloudDeploymentUtil.extractHost(
+                            routingStrategy.getSessionURL(appDefinition, instance));
                     int port = appDefinition.getSpec().getPort();
                     AddedHandlerUtil.updateProxyConfigMap(client, namespace, configMap, host, port);
                 });

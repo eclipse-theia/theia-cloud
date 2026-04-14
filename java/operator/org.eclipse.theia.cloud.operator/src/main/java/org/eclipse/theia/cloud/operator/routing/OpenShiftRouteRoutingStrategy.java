@@ -26,21 +26,20 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
+import org.eclipse.theia.cloud.common.k8s.resource.ResourceEdit;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.util.LabelsUtil;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
-import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 
 import com.google.inject.Inject;
 
-import org.eclipse.theia.cloud.common.k8s.resource.ResourceEdit;
-
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.TLSConfigBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
@@ -261,15 +260,29 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
         return true;
     }
 
+    @Override
+    public String getSessionURL(AppDefinition appDefinition, Session session) {
+        loadRouteConfig();
+        String protocol = useTls ? "https://" : "http://";
+        return protocol + computeSessionHostname(session) + "/";
+    }
+
+    @Override
+    public String getSessionURL(AppDefinition appDefinition, int instance) {
+        // On OpenShift, session URLs are only known once a session (with a UID) exists.
+        // For eager-start pre-provisioned instances that have no session yet, return an empty placeholder.
+        return "";
+    }
+
     /**
-     * Compute the hostname for a session Route. Uses the session's UID to create a unique subdomain under the instances
-     * host. For example: {@code ws-<uid-prefix>.<baseHost>} -> {@code ws-abc123def456.apps-crc.testing}
+     * Compute the hostname for a session Route. Uses the full session UID to create a unique subdomain under the
+     * instances host - the same identifier that {@code IngressPathProvider} uses for Ingress paths.
+     * <p>
+     * For example: {@code <full-uid>.ws.apps-crc.testing}
      */
     private String computeSessionHostname(Session session) {
         String instancesHost = arguments.getInstancesHost();
         String uid = session.getMetadata().getUid();
-        // Use last 12 chars of UID to keep hostname short but unique
-        String shortUid = uid.substring(uid.length() - 12);
-        return shortUid + "." + instancesHost;
+        return uid + "." + instancesHost;
     }
 }

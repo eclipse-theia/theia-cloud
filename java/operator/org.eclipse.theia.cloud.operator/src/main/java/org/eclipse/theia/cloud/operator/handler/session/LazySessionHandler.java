@@ -45,12 +45,12 @@ import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
-import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.replacements.DeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 import org.eclipse.theia.cloud.operator.util.K8sUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudConfigMapUtil;
+import org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudK8sUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudPersistentVolumeUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil;
@@ -72,8 +72,6 @@ public class LazySessionHandler implements SessionHandler {
     private static final Logger LOGGER = LogManager.getLogger(LazySessionHandler.class);
     protected static final String USER_DATA = "user-data";
 
-    @Inject
-    protected IngressPathProvider ingressPathProvider;
     @Inject
     protected TheiaCloudOperatorArguments arguments;
     @Inject
@@ -451,7 +449,8 @@ public class LazySessionHandler implements SessionHandler {
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
                 configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, labelsToAdd,
                 configMap -> {
-                    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, session);
+                    String host = TheiaCloudDeploymentUtil.extractHost(
+                            routingStrategy.getSessionURL(appDefinition, session));
                     int port = appDefinition.getSpec().getPort();
                     AddedHandlerUtil.updateProxyConfigMap(client.kubernetes(), client.namespace(), configMap, host,
                             port);
