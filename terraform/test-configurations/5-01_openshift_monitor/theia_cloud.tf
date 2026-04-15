@@ -2,7 +2,7 @@ data "terraform_remote_state" "openshift" {
   backend = "local"
 
   config = {
-    path = "${path.module}/../0_openshift-setup/terraform.tfstate"
+    path = "${path.module}/../4_openshift-setup/terraform.tfstate"
   }
 }
 
@@ -61,6 +61,14 @@ resource "helm_release" "theia-cloud" {
     {
       name  = "operator.cloudProvider"
       value = "OPENSHIFT"
+    },
+    {
+      name  = "keycloak.enable"
+      value = "true"
+    },
+    {
+      name  = "keycloak.authUrl"
+      value = "https://keycloak.${data.terraform_remote_state.openshift.outputs.hostname}/"
     },
     # Uncomment to use locally built images (see openshift.md)
     # {

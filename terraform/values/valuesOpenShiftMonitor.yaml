@@ -32,10 +32,15 @@ landingPage:
 
 keycloak:
   enable: false
+  authUrl: ""
+  realm: "TheiaCloud"
+  clientId: "theia-cloud"
+  clientSecret: "publicbutoauth2proxywantsasecret"
+  cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
 
 service:
   authToken: asdfghjkl
-  protocol: http
+  protocol: https
 
 operator:
   eagerStart: false
@@ -43,7 +48,7 @@ operator:
   sessionsPerUser: "3"
 
 ingress:
-  tls: false
+  tls: true
   clusterIssuer: ""
   theiaCloudCommonName: false
   instances:

@@ -13,3 +13,8 @@ output "hostname" {
   description = "Base hostname for Theia Cloud routes."
   value       = var.apps_domain
 }
+
+output "keycloak" {
+  description = "Keycloak URL for the OpenShift cluster."
+  value       = "https://keycloak.${var.apps_domain}/"
+}
