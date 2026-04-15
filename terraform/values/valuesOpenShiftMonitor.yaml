@@ -39,7 +39,7 @@ service:
 
 operator:
   eagerStart: false
-  bandwidthLimiter: "WONDERSHAPER"
+  bandwidthLimiter: "K8SANNOTATION"
   sessionsPerUser: "3"
 
 ingress:

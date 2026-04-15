@@ -50,6 +50,123 @@ oc get routes -A   # should show OpenShift console routes
 # OpenShift Local uses: apps-crc.testing
 ```
 
+## Building and Pushing Custom Images
+
+When developing locally, you can build custom Theia Cloud images and push them to the CRC internal image registry. This avoids the need for an external registry.
+
+### Registry Overview
+
+OpenShift Local ships with an internal image registry. It is exposed externally via a Route at `default-route-openshift-image-registry.apps-crc.testing` (uses a self-signed certificate). Inside the cluster, pods pull from `image-registry.openshift-image-registry.svc:5000`.
+
+There are two addresses to keep in mind:
+
+| Address | Usage |
+| ------- | ----- |
+| `default-route-openshift-image-registry.apps-crc.testing` | External, used to push images from the host |
+| `image-registry.openshift-image-registry.svc:5000` | Internal, used by pods to pull images |
+
+### Logging in to the Registry
+
+The registry uses the CRC self-signed CA, so docker/podman needs to trust it or skip verification.
+
+With podman:
+
+```bash
+oc login -u kubeadmin https://api.crc.testing:6443
+podman login --tls-verify=false -u kubeadmin -p $(oc whoami -t) default-route-openshift-image-registry.apps-crc.testing
+```
+
+With docker, you need to trust the CRC CA certificate. The `insecure-registries` daemon option alone is not sufficient because Docker's OAuth token exchange still verifies TLS. Extract the CRC CA and install it as a system-trusted certificate:
+
+```bash
+# Extract the CRC ingress CA certificate
+oc extract secret/router-ca --keys=tls.crt -n openshift-ingress-operator --confirm
+sudo cp tls.crt /usr/local/share/ca-certificates/crc-ingress-ca.crt
+sudo update-ca-certificates
+sudo systemctl restart docker
+```
+
+Then log in:
+
+```bash
+docker login -u kubeadmin -p $(oc whoami -t) default-route-openshift-image-registry.apps-crc.testing
+```
+
+### Building and Pushing Images
+
+Make sure you have logged in to the registry first (see [Logging in to the Registry](#logging-in-to-the-registry)).
+
+The OpenShift internal registry requires the target namespace and ImageStreams to exist before you can push images. Create them if they do not exist yet:
+
+```bash
+oc new-project theia-cloud || true
+oc create imagestream theia-cloud-operator -n theia-cloud
+oc create imagestream theia-cloud-service -n theia-cloud
+oc create imagestream theia-cloud-landing-page -n theia-cloud
+```
+
+All docker builds run from the `theia-cloud` repository root. The tag format is `default-route-openshift-image-registry.apps-crc.testing/<namespace>/<image>:<tag>`. Use the `theia-cloud` namespace to match the Helm deployment.
+
+| Component    | Dockerfile                            | Build context | Helm value to override |
+| ------------ | ------------------------------------- | ------------- | ---------------------- |
+| Operator     | `dockerfiles/operator/Dockerfile`     | repo root (`.`) | `operator.image`     |
+| Service      | `dockerfiles/service/Dockerfile`      | repo root (`.`) | `service.image`      |
+| Landing Page | `dockerfiles/landing-page/Dockerfile` | repo root (`.`) | `landingPage.image`  |
+
+All commands below assume you are in the `theia-cloud` repository root.
+
+Operator:
+
+```bash
+EXT_REG=default-route-openshift-image-registry.apps-crc.testing
+
+docker build -f dockerfiles/operator/Dockerfile -t $EXT_REG/theia-cloud/theia-cloud-operator:dev .
+docker push $EXT_REG/theia-cloud/theia-cloud-operator:dev
+```
+
+Service:
+
+```bash
+docker build -f dockerfiles/service/Dockerfile -t $EXT_REG/theia-cloud/theia-cloud-service:dev .
+docker push $EXT_REG/theia-cloud/theia-cloud-service:dev
+```
+
+Landing Page:
+
+```bash
+docker build -f dockerfiles/landing-page/Dockerfile -t $EXT_REG/theia-cloud/theia-cloud-landing-page:dev .
+docker push $EXT_REG/theia-cloud/theia-cloud-landing-page:dev
+```
+
+### Overriding Images in the Helm Deployment
+
+When deploying via terraform (`4-01_openshift_monitor/theia_cloud.tf`), add `set` blocks to override the image. Inside the cluster, use the internal registry address (not the external route):
+
+```hcl
+{
+  name  = "operator.image"
+  value = "image-registry.openshift-image-registry.svc:5000/theia-cloud/theia-cloud-operator:dev"
+},
+{
+  name  = "operator.imagePullPolicy"
+  value = "Always"
+}
+```
+
+Set `imagePullPolicy` to `Always` during development so that new pushes with the same tag are picked up.
+
+See the commented-out examples in `4-01_openshift_monitor/theia_cloud.tf` for all three images.
+
+### Verifying the Image Was Pushed
+
+```bash
+# List images in the theia-cloud namespace
+oc get imagestreams -n theia-cloud
+
+# Check a specific image
+oc get imagestreamtag -n theia-cloud theia-cloud-operator:dev
+```
+
 ## Key Differences from Minikube
 
 * No external DNS needed, OpenShift Local configures a local DNS resolver, routes are accessible from the host at `*.apps-crc.testing`
@@ -93,6 +210,15 @@ The configuration accepts the following variables:
 
 ## Step 4-01, Deploy Theia Cloud on OpenShift
 
+Install cert-manager before deploying Theia Cloud. The CRDs chart uses cert-manager to generate the conversion webhook certificate. Wait for the cert-manager pods to be ready before proceeding.
+
+```bash
+oc apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.2/cert-manager.yaml
+oc rollout status deployment/cert-manager-webhook -n cert-manager --timeout=120s
+```
+
+Then deploy Theia Cloud:
+
 ```bash
 cd terraform/test-configurations/4-01_openshift_monitor
 
@@ -100,10 +226,10 @@ terraform init
 terraform apply
 ```
 
-This installs:
+This installs (in order):
 
-* `theia-cloud-crds`, Custom Resource Definitions
-* `theia-cloud-base`, base RBAC and cluster roles
+* `theia-cloud-base`, RBAC, cluster roles, and cert-manager issuers
+* `theia-cloud-crds`, Custom Resource Definitions and conversion webhook
 * `theia-cloud`, operator, landing page, and service with OpenShift route configuration
 
 ## Verification
