@@ -1,8 +1,6 @@
 # OpenShift Local Development Setup
 
-This guide describes how to set up a local OpenShift cluster using [Red Hat OpenShift Local](https://console.redhat.com/openshift/create/local) for testing Theia Cloud with OpenShift Route support.
-
-OpenShift Local is the local OpenShift equivalent of minikube. Unlike minikube, there is no Terraform provider for OpenShift Local, the cluster is managed via the `crc` CLI. The `0_openshift-setup` terraform configuration reads connection details from the running cluster and outputs them for downstream terraform steps.
+This guide walks you through setting up a local OpenShift cluster using [Red Hat OpenShift Local](https://console.redhat.com/openshift/create/local) and deploying Theia Cloud with OpenShift Route support.
 
 ## Prerequisites
 
@@ -12,7 +10,9 @@ OpenShift Local is the local OpenShift equivalent of minikube. Unlike minikube, 
 * **Pull secret**: Obtain from [https://console.redhat.com/openshift/create/local](https://console.redhat.com/openshift/create/local), requires a free Red Hat account
 * **Minimum resources**: 4 CPUs, 12 GiB RAM, 50 GiB disk, more than the OpenShift Local defaults to run Theia Cloud
 
-## OpenShift Local Setup
+## Step 1: Start OpenShift Local
+
+OpenShift Local is the local OpenShift equivalent of minikube. Unlike minikube, there is no Terraform provider for OpenShift Local; the cluster is managed via the `crc` CLI.
 
 ```bash
 # Download and install OpenShift Local following the instructions at:
@@ -30,7 +30,7 @@ crc config set disk-size 50    # 50 GiB
 crc start
 ```
 
-## Post Start Configuration
+Once the cluster is running, configure CLI access and verify:
 
 ```bash
 # Set up oc CLI access
@@ -50,7 +50,121 @@ oc get routes -A   # should show OpenShift console routes
 # OpenShift Local uses: apps-crc.testing
 ```
 
-## Building and Pushing Custom Images
+## Step 2: Install Dependencies
+
+The `4_openshift-setup` terraform configuration reads connection details from the running cluster, installs all dependencies (cert-manager, Keycloak with a TheiaCloud realm), and outputs them for downstream terraform steps.
+
+No external DNS or ingress controller is needed — OpenShift Local configures a local DNS resolver so routes are accessible from the host at `*.apps-crc.testing`, and OpenShift has a built-in HAProxy-based router that handles routes natively. OpenShift uses token-based auth instead of client certificates.
+
+If you prefer using `kubectl` over `oc`, the `oc login` command in Step 1 already configures the kubeconfig context. Verify with:
+
+```bash
+kubectl cluster-info
+```
+
+```bash
+cd terraform/test-configurations/4_openshift-setup
+
+# Get your login token
+oc login -u kubeadmin https://api.crc.testing:6443
+TOKEN=$(oc whoami -t)
+
+# Initialize and apply
+terraform init
+terraform apply -var="openshift_token=$TOKEN"
+```
+
+The first run may take several minutes while cert-manager, Keycloak, and PostgreSQL start up.
+
+The configuration accepts the following variables:
+
+| Variable                   | Default                        | Description                              |
+| -------------------------- | ------------------------------ | ---------------------------------------- |
+| `openshift_server`         | `https://api.crc.testing:6443` | OpenShift API server URL                 |
+| `openshift_token`          | required                       | Login token, get via `oc whoami -t`      |
+| `apps_domain`              | `apps-crc.testing`             | Apps domain for route hostnames          |
+| `keycloak_admin_password`  | `admin`                        | Keycloak admin password                  |
+| `postgres_postgres_password` | `admin`                      | PostgreSQL admin password for Keycloak   |
+| `postgres_password`        | `admin`                        | PostgreSQL user password for Keycloak    |
+
+After apply, verify the dependencies are running:
+
+```bash
+# cert-manager
+oc get pods -n cert-manager
+
+# Keycloak
+oc get pods -n keycloak
+oc get routes -n keycloak
+
+# Keycloak realm
+curl -sk https://keycloak.apps-crc.testing/realms/TheiaCloud/.well-known/openid-configuration
+```
+
+## Step 3: Deploy Theia Cloud
+
+With all dependencies installed by `4_openshift-setup`, deploy Theia Cloud:
+
+```bash
+cd terraform/test-configurations/5-01_openshift_monitor
+
+terraform init
+terraform apply
+```
+
+This installs (in order):
+
+* `theia-cloud-base`, RBAC, cluster roles, and cert-manager issuers
+* `theia-cloud-crds`, Custom Resource Definitions and conversion webhook
+* `theia-cloud`, operator, landing page, and service with OpenShift route configuration and Keycloak authentication
+
+## Step 4: Verify
+
+After deployment, verify the installation:
+
+```bash
+# Check routes are created, no ingress resources should exist
+oc get routes -n theia-cloud
+oc get ingress -n theia-cloud
+
+# Check the session ServiceAccount and SCC RoleBinding
+oc get sa theia-cloud-sessions -n theia-cloud
+oc get rolebindings theia-cloud-sessions-anyuid -n theia-cloud
+
+# Access the landing page (should redirect to Keycloak login)
+curl -sk -o /dev/null -w "%{http_code}" https://try.apps-crc.testing
+
+# Login test: navigate to https://try.apps-crc.testing in a browser
+# Should redirect to Keycloak login page
+# Login with foo/foo
+# Should redirect back and start a session
+```
+
+OpenShift Local exposes routes at `*.apps-crc.testing`. The expected Theia Cloud routes are:
+
+| Component    | Hostname                          |
+| ------------ | --------------------------------- |
+| Landing page | `try.apps-crc.testing`            |
+| Service      | `service.apps-crc.testing`        |
+| Sessions     | `ws-<sessionid>.apps-crc.testing` |
+| Keycloak     | `keycloak.apps-crc.testing`       |
+
+## Step 5: Teardown
+
+```bash
+# Destroy Theia Cloud installation, reverse order
+cd terraform/test-configurations/5-01_openshift_monitor
+terraform destroy
+
+cd ../4_openshift-setup
+terraform destroy
+
+# Stop or delete the OpenShift Local cluster
+crc stop          # pause the cluster, preserves state
+crc delete        # remove the cluster entirely
+```
+
+## Appendix A: Building and Pushing Custom Images
 
 When developing locally, you can build custom Theia Cloud images and push them to the CRC internal image registry. This avoids the need for an external registry.
 
@@ -140,7 +254,7 @@ docker push $EXT_REG/theia-cloud/theia-cloud-landing-page:dev
 
 ### Overriding Images in the Helm Deployment
 
-When deploying via terraform (`4-01_openshift_monitor/theia_cloud.tf`), add `set` blocks to override the image. Inside the cluster, use the internal registry address (not the external route):
+When deploying via terraform (`5-01_openshift_monitor/theia_cloud.tf`), add `set` blocks to override the image. Inside the cluster, use the internal registry address (not the external route):
 
 ```hcl
 {
@@ -155,7 +269,7 @@ When deploying via terraform (`4-01_openshift_monitor/theia_cloud.tf`), add `set
 
 Set `imagePullPolicy` to `Always` during development so that new pushes with the same tag are picked up.
 
-See the commented-out examples in `4-01_openshift_monitor/theia_cloud.tf` for all three images.
+See the commented-out examples in `5-01_openshift_monitor/theia_cloud.tf` for all three images.
 
 ### Verifying the Image Was Pushed
 
@@ -165,101 +279,4 @@ oc get imagestreams -n theia-cloud
 
 # Check a specific image
 oc get imagestreamtag -n theia-cloud theia-cloud-operator:dev
-```
-
-## Key Differences from Minikube
-
-* No external DNS needed, OpenShift Local configures a local DNS resolver, routes are accessible from the host at `*.apps-crc.testing`
-* No ingress controller needed, OpenShift has a built in HAProxy based router that handles routes natively
-* No cert manager needed for initial setup, OpenShift Local comes with a self signed CA, routes can use `tls.termination: edge` with the default router certificate, or start without TLS
-* Token based authentication, OpenShift uses token based auth instead of client certificates
-
-## Hostname Pattern
-
-OpenShift Local exposes routes at `*.apps-crc.testing`. Theia Cloud routes will be:
-
-| Component    | Hostname                          |
-| ------------ | --------------------------------- |
-| Landing page | `try.apps-crc.testing`            |
-| Service      | `service.apps-crc.testing`        |
-| Sessions     | `ws-<sessionid>.apps-crc.testing` |
-
-## Step 0, OpenShift Setup, Terraform
-
-After starting OpenShift Local, configure the terraform state that downstream steps depend on:
-
-```bash
-cd terraform/test-configurations/0_openshift-setup
-
-# Get your login token
-oc login -u kubeadmin https://api.crc.testing:6443
-TOKEN=$(oc whoami -t)
-
-# Initialize and apply
-terraform init
-terraform apply -var="openshift_token=$TOKEN"
-```
-
-The configuration accepts the following variables:
-
-| Variable           | Default                        | Description                         |
-| ------------------ | ------------------------------ | ----------------------------------- |
-| `openshift_server` | `https://api.crc.testing:6443` | OpenShift API server URL            |
-| `openshift_token`  | required                       | Login token, get via `oc whoami -t` |
-| `apps_domain`      | `apps-crc.testing`             | Apps domain for route hostnames     |
-
-## Step 4-01, Deploy Theia Cloud on OpenShift
-
-Install cert-manager before deploying Theia Cloud. The CRDs chart uses cert-manager to generate the conversion webhook certificate. Wait for the cert-manager pods to be ready before proceeding.
-
-```bash
-oc apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.17.2/cert-manager.yaml
-oc rollout status deployment/cert-manager-webhook -n cert-manager --timeout=120s
-```
-
-Then deploy Theia Cloud:
-
-```bash
-cd terraform/test-configurations/4-01_openshift_monitor
-
-terraform init
-terraform apply
-```
-
-This installs (in order):
-
-* `theia-cloud-base`, RBAC, cluster roles, and cert-manager issuers
-* `theia-cloud-crds`, Custom Resource Definitions and conversion webhook
-* `theia-cloud`, operator, landing page, and service with OpenShift route configuration
-
-## Verification
-
-After deployment, verify the installation:
-
-```bash
-# Check routes are created, no ingress resources should exist
-oc get routes -n theia-cloud
-oc get ingress -n theia-cloud
-
-# Check the session ServiceAccount and SCC RoleBinding
-oc get sa theia-cloud-sessions -n theia-cloud
-oc get rolebindings theia-cloud-sessions-anyuid -n theia-cloud
-
-# Access the landing page
-curl -s -o /dev/null -w "%{http_code}" http://try.apps-crc.testing
-```
-
-## Teardown
-
-```bash
-# Destroy Theia Cloud installation, reverse order
-cd terraform/test-configurations/4-01_openshift_monitor
-terraform destroy
-
-cd ../0_openshift-setup
-terraform destroy
-
-# Stop or delete the OpenShift Local cluster
-crc stop          # pause the cluster, preserves state
-crc delete        # remove the cluster entirely
 ```

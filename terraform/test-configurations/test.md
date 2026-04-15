@@ -20,7 +20,7 @@ terraform state rm kubernetes_persistent_volume_v1.minikube
 
 For testing on OpenShift (using OpenShift Local / CRC), see [openshift.md](./openshift.md).
 
-- `0_openshift-setup` captures OpenShift connection details for downstream terraform steps.
+- `4_openshift-setup` captures OpenShift connection details and installs all dependencies (cert-manager, Keycloak with a TheiaCloud realm) for downstream terraform steps.
 
 ## Theia Cloud Setups
 
@@ -33,9 +33,9 @@ Pick an installation in one of below directories and run `terraform init` and `t
 
 ### OpenShift Setups
 
-These configurations deploy Theia Cloud on an OpenShift cluster (using Routes instead of Ingress). Run `0_openshift-setup` first, see [openshift.md](./openshift.md).
+These configurations deploy Theia Cloud on an OpenShift cluster (using Routes instead of Ingress). Run `4_openshift-setup` first, see [openshift.md](./openshift.md).
 
-- `4-01_openshift_monitor` installs Theia Cloud with OpenShift Route support and activity monitoring, without Keycloak, using `valuesOpenShiftMonitor.yaml`
+- `5-01_openshift_monitor` installs Theia Cloud with OpenShift Route support, activity monitoring, and Keycloak authentication, using `valuesOpenShiftMonitor.yaml`
 
 ## Getting a Keycloak access token
 
@@ -43,9 +43,23 @@ To test the service's APIs via a REST client such as Postman or Bruno, you need 
 You can get such a token from Keycloak with a simple CLI call using `curl` and `jq`.
 This call gets the token for test user `foo`.
 
+Minikube:
+
 ```sh
 curl -s --insecure --request POST \
   --url https://$(minikube ip).nip.io/keycloak/realms/TheiaCloud/protocol/openid-connect/token \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data grant_type=password \
+  --data client_id=theia-cloud \
+  --data username=foo \
+  --data password=foo | jq -r '.access_token'
+```
+
+OpenShift Local:
+
+```sh
+curl -s --insecure --request POST \
+  --url https://keycloak.apps-crc.testing/realms/TheiaCloud/protocol/openid-connect/token \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data grant_type=password \
   --data client_id=theia-cloud \
