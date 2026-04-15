@@ -18,7 +18,7 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <guice.version>7.0.0</guice.version>
         <log4j.version>2.25.1</log4j.version>
-        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
         <google.artifactregistry-maven-wagon-version>2.2.5</google.artifactregistry-maven-wagon-version>

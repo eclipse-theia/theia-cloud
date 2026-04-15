@@ -14,16 +14,7 @@ provider "helm" {
   }
 }
 
-resource "helm_release" "theia-cloud-crds" {
-  name             = "theia-cloud-crds"
-  chart            = "../../../../theia-cloud-helm/charts/theia-cloud-crds"
-  namespace        = "theia-cloud"
-  create_namespace = true
-}
-
 resource "helm_release" "theia-cloud-base" {
-  depends_on = [helm_release.theia-cloud-crds]
-
   name             = "theia-cloud-base"
   chart            = "../../../../theia-cloud-helm/charts/theia-cloud-base"
   namespace        = "theia-cloud"
@@ -35,18 +26,23 @@ resource "helm_release" "theia-cloud-base" {
       value = "OPENSHIFT"
     },
     {
-      name  = "issuerca.enable"
-      value = "false"
-    },
-    {
       name  = "issuerprod.enable"
       value = "false"
     }
   ]
 }
 
-resource "helm_release" "theia-cloud" {
+resource "helm_release" "theia-cloud-crds" {
   depends_on = [helm_release.theia-cloud-base]
+
+  name             = "theia-cloud-crds"
+  chart            = "../../../../theia-cloud-helm/charts/theia-cloud-crds"
+  namespace        = "theia-cloud"
+  create_namespace = true
+}
+
+resource "helm_release" "theia-cloud" {
+  depends_on = [helm_release.theia-cloud-crds]
 
   name             = "theia-cloud"
   chart            = "../../../../theia-cloud-helm/charts/theia-cloud"
@@ -65,6 +61,31 @@ resource "helm_release" "theia-cloud" {
     {
       name  = "operator.cloudProvider"
       value = "OPENSHIFT"
-    }
+    },
+    # Uncomment to use locally built images (see openshift.md)
+    # {
+    #   name  = "operator.image"
+    #   value = "image-registry.openshift-image-registry.svc:5000/theia-cloud/theia-cloud-operator:dev"
+    # },
+    # {
+    #   name  = "operator.imagePullPolicy"
+    #   value = "Always"
+    # },
+    # {
+    #   name  = "service.image"
+    #   value = "image-registry.openshift-image-registry.svc:5000/theia-cloud/theia-cloud-service:dev"
+    # },
+    # {
+    #   name  = "service.imagePullPolicy"
+    #   value = "Always"
+    # },
+    # {
+    #   name  = "landingPage.image"
+    #   value = "image-registry.openshift-image-registry.svc:5000/theia-cloud/theia-cloud-landing-page:dev"
+    # },
+    # {
+    #   name  = "landingPage.imagePullPolicy"
+    #   value = "Always"
+    # },
   ]
 }
