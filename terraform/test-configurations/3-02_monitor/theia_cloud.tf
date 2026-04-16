@@ -74,7 +74,7 @@ resource "helm_release" "theia-cloud" {
     },
     {
       name  = "demoApplication.name"
-      value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:1.2.0" : "theiacloud/theia-cloud-activity-demo-theia:1.2.0"
+      value = var.use_vscode_extension ? "theiacloud/theia-cloud-activity-demo:1.3.0-next" : "theiacloud/theia-cloud-activity-demo-theia:1.3.0-next"
     },
     {
       name  = "demoApplication.monitor.port"

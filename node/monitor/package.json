@@ -2,7 +2,7 @@
   "name": "theia-cloud-monitor",
   "displayName": "Theia Cloud Monitor extension",
   "description": "Monitor for Theia Cloud hosted tools",
-  "version": "1.2.0",
+  "version": "1.3.0-next",
   "publisher": "eclipse-theia",
   "license": "EPL-2.0",
   "author": {
