@@ -677,7 +677,7 @@
   },
   "info": {
     "title": "Theia Cloud API",
-    "version": "1.2.0"
+    "version": "1.3.0"
   },
   "paths": {
     "/service": {

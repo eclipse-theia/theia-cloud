@@ -84,7 +84,7 @@ docker build -t <image-name> -f dockerfiles/<component>/Dockerfile .
 
 ## Versioning
 
-- All components share the same version number (currently 1.2.0-SNAPSHOT)
+- All components share the same version number (currently 1.3.0-SNAPSHOT)
 - Releases every 3 months; pre-releases on every commit tagged `<version>-next.<git-sha>`
 - npm uses `next` tag for pre-releases (not semver-compatible `<version>-next`)
 
