@@ -23,7 +23,7 @@ on:
         required: true
 
 env:
-  VERSION: 1.3.0-next
+  VERSION: 1.3.0-ocp.0-next
 
 jobs:
   build:
