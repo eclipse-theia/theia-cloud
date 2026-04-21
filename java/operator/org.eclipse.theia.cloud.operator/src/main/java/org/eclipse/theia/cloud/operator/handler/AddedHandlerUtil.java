@@ -21,6 +21,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatMetric;
 import static org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil.HOST_PROTOCOL;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -160,9 +161,9 @@ public final class AddedHandlerUtil {
                     /* silent */
                 }
 
-                HttpsURLConnection connection;
+                HttpURLConnection connection;
                 try {
-                    connection = (HttpsURLConnection) new URL(HOST_PROTOCOL + url).openConnection();
+                    connection = (HttpURLConnection) new URL(url).openConnection();
                 } catch (IOException e) {
                     LOGGER.error(formatLogMessage(correlationId, "Error while checking session availability."), e);
                     continue;
@@ -170,11 +171,12 @@ public final class AddedHandlerUtil {
                 int code;
 
                 try {
-                    connection.setHostnameVerifier(ALL_GOOD_HOSTNAME_VERIFIER);
-                    SSLContext sc = SSLContext.getInstance("SSL");
-                    sc.init(null, new TrustManager[] { TRUST_ALL_MANAGER }, new java.security.SecureRandom());
-                    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-                    connection.setSSLSocketFactory(sc.getSocketFactory());
+                    if (connection instanceof HttpsURLConnection httpsConn) {
+                        httpsConn.setHostnameVerifier(ALL_GOOD_HOSTNAME_VERIFIER);
+                        SSLContext sc = SSLContext.getInstance("SSL");
+                        sc.init(null, new TrustManager[] { TRUST_ALL_MANAGER }, new java.security.SecureRandom());
+                        httpsConn.setSSLSocketFactory(sc.getSocketFactory());
+                    }
                     connection.connect();
                     code = connection.getResponseCode();
                 } catch (IOException e) {

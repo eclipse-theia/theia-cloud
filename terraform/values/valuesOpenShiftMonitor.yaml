@@ -1,0 +1,61 @@
+imagePullPolicy: IfNotPresent
+
+# Legacy app configuration (deprecated - use service.authToken instead)
+app:
+  id: asdfghjkl
+  name: Theia Blueprint
+
+demoApplication:
+  name: theiacloud/theia-cloud-activity-demo:1.2.0
+  pullSecret: ""
+  timeoutStrategy: "FIXEDTIME"
+  timeoutLimit: "0"
+  imagePullPolicy: IfNotPresent
+  monitor:
+    port: 8081
+    activityTracker:
+      timeoutAfter: 4
+      notifyAfter: 2
+
+hosts:
+  usePaths: false
+  configuration:
+    baseHost: apps-crc.testing
+    service: service
+    landing: try
+    instance: ws
+
+landingPage:
+  image: theiacloud/theia-cloud-landing-page:1.2.0
+  appDefinition: "theia-cloud-demo"
+  ephemeralStorage: true
+
+keycloak:
+  enable: false
+  authUrl: ""
+  realm: "TheiaCloud"
+  clientId: "theia-cloud"
+  clientSecret: "publicbutoauth2proxywantsasecret"
+  cookieSecret: "OQINaROshtE9TcZkNAm5Zs2Pv3xaWytBmc5W7sPX7ws="
+
+service:
+  authToken: asdfghjkl
+  protocol: https
+
+operator:
+  eagerStart: false
+  bandwidthLimiter: "K8SANNOTATION"
+  sessionsPerUser: "3"
+
+ingress:
+  tls: true
+  clusterIssuer: ""
+  theiaCloudCommonName: false
+  instances:
+    name: "theia-cloud-demo-ws-ingress"
+
+monitor:
+  enable: true
+  activityTracker:
+    enable: true
+    interval: 1
