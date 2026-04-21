@@ -50,7 +50,7 @@ resource "helm_release" "theia-cloud" {
   create_namespace = true
 
   values = [
-    "${file("${path.module}/../../values/valuesOpenShiftMonitor.yaml")}"
+    file("${path.module}/../../values/valuesOpenShiftMonitor.yaml")
   ]
 
   set = [

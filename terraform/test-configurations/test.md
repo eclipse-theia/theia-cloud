@@ -35,7 +35,12 @@ Pick an installation in one of below directories and run `terraform init` and `t
 
 These configurations deploy Theia Cloud on an OpenShift cluster (using Routes instead of Ingress). Run `4_openshift-setup` first, see [openshift.md](./openshift.md).
 
-- `5-01_openshift_monitor` installs Theia Cloud with OpenShift Route support, activity monitoring, and Keycloak authentication, using `valuesOpenShiftMonitor.yaml`
+- `5-01_openshift_monitor` installs Theia Cloud with OpenShift Route support, activity monitoring, and Keycloak authentication, using `valuesOpenShiftMonitor.yaml`. **Local-dev only** — not used in CI.
+- `5-02_openshift_ci` is the CI counterpart of `ci-configurations/`: same chart releases plus the e2e AppDefinition CRs, but driven by `valuesE2ECI-base.yaml` + `valuesE2ECI-openshift.yaml`. Used exclusively by `[E2E Tests] OpenShift`.
+
+#### Continuous Integration
+
+The `[E2E Tests] OpenShift` workflow (`.github/workflows/e2e-tests-openshift.yml`) exercises the OpenShift code path on every push to `main` and weekly. It uses **MicroShift in a privileged Docker container** on a stock GitHub-hosted `ubuntu-22.04` runner instead of OpenShift Local, because GH-hosted runners do not support nested virtualisation. RPMs come from `mirror.openshift.com` (community/anonymous, no Red Hat subscription); the only secret needed is the Red Hat pull secret for the OpenShift control-plane container images (`REDHAT_PULL_SECRET`). The container-image hand-off uses `docker save | skopeo copy docker-archive:- containers-storage:` rather than a registry. Sources: `.github/microshift-ci/` (Dockerfile, `start.sh`, `entrypoint.sh`), `terraform/test-configurations/5-02_openshift_ci/`, and `terraform/values/valuesE2ECI-{base,openshift}.yaml` (the shared CI values; see also `terraform/values/valuesE2ECI-minikube.yaml` for the minikube counterpart).
 
 ## Getting a Keycloak access token
 

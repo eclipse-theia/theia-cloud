@@ -24,6 +24,7 @@ jobs:
   runtests:
     name: "Run Tests on Minikube (K8s: ${{ matrix.kubernetes }}, Ingress: ${{ matrix.ingress }}, Paths: ${{ matrix.paths }}, Ephemeral: ${{ matrix.ephemeral }}, Keycloak: ${{ matrix.keycloak }}, EagerStart: ${{ matrix.eagerStart }})"
     runs-on: ubuntu-22.04
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -105,17 +106,13 @@ jobs:
 
       # we use the none driver, so minikube should see the same images on the host
       - name: Build Theia Cloud Images
+        working-directory: theia-cloud
         run: |
-          cd theia-cloud
-          docker build --no-cache -t theiacloud/theia-cloud-service:minikube-ci-e2e -f dockerfiles/service/Dockerfile .
-          docker build --no-cache -t theiacloud/theia-cloud-operator:minikube-ci-e2e -f dockerfiles/operator/Dockerfile .
-          docker build --no-cache -t theiacloud/theia-cloud-landing-page:minikube-ci-e2e -f dockerfiles/landing-page/Dockerfile .
-          docker build --no-cache -t theiacloud/theia-cloud-wondershaper:minikube-ci-e2e -f dockerfiles/wondershaper/Dockerfile .
-          docker build --no-cache -t theiacloud/theia-cloud-conversion-webhook:minikube-ci-e2e -f dockerfiles/conversion-webhook/Dockerfile .
-          docker build --no-cache -t theiacloud/theia-cloud-demo:latest -f demo/dockerfiles/demo-theia-docker/Dockerfile demo/dockerfiles/demo-theia-docker/.
-          docker tag theiacloud/theia-cloud-demo:latest theiacloud/theia-cloud-demo:minikube-ci-e2e
-          docker build --no-cache -t theiacloud/theia-cloud-activity-demo:minikube-ci-e2e -f demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile demo/dockerfiles/demo-theia-monitor-vscode/.
-          docker build --no-cache -t theiacloud/theia-cloud-activity-demo-theia:minikube-ci-e2e -f demo/dockerfiles/demo-theia-monitor-theia/Dockerfile .
+          chmod +x .github/scripts/build-theia-cloud-images.sh
+          .github/scripts/build-theia-cloud-images.sh \
+            --tag minikube-ci-e2e \
+            --registry-prefix theiacloud/theia-cloud- \
+            --no-cache
 
       - name: Get Ingress Controller Host
         id: ingress_info
