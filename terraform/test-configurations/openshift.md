@@ -2,6 +2,20 @@
 
 This guide walks you through setting up a local OpenShift cluster using [Red Hat OpenShift Local](https://console.redhat.com/openshift/create/local) and deploying Theia Cloud with OpenShift Route support.
 
+> **CI note:** the `[E2E Tests] OpenShift` GitHub Actions workflow
+> (`.github/workflows/e2e-tests-openshift.yml`) does NOT use OpenShift
+> Local — GitHub-hosted runners do not support nested virtualisation.
+> Instead, CI runs **MicroShift in a privileged Docker container** on a
+> stock `ubuntu-22.04` runner. RPMs come from `mirror.openshift.com`
+> (community/anonymous, no Red Hat subscription); the only secret
+> needed is the Red Hat pull secret (`REDHAT_PULL_SECRET`). Container
+> images are handed off via `docker save | skopeo copy` directly into
+> MicroShift's CRI-O containers-storage, no registry required. See
+> `.github/microshift-ci/`, `terraform/test-configurations/5-02_openshift_ci/`,
+> and `terraform/values/valuesE2ECI-{base,openshift}.yaml` for the CI
+> plumbing. Local development uses `5-01_openshift_monitor` with
+> OpenShift Local / CRC as described below.
+
 ## Prerequisites
 
 * **OS**: Ubuntu 24.04, or another supported Linux distribution

@@ -1,4 +1,9 @@
-imagePullPolicy: IfNotPresent
+# Shared CI Helm values for the e2e workflows. Combined with one of:
+#   - valuesE2ECI-minikube.yaml  (consumed by terraform/ci-configurations/)
+#   - valuesE2ECI-openshift.yaml (consumed by terraform/test-configurations/5-02_openshift_ci/)
+#
+# The platform overlay is applied AFTER this base, so any value set in
+# both wins from the overlay.
 
 app:
   name: "Theia with Theia Extension Monitor"
@@ -11,12 +16,8 @@ demoApplication:
 
 hosts:
   usePaths: false
-  allWildcardInstances: ["*.webview."]
-  configuration:
-    baseHost: 192.168.39.173.nip.io
 
 landingPage:
-  image: theiacloud/theia-cloud-landing-page:minikube-ci-e2e
   appDefinition: "theia-cloud-monitor-theia-popup"
   ephemeralStorage: true
   additionalApps:
@@ -31,29 +32,11 @@ landingPage:
     theia-cloud-demo:
       label: "Theia Cloud Demo (2min timeout)"
 
-keycloak:
-  enable: false
-  authUrl: "https://keycloak.url/auth/"
-
 operator:
-  image: theiacloud/theia-cloud-operator:minikube-ci-e2e
-  cloudProvider: "MINIKUBE"
   bandwidthLimiter: "WONDERSHAPER"
-  wondershaperImage: theiacloud/theia-cloud-wondershaper:minikube-ci-e2e
   sessionsPerUser: "1"
-  storageClassName: "default"
   requestedStorage: "250Mi"
   replicas: 2
-
-service:
-  image: theiacloud/theia-cloud-service:minikube-ci-e2e
-
-ingress:
-  certManagerAnnotations: true
-  clusterIssuer: theia-cloud-selfsigned-issuer
-  theiaCloudCommonName: true
-  tls: true
-  addTLSSecretName: true
 
 monitor:
   enable: true
