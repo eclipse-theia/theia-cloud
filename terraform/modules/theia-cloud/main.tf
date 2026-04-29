@@ -1,4 +1,7 @@
 locals {
+  theia_cloud_helm_repository = "https://eclipse-theia.github.io/theia-cloud-helm"
+  theia_cloud_namespace       = "theia-cloud"
+
   # base_keycloak: use provided URL or build from hostname
   base_keycloak = var.keycloak_url != "" ? var.keycloak_url : "https://${var.hostname}/keycloak"
   # normalized_keycloak_url: ensure a single trailing slash as required by the Theia Cloud Helm chart.
@@ -8,10 +11,10 @@ locals {
 resource "helm_release" "theia-cloud-base" {
   count            = var.install_theia_cloud_base ? 1 : 0
   name             = "theia-cloud-base"
-  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
+  repository       = local.theia_cloud_helm_repository
   chart            = "theia-cloud-base"
-  version          = "1.1.2"
-  namespace        = "theia-cloud"
+  version          = "1.2.0"
+  namespace        = local.theia_cloud_namespace
   create_namespace = true
 
   set = [
@@ -26,10 +29,10 @@ resource "helm_release" "theia-cloud-crds" {
   count            = var.install_theia_cloud_crds ? 1 : 0
   depends_on       = [helm_release.theia-cloud-base]
   name             = "theia-cloud-crds"
-  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
+  repository       = local.theia_cloud_helm_repository
   chart            = "theia-cloud-crds"
-  version          = "1.1.2"
-  namespace        = "theia-cloud"
+  version          = "1.2.0"
+  namespace        = local.theia_cloud_namespace
   create_namespace = true
 }
 
@@ -37,10 +40,10 @@ resource "helm_release" "theia-cloud" {
   count            = var.install_theia_cloud ? 1 : 0
   depends_on       = [helm_release.theia-cloud-crds]
   name             = "theia-cloud"
-  repository       = "https://eclipse-theia.github.io/theia-cloud-helm"
+  repository       = local.theia_cloud_helm_repository
   chart            = "theia-cloud"
-  version          = "1.1.3"
-  namespace        = "theia-cloud"
+  version          = "1.2.0"
+  namespace        = local.theia_cloud_namespace
   create_namespace = true
 
   values = [
@@ -58,7 +61,11 @@ resource "helm_release" "theia-cloud" {
     },
     {
       name  = "operator.cloudProvider"
-      value = var.cloudProvider
+      value = var.cloud_provider
+    },
+    {
+      name  = "ingress.controller"
+      value = var.ingress_controller_type
     }
   ]
 }

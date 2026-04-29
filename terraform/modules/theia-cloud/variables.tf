@@ -14,7 +14,18 @@ variable "install_theia_cloud" {
 }
 
 variable "hostname" {
-  description = "The hostname for all installed services"
+  description = "The hostname for the deployment"
+}
+
+variable "ingress_controller_type" {
+  description = "Type of ingress controller to use (nginx or haproxy)"
+  type        = string
+  default     = "nginx"
+
+  validation {
+    condition     = contains(["nginx", "haproxy"], var.ingress_controller_type)
+    error_message = "Valid values are 'nginx' or 'haproxy'."
+  }
 }
 
 variable "keycloak_url" {
@@ -22,11 +33,18 @@ variable "keycloak_url" {
   default     = ""
 }
 
-variable "cloudProvider" {
-  description = "The cloud provider to use"
+variable "cloud_provider" {
+  description = "Cloud provider type"
+  type        = string
   default     = "K8S"
+  validation {
+    condition     = contains(["MINIKUBE", "K8S"], var.cloud_provider)
+    error_message = "Valid values are: MINIKUBE, K8S"
+  }
 }
 
 variable "cert_manager_issuer_email" {
-  description = "EMail address used to create certificates."
+  description = "Email address used to create certificates."
+  type        = string
+  default     = ""
 }
