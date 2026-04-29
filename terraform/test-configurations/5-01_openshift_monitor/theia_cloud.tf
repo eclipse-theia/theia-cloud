@@ -6,6 +6,38 @@ data "terraform_remote_state" "openshift" {
   }
 }
 
+# CI-only knobs. All defaulted to empty so local CRC development keeps
+# using the upstream chart values + valuesOpenShiftMonitor.yaml as-is.
+# The MicroShift e2e CI workflow passes these via -var to:
+#  - swap the primary values file to a CI-specific one with the right
+#    `app.name`, multi-app `additionalApps`, etc. (`values_file`)
+#  - layer additional Helm overrides on top (`extra_helm_values`)
+#  - point the conversion-webhook image at a locally imported tag
+#    (`conversion_webhook_image[_pull_policy]`).
+variable "values_file" {
+  description = "Path to the primary Helm values file for the theia-cloud release. Empty = use valuesOpenShiftMonitor.yaml (local CRC dev default)."
+  type        = string
+  default     = ""
+}
+
+variable "extra_helm_values" {
+  description = "Path to an additional Helm values file applied last to the theia-cloud release. Empty disables."
+  type        = string
+  default     = ""
+}
+
+variable "conversion_webhook_image" {
+  description = "Override image for the theia-cloud-crds conversion webhook. Empty = chart default."
+  type        = string
+  default     = ""
+}
+
+variable "conversion_webhook_image_pull_policy" {
+  description = "imagePullPolicy for the conversion webhook. Empty = chart default."
+  type        = string
+  default     = ""
+}
+
 provider "helm" {
   kubernetes = {
     host     = data.terraform_remote_state.openshift.outputs.host
@@ -39,6 +71,17 @@ resource "helm_release" "theia-cloud-crds" {
   chart            = "../../../../theia-cloud-helm/charts/theia-cloud-crds"
   namespace        = "theia-cloud"
   create_namespace = true
+
+  # Optional CI image overrides (see variables above). Empty list when
+  # both vars are unset.
+  set = concat(
+    var.conversion_webhook_image == "" ? [] : [
+      { name = "conversion.image", value = var.conversion_webhook_image }
+    ],
+    var.conversion_webhook_image_pull_policy == "" ? [] : [
+      { name = "conversion.imagePullPolicy", value = var.conversion_webhook_image_pull_policy }
+    ]
+  )
 }
 
 resource "helm_release" "theia-cloud" {
@@ -49,9 +92,13 @@ resource "helm_release" "theia-cloud" {
   namespace        = "theia-cloud"
   create_namespace = true
 
-  values = [
-    "${file("${path.module}/../../values/valuesOpenShiftMonitor.yaml")}"
-  ]
+  values = concat(
+    # Primary values file: CI overrides via `values_file`, otherwise
+    # the local-dev valuesOpenShiftMonitor.yaml. `coalesce` skips empty
+    # strings, so the default "" falls through to the second arg.
+    [file(coalesce(var.values_file, "${path.module}/../../values/valuesOpenShiftMonitor.yaml"))],
+    var.extra_helm_values == "" ? [] : ["${file(var.extra_helm_values)}"]
+  )
 
   set = [
     {
