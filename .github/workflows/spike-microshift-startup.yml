@@ -1,0 +1,806 @@
+name: "[E2E Tests] OpenShift"
+# name: "[Spike A] MicroShift startup in privileged container"
+
+# Spike A: prove that upstream MicroShift can start inside a privileged
+# Docker container on a stock GitHub-hosted ubuntu-22.04 runner, that
+# systemd-as-PID-1 works there, and that the OpenShift API groups
+# (route.openshift.io, security.openshift.io) are present.
+#
+# Spike B: folded in here per the plan. Verifies that a Route is
+# reachable from the runner host by resolving the apps domain
+# (hello.apps-microshift.testing) to the container IP via /etc/hosts.
+#
+# Spike C: also folded in here. Proves we can hand images from the
+# runner's Docker daemon to MicroShift's CRI-O without standing up a
+# registry, using `docker save | skopeo copy` into containers-storage.
+#
+# Spike D: also folded in here. Runs `terraform apply` in
+# `4_openshift-setup` (cert-manager + Bitnami Keycloak + TheiaCloud
+# realm) against the running MicroShift, verifying that the existing
+# OpenShift module works without modification.
+#
+# Spike E: also folded in here. Builds and transfers the Theia Cloud
+# images into MicroShift's CRI-O, then runs `terraform apply` in
+# `5-01_openshift_monitor` with image overrides to install the local
+# operator/service/landing-page/wondershaper/conversion-webhook and
+# verify all theia-cloud pods reach Ready.
+#
+# Spike F.1: image-preloading triage. DONE off-workflow -- the
+# `CreateContainerError` was traced to cri-o's `container_min_memory =
+# "12MiB"` floor rejecting the chart's 8 MB memory request on the
+# image-preloading Deployment. Chart-side bug on `jf/openshift`,
+# tracked separately and not blocking F.2.
+#
+# Spike F.2: also folded in here. Runs the existing `login` Playwright
+# test against MicroShift. The login test is the smallest meaningful
+# coverage because it only needs `try.*` and `keycloak.*` hostnames
+# (already in /etc/hosts) -- no wildcard `ws-<id>.*` session DNS yet.
+# That comes in F.3 with dnsmasq.
+#
+# CHECKOUT LAYOUT (changed at Spike E): the workflow now mirrors the
+# existing minikube e2e layout (path: ./theia-cloud + path:
+# ./theia-cloud-helm) because the 5-01_openshift_monitor terraform
+# module references the helm chart by relative path
+# (../../../../theia-cloud-helm/charts/theia-cloud) which only resolves
+# correctly when both repos are checked out into named subdirectories.
+# Earlier spike runs used a no-`path:` checkout; the migration is part
+# of Spike E so the workflow is ready for Step 7 promotion.
+#
+# This workflow will be deleted once these spikes graduate into the
+# maintained e2e-tests-openshift.yml workflow.
+
+on:
+  push:
+    branches:
+      - jf/openshift
+  workflow_dispatch:
+    inputs:
+      microshift_release:
+        description: "MicroShift release tag (e.g. 4.18.0-rc.10). Leave empty to use the Dockerfile default."
+        type: string
+        default: ""
+      microshift_line:
+        description: "MicroShift minor line (e.g. 4.18). Leave empty to use the Dockerfile default."
+        type: string
+        default: ""
+      theia_cloud_helm_branch:
+        # The OpenShift templates (landing-page-route-openshift.yaml,
+        # service-route-openshift.yaml, openshift-route-configmap.yaml,
+        # session-scc-rolebinding-openshift.yaml) and the
+        # `cloudProvider=OPENSHIFT` guards on the existing Ingress
+        # templates are only on the `jf/openshift` branch as of writing.
+        # Defaulting to `main` (Spike E run 1) made Helm render the
+        # Ingress manifests with no error and silently skip Route
+        # creation, so `oc get routes -n theia-cloud` returned nothing.
+        # FLIP TO `main` once the OpenShift PR on theia-cloud-helm is
+        # merged.
+        description: "Branch of theia-cloud-helm to check out."
+        type: string
+        default: "jf/openshift"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spike-microshift-startup-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI_IMAGE_TAG: microshift-ci-e2e
+
+jobs:
+  microshift-startup:
+    name: "Start MicroShift ${{ inputs.microshift_release || '4.18.0-rc.10 (default)' }}"
+    runs-on: ubuntu-22.04
+    # 90 min: image build is the dominant cost (8 Theia Cloud images
+    # including ~3 Theia-based ones that take ~10 min each), plus
+    # MicroShift boot ~5 min, terraform applies ~10 min total,
+    # transfers ~5 min, verification ~3 min.
+    timeout-minutes: 90
+    steps:
+      - name: Checkout Theia Cloud
+        uses: actions/checkout@v4
+        with:
+          path: ./theia-cloud
+
+      - name: Checkout Theia Cloud Helm
+        # Required by 5-01_openshift_monitor/theia_cloud.tf which loads
+        # the chart via `chart = "../../../../theia-cloud-helm/charts/...`.
+        # Default branch is `jf/openshift` because `main` does not yet
+        # contain the OpenShift Route templates (Spike E run 1 lesson).
+        uses: actions/checkout@v4
+        with:
+          repository: eclipse-theia/theia-cloud-helm
+          ref: ${{ inputs.theia_cloud_helm_branch || 'jf/openshift' }}
+          path: ./theia-cloud-helm
+
+      - name: Show host kernel / cgroup info
+        run: |
+          uname -a
+          cat /proc/1/cgroup || true
+          stat -fc %T /sys/fs/cgroup || true
+          mount | grep cgroup || true
+
+      - name: Build MicroShift CI image
+        # Only forward --build-arg when the input is non-empty. An empty
+        # `--build-arg X=` would silently override the Dockerfile default
+        # with an empty string, which broke pinning in Spike A runs 1 & 2.
+        env:
+          MICROSHIFT_RELEASE_INPUT: ${{ inputs.microshift_release }}
+          MICROSHIFT_LINE_INPUT: ${{ inputs.microshift_line }}
+        run: |
+          args=(--progress=plain)
+          if [ -n "${MICROSHIFT_RELEASE_INPUT:-}" ]; then
+            args+=(--build-arg "MICROSHIFT_RELEASE=${MICROSHIFT_RELEASE_INPUT}")
+          fi
+          if [ -n "${MICROSHIFT_LINE_INPUT:-}" ]; then
+            args+=(--build-arg "MICROSHIFT_LINE=${MICROSHIFT_LINE_INPUT}")
+          fi
+          DOCKER_BUILDKIT=1 docker build "${args[@]}" -t microshift-ci:local theia-cloud/.github/microshift-ci
+
+      - name: Write Red Hat pull secret
+        # Required for any upstream MicroShift install: the bundled OVN,
+        # DNS, router, and pause images live in the subscription-gated
+        # quay.io/openshift-release-dev/ocp-v4.0-art-dev registry. Same
+        # secret as the local CRC docs prescribe (terraform/test-
+        # configurations/openshift.md). Obtain from
+        # console.redhat.com/openshift/install/pull-secret and store as
+        # the REDHAT_PULL_SECRET GitHub Actions secret on this repo.
+        env:
+          REDHAT_PULL_SECRET: ${{ secrets.REDHAT_PULL_SECRET }}
+        run: |
+          if [ -z "${REDHAT_PULL_SECRET:-}" ]; then
+            echo "::error::REDHAT_PULL_SECRET is not set on this repository."
+            echo "Obtain a pull secret from console.redhat.com/openshift/install/pull-secret"
+            echo "and add it as the REDHAT_PULL_SECRET GitHub Actions secret."
+            echo "Note: GitHub Actions does not expose secrets to PRs from forks,"
+            echo "so this workflow cannot run from forked branches."
+            exit 1
+          fi
+          umask 077
+          printf '%s' "${REDHAT_PULL_SECRET}" > "${RUNNER_TEMP}/openshift-pull-secret"
+          chmod 600 "${RUNNER_TEMP}/openshift-pull-secret"
+          # Sanity-check the file is non-empty without leaking contents.
+          if [ ! -s "${RUNNER_TEMP}/openshift-pull-secret" ]; then
+            echo "::error::Pull secret file is empty after write"
+            exit 1
+          fi
+          echo "Pull secret written ($(wc -c < "${RUNNER_TEMP}/openshift-pull-secret") bytes)"
+
+      - name: Start MicroShift
+        run: |
+          chmod +x theia-cloud/.github/microshift-ci/start.sh
+          theia-cloud/.github/microshift-ci/start.sh \
+            "${RUNNER_TEMP}/openshift-pull-secret" \
+            microshift-ci:local
+
+      - name: oc get nodes
+        run: kubectl get nodes -o wide
+
+      - name: oc get pods (all namespaces)
+        run: kubectl get pods -A -o wide
+
+      - name: OpenShift API resources
+        run: |
+          echo "--- all api-resources ---"
+          kubectl api-resources || true
+          echo "--- openshift api groups ---"
+          api_resources=$(kubectl api-resources)
+          echo "$api_resources" | grep -q 'route\.openshift\.io' || \
+            { echo "ERROR: route.openshift.io API group not found"; exit 1; }
+          echo "$api_resources" | grep -q 'security\.openshift\.io' || \
+            { echo "ERROR: security.openshift.io API group not found"; exit 1; }
+          echo "OK: route.openshift.io and security.openshift.io are present"
+
+      - name: Security Context Constraints
+        # The registered shortname is `scc` (singular) -- `sccs` is not
+        # recognized by the API server (typo that turned run 8 red).
+        run: kubectl get scc -o wide
+
+      - name: Routes (all namespaces)
+        run: kubectl get routes -A -o wide || true
+
+      - name: Cluster version / operators (best effort)
+        run: |
+          kubectl get clusterversion 2>/dev/null || echo "no clusterversion (expected on MicroShift)"
+          kubectl get clusteroperators 2>/dev/null || echo "no clusteroperators (expected on MicroShift)"
+
+      # ----------------------------------------------------------------
+      # Spike B: a Route is reachable from the runner host
+      # ----------------------------------------------------------------
+
+      - name: Spike B — wait for OpenShift router (Available)
+        run: |
+          kubectl -n openshift-ingress wait deployment/router-default \
+            --for=condition=Available --timeout=180s
+          kubectl -n openshift-ingress get pods -o wide
+
+      - name: Spike B — apply test workload (Deployment + Service + Route)
+        run: |
+          # Use hello-openshift: known-compliant with restricted SCC
+          # (runs as any UID), publicly pullable from quay.io, and
+          # listens on 8080 with a trivial 200 OK response. Same image
+          # the OpenShift e2e suite uses for routing checks.
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: spike-b
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: hello
+            namespace: spike-b
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: hello
+            template:
+              metadata:
+                labels:
+                  app: hello
+              spec:
+                containers:
+                  - name: hello
+                    image: quay.io/openshifttest/hello-openshift:multiarch
+                    ports:
+                      - containerPort: 8080
+                    readinessProbe:
+                      httpGet:
+                        path: /
+                        port: 8080
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: hello
+            namespace: spike-b
+          spec:
+            selector:
+              app: hello
+            ports:
+              - port: 80
+                targetPort: 8080
+          ---
+          apiVersion: route.openshift.io/v1
+          kind: Route
+          metadata:
+            name: hello
+            namespace: spike-b
+          spec:
+            host: hello.apps-microshift.testing
+            to:
+              kind: Service
+              name: hello
+            port:
+              targetPort: 8080
+            tls:
+              termination: edge
+            wildcardPolicy: None
+          EOF
+          kubectl -n spike-b wait deployment/hello \
+            --for=condition=Available --timeout=120s
+          kubectl -n spike-b get pods,svc,routes -o wide
+
+      - name: Spike B — resolve container IP and add to /etc/hosts
+        run: |
+          # Use the bridge-network IP of the microshift container as the
+          # apps-domain target. Alternative pattern (publishing :80/:443
+          # plus 127.0.0.1.nip.io hostnames) is the documented fallback
+          # if this approach fails.
+          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' microshift)
+          echo "microshift container IP: ${CONTAINER_IP}"
+          if [ -z "$CONTAINER_IP" ]; then
+            echo "::error::Could not resolve microshift container IP"
+            docker inspect microshift
+            exit 1
+          fi
+          # Persist for later steps (Spike D / Spike E need it too).
+          echo "MICROSHIFT_CONTAINER_IP=${CONTAINER_IP}" >> "$GITHUB_ENV"
+          echo "$CONTAINER_IP hello.apps-microshift.testing" | sudo tee -a /etc/hosts
+          echo "--- relevant /etc/hosts entries ---"
+          grep apps-microshift.testing /etc/hosts
+
+      - name: Spike B — curl the Route (HTTP 200 expected)
+        run: |
+          # Retry for ~60s -- router admit + endpoints sync can take a
+          # few seconds after the deployment goes Available.
+          for i in $(seq 1 12); do
+            if curl -ksS -o /tmp/curl-body -w '%{http_code}\n' \
+                --max-time 10 \
+                https://hello.apps-microshift.testing 2>/tmp/curl-err > /tmp/curl-code; then
+              code=$(cat /tmp/curl-code)
+              if [ "$code" = "200" ]; then
+                echo "OK: route reachable, HTTP $code"
+                head -c 200 /tmp/curl-body || true
+                exit 0
+              fi
+              echo "Attempt $i: HTTP $code (not 200)"
+            else
+              echo "Attempt $i: curl failed: $(cat /tmp/curl-err)"
+            fi
+            sleep 5
+          done
+          echo "::error::Route not reachable after 60s"
+          kubectl -n spike-b describe route hello || true
+          kubectl -n spike-b get endpoints -o wide || true
+          kubectl -n openshift-ingress logs deployment/router-default --tail=100 || true
+          exit 1
+
+      # ----------------------------------------------------------------
+      # Spike C: image hand-off Docker -> CRI-O without a registry
+      # ----------------------------------------------------------------
+
+      - name: Spike C — build trivial test image in Docker
+        run: |
+          mkdir -p /tmp/spike-c-build
+          cat > /tmp/spike-c-build/Dockerfile <<EOF
+          FROM quay.io/openshifttest/hello-openshift:multiarch
+          LABEL spike-c="local-build-$(date -u +%Y%m%dT%H%M%SZ)"
+          EOF
+          docker build -t hello-spike-c:dev /tmp/spike-c-build
+          docker images hello-spike-c:dev
+
+      - name: Spike C — transfer image into MicroShift containers-storage
+        run: |
+          # The Docker daemon socket is NOT shared with the microshift
+          # container, so `skopeo copy docker-daemon:...` from inside
+          # would fail. The registry-free transport is a docker-archive
+          # tarball piped through `docker exec -i`.
+          docker save hello-spike-c:dev | docker exec -i microshift \
+            skopeo copy --dest-tls-verify=false \
+              docker-archive:/dev/stdin \
+              containers-storage:localhost/hello-spike-c:dev
+          echo "--- crictl images in microshift (filtered) ---"
+          docker exec microshift crictl images | grep -E '(hello-spike-c|REPOSITORY)' \
+            || docker exec microshift crictl images
+
+      - name: Spike C — prune Docker-side copy to free disk
+        run: |
+          docker rmi hello-spike-c:dev quay.io/openshifttest/hello-openshift:multiarch || true
+          docker system df
+
+      - name: Spike C — run Pod with imagePullPolicy=Never
+        run: |
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: spike-c
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: hello-local
+            namespace: spike-c
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: hello-local
+            template:
+              metadata:
+                labels:
+                  app: hello-local
+              spec:
+                containers:
+                  - name: hello
+                    image: localhost/hello-spike-c:dev
+                    imagePullPolicy: Never
+                    ports:
+                      - containerPort: 8080
+                    readinessProbe:
+                      httpGet:
+                        path: /
+                        port: 8080
+          EOF
+          if ! kubectl -n spike-c wait deployment/hello-local \
+                --for=condition=Available --timeout=120s; then
+            echo "::error::Pod did not become Available with imagePullPolicy=Never"
+            kubectl -n spike-c describe pods || true
+            kubectl -n spike-c get events --sort-by=.lastTimestamp || true
+            exit 1
+          fi
+          kubectl -n spike-c get pods -o wide
+          echo "OK: image transferred Docker -> CRI-O and ran without a registry"
+
+      # ----------------------------------------------------------------
+      # Spike D: terraform 4_openshift-setup against MicroShift
+      # ----------------------------------------------------------------
+
+      - name: Spike D — install local-path-provisioner StorageClass
+        run: |
+          # MicroShift's default StorageClass (topolvm) needs an LVM
+          # volume group, which doesn't exist in our privileged
+          # container. Install rancher's local-path-provisioner as a
+          # shim. (Per the plan: keep this in the workflow, NOT in the
+          # Terraform module — the module must remain CRC-compatible.)
+          kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.30/deploy/local-path-storage.yaml
+
+          # The provisioner pod and its on-demand helper pods bind-mount
+          # hostPath, which the restricted SCC blocks. Grant `privileged`
+          # SCC to both: the provisioner SA and the default SA in the
+          # same namespace (helper pods run under default).
+          for sa in local-path-provisioner-service-account default; do
+            kubectl create clusterrolebinding "local-path-${sa}-privileged" \
+              --clusterrole=system:openshift:scc:privileged \
+              --serviceaccount="local-path-storage:${sa}" \
+              --dry-run=client -o yaml | kubectl apply -f -
+          done
+
+          # Mark local-path as default; un-default any other currently-
+          # default SC so PVCs without an explicit className land on it.
+          kubectl patch storageclass local-path \
+            -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+          for sc in $(kubectl get sc -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}'); do
+            if [ "$sc" != "local-path" ]; then
+              kubectl patch storageclass "$sc" \
+                -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+            fi
+          done
+
+          kubectl -n local-path-storage wait deployment/local-path-provisioner \
+            --for=condition=Available --timeout=120s
+          kubectl get sc
+
+      - name: Spike D — mint cluster-admin bearer token
+        run: |
+          # MicroShift's kubeadmin kubeconfig uses client-certificate
+          # auth, not bearer tokens, so `oc whoami -t` returns empty.
+          # The 4_openshift-setup module's kubernetes/helm/kubectl
+          # providers all expect a bearer token. Mint one via the
+          # TokenRequest API.
+          kubectl create namespace tf-bootstrap \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create serviceaccount tf-admin -n tf-bootstrap \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create clusterrolebinding tf-admin \
+            --clusterrole=cluster-admin \
+            --serviceaccount=tf-bootstrap:tf-admin \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          TOKEN=$(kubectl create token tf-admin -n tf-bootstrap --duration=24h)
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Failed to mint token for tf-admin"
+            exit 1
+          fi
+          # Mask in run logs and propagate to subsequent steps.
+          echo "::add-mask::${TOKEN}"
+          echo "OPENSHIFT_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+          echo "Token minted ($(echo -n "$TOKEN" | wc -c) bytes)"
+
+      - name: Spike D — add keycloak hostname to /etc/hosts
+        run: |
+          # Same container-IP pattern as Spike B; just an extra
+          # apps-domain hostname (Keycloak Route).
+          echo "${MICROSHIFT_CONTAINER_IP} keycloak.apps-microshift.testing" | sudo tee -a /etc/hosts
+          grep apps-microshift.testing /etc/hosts
+
+      - name: Spike D — setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.0"
+          terraform_wrapper: false
+
+      - name: Spike D — terraform apply (4_openshift-setup)
+        # NOTE: with the new path-based checkout layout (path:
+        # ./theia-cloud + path: ./theia-cloud-helm) all terraform
+        # working-directories are prefixed with `theia-cloud/`. The
+        # earlier no-`path:` checkout that Spike A-D used is gone now
+        # that Spike E needs the two-repo layout for the relative path
+        # in 5-01_openshift_monitor/theia_cloud.tf to resolve.
+        working-directory: theia-cloud/terraform/test-configurations/4_openshift-setup
+        env:
+          TF_VAR_openshift_server: https://127.0.0.1:6443
+          TF_VAR_openshift_token: ${{ env.OPENSHIFT_TOKEN }}
+          TF_VAR_apps_domain: apps-microshift.testing
+        run: |
+          # Defense in depth: drop any tfstate that may have leaked into
+          # a developer's repo (terraform.tfstate is gitignored, but).
+          rm -f terraform.tfstate terraform.tfstate.backup
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Spike D — verify Keycloak pods Ready
+        run: |
+          kubectl get pods -n keycloak -o wide
+          # Bitnami chart deploys keycloak + postgresql; both must be
+          # Ready for the realm setup to be considered green.
+          kubectl wait --for=condition=Ready pods --all -n keycloak --timeout=180s
+
+      - name: Spike D — verify TheiaCloud realm metadata
+        run: |
+          URL="https://keycloak.apps-microshift.testing/realms/TheiaCloud/.well-known/openid-configuration"
+          for i in $(seq 1 12); do
+            if curl -sk --max-time 10 -o /tmp/oidc.json "$URL"; then
+              if jq -e '.issuer' /tmp/oidc.json >/dev/null 2>&1; then
+                echo "OK: TheiaCloud realm reachable"
+                jq '{issuer, authorization_endpoint, token_endpoint}' /tmp/oidc.json
+                exit 0
+              fi
+            fi
+            echo "Attempt $i: waiting for realm metadata..."
+            sleep 5
+          done
+          echo "::error::TheiaCloud realm metadata not reachable after 60s"
+          cat /tmp/oidc.json 2>/dev/null || true
+          kubectl get pods -n keycloak -o wide || true
+          kubectl logs -n keycloak deployment/keycloak --tail=100 || true
+          exit 1
+
+      # ----------------------------------------------------------------
+      # Spike E: full Theia Cloud install with locally-built images
+      # ----------------------------------------------------------------
+
+      - name: Spike E — add theia-cloud apps hostnames to /etc/hosts
+        run: |
+          for host in try service; do
+            echo "${MICROSHIFT_CONTAINER_IP} ${host}.apps-microshift.testing" | \
+              sudo tee -a /etc/hosts
+          done
+          grep apps-microshift.testing /etc/hosts
+
+      - name: Spike E — build and transfer Theia Cloud images
+        # Build, transfer, and immediately prune each image to keep peak
+        # disk usage manageable. After each loop iteration the image
+        # exists in MicroShift's CRI-O containers-storage but no longer
+        # in Docker's graph driver, so net storage growth is roughly the
+        # CRI-O footprint of one image at a time.
+        working-directory: theia-cloud
+        run: |
+          set -e
+          TAG="${CI_IMAGE_TAG}"
+
+          build_and_transfer() {
+            local name=$1
+            local dockerfile=$2
+            local context=$3
+            local local_tag="localhost/theia-cloud-${name}:${TAG}"
+
+            echo "::group::Build theia-cloud-${name}"
+            docker build -t "${local_tag}" -f "${dockerfile}" "${context}"
+            echo "::endgroup::"
+
+            echo "::group::Transfer theia-cloud-${name} into MicroShift"
+            docker save "${local_tag}" | docker exec -i microshift \
+              skopeo copy --dest-tls-verify=false \
+                docker-archive:/dev/stdin \
+                "containers-storage:${local_tag}"
+            docker rmi "${local_tag}" || true
+            echo "::endgroup::"
+
+            echo "--- disk after ${name} ---"
+            docker system df
+            df -h /
+          }
+
+          # Core Theia Cloud images (deployments under theia-cloud ns).
+          build_and_transfer service            dockerfiles/service/Dockerfile             .
+          build_and_transfer operator           dockerfiles/operator/Dockerfile            .
+          build_and_transfer landing-page       dockerfiles/landing-page/Dockerfile        .
+          build_and_transfer wondershaper       dockerfiles/wondershaper/Dockerfile        .
+          build_and_transfer conversion-webhook dockerfiles/conversion-webhook/Dockerfile  .
+
+          # Demo images (referenced by AppDefinitions; sessions for
+          # Spike F use these). Transferred now so Spike E's helm install
+          # can register the AppDefinitions without registry pulls.
+          build_and_transfer demo                demo/dockerfiles/demo-theia-docker/Dockerfile         demo/dockerfiles/demo-theia-docker/.
+          build_and_transfer activity-demo       demo/dockerfiles/demo-theia-monitor-vscode/Dockerfile demo/dockerfiles/demo-theia-monitor-vscode/.
+          build_and_transfer activity-demo-theia demo/dockerfiles/demo-theia-monitor-theia/Dockerfile  .
+
+          echo "--- final image list in MicroShift ---"
+          docker exec microshift crictl images | grep theia-cloud || true
+
+      - name: Spike E — terraform apply (5-01_openshift_monitor)
+        # Uses the committed valuesOpenShiftCI.yaml (image tags + app.name
+        # + multi-app additionalApps tailored for the e2e tests) instead
+        # of valuesOpenShiftMonitor.yaml (local-dev). Spike F.2 run 2
+        # discovered that valuesOpenShiftMonitor.yaml's `app.name: "Theia
+        # Blueprint"` doesn't match the test's expectation of `"Theia
+        # with Theia Extension Monitor"` -- the minikube CI uses
+        # valuesE2ECI.yaml for exactly this reason; we now have the
+        # OpenShift equivalent.
+        working-directory: theia-cloud/terraform/test-configurations/5-01_openshift_monitor
+        env:
+          TF_VAR_values_file: ${{ github.workspace }}/theia-cloud/terraform/values/valuesOpenShiftCI.yaml
+          TF_VAR_conversion_webhook_image: localhost/theia-cloud-conversion-webhook:${{ env.CI_IMAGE_TAG }}
+          TF_VAR_conversion_webhook_image_pull_policy: Never
+        run: |
+          rm -f terraform.tfstate terraform.tfstate.backup
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Spike E — verify theia-cloud pods Ready
+        run: |
+          kubectl get pods -n theia-cloud -o wide
+          # Wait for all deployments in the theia-cloud namespace to be
+          # Available. The chart deploys: operator, service, landing-page,
+          # conversion-webhook (in theia-cloud-crds chart), monitor.
+          kubectl -n theia-cloud wait \
+            --for=condition=Available deployment --all --timeout=180s
+
+      - name: Spike E — verify routes exist
+        run: |
+          echo "--- routes in theia-cloud ---"
+          kubectl get routes -n theia-cloud -o wide
+          # Expect at least try.* and service.*
+          routes=$(kubectl get routes -n theia-cloud -o jsonpath='{.items[*].spec.host}')
+          echo "Found routes: $routes"
+          echo "$routes" | grep -q 'try\.apps-microshift\.testing' || \
+            { echo "::error::try.apps-microshift.testing route missing"; exit 1; }
+          echo "$routes" | grep -q 'service\.apps-microshift\.testing' || \
+            { echo "::error::service.apps-microshift.testing route missing"; exit 1; }
+          echo "OK: required theia-cloud routes registered"
+
+      - name: Spike E — verify try.apps-microshift.testing reachable
+        run: |
+          # With keycloak.enable=true, the landing page redirects to
+          # Keycloak for login; we expect a 302/3xx. Without keycloak
+          # it would be 200. Accept any 2xx/3xx as success.
+          for i in $(seq 1 12); do
+            code=$(curl -ksS -o /dev/null -w '%{http_code}' --max-time 10 \
+              https://try.apps-microshift.testing || echo "000")
+            case "$code" in
+              2*|3*)
+                echo "OK: try.apps-microshift.testing reachable (HTTP $code)"
+                exit 0
+                ;;
+              *)
+                echo "Attempt $i: HTTP $code"
+                ;;
+            esac
+            sleep 5
+          done
+          echo "::error::try.apps-microshift.testing not reachable after 60s"
+          kubectl -n theia-cloud describe route trynow 2>/dev/null || \
+            kubectl -n theia-cloud describe routes
+          kubectl -n theia-cloud logs deployment/landing-page-deployment --tail=100 || true
+          exit 1
+
+      # ----------------------------------------------------------------
+      # Spike F.2: run the existing `login` Playwright test against
+      # MicroShift. Smallest meaningful e2e coverage:
+      #   - landing page reachable at try.apps-microshift.testing
+      #   - Keycloak login flow (foo/foo) succeeds
+      #   - landing page renders the post-login "Launch ..." button
+      #
+      # No wildcard ws-<id>.apps-microshift.testing resolution needed:
+      # the login test does not start a session. Tests that DO need
+      # session URLs (start/logout/timeout) are deferred to F.3 once
+      # dnsmasq (or an equivalent wildcard-DNS shim) is in place.
+      # ----------------------------------------------------------------
+
+      - name: Spike F.2 — Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Spike F.2 — Install dependencies and run login test
+        working-directory: theia-cloud/node
+        env:
+          # Selects the OpenShift baseURL branch in playwright.config.ts.
+          MATRIX_CLOUD_PROVIDER: OPENSHIFT
+          APPS_DOMAIN: apps-microshift.testing
+          # Spike E enables Keycloak; the login test skips itself when
+          # MATRIX_KEYCLOAK!='true', so we must set it to actually run.
+          MATRIX_KEYCLOAK: "true"
+        run: |
+          npm ci
+          npm run build -w e2e-tests
+          # Filter to the login test only, by anchored test title (NOT
+          # by positional path).
+          #
+          # F.2 run 1: positional `login.test.js` -- resolved relative
+          #   to cwd, not testDir, so Playwright reported "No tests
+          #   found".
+          # F.2 run 2: `--grep "Login"` -- case-insensitive substring,
+          #   ALSO matched `start.test.ts`'s "should require login when
+          #   accessing session URL...".
+          # F.2 run 4: positional `./lib/tests/login.test.js` (full path
+          #   from cwd) -- STILL "No tests found". Playwright's
+          #   positional-arg behavior is too version-dependent (path
+          #   vs. regex, cwd-relative vs. testDir-relative) to rely on.
+          # Fix (committed after 3 rounds): anchored `^Login\b`.
+          #   - `^Login` -- start-of-title anchor; excludes
+          #     "should require login..." (doesn't START with "Login").
+          #   - `\b` -- word boundary; would also exclude e.g.
+          #     `LoginExtended` if anyone ever adds one.
+          cd e2e-tests
+          # Belt-and-braces: surface any future build-output regression
+          # (e.g. tsc emitted nothing; lib/tests/ missing) directly in
+          # the log instead of bottoming out as another "No tests found".
+          ls -la ./lib/tests/ || true
+          npx playwright test \
+            --config=./configs/playwright.config.ts \
+            --grep "^Login\\b"
+
+      - name: Spike F.2 — Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spike-f2-playwright-failure
+          path: |
+            theia-cloud/node/e2e-tests/test-results/**
+          retention-days: 7
+
+      - name: MicroShift logs
+        if: always()
+        run: |
+          echo "--- microshift journal ---"
+          docker exec microshift journalctl -u microshift --no-pager || true
+          echo ""
+          echo "--- crio journal (tail) ---"
+          docker exec microshift journalctl -u crio --no-pager | tail -300 || true
+
+      - name: Cluster diagnostics on failure
+        # Each block surfaces a class of failure that has bitten a past
+        # Spike A run, so the same dump narrows down whichever layer
+        # broke this time:
+        #   run 3: microshift userspace dep         -> microshift journal
+        #   run 4: subscription-gated image pulls   -> describe pods -A
+        #   run 5: rshared mount-propagation error  -> describe pods -A (events)
+        #   run 6: OVS modprobe / OVN setup hang    -> OVN logs + OVS
+        #                                              journal + CNI dir
+        #   run 7: cri-o EACCES exec'ing OVN binary -> /run mount opts +
+        #          (because /run is noexec)           direct binary exec +
+        #                                              SELinux/AppArmor probes
+        if: failure()
+        run: |
+          echo "=== combined microshift + crio journal ==="
+          docker exec microshift journalctl -u microshift -u crio --no-pager || true
+          echo ""
+          echo "=== pods (all namespaces) ==="
+          kubectl get pods -A -o wide || true
+          echo ""
+          echo "=== describe pods -A (head -200) ==="
+          kubectl describe pods -A 2>&1 | head -200 || true
+          echo ""
+          echo "=== theia-cloud pod logs (tail 100 each) ==="
+          for d in operator-deployment service-deployment landing-page-deployment conversion-webhook; do
+            echo "--- $d ---"
+            kubectl logs -n theia-cloud deployment/$d --tail=100 2>&1 || true
+          done
+          echo ""
+          echo "=== ovnkube-node logs ==="
+          kubectl logs -n openshift-ovn-kubernetes -l app=ovnkube-node \
+            --all-containers --tail=200 2>&1 || true
+          echo ""
+          echo "=== ovnkube-master logs ==="
+          kubectl logs -n openshift-ovn-kubernetes -l app=ovnkube-master \
+            --all-containers --tail=200 2>&1 || true
+          echo ""
+          echo "=== openvswitch / microshift-ovs-init unit status ==="
+          docker exec microshift systemctl status --no-pager \
+            openvswitch microshift-ovs-init 2>&1 || true
+          echo ""
+          echo "=== openvswitch / microshift-ovs-init journal (tail 100) ==="
+          docker exec microshift journalctl -u openvswitch -u microshift-ovs-init \
+            --no-pager 2>&1 | tail -100 || true
+          echo ""
+          echo "=== /etc/cni/net.d/ (CNI handoff marker) ==="
+          docker exec microshift ls -la /etc/cni/net.d/ 2>&1 || true
+          echo ""
+          echo "=== /run/cni/bin/ contents ==="
+          docker exec microshift ls -la /run/cni/bin/ 2>&1 || true
+          echo ""
+          echo "=== /run mount options (looking for noexec) ==="
+          docker exec microshift sh -c "cat /proc/mounts | grep -E ' /run( |\b)'" 2>&1 || true
+          echo ""
+          echo "=== direct exec of OVN CNI binary (--help) ==="
+          docker exec microshift /run/cni/bin/ovn-k8s-cni-overlay --help 2>&1 | head -10 || true
+          echo ""
+          echo "=== SELinux mode (getenforce) ==="
+          docker exec microshift getenforce 2>&1 || true
+          echo ""
+          echo "=== OVN CNI binary stat (mode/owner) ==="
+          docker exec microshift stat -c '%A %u %g %n' /run/cni/bin/ovn-k8s-cni-overlay 2>&1 || true
+
+      - name: Stop MicroShift
+        if: always()
+        run: docker rm -f microshift || true
+
+      - name: Remove pull secret
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/openshift-pull-secret" || true

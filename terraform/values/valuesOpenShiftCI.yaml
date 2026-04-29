@@ -1,0 +1,86 @@
+# Helm values for the OpenShift e2e CI workflow
+# (.github/workflows/spike-microshift-startup.yml).
+#
+# Derived from theia-cloud/terraform/ci-configurations/valuesE2ECI.yaml
+# (the minikube CI values) with OpenShift-specific deltas:
+#
+#   - operator.cloudProvider: OPENSHIFT (was MINIKUBE)
+#   - image tags `localhost/*:microshift-ci-e2e` (was
+#     `theiacloud/*:minikube-ci-e2e`) -- the CI workflow transfers each
+#     image into MicroShift's CRI-O via skopeo, so they live under the
+#     local "localhost/" namespace, not on Docker Hub
+#   - imagePullPolicy: Never (no registry contact for CI images;
+#     kubelet must use the locally imported tag exactly)
+#   - dropped: minikube-specific bits (operator.storageClassName:
+#     "default", ingress.* block, hosts.allWildcardInstances)
+#   - keycloak.* values are NOT set here; the spike workflow's
+#     terraform `set` blocks override them at apply time
+#     (keycloak.enable=true, keycloak.authUrl=https://keycloak.<host>/)
+#   - hosts.configuration.baseHost is NOT set here; terraform `set`s
+#     it from data.terraform_remote_state.openshift.outputs.hostname
+#
+# Local CRC development continues to use valuesOpenShiftMonitor.yaml
+# (local-dev values). This file is CI-only.
+
+imagePullPolicy: Never
+
+app:
+  name: "Theia with Theia Extension Monitor"
+
+issuer:
+  email: jdoe@theia-cloud.io
+
+demoApplication:
+  install: false
+
+hosts:
+  usePaths: false
+  # Host-prefix overrides matching valuesOpenShiftMonitor.yaml (the
+  # local CRC dev defaults). Without these, the chart falls back to
+  # `landing: trynow` / `service: servicex` / `instance: instances`,
+  # but the spike workflow's /etc/hosts entries, the Spike E route
+  # grep, and playwright.config.ts's getBaseURL() all assume the
+  # `try.` / `service.` / `ws-` prefixes (Spike F.2 run 3 lesson).
+  configuration:
+    landing: try
+    service: service
+    instance: ws
+
+landingPage:
+  image: localhost/theia-cloud-landing-page:microshift-ci-e2e
+  appDefinition: "theia-cloud-monitor-theia-popup"
+  ephemeralStorage: true
+  additionalApps:
+    theia-cloud-monitor-theia-popup:
+      label: "Theia Monitor (Popup Test)"
+    theia-cloud-monitor-theia-timeout:
+      label: "Theia Monitor (Timeout Test)"
+    theia-cloud-monitor-vscode-popup:
+      label: "VSCode Monitor (Popup Test)"
+    theia-cloud-monitor-vscode-timeout:
+      label: "VSCode Monitor (Timeout Test)"
+    theia-cloud-demo:
+      label: "Theia Cloud Demo (2min timeout)"
+
+operator:
+  image: localhost/theia-cloud-operator:microshift-ci-e2e
+  cloudProvider: "OPENSHIFT"
+  bandwidthLimiter: "WONDERSHAPER"
+  wondershaperImage: localhost/theia-cloud-wondershaper:microshift-ci-e2e
+  sessionsPerUser: "1"
+  requestedStorage: "250Mi"
+  replicas: 2
+
+service:
+  image: localhost/theia-cloud-service:microshift-ci-e2e
+  protocol: https
+
+monitor:
+  enable: true
+  activityTracker:
+    enable: true
+    interval: 1
+
+preloading:
+  enable: true
+  images: []

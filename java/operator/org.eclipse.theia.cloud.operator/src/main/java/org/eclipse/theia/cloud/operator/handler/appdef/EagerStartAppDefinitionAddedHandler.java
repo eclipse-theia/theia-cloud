@@ -34,13 +34,12 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSp
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.bandwidth.BandwidthLimiter;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
-import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
 import org.eclipse.theia.cloud.operator.replacements.DeploymentTemplateReplacements;
+import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 import org.eclipse.theia.cloud.operator.util.K8sUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil;
-import org.eclipse.theia.cloud.operator.util.TheiaCloudIngressUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil;
 
 import com.google.inject.Inject;
@@ -69,7 +68,7 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
     protected TheiaCloudOperatorArguments arguments;
 
     @Inject
-    protected IngressPathProvider ingressPathProvider;
+    protected SessionRoutingStrategy routingStrategy;
 
     @Inject
     protected BandwidthLimiter bandwidthLimiter;
@@ -86,15 +85,14 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
         String appDefinitionResourceUID = appDefinition.getMetadata().getUid();
         int instances = spec.getMinInstances();
 
-        /* Create ingress if not existing */
-        if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client.kubernetes(),
-                client.namespace(), appDefinition, correlationId)) {
+        /* Check routing resource exists */
+        if (!routingStrategy.ensureRoutingResourceExists(appDefinition, correlationId)) {
             LOGGER.error(formatLogMessage(correlationId,
-                    "Expected ingress '" + spec.getIngressname() + "' for app definition '" + appDefinitionResourceName
+                    "Expected routing resource '" + spec.getIngressname() + "' for app definition '" + appDefinitionResourceName
                             + "' does not exist. Abort handling app definition."));
             return false;
         } else {
-            LOGGER.trace(formatLogMessage(correlationId, "Ingress available already"));
+            LOGGER.trace(formatLogMessage(correlationId, "Routing resource available already"));
         }
 
         /* Get existing services for this app definition */
@@ -249,7 +247,8 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
                 AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
                 labelsToAdd, configMap -> {
-                    String host = arguments.getInstancesHost() + ingressPathProvider.getPath(appDefinition, instance);
+                    String host = TheiaCloudDeploymentUtil.extractHost(
+                            routingStrategy.getSessionURL(appDefinition, instance));
                     int port = appDefinition.getSpec().getPort();
                     AddedHandlerUtil.updateProxyConfigMap(client, namespace, configMap, host, port);
                 });
