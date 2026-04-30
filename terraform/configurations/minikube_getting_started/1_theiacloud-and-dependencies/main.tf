@@ -97,25 +97,35 @@ locals {
   hostname                = "${local.effective_host}.nip.io"
 }
 
-module "helm" {
-  source = "../../../modules/helm"
+module "cluster_prerequisites" {
+  source = "../../../modules/cluster-prerequisites"
 
-  depends_on = [module.host, helm_release.haproxy-ingress-controller]
+  depends_on = [kubernetes_persistent_volume_v1.minikube, helm_release.haproxy-ingress-controller]
 
-  install_ingress_controller   = false
-  ingress_controller_type      = local.ingress_controller_type
-  cert_manager_issuer_email    = var.cert_manager_issuer_email
-  cert_manager_cluster_issuer  = "theia-cloud-selfsigned-issuer"
-  cert_manager_common_name     = local.hostname
-  hostname                     = local.hostname
-  keycloak_admin_password      = var.keycloak_admin_password
-  postgresql_enabled           = true
-  postgres_postgres_password   = "admin"
-  postgres_password            = "admin"
-  postgresql_storageClass      = "manual"
-  postgresql_volumePermissions = true
-  service_type                 = "ClusterIP"
-  cloudProvider                = "MINIKUBE"
+  hostname                            = local.hostname
+  keycloak_admin_password             = var.keycloak_admin_password
+  postgres_password                   = "admin"
+  install_cert_manager                = true
+  install_selfsigned_issuer           = true
+  cert_manager_issuer_email           = var.cert_manager_issuer_email
+  ingress_controller_type             = data.terraform_remote_state.cluster.outputs.ingress_controller_type
+  ingress_class_name                  = data.terraform_remote_state.cluster.outputs.ingress_controller_type
+  ingress_cert_manager_cluster_issuer = "keycloak-selfsigned-issuer"
+  ingress_cert_manager_common_name    = local.hostname
+  postgres_storage_class              = "manual"
+  postgres_volume_permissions         = true
+  cloud_provider                      = "MINIKUBE"
+}
+
+module "theia-cloud" {
+  source = "../../../modules/theia-cloud"
+
+  depends_on = [module.host, module.cluster_prerequisites, helm_release.haproxy-ingress-controller]
+
+  ingress_controller_type   = local.ingress_controller_type
+  cert_manager_issuer_email = var.cert_manager_issuer_email
+  hostname                  = local.hostname
+  cloud_provider            = "MINIKUBE"
 }
 
 provider "keycloak" {
@@ -131,9 +141,8 @@ provider "keycloak" {
 module "keycloak" {
   source = "../../../modules/keycloak"
 
-  depends_on = [module.helm]
+  depends_on = [module.cluster_prerequisites]
 
-  hostname                        = local.hostname
   keycloak_test_user_foo_password = "foo"
   keycloak_test_user_bar_password = "bar"
   valid_redirect_uri              = "https://${local.hostname}/*"

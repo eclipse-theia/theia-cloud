@@ -5,5 +5,5 @@ output "try_now" {
 
 output "keycloak" {
   description = "Keycloak Admin URL."
-  value       = "https://${local.hostname}/keycloak/"
+  value       = "${module.cluster_prerequisites.keycloak_url}/"
 }
