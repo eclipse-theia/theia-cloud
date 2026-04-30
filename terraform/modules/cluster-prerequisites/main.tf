@@ -405,7 +405,7 @@ locals {
     }
 
     additionalOptions = [
-      # Tell Keycloak to use X-Forwarded-* from nginx
+      # Use X-Forwarded-* headers from the ingress controller (works for both nginx and haproxy).
       {
         name  = "proxy-headers"
         value = "xforwarded"
