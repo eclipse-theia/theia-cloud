@@ -24,10 +24,3 @@ module "cluster" {
   driver                  = "kvm2"
   ingress_controller_type = var.ingress_controller_type
 }
-
-provider "kubernetes" {
-  host                   = module.cluster.cluster_host
-  client_certificate     = module.cluster.cluster_client_certificate
-  client_key             = module.cluster.cluster_client_key
-  cluster_ca_certificate = module.cluster.cluster_ca_certificate
-}
