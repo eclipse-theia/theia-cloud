@@ -32,6 +32,7 @@ on:
   push:
     branches:
       - main
+      - jf/openshift
   workflow_dispatch:
     inputs:
       microshift_release:
@@ -45,7 +46,7 @@ on:
       theia-cloud-helm-branch:
         description: "Branch of theia-cloud-helm to check out."
         type: string
-        default: "main"
+        default: "jf/openshift"
   schedule:
     - cron: "0 13 * * 0"
 
@@ -84,7 +85,7 @@ jobs:
 
     steps:
       - name: Set Helm Branch
-        run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=${{ inputs.theia-cloud-helm-branch || 'main' }}" >> $GITHUB_ENV
+        run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=${{ inputs.theia-cloud-helm-branch || 'jf/openshift' }}" >> $GITHUB_ENV
 
       - name: Checkout Theia Cloud
         uses: actions/checkout@v4
