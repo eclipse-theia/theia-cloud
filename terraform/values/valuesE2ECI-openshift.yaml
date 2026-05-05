@@ -1,0 +1,60 @@
+# OpenShift-specific overlay for the [E2E Tests] OpenShift workflow.
+# Layered on top of valuesE2ECI-base.yaml. See theia_cloud.tf in
+# terraform/test-configurations/5-02_openshift_ci/.
+#
+# Image references use `localhost/...:microshift-ci-e2e` because the CI
+# workflow transfers each image into MicroShift's CRI-O via skopeo,
+# under the local "localhost/" namespace, not via Docker Hub. With
+# `imagePullPolicy: Never` the kubelet uses the locally imported tag
+# exactly without any registry contact.
+#
+# `hosts.configuration.{landing,service,instance}` overrides the chart
+# defaults (`trynow` / `servicex` / `instances`) so the workflow's
+# wildcard DNS, the route-existence check, and playwright.config.ts's
+# getBaseURL() can all assume the `try.` / `service.` / `ws-` prefixes.
+# `hosts.configuration.baseHost` and `keycloak.*` are NOT set here;
+# terraform `set` blocks override them at apply time from the
+# 4_openshift-setup remote state and matrix axes.
+
+imagePullPolicy: Never
+
+hosts:
+  configuration:
+    landing: try
+    service: service
+    instance: ws
+
+landingPage:
+  image: localhost/theia-cloud-landing-page:microshift-ci-e2e
+
+operator:
+  image: localhost/theia-cloud-operator:microshift-ci-e2e
+  cloudProvider: "OPENSHIFT"
+  # OpenShift SCC `anyuid` allows the fixed UID used by the session
+  # images, but it does not allow adding NET_ADMIN. The base CI values
+  # use WONDERSHAPER, which injects a NET_ADMIN init container and makes
+  # session pods fail admission. Use the Kubernetes bandwidth annotation
+  # strategy for OpenShift, matching valuesOpenShiftMonitor.yaml.
+  bandwidthLimiter: "K8SANNOTATION"
+  wondershaperImage: localhost/theia-cloud-wondershaper:microshift-ci-e2e
+  # The chart default is `default`, but the workflow installs
+  # local-path-provisioner with StorageClass name `local-path` for
+  # persistent workspace PVCs. Without this override, the non-ephemeral
+  # matrix row wedges on unbound PVCs with:
+  # `storageclass.storage.k8s.io "default" not found`.
+  storageClassName: "local-path"
+
+service:
+  image: localhost/theia-cloud-service:microshift-ci-e2e
+  protocol: https
+
+# The chart's image-preloading DaemonSet sets the pause container to
+# memory: 8M, which is below CRI-O 1.32+'s hardcoded 12 MiB minimum
+# (CRI-O rejects the sandbox with "pod set memory limit too low;
+# should be at least 12582912 bytes"). MicroShift ships CRI-O 1.32, so
+# the DaemonSet wedges in CrashLoop on every node. The minikube CI
+# uses containerd which has no such minimum, so this only affects
+# OpenShift. Disable preloading here -- it's a no-op anyway with
+# preloading.images: [] from the base values.
+preloading:
+  enable: false

@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 public class TheiaCloudOperatorArguments {
 
     public enum CloudProvider {
-        K8S, MINIKUBE
+        K8S, MINIKUBE, OPENSHIFT
     }
 
     public enum BandwidthLimiter {

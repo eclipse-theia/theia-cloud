@@ -1,0 +1,653 @@
+name: "[E2E Tests] OpenShift"
+
+# OpenShift e2e tests. Peer of e2e-tests.yml (minikube). Exercises the
+# `cloudProvider=OPENSHIFT` code path of the helm chart + the
+# OpenShift-specific Route templates + the operator's SCC RoleBinding
+# logic, against MicroShift running inside a privileged Docker container
+# on a stock GitHub-hosted ubuntu-22.04 runner.
+#
+# The MicroShift container approach: the runner builds a
+# CentOS Stream 9 + systemd-as-PID-1 image (.github/microshift-ci/),
+# starts MicroShift inside it (start.sh), then runs Theia Cloud terraform
+# / e2e tests against the running cluster from the runner host. RPMs
+# come from mirror.openshift.com (community/anonymous, no Red Hat
+# subscription); the only secret needed is the Red Hat pull secret for
+# pulling the OpenShift control-plane container images
+# (REDHAT_PULL_SECRET, see Step 1 prereq below).
+#
+# CHECKOUT LAYOUT: same as e2e-tests.yml -- both repos in named
+# subdirectories (path: ./theia-cloud + path: ./theia-cloud-helm)
+# because 5-02_openshift_ci/theia_cloud.tf references the helm
+# chart by relative path (../../../../theia-cloud-helm/charts/...).
+#
+# Prereqs the workflow assumes:
+#  1. `REDHAT_PULL_SECRET` GitHub Actions secret on the repo. Obtain
+#     from console.redhat.com/openshift/install/pull-secret. Note that
+#     GH does NOT expose secrets to PRs from forks, so this workflow
+#     only runs on push/schedule events from the upstream repo.
+#  2. The MicroShift release tag in the Dockerfile default must be
+#     served by mirror.openshift.com.
+
+on:
+  push:
+    branches:
+      - main
+      - jf/openshift
+  workflow_dispatch:
+    inputs:
+      microshift_release:
+        description: "MicroShift release tag (e.g. 4.18.0-rc.10). Leave empty to use the Dockerfile default."
+        type: string
+        default: ""
+      microshift_line:
+        description: "MicroShift minor line (e.g. 4.18). Leave empty to use the Dockerfile default."
+        type: string
+        default: ""
+      theia-cloud-helm-branch:
+        description: "Branch of theia-cloud-helm to check out."
+        type: string
+        default: "jf/openshift"
+  schedule:
+    - cron: "0 13 * * 0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-tests-openshift-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI_IMAGE_TAG: microshift-ci-e2e
+
+jobs:
+  runtests:
+    name: "Run on MicroShift (Keycloak: ${{ matrix.keycloak }}, Ephemeral: ${{ matrix.ephemeral }}, EagerStart: ${{ matrix.eagerStart }})"
+    runs-on: ubuntu-22.04
+    # Image build is the dominant cost (8 Theia Cloud images, including
+    # ~3 Theia-based ones at ~10 min each), plus MicroShift boot ~5 min,
+    # terraform applies ~10 min total, transfers ~5 min, tests ~3 min.
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        keycloak: [true, false]
+        ephemeral: [true, false]
+        eagerStart: [true, false]
+        exclude:
+          # Non-ephemeral sessions only make sense with keycloak (matches
+          # the minikube e2e workflow's exclusion).
+          - ephemeral: false
+            keycloak: false
+          # Eager start does not support persistent storage (workspaces).
+          - ephemeral: false
+            eagerStart: true
+
+    steps:
+      - name: Set Helm Branch
+        run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=${{ inputs.theia-cloud-helm-branch || 'jf/openshift' }}" >> $GITHUB_ENV
+
+      - name: Checkout Theia Cloud
+        uses: actions/checkout@v4
+        with:
+          path: ./theia-cloud
+
+      - name: Checkout Theia Cloud Helm
+        # Required by 5-02_openshift_ci/theia_cloud.tf which loads
+        # the chart via `chart = "../../../../theia-cloud-helm/charts/...`.
+        uses: actions/checkout@v4
+        with:
+          repository: eclipse-theia/theia-cloud-helm
+          ref: ${{ env.INPUT_THEIA_CLOUD_HELM_BRANCH }}
+          path: ./theia-cloud-helm
+
+      - name: Show host kernel / cgroup info
+        run: |
+          uname -a
+          cat /proc/1/cgroup || true
+          stat -fc %T /sys/fs/cgroup || true
+          mount | grep cgroup || true
+
+      - name: Build MicroShift CI image
+        # Only forward --build-arg when the input is non-empty. An empty
+        # `--build-arg X=` would silently override the Dockerfile default
+        # with an empty string.
+        env:
+          MICROSHIFT_RELEASE_INPUT: ${{ inputs.microshift_release }}
+          MICROSHIFT_LINE_INPUT: ${{ inputs.microshift_line }}
+        run: |
+          args=(--progress=plain)
+          if [ -n "${MICROSHIFT_RELEASE_INPUT:-}" ]; then
+            args+=(--build-arg "MICROSHIFT_RELEASE=${MICROSHIFT_RELEASE_INPUT}")
+          fi
+          if [ -n "${MICROSHIFT_LINE_INPUT:-}" ]; then
+            args+=(--build-arg "MICROSHIFT_LINE=${MICROSHIFT_LINE_INPUT}")
+          fi
+          DOCKER_BUILDKIT=1 docker build "${args[@]}" -t microshift-ci:local theia-cloud/.github/microshift-ci
+
+      - name: Write Red Hat pull secret
+        # MicroShift's bundled OVN, DNS, router, and pause images live
+        # in the subscription-gated quay.io/openshift-release-dev/
+        # ocp-v4.0-art-dev registry. Same secret as the local CRC docs
+        # prescribe (terraform/test-configurations/openshift.md). Obtain
+        # from console.redhat.com/openshift/install/pull-secret and
+        # store as the REDHAT_PULL_SECRET GitHub Actions secret.
+        env:
+          REDHAT_PULL_SECRET: ${{ secrets.REDHAT_PULL_SECRET }}
+        run: |
+          if [ -z "${REDHAT_PULL_SECRET:-}" ]; then
+            echo "::error::REDHAT_PULL_SECRET is not set on this repository."
+            echo "Obtain a pull secret from console.redhat.com/openshift/install/pull-secret"
+            echo "and add it as the REDHAT_PULL_SECRET GitHub Actions secret."
+            echo "Note: GitHub Actions does not expose secrets to PRs from forks,"
+            echo "so this workflow cannot run from forked branches."
+            exit 1
+          fi
+          umask 077
+          printf '%s' "${REDHAT_PULL_SECRET}" > "${RUNNER_TEMP}/openshift-pull-secret"
+          chmod 600 "${RUNNER_TEMP}/openshift-pull-secret"
+          if [ ! -s "${RUNNER_TEMP}/openshift-pull-secret" ]; then
+            echo "::error::Pull secret file is empty after write"
+            exit 1
+          fi
+          echo "Pull secret written ($(wc -c < "${RUNNER_TEMP}/openshift-pull-secret") bytes)"
+
+      - name: Start MicroShift
+        run: |
+          chmod +x theia-cloud/.github/microshift-ci/start.sh
+          theia-cloud/.github/microshift-ci/start.sh \
+            "${RUNNER_TEMP}/openshift-pull-secret" \
+            microshift-ci:local
+
+      - name: oc get nodes
+        run: kubectl get nodes -o wide
+
+      - name: oc get pods (all namespaces)
+        run: kubectl get pods -A -o wide
+
+      - name: Verify OpenShift API groups present
+        run: |
+          api_resources=$(kubectl api-resources)
+          echo "$api_resources" | grep -q 'route\.openshift\.io' || \
+            { echo "::error::route.openshift.io API group not found"; exit 1; }
+          echo "$api_resources" | grep -q 'security\.openshift\.io' || \
+            { echo "::error::security.openshift.io API group not found"; exit 1; }
+          echo "OK: route.openshift.io and security.openshift.io are present"
+
+      - name: List Security Context Constraints
+        # `scc` (singular) is the registered shortname; `sccs` is not.
+        run: kubectl get scc -o wide
+
+      - name: Wait for OpenShift router (Available)
+        run: |
+          kubectl -n openshift-ingress wait deployment/router-default \
+            --for=condition=Available --timeout=180s
+
+      - name: Resolve container IP
+        run: |
+          # Bridge-network IP of the microshift container is the
+          # apps-domain target. Persist for later steps.
+          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' microshift)
+          echo "microshift container IP: ${CONTAINER_IP}"
+          if [ -z "$CONTAINER_IP" ]; then
+            echo "::error::Could not resolve microshift container IP"
+            docker inspect microshift
+            exit 1
+          fi
+          echo "MICROSHIFT_CONTAINER_IP=${CONTAINER_IP}" >> "$GITHUB_ENV"
+
+      - name: Configure dnsmasq for *.apps-microshift.testing
+        run: |
+          # Wildcard-resolve *.apps-microshift.testing on the runner so
+          # session-specific hostnames (ws-<id>.apps-microshift.testing)
+          # generated at test time route to the MicroShift container
+          # without per-host /etc/hosts entries.
+          #
+          # The runner's /etc/resolv.conf points at systemd-resolved on
+          # 127.0.0.53; the real upstream resolvers are in
+          # /run/systemd/resolve/resolv.conf. Capture them BEFORE we
+          # stop systemd-resolved so dnsmasq can still forward general
+          # DNS lookups (e.g. raw.githubusercontent.com) upstream.
+          UPSTREAM_DNS=$(awk '/^nameserver/ {print $2}' \
+            /run/systemd/resolve/resolv.conf 2>/dev/null | head -2)
+          if [ -z "${UPSTREAM_DNS}" ]; then
+            UPSTREAM_DNS="8.8.8.8 1.1.1.1"
+          fi
+          echo "Upstream DNS for dnsmasq: ${UPSTREAM_DNS}"
+
+          sudo apt-get update
+          sudo apt-get install -y dnsmasq
+          sudo systemctl stop systemd-resolved || true
+          {
+            echo "no-resolv"
+            for s in ${UPSTREAM_DNS}; do
+              echo "server=${s}"
+            done
+            echo "address=/.apps-microshift.testing/${MICROSHIFT_CONTAINER_IP}"
+          } | sudo tee /etc/dnsmasq.d/microshift.conf
+          sudo systemctl restart dnsmasq
+          echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
+
+          # Validate both wildcard and upstream resolution work.
+          getent hosts try.apps-microshift.testing
+          getent hosts ws-anything.apps-microshift.testing
+          getent hosts raw.githubusercontent.com
+
+      - name: Configure cluster CoreDNS for *.apps-microshift.testing
+        run: |
+          # Pods inside MicroShift need to resolve
+          # *.apps-microshift.testing to the in-cluster router so the
+          # Theia Cloud `service` pod can reach Keycloak for OIDC
+          # discovery. The runner host already gets this resolution
+          # via dnsmasq above; this step is the pod-network
+          # counterpart. Patches the cluster DNS configmap to add a
+          # wildcard zone pointing at the router-default ClusterIP.
+          set -e
+          ROUTER_IP=$(kubectl -n openshift-ingress get svc router-default \
+            -o jsonpath='{.spec.clusterIP}')
+          if [ -z "${ROUTER_IP}" ]; then
+            echo "::error::router-default ClusterIP not found"
+            kubectl -n openshift-ingress get svc -o wide || true
+            exit 1
+          fi
+          echo "router-default ClusterIP: ${ROUTER_IP}"
+
+          # Locate the CoreDNS configmap. MicroShift uses
+          # openshift-dns/dns-default; stock K8s uses kube-system/coredns.
+          DNS_NS=""
+          DNS_CM=""
+          for ns in openshift-dns kube-system; do
+            for cm in dns-default coredns; do
+              if kubectl -n "$ns" get configmap "$cm" >/dev/null 2>&1; then
+                DNS_NS="$ns"; DNS_CM="$cm"; break 2
+              fi
+            done
+          done
+          if [ -z "${DNS_NS}" ]; then
+            echo "::error::Could not locate CoreDNS configmap"
+            kubectl get cm -A | grep -iE 'coredns|dns-default' || true
+            exit 1
+          fi
+          echo "Patching CoreDNS configmap: ${DNS_NS}/${DNS_CM}"
+
+          # Extract the bind port from the existing Corefile (OpenShift /
+          # MicroShift uses :5353; stock CoreDNS uses :53).
+          CURRENT=$(kubectl -n "$DNS_NS" get configmap "$DNS_CM" \
+            -o jsonpath='{.data.Corefile}')
+          PORT=$(printf '%s' "$CURRENT" \
+            | grep -oE '\.:[0-9]+' | head -1 | grep -oE '[0-9]+$' || true)
+          PORT="${PORT:-53}"
+          echo "CoreDNS bind port: ${PORT}"
+
+          # Append a wildcard zone that synthesizes every FQDN under
+          # apps-microshift.testing. to ROUTER_IP via the template
+          # plugin (standard CoreDNS plugin, available in all distros).
+          # Synthesize both A and empty AAAA responses. Without the AAAA
+          # block, Java / Vert.x OIDC discovery logs CoreDNS errors like
+          # `AAAA: plugin/template: no next plugin found` and the service
+          # pod reports `OIDC Server is not available` when it resolves
+          # keycloak.apps-microshift.testing.
+          # Patch with jq so we preserve every other configmap field
+          # (ownership labels, annotations) the operator may reconcile.
+          NEW_COREFILE="${CURRENT}
+          apps-microshift.testing:${PORT} {
+              errors
+              cache 60
+              template IN A apps-microshift.testing {
+                  answer \"{{ .Name }} 60 IN A ${ROUTER_IP}\"
+              }
+              template IN AAAA apps-microshift.testing {
+                  rcode NOERROR
+              }
+          }
+          "
+          kubectl -n "$DNS_NS" get configmap "$DNS_CM" -o json \
+            | jq --arg cf "${NEW_COREFILE}" '.data.Corefile = $cf' \
+            | kubectl apply -f -
+
+          # Restart the DNS workload to pick up the new config.
+          if kubectl -n "$DNS_NS" get daemonset/dns-default >/dev/null 2>&1; then
+            kubectl -n "$DNS_NS" rollout restart daemonset/dns-default
+            kubectl -n "$DNS_NS" rollout status daemonset/dns-default --timeout=90s
+          elif kubectl -n "$DNS_NS" get deployment/coredns >/dev/null 2>&1; then
+            kubectl -n "$DNS_NS" rollout restart deployment/coredns
+            kubectl -n "$DNS_NS" rollout status deployment/coredns --timeout=90s
+          fi
+
+          # Best-effort verification from a pod. Does NOT gate the step
+          # on success because Keycloak isn't deployed yet; the lookup
+          # will still synthesize DNS records (the connection itself
+          # only works after the keycloak Route is created later).
+          kubectl run dns-probe --image=busybox:1.36 --restart=Never \
+            --command -- sh -c 'nslookup keycloak.apps-microshift.testing; nslookup -type=AAAA keycloak.apps-microshift.testing || true; sleep 2'
+          for i in $(seq 1 15); do
+            phase=$(kubectl get pod dns-probe -o jsonpath='{.status.phase}' 2>/dev/null || true)
+            case "$phase" in Succeeded|Failed) break ;; esac
+            sleep 2
+          done
+          kubectl logs dns-probe || true
+          kubectl delete pod dns-probe --ignore-not-found --wait=false
+
+      # ----------------------------------------------------------------
+      # OpenShift base install: terraform 4_openshift-setup
+      # ----------------------------------------------------------------
+
+      - name: Install local-path-provisioner StorageClass
+        run: |
+          # MicroShift's default StorageClass (topolvm) needs an LVM
+          # volume group, which doesn't exist in our privileged
+          # container. Install rancher's local-path-provisioner as a
+          # shim. (The terraform module remains CRC-compatible because
+          # this lives in the workflow, not in the module.)
+          kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.30/deploy/local-path-storage.yaml
+
+          # The provisioner pod and its on-demand helper pods bind-mount
+          # hostPath, which the restricted SCC blocks. Grant `privileged`
+          # SCC to both: the provisioner SA and the default SA in the
+          # same namespace (helper pods run under default).
+          for sa in local-path-provisioner-service-account default; do
+            kubectl create clusterrolebinding "local-path-${sa}-privileged" \
+              --clusterrole=system:openshift:scc:privileged \
+              --serviceaccount="local-path-storage:${sa}" \
+              --dry-run=client -o yaml | kubectl apply -f -
+          done
+
+          # Mark local-path as default; un-default any other currently-
+          # default SC so PVCs without an explicit className land on it.
+          kubectl patch storageclass local-path \
+            -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+          for sc in $(kubectl get sc -o jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}'); do
+            if [ "$sc" != "local-path" ]; then
+              kubectl patch storageclass "$sc" \
+                -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+            fi
+          done
+
+          kubectl -n local-path-storage wait deployment/local-path-provisioner \
+            --for=condition=Available --timeout=120s
+
+      - name: Mint cluster-admin bearer token
+        run: |
+          # MicroShift's kubeadmin kubeconfig uses client-certificate
+          # auth, not bearer tokens, so `oc whoami -t` returns empty.
+          # The 4_openshift-setup module's kubernetes/helm/kubectl
+          # providers all expect a bearer token. Mint one via the
+          # TokenRequest API.
+          kubectl create namespace tf-bootstrap \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create serviceaccount tf-admin -n tf-bootstrap \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create clusterrolebinding tf-admin \
+            --clusterrole=cluster-admin \
+            --serviceaccount=tf-bootstrap:tf-admin \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          TOKEN=$(kubectl create token tf-admin -n tf-bootstrap --duration=24h)
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Failed to mint token for tf-admin"
+            exit 1
+          fi
+          echo "::add-mask::${TOKEN}"
+          echo "OPENSHIFT_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.0"
+          terraform_wrapper: false
+
+      - name: Terraform apply (4_openshift-setup)
+        working-directory: theia-cloud/terraform/test-configurations/4_openshift-setup
+        env:
+          TF_VAR_openshift_server: https://127.0.0.1:6443
+          TF_VAR_openshift_token: ${{ env.OPENSHIFT_TOKEN }}
+          TF_VAR_apps_domain: apps-microshift.testing
+        run: |
+          rm -f terraform.tfstate terraform.tfstate.backup
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Verify Keycloak pods Ready
+        run: |
+          kubectl get pods -n keycloak -o wide
+          kubectl wait --for=condition=Ready pods --all -n keycloak --timeout=180s
+
+      - name: Verify TheiaCloud realm metadata
+        run: |
+          URL="https://keycloak.apps-microshift.testing/realms/TheiaCloud/.well-known/openid-configuration"
+          for i in $(seq 1 12); do
+            if curl -sk --max-time 10 -o /tmp/oidc.json "$URL"; then
+              if jq -e '.issuer' /tmp/oidc.json >/dev/null 2>&1; then
+                echo "OK: TheiaCloud realm reachable"
+                jq '{issuer, authorization_endpoint, token_endpoint}' /tmp/oidc.json
+                exit 0
+              fi
+            fi
+            echo "Attempt $i: waiting for realm metadata..."
+            sleep 5
+          done
+          echo "::error::TheiaCloud realm metadata not reachable after 60s"
+          kubectl get pods -n keycloak -o wide || true
+          kubectl logs -n keycloak deployment/keycloak --tail=100 || true
+          exit 1
+
+      # ----------------------------------------------------------------
+      # Theia Cloud install: build images + terraform 5-02_openshift_ci
+      # ----------------------------------------------------------------
+
+      - name: Build and transfer Theia Cloud images
+        # Build, transfer, and immediately prune each image to keep
+        # peak disk usage manageable on the 14 GB runner. After each
+        # iteration the image lives in MicroShift's CRI-O containers-
+        # storage but no longer in Docker's graph driver.
+        working-directory: theia-cloud
+        run: |
+          chmod +x .github/scripts/build-theia-cloud-images.sh
+          # docker save | docker exec -i microshift skopeo copy is the
+          # registry-free transport: the docker daemon socket is NOT
+          # shared with the microshift container, so we pipe a
+          # docker-archive tarball through stdin.
+          .github/scripts/build-theia-cloud-images.sh \
+            --tag "${CI_IMAGE_TAG}" \
+            --registry-prefix localhost/theia-cloud- \
+            --post-build '
+              docker save "$LOCAL_TAG" | docker exec -i microshift \
+                skopeo copy --dest-tls-verify=false \
+                  docker-archive:/dev/stdin \
+                  "containers-storage:$LOCAL_TAG"
+              docker rmi "$LOCAL_TAG" || true
+              docker system df
+              df -h /
+            '
+
+          docker exec microshift crictl images | grep theia-cloud || true
+
+      - name: Terraform apply (5-02_openshift_ci)
+        # Loads valuesE2ECI-base.yaml + valuesE2ECI-openshift.yaml from
+        # within the module; matrix axes are forwarded via TF_VAR_*.
+        working-directory: theia-cloud/terraform/test-configurations/5-02_openshift_ci
+        env:
+          TF_VAR_enable_keycloak: ${{ matrix.keycloak }}
+          TF_VAR_use_ephemeral_storage: ${{ matrix.ephemeral }}
+          TF_VAR_eager_start: ${{ matrix.eagerStart }}
+        run: |
+          rm -f terraform.tfstate terraform.tfstate.backup
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Verify theia-cloud deployments Available
+        run: |
+          kubectl get pods -n theia-cloud -o wide
+          kubectl -n theia-cloud wait \
+            --for=condition=Available deployment --all --timeout=180s
+
+      - name: Verify routes exist
+        run: |
+          kubectl get routes -n theia-cloud -o wide
+          routes=$(kubectl get routes -n theia-cloud -o jsonpath='{.items[*].spec.host}')
+          echo "Found routes: $routes"
+          echo "$routes" | grep -q 'try\.apps-microshift\.testing' || \
+            { echo "::error::try.apps-microshift.testing route missing"; exit 1; }
+          echo "$routes" | grep -q 'service\.apps-microshift\.testing' || \
+            { echo "::error::service.apps-microshift.testing route missing"; exit 1; }
+          echo "OK: required theia-cloud routes registered"
+
+      - name: Verify try.apps-microshift.testing reachable
+        run: |
+          # With keycloak.enable=true: redirect (3xx) to Keycloak login.
+          # With keycloak.enable=false: 200 (anonymous landing page).
+          # Either is success.
+          for i in $(seq 1 12); do
+            code=$(curl -ksS -o /dev/null -w '%{http_code}' --max-time 10 \
+              https://try.apps-microshift.testing || echo "000")
+            case "$code" in
+              2*|3*)
+                echo "OK: try.apps-microshift.testing reachable (HTTP $code)"
+                exit 0
+                ;;
+              *)
+                echo "Attempt $i: HTTP $code"
+                ;;
+            esac
+            sleep 5
+          done
+          echo "::error::try.apps-microshift.testing not reachable after 60s"
+          kubectl -n theia-cloud describe routes
+          kubectl -n theia-cloud logs deployment/landing-page-deployment --tail=100 || true
+          exit 1
+
+      # ----------------------------------------------------------------
+      # Playwright tests
+      # ----------------------------------------------------------------
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies and run e2e tests
+        working-directory: theia-cloud/node
+        env:
+          MATRIX_CLOUD_PROVIDER: OPENSHIFT
+          APPS_DOMAIN: apps-microshift.testing
+          MATRIX_KEYCLOAK: ${{ matrix.keycloak }}
+          MATRIX_EPHEMERAL: ${{ matrix.ephemeral }}
+        run: |
+          npm ci
+          npm run build -w e2e-tests
+          npm run ui-tests -w e2e-tests
+
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-keycloak-${{ matrix.keycloak }}-ephemeral-${{ matrix.ephemeral }}-eagerstart-${{ matrix.eagerStart }}
+          path: theia-cloud/node/e2e-tests/test-results/**/*.png
+          retention-days: 7
+
+      # ----------------------------------------------------------------
+      # Diagnostics + cleanup
+      # ----------------------------------------------------------------
+
+      - name: MicroShift logs
+        if: always()
+        run: |
+          echo "--- microshift journal ---"
+          docker exec microshift journalctl -u microshift --no-pager || true
+          echo ""
+          echo "--- crio journal (tail) ---"
+          docker exec microshift journalctl -u crio --no-pager | tail -300 || true
+
+      - name: Cluster diagnostics on failure
+        # Catches every class of failure that has surfaced in this
+        # workflow:
+        #   - microshift userspace deps         -> microshift journal
+        #   - subscription-gated image pulls    -> describe pods -A
+        #   - rshared mount-propagation errors  -> describe pods -A (events)
+        #   - OVS modprobe / OVN setup hang     -> OVN logs + OVS journal + CNI dir
+        #   - cri-o EACCES exec'ing OVN binary  -> /run mount opts + binary exec + SELinux probes
+        #   - missing/misconfigured Theia Cloud CRs and Routes -> AppDefinitions / Sessions / Workspaces / Routes / router logs
+        if: failure()
+        run: |
+          echo "=== combined microshift + crio journal ==="
+          docker exec microshift journalctl -u microshift -u crio --no-pager || true
+          echo ""
+          echo "=== pods (all namespaces) ==="
+          kubectl get pods -A -o wide || true
+          echo ""
+          echo "=== describe pods -A (head -200) ==="
+          kubectl describe pods -A 2>&1 | head -200 || true
+          echo ""
+          echo "=== routes (all namespaces) ==="
+          kubectl get routes -A -o wide || true
+          echo ""
+          echo "=== describe routes (all namespaces) ==="
+          kubectl describe routes -A || true
+          echo ""
+          echo "=== AppDefinitions in theia-cloud ==="
+          kubectl get appdefinitions -n theia-cloud -o yaml || true
+          echo ""
+          echo "=== Sessions in theia-cloud ==="
+          kubectl get sessions -n theia-cloud -o yaml || true
+          echo ""
+          echo "=== Workspaces in theia-cloud ==="
+          kubectl get workspaces -n theia-cloud -o yaml || true
+          echo ""
+          echo "=== router-default logs (tail 200) ==="
+          kubectl logs -n openshift-ingress deployment/router-default --tail=200 || true
+          echo ""
+          echo "=== CoreDNS configmap and pod logs ==="
+          kubectl -n openshift-dns get configmap dns-default -o yaml 2>/dev/null \
+            || kubectl -n kube-system get configmap coredns -o yaml 2>/dev/null \
+            || true
+          kubectl -n openshift-dns logs -l dns.operator.openshift.io/daemonset-dns=default --tail=100 2>/dev/null \
+            || kubectl -n kube-system logs -l k8s-app=kube-dns --tail=100 2>/dev/null \
+            || true
+          echo ""
+          echo "=== theia-cloud pod logs (tail 100 each) ==="
+          for d in operator-deployment service-deployment landing-page-deployment conversion-webhook; do
+            echo "--- $d ---"
+            kubectl logs -n theia-cloud deployment/$d --tail=100 2>&1 || true
+          done
+          echo ""
+          echo "=== ovnkube-node logs ==="
+          kubectl logs -n openshift-ovn-kubernetes -l app=ovnkube-node \
+            --all-containers --tail=200 2>&1 || true
+          echo ""
+          echo "=== ovnkube-master logs ==="
+          kubectl logs -n openshift-ovn-kubernetes -l app=ovnkube-master \
+            --all-containers --tail=200 2>&1 || true
+          echo ""
+          echo "=== openvswitch / microshift-ovs-init unit status ==="
+          docker exec microshift systemctl status --no-pager \
+            openvswitch microshift-ovs-init 2>&1 || true
+          echo ""
+          echo "=== openvswitch / microshift-ovs-init journal (tail 100) ==="
+          docker exec microshift journalctl -u openvswitch -u microshift-ovs-init \
+            --no-pager 2>&1 | tail -100 || true
+          echo ""
+          echo "=== /etc/cni/net.d/ (CNI handoff marker) ==="
+          docker exec microshift ls -la /etc/cni/net.d/ 2>&1 || true
+          echo ""
+          echo "=== /run/cni/bin/ contents ==="
+          docker exec microshift ls -la /run/cni/bin/ 2>&1 || true
+          echo ""
+          echo "=== /run mount options (looking for noexec) ==="
+          docker exec microshift sh -c "cat /proc/mounts | grep -E ' /run( |\b)'" 2>&1 || true
+          echo ""
+          echo "=== direct exec of OVN CNI binary (--help) ==="
+          docker exec microshift /run/cni/bin/ovn-k8s-cni-overlay --help 2>&1 | head -10 || true
+          echo ""
+          echo "=== SELinux mode (getenforce) ==="
+          docker exec microshift getenforce 2>&1 || true
+          echo ""
+          echo "=== OVN CNI binary stat (mode/owner) ==="
+          docker exec microshift stat -c '%A %u %g %n' /run/cni/bin/ovn-k8s-cni-overlay 2>&1 || true
+
+      - name: Stop MicroShift
+        if: always()
+        run: docker rm -f microshift || true
+
+      - name: Remove pull secret
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/openshift-pull-secret" || true

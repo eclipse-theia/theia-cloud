@@ -1,0 +1,19 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: placeholder-routename
+  namespace: placeholder-namespace
+  ownerReferences:
+    - apiVersion: theia.cloud/v1beta9
+      kind: Session
+      name: placeholder
+      uid: placeholder
+spec:
+  host: placeholder-hostname
+  to:
+    kind: Service
+    name: placeholder-servicename
+    weight: 100
+  port:
+    targetPort: http
+  wildcardPolicy: None
