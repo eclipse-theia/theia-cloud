@@ -50,7 +50,6 @@ import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 import org.eclipse.theia.cloud.operator.util.K8sUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudConfigMapUtil;
-import org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudK8sUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudPersistentVolumeUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil;
@@ -449,10 +448,9 @@ public class LazySessionHandler implements SessionHandler {
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client.kubernetes(), client.namespace(), correlationId,
                 configMapYaml, Session.API, Session.KIND, sessionResourceName, sessionResourceUID, 0, labelsToAdd,
                 configMap -> {
-                    String host = TheiaCloudDeploymentUtil.extractHost(
-                            routingStrategy.getSessionURL(appDefinition, session));
+                    String sessionUrl = routingStrategy.getSessionURL(appDefinition, session);
                     int port = appDefinition.getSpec().getPort();
-                    AddedHandlerUtil.updateProxyConfigMap(client.kubernetes(), client.namespace(), configMap, host,
+                    AddedHandlerUtil.updateProxyConfigMap(client.kubernetes(), client.namespace(), configMap, sessionUrl,
                             port);
                 });
     }

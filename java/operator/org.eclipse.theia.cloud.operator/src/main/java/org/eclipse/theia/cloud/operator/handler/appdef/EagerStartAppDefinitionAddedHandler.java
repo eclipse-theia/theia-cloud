@@ -247,10 +247,9 @@ public class EagerStartAppDefinitionAddedHandler implements AppDefinitionHandler
         K8sUtil.loadAndCreateConfigMapWithOwnerReference(client, namespace, correlationId, configMapYaml,
                 AppDefinition.API, AppDefinition.KIND, appDefinitionResourceName, appDefinitionResourceUID, 0,
                 labelsToAdd, configMap -> {
-                    String host = TheiaCloudDeploymentUtil.extractHost(
-                            routingStrategy.getSessionURL(appDefinition, instance));
+                    String sessionUrl = routingStrategy.getSessionURL(appDefinition, instance);
                     int port = appDefinition.getSpec().getPort();
-                    AddedHandlerUtil.updateProxyConfigMap(client, namespace, configMap, host, port);
+                    AddedHandlerUtil.updateProxyConfigMap(client, namespace, configMap, sessionUrl, port);
                 });
     }
 

@@ -54,4 +54,21 @@ class TheiaCloudDeploymentUtilTests {
         assertEquals("my-app-0.ws.apps-crc.testing",
                 TheiaCloudDeploymentUtil.extractHost("http://my-app-0.ws.apps-crc.testing/"));
     }
+
+    @Test
+    void normalizeExternalBaseUrl_httpSubdomain() {
+        assertEquals("http://uid.ws.apps-crc.testing",
+                TheiaCloudDeploymentUtil.normalizeExternalBaseUrl("http://uid.ws.apps-crc.testing/"));
+    }
+
+    @Test
+    void normalizeExternalBaseUrl_httpsSubdomain() {
+        assertEquals("https://uid.ws.apps-crc.testing",
+                TheiaCloudDeploymentUtil.normalizeExternalBaseUrl("https://uid.ws.apps-crc.testing/"));
+    }
+
+    @Test
+    void normalizeExternalBaseUrl_httpsPath() {
+        assertEquals("https://host/path", TheiaCloudDeploymentUtil.normalizeExternalBaseUrl("https://host/path/"));
+    }
 }
