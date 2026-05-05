@@ -51,6 +51,10 @@ public final class TheiaCloudDeploymentUtil {
         return url.replaceFirst("^https?://", "").replaceFirst("/$", "");
     }
 
+    public static String normalizeExternalBaseUrl(String url) {
+        return url.replaceFirst("/$", "");
+    }
+
     public static String getDeploymentName(AppDefinition appDefinition, int instance) {
         return NamingUtil.createName(appDefinition, instance);
     }
