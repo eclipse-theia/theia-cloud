@@ -1,3 +1,9 @@
+variable "theia_cloud_version" {
+  description = "The version of theia cloud to install. Used for all installed charts."
+  type        = string
+  default     = "1.2.0"
+}
+
 variable "install_theia_cloud_base" {
   description = "Whether to install theia cloud base"
   default     = true

@@ -13,7 +13,7 @@ resource "helm_release" "theia-cloud-base" {
   name             = "theia-cloud-base"
   repository       = local.theia_cloud_helm_repository
   chart            = "theia-cloud-base"
-  version          = "1.2.0"
+  version          = var.theia_cloud_version
   namespace        = local.theia_cloud_namespace
   create_namespace = true
 
@@ -31,7 +31,7 @@ resource "helm_release" "theia-cloud-crds" {
   name             = "theia-cloud-crds"
   repository       = local.theia_cloud_helm_repository
   chart            = "theia-cloud-crds"
-  version          = "1.2.0"
+  version          = var.theia_cloud_version
   namespace        = local.theia_cloud_namespace
   create_namespace = true
 }
@@ -42,7 +42,7 @@ resource "helm_release" "theia-cloud" {
   name             = "theia-cloud"
   repository       = local.theia_cloud_helm_repository
   chart            = "theia-cloud"
-  version          = "1.2.0"
+  version          = var.theia_cloud_version
   namespace        = local.theia_cloud_namespace
   create_namespace = true
 

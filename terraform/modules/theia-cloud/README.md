@@ -36,10 +36,11 @@ module "theia_cloud" {
 
 ## Variables
 
+- `theia_cloud_version` (optional, default: `"1.2.0"`) - The helm chart version to use for all installed charts
 - `install_theia_cloud_base` (optional, default: `true`) - Whether to install theia-cloud-base chart
 - `install_theia_cloud_crds` (optional, default: `true`) - Whether to install theia-cloud-crds chart
 - `install_theia_cloud` (optional, default: `true`) - Whether to install theia-cloud chart
 - `hostname` (required) - The hostname for Theia Cloud services
 - `keycloak_url` (optional) - The base URL of the Keycloak instance used for authentication. If not provided, it will be constructed from the 'hostname' variable assuming keycloak is hosted at relative path /keycloak/.
 - `cert_manager_issuer_email` (required) - Email address used for certificate management
-- `cloudProvider` (optional, default: `"K8S"`) - The cloud provider (e.g., "K8S", "MINIKUBE")
+- `cloud_provider` (optional, default: `"K8S"`) - The cloud provider (e.g., "K8S", "MINIKUBE")
