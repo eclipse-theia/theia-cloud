@@ -69,6 +69,8 @@ resource "keycloak_user" "test-user-foo" {
   enabled        = true
   email          = "foo@theia-cloud.io"
   email_verified = true
+  first_name     = "Foo"
+  last_name      = "User"
   initial_password {
     value     = var.keycloak_test_user_foo_password
     temporary = false
@@ -81,6 +83,8 @@ resource "keycloak_user" "test-user-bar" {
   enabled        = true
   email          = "bar@theia-cloud.io"
   email_verified = true
+  first_name     = "Bar"
+  last_name      = "User"
   initial_password {
     value     = var.keycloak_test_user_bar_password
     temporary = false
