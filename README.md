@@ -59,7 +59,7 @@ To make a release provide a commit that:
 - removes the next parts from `version` fields across the repo.
 - updates the package-lock files.
 - updates the `node/monitor` .vsix file in `demo/dockerfiles/demo-theia-monitor-vscode`.
-- updates the helm chart versions in `terraform/modules/helm` to the new version.
+- updates the helm chart version in `terraform/modules/theia-cloud/variables.tf` to the new version.
 
 When this commit is merged it should not result in pushed artifacts.
 Create a `releases/<currentVersion>` branch. This will be used in the future if any backports are necessary. Also it makes versions easier to find.

@@ -16,7 +16,7 @@ If you are unfamiliar with Terraform, you may want to have a look at their tutor
 
 The `modules` directory contains our reusable terraform modules for creating clusters, installing dependencies via helm, and configuring keycloak. The modules will be used by the actual terraform configurations available in the `configurations` directory.
 
-If you can't use Terraform, the `./modules/helm/main.tf` contains the information which helm charts are installed from which helm repository and you may extract the passed values. For an initial Keycloak realm configuration, you may check the values in `./modules/keycloak/main.tf`.
+If you can't use Terraform, `./modules/cluster-prerequisites/main.tf` and `./modules/theia-cloud/main.tf` contain the information which helm charts are installed from which helm repository and you may extract the passed values. For an initial Keycloak realm configuration, you may check the values in `./modules/keycloak/main.tf`.
 
 ## Theia Cloud Getting Started
 
