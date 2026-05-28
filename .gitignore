@@ -4,3 +4,7 @@ openapitools.json
 .DS_Store
 node/e2e-tests/test-results/.last-run.json
 .prompts/task-contexts
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/.terraform/
+**/.terraform.lock.hcl

@@ -28,7 +28,7 @@ import java.util.Optional;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
-import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
+import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudConfigMapUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil;
 import org.eclipse.theia.cloud.operator.util.TheiaCloudHandlerUtil;
@@ -73,7 +73,7 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
     protected TheiaCloudOperatorArguments arguments;
 
     @Inject
-    protected IngressPathProvider ingressPathProvider;
+    protected SessionRoutingStrategy routingStrategy;
 
     @Override
     public Map<String, String> getReplacements(String namespace, AppDefinition appDefinition, int instance) {
@@ -114,15 +114,15 @@ public class DefaultDeploymentTemplateReplacements implements DeploymentTemplate
 
     protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, Session session) {
         Map<String, String> environmentVariables = getEnvironmentVariables(appDefinition, Optional.of(session));
-        environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL, TheiaCloudDeploymentUtil
-                .getSessionURL(arguments.getInstancesHost(), ingressPathProvider, appDefinition, session));
+        environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL,
+                routingStrategy.getSessionURL(appDefinition, session));
         return environmentVariables;
     }
 
     protected Map<String, String> getEnvironmentVariables(AppDefinition appDefinition, int instance) {
         Map<String, String> environmentVariables = getEnvironmentVariables(appDefinition, Optional.empty());
-        environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL, TheiaCloudDeploymentUtil
-                .getSessionURL(arguments.getInstancesHost(), ingressPathProvider, appDefinition, instance));
+        environmentVariables.put(PLACEHOLDER_ENV_SESSION_URL,
+                routingStrategy.getSessionURL(appDefinition, instance));
         return environmentVariables;
     }
 

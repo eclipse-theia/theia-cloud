@@ -19,6 +19,7 @@ spec:
         app: placeholder-app
     spec:
       automountServiceAccountToken: false
+      serviceAccountName: theia-cloud-sessions
       # initContainers:
       # - name: wondershaper-init
       #   image: gcr.io/kubernetes-238012/theia-cloud-wondershaper

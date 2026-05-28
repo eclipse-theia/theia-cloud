@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.0] - unreleased
+
+- [java/operator] Add OpenShift support with Route-based session routing [#486](https://github.com/eclipse-theia/theia-cloud/pull/486)
+
+### Breaking Changes in 1.3.0
+
+- [java/operator] Ingress and session URL logic extracted from `LazySessionHandler` and `EagerSessionHandler` into the new `SessionRoutingStrategy` interface. Custom operator extensions that override or extend these handlers may need to inject `SessionRoutingStrategy` instead of directly using `IngressPathProvider` and `TheiaCloudIngressUtil`.
+- [java/operator] `TheiaCloudDeploymentUtil.getSessionURL()` methods (which took `IngressPathProvider`) have been removed. Use `SessionRoutingStrategy.getSessionURL()` instead. A new `TheiaCloudDeploymentUtil.extractHost()` utility method is provided.
+
 ## [1.2.0] - 2026-04-09
 
 - [java/operator] Fix ingress rules not being fully removed on session deletion [#456](https://github.com/eclipse-theia/theia-cloud/pull/456)

@@ -1,0 +1,46 @@
+fullnameOverride: "keycloak"
+httpRelativePath: "/"
+
+auth:
+  adminUser: admin
+
+image:
+  # Configure using repository bitnamilegacy because bitnami has removed the bitnami repository in favor of a paid service
+  repository: bitnamilegacy/keycloak
+
+postgresql:
+  enabled: true
+  # Configure using repository bitnamilegacy because bitnami has removed the bitnami repository in favor of a paid service
+  image:
+    repository: bitnamilegacy/postgresql
+  volumePermissions:
+    image:
+      repository: bitnamilegacy/os-shell
+    enabled: false
+  metrics:
+    image:
+      repository: bitnamilegacy/bitnami-exporter
+  primary:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+
+# Keycloak is exposed via an OpenShift Route, not a Kubernetes Ingress
+ingress:
+  enabled: false
+
+service:
+  type: ClusterIP
+
+# Keycloak sits behind an OpenShift Route with edge TLS termination,
+# so it receives plain HTTP internally
+proxy: edge
+
+# OpenShift assigns UIDs from a namespace-specific range via its Security Context
+# Constraints (SCC). The Bitnami chart defaults (fsGroup: 1001, runAsUser: 1001)
+# are rejected by the restricted SCC. Disabling them lets OpenShift take over.
+podSecurityContext:
+  enabled: false
+containerSecurityContext:
+  enabled: false
