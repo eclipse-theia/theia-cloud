@@ -58,30 +58,25 @@ resource "kubernetes_persistent_volume_v1" "minikube" {
   }
 }
 
-module "helm" {
-  source = "../modules/helm"
+module "cluster_prerequisites" {
+  source = "../modules/cluster-prerequisites"
 
   depends_on = [kubernetes_persistent_volume_v1.minikube]
 
-  install_ingress_controller   = false
-  ingress_controller_type      = var.ingress_controller_type
-  install_theia_cloud_base     = false
-  install_theia_cloud_crds     = false
-  install_theia_cloud          = false
-  install_selfsigned_issuer    = true
-  cert_manager_issuer_email    = "jdoe@theia-cloud.io"
-  cert_manager_cluster_issuer  = "keycloak-selfsigned-issuer"
-  cert_manager_common_name     = "${var.ingress_ip}.nip.io"
-  hostname                     = "${var.ingress_ip}.nip.io"
-  service_type                 = "ClusterIP"
-  postgresql_storageClass      = "manual"
-  postgresql_volumePermissions = true
-  keycloak_admin_password      = "admin"
-  postgresql_enabled           = true
-  postgres_postgres_password   = "admin"
-  postgres_password            = "admin"
-  loadBalancerIP               = ""
-  cloud_provider               = "MINIKUBE"
+  hostname                            = "${var.ingress_ip}.nip.io"
+  keycloak_admin_password             = "admin"
+  postgres_password                   = "admin"
+  install_cert_manager                = true
+  install_selfsigned_issuer           = true
+  install_ingress_controller          = false
+  cert_manager_issuer_email           = "jdoe@theia-cloud.io"
+  ingress_controller_type             = var.ingress_controller_type
+  ingress_class_name                  = var.ingress_controller_type
+  ingress_cert_manager_cluster_issuer = "keycloak-selfsigned-issuer"
+  ingress_cert_manager_common_name    = "${var.ingress_ip}.nip.io"
+  postgres_storage_class              = "manual"
+  postgres_volume_permissions         = true
+  cloud_provider                      = "MINIKUBE"
 }
 
 provider "keycloak" {
@@ -105,7 +100,7 @@ module "keycloak" {
 }
 
 resource "helm_release" "theia-cloud-crds" {
-  depends_on = [module.keycloak]
+  depends_on = [module.cluster_prerequisites]
 
   name             = "theia-cloud-crds"
   chart            = "../../../theia-cloud-helm/charts/theia-cloud-crds"
@@ -121,7 +116,7 @@ resource "helm_release" "theia-cloud-crds" {
 }
 
 resource "helm_release" "theia-cloud-base" {
-  depends_on = [module.keycloak]
+  depends_on = [module.cluster_prerequisites]
 
   name             = "theia-cloud-base"
   chart            = "../../../theia-cloud-helm/charts/theia-cloud-base"
