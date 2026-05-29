@@ -30,7 +30,7 @@ Note: cert-manager can be installed automatically by this module (default) or yo
 ### Minikube Example (with cert-manager installation)
 
 ```hcl
-module "keycloak" {
+module "cluster-prerequisites" {
   source = "../../modules/cluster-prerequisites"
 
   hostname                   = "192.168.49.2.nip.io"
@@ -52,7 +52,7 @@ module "keycloak" {
 ### GKE Example (with Let's Encrypt)
 
 ```hcl
-module "keycloak" {
+module "cluster-prerequisites" {
   source = "../../modules/cluster-prerequisites"
 
   hostname                   = "keycloak.example.com"
@@ -79,7 +79,7 @@ module "keycloak" {
 ### Using Existing cert-manager Installation
 
 ```hcl
-module "keycloak" {
+module "cluster-prerequisites" {
   source = "../../modules/cluster-prerequisites"
 
   hostname                   = "keycloak.example.com"
@@ -97,7 +97,7 @@ module "keycloak" {
 ### Using External PostgreSQL Database
 
 ```hcl
-module "keycloak" {
+module "cluster-prerequisites" {
   source = "../../modules/cluster-prerequisites"
 
   hostname                = "keycloak.example.com"
@@ -177,14 +177,14 @@ module "keycloak" {
 
 ## Outputs
 
-| Name                    | Description                                  |
-| ----------------------- | -------------------------------------------- |
-| `namespace`             | Keycloak namespace                           |
+| Name                    | Description                                          |
+| ----------------------- | ---------------------------------------------------- |
+| `namespace`             | Keycloak namespace                                   |
 | `keycloak_url`          | Full URL to access Keycloak (without trailing slash) |
-| `admin_username`        | Keycloak admin username                      |
-| `postgres_service_name` | PostgreSQL service name (if deployed)        |
-| `keycloak_service_name` | Keycloak service name                        |
-| `tls_secret_name`       | TLS certificate secret name (if TLS enabled) |
+| `admin_username`        | Keycloak admin username                              |
+| `postgres_service_name` | PostgreSQL service name (if deployed)                |
+| `keycloak_service_name` | Keycloak service name                                |
+| `tls_secret_name`       | TLS certificate secret name (if TLS enabled)         |
 
 ## Migration from Bitnami Helm Chart
 
