@@ -123,7 +123,11 @@ public class TheiaCloudOperatorArguments {
     private boolean continueOnException;
 
     @Option(names = {
-            "--oAuth2ProxyVersion" }, description = "The version to use of the quay.io/oauth2-proxy/oauth2-proxy image.", required = false, defaultValue = "latest")
+            "--oAuth2ProxyImage" }, description = "The image (without tag) to use for the oauth2-proxy container. Override this to pull from a private registry in air-gapped or corporate networks.", required = false, defaultValue = "quay.io/oauth2-proxy/oauth2-proxy")
+    private String oAuth2ProxyImage;
+
+    @Option(names = {
+            "--oAuth2ProxyVersion" }, description = "The version (image tag) to use of the oauth2-proxy image.", required = false, defaultValue = "latest")
     private String oAuth2ProxyVersion;
 
     @Option(names = {
@@ -238,6 +242,10 @@ public class TheiaCloudOperatorArguments {
         return continueOnException;
     }
 
+    public String getOAuth2ProxyImage() {
+        return oAuth2ProxyImage;
+    }
+
     public String getOAuth2ProxyVersion() {
         return oAuth2ProxyVersion;
     }
@@ -294,6 +302,7 @@ public class TheiaCloudOperatorArguments {
         result = prime * result + (useKeycloak ? 1231 : 1237);
         result = prime * result + (usePaths ? 1231 : 1237);
         result = prime * result + ((wondershaperImage == null) ? 0 : wondershaperImage.hashCode());
+        result = prime * result + ((oAuth2ProxyImage == null) ? 0 : oAuth2ProxyImage.hashCode());
         result = prime * result + ((oAuth2ProxyVersion == null) ? 0 : oAuth2ProxyVersion.hashCode());
         result = prime * result + ((ingressPathSuffix == null) ? 0 : ingressPathSuffix.hashCode());
         return result;
@@ -397,6 +406,11 @@ public class TheiaCloudOperatorArguments {
                 return false;
         } else if (!wondershaperImage.equals(other.wondershaperImage))
             return false;
+        if (oAuth2ProxyImage == null) {
+            if (other.oAuth2ProxyImage != null)
+                return false;
+        } else if (!oAuth2ProxyImage.equals(other.oAuth2ProxyImage))
+            return false;
         if (oAuth2ProxyVersion == null) {
             if (other.oAuth2ProxyVersion != null)
                 return false;
@@ -422,7 +436,8 @@ public class TheiaCloudOperatorArguments {
                 + ", keycloakClientId=" + keycloakClientId + ", leaderLeaseDuration=" + leaderLeaseDuration
                 + ", leaderRenewDeadline=" + leaderRenewDeadline + ", leaderRetryPeriod=" + leaderRetryPeriod
                 + ", maxWatchIdleTime=" + maxWatchIdleTime + ", continueOnException=" + continueOnException
-                + ", oAuth2ProxyVersion=" + oAuth2ProxyVersion + ", ingressPathSuffix=" + ingressPathSuffix + "]";
+                + ", oAuth2ProxyImage=" + oAuth2ProxyImage + ", oAuth2ProxyVersion=" + oAuth2ProxyVersion
+                + ", ingressPathSuffix=" + ingressPathSuffix + "]";
     }
 
 }

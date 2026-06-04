@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- [java/operator] Add `--oAuth2ProxyImage` operator argument to override the full oauth2-proxy image path (defaults to `quay.io/oauth2-proxy/oauth2-proxy`). This enables pulling the image from a private registry in air-gapped or corporate networks, instead of only configuring the tag via `--oAuth2ProxyVersion`.
+
 ## [1.2.0] - 2026-04-09
 
 - [java/operator] Fix ingress rules not being fully removed on session deletion [#456](https://github.com/eclipse-theia/theia-cloud/pull/456)
