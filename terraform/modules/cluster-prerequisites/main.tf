@@ -527,7 +527,7 @@ resource "terraform_data" "wait_for_keycloak_instance" {
       echo "Waiting for Keycloak service endpoint..."
       kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/keycloak-service -n ${local.keycloak_ns} --timeout=2m
       echo "Keycloak is ready!"
-      echo "Waiting additional 5 for Keycloak authentication to be fully initialized..."
+      echo "Waiting additional 5s for Keycloak authentication to be fully initialized..."
       sleep 5
     EOT
   }

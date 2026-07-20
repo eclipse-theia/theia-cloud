@@ -20,8 +20,7 @@ The module offers various customization options via variables including skipping
 
 The following components must be installed in your Kubernetes cluster before using this module:
 
-1. **nginx-ingress-controller** (if using ingress): For routing traffic to Keycloak
-2. **Persistent Volume provisioner**: For PostgreSQL data persistence (if using integrated database)
+1. **Persistent Volume provisioner**: For PostgreSQL data persistence (if using integrated database)
 
 Note: cert-manager can be installed automatically by this module (default) or you can disable it if already present in your cluster.
 
