@@ -38,7 +38,7 @@ function App() {
   const [configValue, setConfigValue] = useState('');
 
   useEffect(() => {
-    const keycloak = Keycloak(KEYCLOAK_CONFIG);
+    const keycloak = new Keycloak(KEYCLOAK_CONFIG);
     keycloak
       .init({
         onLoad: 'check-sso',
@@ -63,7 +63,7 @@ function App() {
   }, []);
 
   const login = () => {
-    const keycloak = Keycloak(KEYCLOAK_CONFIG);
+    const keycloak = new Keycloak(KEYCLOAK_CONFIG);
     keycloak
       .init({
         onLoad: 'login-required',
