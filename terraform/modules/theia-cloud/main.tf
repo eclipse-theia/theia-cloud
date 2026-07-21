@@ -52,6 +52,12 @@ resource "helm_release" "theia-cloud" {
 
   set = [
     {
+      # TODO Remove explicit landing page configuration when 1.3 is released.
+      # The explicit override is only necessary due to the 1.2 landing page release not being comaptible with Keycloak 26.
+      name  = "landingPage.image"
+      value = "theiacloud/theia-cloud-landing-page:1.2-KC26-compat"
+    },
+    {
       name  = "hosts.configuration.baseHost"
       value = var.hostname
     },
