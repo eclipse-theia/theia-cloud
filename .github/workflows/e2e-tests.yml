@@ -50,19 +50,19 @@ jobs:
         run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=${{ github.event.inputs.theia-cloud-helm-branch }}" >> $GITHUB_ENV
 
       - name: Checkout Theia Cloud
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: "./theia-cloud"
 
       - name: Checkout Theia Cloud Helm
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: "eclipse-theia/theia-cloud-helm"
           ref: "${{ env.INPUT_THEIA_CLOUD_HELM_BRANCH }}"
           path: "./theia-cloud-helm"
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
+        uses: manusa/actions-setup-minikube@b65276017fdec6f1e6498129fb740e34e260dc55 # v2.18.0
         with:
           minikube version: v1.37.0
           kubernetes version: ${{ matrix.kubernetes }}
@@ -198,7 +198,7 @@ jobs:
           ls -al
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: theia-cloud/node/.nvmrc
 
@@ -264,7 +264,7 @@ jobs:
 
       - name: Upload Playwright test failure screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-failure-screenshots-k8s-${{ matrix.kubernetes }}-ingress-${{ matrix.ingress }}-paths-${{ matrix.paths }}-ephemeral-${{ matrix.ephemeral }}-keycloak-${{ matrix.keycloak }}-eagerstart-${{ matrix.eagerStart }}
           path: theia-cloud/node/e2e-tests/test-results/**/*.png
