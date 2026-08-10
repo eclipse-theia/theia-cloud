@@ -3,6 +3,13 @@
 ## [Unreleased]
 
 - [java/operator] Add `--oAuth2ProxyImage` operator argument to override the full oauth2-proxy image path (defaults to `quay.io/oauth2-proxy/oauth2-proxy`). This enables pulling the image from a private registry in air-gapped or corporate networks, instead of only configuring the tag via `--oAuth2ProxyVersion`.
+- [all components] Update Node.js from 20 to 24 (LTS)
+- [theia] Update TypeScript from 5.4.5 to 5.9.3 to match the TypeScript version required by `@types/node` 24
+
+### Breaking Changes in 1.3.0
+
+- [node][theia] Node.js 24 or later is now required to build the `node/` and `theia/` packages. `engine-strict` is enabled in `node/.npmrc`, so `npm ci` fails on older Node versions.
+- [docker/demo] The `theia-cloud-activity-demo-theia` image now runs on Node 24 (`node:24-bookworm-slim`) instead of Node 20.
 
 ## [1.2.0] - 2026-04-09
 

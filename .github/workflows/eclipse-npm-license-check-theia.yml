@@ -23,7 +23,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        node: [20]
         java: [11]
 
     runs-on: ${{ matrix.os }}
@@ -39,10 +38,10 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Use Node.js ${{ matrix.node }}
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version-file: theia/.nvmrc
 
       - name: Use Java ${{ matrix.java }}
         uses: actions/setup-java@v4
