@@ -24,7 +24,7 @@ NPM workspaces monorepo with packages:
 - `testing-page/` - Local testing UI for the REST service
 - `monitor/` - VSCode extension for activity tracking (separate from workspaces, uses webpack)
 
-**Node Stack**: Node 20.10.0+, TypeScript, npm workspaces, ESLint, Prettier
+**Node Stack**: Node 24+, TypeScript, npm workspaces, ESLint, Prettier
 
 ### Theia Extensions (`theia/`)
 Yarn/Lerna monorepo for Theia-specific extensions:
