@@ -41,7 +41,12 @@ jobs:
           node-version-file: theia/.nvmrc
           registry-url: "https://registry.npmjs.org"
 
+      # setup-node's registry-url writes an .npmrc containing ${NODE_AUTH_TOKEN}. Since setup-node v7
+      # no dummy token is exported anymore and Yarn Classic fails on the unresolved placeholder.
+      # Publishing uses npm Trusted Publishing (OIDC) and does not need a real token here.
       - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: dummy
         run: |
           sudo apt-get install libsecret-1-dev
           yarn --frozen-lockfile
