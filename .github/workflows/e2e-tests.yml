@@ -200,7 +200,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: theia-cloud/node/.nvmrc
 
       - name: Install dependencies and run tests
         run: |

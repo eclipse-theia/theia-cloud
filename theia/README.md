@@ -14,6 +14,8 @@ as well as further example extensions using them.
 
 ## Setup
 
+Requires Node **24** (see [.nvmrc](./.nvmrc)) and Yarn 1.x. Both are enforced via the `engines` field.
+
 Install dependencies and build
 
 ```sh

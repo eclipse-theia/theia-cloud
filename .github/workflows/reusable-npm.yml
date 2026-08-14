@@ -26,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: node/.nvmrc
 
       - name: Install dependencies
         run: |
@@ -61,13 +61,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: node/.nvmrc
           registry-url: "https://registry.npmjs.org"
-
-      # Ensure npm 11.5.1 or later for trusted publishing
-      # Will no longer be needed when using Node.js 24+
-      - name: Update npm
-        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: |

@@ -1,4 +1,4 @@
-FROM node:20-bookworm AS build-stage
+FROM node:24-bookworm AS build-stage
 RUN apt-get update && apt-get install -y libxkbfile-dev libsecret-1-dev
 
 WORKDIR /home/theia
@@ -15,7 +15,7 @@ RUN yarn --frozen-lockfile && \
     yarn autoclean --force && \
     yarn cache clean
 
-FROM node:20-bookworm-slim AS production-stage
+FROM node:24-bookworm-slim AS production-stage
 
 # Use fixed user id 101 to guarantee it matches the app definition
 RUN adduser --system --group --uid 101 theia

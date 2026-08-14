@@ -1,4 +1,4 @@
-FROM node:18-bullseye-slim as build-stage
+FROM node:24-bookworm-slim as build-stage
 
 # Copy and unzip the vsix file
 RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*

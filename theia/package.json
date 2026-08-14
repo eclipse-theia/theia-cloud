@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "engines": {
     "yarn": ">=1.7.0 <2",
-    "node": ">=20.0.0 || <21"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "prepare": "lerna run prepare --loglevel=verbose",
@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@eclipse-dash/nodejs-wrapper": "^0.0.1",
-    "@types/node": "^20.10.0",
+    "@types/node": "^24.13.3",
     "@typescript-eslint/eslint-plugin": "^6.18.1",
     "@typescript-eslint/parser": "^6.18.1",
     "eslint": "^8.20.0",
@@ -33,7 +33,7 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "lerna": "^8.1.9",
     "prettier": "^2.6.2",
-    "typescript": "~5.4.5"
+    "typescript": "~5.9.3"
   },
   "workspaces": [
     "examples/browser-app",

@@ -5,7 +5,7 @@ It is based on [npm workspaces](https://docs.npmjs.com/cli/v8/using-npm/workspac
 
 ## Requirements
 
-- Node **20.10.0**. This is important because npm workspaces do not work with lower versions!
+- Node **24** (see [.nvmrc](./.nvmrc)). This is enforced via the `engines` field and `engine-strict=true` in [.npmrc](./.npmrc), so `npm ci` fails on older versions.
 
 ## Install dependencies
 

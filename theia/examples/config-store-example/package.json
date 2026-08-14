@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
-    "typescript": "~5.4.5"
+    "typescript": "~5.9.3"
   },
   "scripts": {
     "prepare": "yarn run clean && yarn run build",
