@@ -32,7 +32,7 @@ Yarn/Lerna monorepo for Theia-specific extensions:
 - `extensions/config-store/` - Configuration store extension
 - `examples/` - Example applications
 
-**Theia Stack**: Yarn 1.x, Lerna, TypeScript 5.4.x
+**Theia Stack**: Yarn 1.x, Lerna, TypeScript 5.9.3
 
 ### Infrastructure
 - `dockerfiles/` - Docker images for operator, service, landing-page, wondershaper, conversion-webhook
