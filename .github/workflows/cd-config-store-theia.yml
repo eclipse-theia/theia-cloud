@@ -8,7 +8,7 @@ on:
       - "theia/yarn.lock"
       - "theia/extensions/config-store/**"
       # Publish when a workflow has changed (this is needed to detect version updates)
-      - ".github/workflows/cd-config-store.yml"
+      - ".github/workflows/cd-config-store-theia.yml"
       - ".github/workflows/reusable-theia-extension.yml"
   release:
     types:
