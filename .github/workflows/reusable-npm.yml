@@ -22,9 +22,9 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: node/.nvmrc
 
@@ -44,7 +44,7 @@ jobs:
         working-directory: ./node
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Check version (only for push events)
         if: github.event_name == 'push'
@@ -59,7 +59,7 @@ jobs:
           fi
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: node/.nvmrc
           registry-url: "https://registry.npmjs.org"
