@@ -1,0 +1,33 @@
+name: "[THEIA] Test setup-node Yarn registry"
+
+on:
+  push:
+    branches:
+      - jf/test-workflow
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./theia
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: dummy
+        run: |
+          sudo apt-get install libsecret-1-dev
+          yarn --frozen-lockfile
