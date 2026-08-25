@@ -952,6 +952,11 @@
     chardet "^2.1.0"
     iconv-lite "^0.7.0"
 
+"@interlace/eslint-devkit@^1.17.2":
+  version "1.17.2"
+  resolved "https://registry.yarnpkg.com/@interlace/eslint-devkit/-/eslint-devkit-1.17.2.tgz#7e2cd64518e03bb75c01d84cb341d1e5886eaeed"
+  integrity sha512-owpOOCCBUeJ+r93Fkb0TzfBOdgDbpptT7FJYR8bWA8PU//8SnTlHOXg7juQl4G9kEvFPoKAVRnNJSQOYryF6Ng==
+
 "@isaacs/balanced-match@^4.0.1":
   version "4.0.1"
   resolved "https://registry.npmjs.org/@isaacs/balanced-match/-/balanced-match-4.0.1.tgz#3081dadbc3460661b751e7591d7faea5df39dd29"
@@ -5325,6 +5330,13 @@ eslint-plugin-no-null@^1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/eslint-plugin-no-null/-/eslint-plugin-no-null-1.0.2.tgz#1236a812391390a1877ad4007c26e745341c951f"
   integrity sha512-uRDiz88zCO/2rzGfgG15DBjNsgwWtWiSo4Ezy7zzajUgpnFIqd1TjepKeRmJZHEfBGu58o2a8S0D7vglvvhkVA==
+
+eslint-plugin-node-security@5.2.2:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-node-security/-/eslint-plugin-node-security-5.2.2.tgz#402e666fd2e2e1112b8f86aa6ebb2c05bd879d00"
+  integrity sha512-VETQOmnAKdn0/iY4ct+lxWmCm1YJUl2qL5oXdFTYac0Pgm+YrgOxc7EQslNSN3k60CyiQx6l/XV2EeAXTXAjjw==
+  dependencies:
+    "@interlace/eslint-devkit" "^1.17.2"
 
 eslint-plugin-prettier@^4.0.0:
   version "4.2.5"
