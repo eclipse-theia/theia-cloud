@@ -12,6 +12,7 @@
     ],
     "guard-for-in": "error",
     "no-caller": "error",
+    "node-security/no-timing-unsafe-compare": "error",
     "no-eval": "error",
     "no-restricted-imports": [
       "error",
