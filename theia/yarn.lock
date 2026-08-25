@@ -952,10 +952,10 @@
     chardet "^2.1.0"
     iconv-lite "^0.7.0"
 
-"@interlace/eslint-devkit@^1.17.2":
-  version "1.17.2"
-  resolved "https://registry.yarnpkg.com/@interlace/eslint-devkit/-/eslint-devkit-1.17.2.tgz#7e2cd64518e03bb75c01d84cb341d1e5886eaeed"
-  integrity sha512-owpOOCCBUeJ+r93Fkb0TzfBOdgDbpptT7FJYR8bWA8PU//8SnTlHOXg7juQl4G9kEvFPoKAVRnNJSQOYryF6Ng==
+"@interlace/eslint-devkit@^1.17.3":
+  version "1.17.3"
+  resolved "https://registry.yarnpkg.com/@interlace/eslint-devkit/-/eslint-devkit-1.17.3.tgz#5b7bdaf1df3ab21544dbbcf356d97662f862aa41"
+  integrity sha512-XCklAAGpWEvYtRtBLfbQ06hpO/0VkwumzmgJtJw8ZbLzltI7LYJmhXQN4HSUxI4s/F/UkcEwgcvDTxkUgjlMHQ==
 
 "@isaacs/balanced-match@^4.0.1":
   version "4.0.1"
@@ -5331,12 +5331,12 @@ eslint-plugin-no-null@^1.0.2:
   resolved "https://registry.npmjs.org/eslint-plugin-no-null/-/eslint-plugin-no-null-1.0.2.tgz#1236a812391390a1877ad4007c26e745341c951f"
   integrity sha512-uRDiz88zCO/2rzGfgG15DBjNsgwWtWiSo4Ezy7zzajUgpnFIqd1TjepKeRmJZHEfBGu58o2a8S0D7vglvvhkVA==
 
-eslint-plugin-node-security@5.2.2:
-  version "5.2.2"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-node-security/-/eslint-plugin-node-security-5.2.2.tgz#402e666fd2e2e1112b8f86aa6ebb2c05bd879d00"
-  integrity sha512-VETQOmnAKdn0/iY4ct+lxWmCm1YJUl2qL5oXdFTYac0Pgm+YrgOxc7EQslNSN3k60CyiQx6l/XV2EeAXTXAjjw==
+eslint-plugin-node-security@5.2.3:
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-node-security/-/eslint-plugin-node-security-5.2.3.tgz#14b455fba239ebb57369dbb7e93fc42809ed59cd"
+  integrity sha512-7UqgtN8N381prWZif/yL+1ZVB07VNz7UZ7TJlxb+liHba+UfZ3/tx+eZB+FsgW2tOIhImZtWGSCWwk6CuG0jUg==
   dependencies:
-    "@interlace/eslint-devkit" "^1.17.2"
+    "@interlace/eslint-devkit" "^1.17.3"
 
 eslint-plugin-prettier@^4.0.0:
   version "4.2.5"
