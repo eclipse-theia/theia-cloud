@@ -28,8 +28,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionStatus;
-import org.eclipse.theia.cloud.operator.ingress.IngressPathProvider;
-import org.eclipse.theia.cloud.operator.util.TheiaCloudIngressUtil;
+import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 
 import com.google.inject.Inject;
 
@@ -41,7 +40,7 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
     protected TheiaCloudClient client;
 
     @Inject
-    protected IngressPathProvider ingressPathProvider;
+    protected SessionRoutingStrategy routingStrategy;
 
     @Override
     public boolean appDefinitionAdded(AppDefinition appDefinition, String correlationId) {
@@ -95,19 +94,18 @@ public class LazyStartAppDefinitionHandler implements AppDefinitionHandler {
         AppDefinitionSpec spec = appDefinition.getSpec();
         String appDefinitionResourceName = appDefinition.getMetadata().getName();
 
-        /* Create ingress if not existing */
-        if (!TheiaCloudIngressUtil.checkForExistingIngressAndAddOwnerReferencesIfMissing(client.kubernetes(),
-                client.namespace(), appDefinition, correlationId)) {
+        /* Check routing resource exists */
+        if (!routingStrategy.ensureRoutingResourceExists(appDefinition, correlationId)) {
             LOGGER.error(formatLogMessage(correlationId,
-                    "Expected ingress '" + spec.getIngressname() + "' for app definition '" + appDefinitionResourceName
+                    "Expected routing resource '" + spec.getIngressname() + "' for app definition '" + appDefinitionResourceName
                             + "' does not exist. Abort handling app definition."));
             client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {
                 s.setOperatorStatus(OperatorStatus.ERROR);
-                s.setOperatorMessage("Ingress does not exist.");
+                s.setOperatorMessage("Routing resource does not exist.");
             });
             return false;
         } else {
-            LOGGER.trace(formatLogMessage(correlationId, "Ingress available already"));
+            LOGGER.trace(formatLogMessage(correlationId, "Routing resource available already"));
         }
 
         client.appDefinitions().updateStatus(correlationId, appDefinition, s -> {

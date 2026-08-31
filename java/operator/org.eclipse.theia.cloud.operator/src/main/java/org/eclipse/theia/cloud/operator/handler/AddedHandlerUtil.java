@@ -18,10 +18,11 @@ package org.eclipse.theia.cloud.operator.handler;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatMetric;
-import static org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil.HOST_PROTOCOL;
+import static org.eclipse.theia.cloud.operator.util.TheiaCloudDeploymentUtil.normalizeExternalBaseUrl;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -82,7 +83,7 @@ public final class AddedHandlerUtil {
 
     public static final String OAUTH2_PROXY_CONFIGMAP_NAME = "oauth2-proxy-config";
 
-    public static final String CONFIGMAP_DATA_PLACEHOLDER_HOST = "https://placeholder";
+    public static final String CONFIGMAP_DATA_PLACEHOLDER_BASE_URL = "placeholder-url";
     public static final String CONFIGMAP_DATA_PLACEHOLDER_PORT = "placeholder-port";
 
     public static final String FILENAME_AUTHENTICATED_EMAILS_LIST = "authenticated-emails-list";
@@ -125,12 +126,12 @@ public final class AddedHandlerUtil {
     }
 
     public static void updateProxyConfigMap(NamespacedKubernetesClient client, String namespace, ConfigMap configMap,
-            String host, int port) {
+            String externalBaseUrl, int port) {
         ConfigMap templateConfigMap = client.configMaps().inNamespace(namespace).withName(OAUTH2_PROXY_CONFIGMAP_NAME)
                 .get();
         Map<String, String> data = new LinkedHashMap<>(templateConfigMap.getData());
         data.put(OAUTH2_PROXY_CFG, data.get(OAUTH2_PROXY_CFG)//
-                .replace(CONFIGMAP_DATA_PLACEHOLDER_HOST, HOST_PROTOCOL + host)//
+                .replace(CONFIGMAP_DATA_PLACEHOLDER_BASE_URL, normalizeExternalBaseUrl(externalBaseUrl))//
                 .replace(CONFIGMAP_DATA_PLACEHOLDER_PORT, String.valueOf(port)));
         configMap.setData(data);
     }
@@ -160,21 +161,22 @@ public final class AddedHandlerUtil {
                     /* silent */
                 }
 
-                HttpsURLConnection connection;
+                HttpURLConnection connection;
                 try {
-                    connection = (HttpsURLConnection) new URL(HOST_PROTOCOL + url).openConnection();
-                } catch (IOException e) {
+                    connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
+                } catch (IllegalArgumentException | IOException e) {
                     LOGGER.error(formatLogMessage(correlationId, "Error while checking session availability."), e);
                     continue;
                 }
                 int code;
 
                 try {
-                    connection.setHostnameVerifier(ALL_GOOD_HOSTNAME_VERIFIER);
-                    SSLContext sc = SSLContext.getInstance("SSL");
-                    sc.init(null, new TrustManager[] { TRUST_ALL_MANAGER }, new java.security.SecureRandom());
-                    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-                    connection.setSSLSocketFactory(sc.getSocketFactory());
+                    if (connection instanceof HttpsURLConnection httpsConn) {
+                        httpsConn.setHostnameVerifier(ALL_GOOD_HOSTNAME_VERIFIER);
+                        SSLContext sc = SSLContext.getInstance("SSL");
+                        sc.init(null, new TrustManager[] { TRUST_ALL_MANAGER }, new java.security.SecureRandom());
+                        httpsConn.setSSLSocketFactory(sc.getSocketFactory());
+                    }
                     connection.connect();
                     code = connection.getResponseCode();
                 } catch (IOException e) {
