@@ -25,37 +25,6 @@ import org.junit.jupiter.api.Test;
 class TheiaCloudDeploymentUtilTests {
 
     @Test
-    void extractHost_httpsUrl() {
-        assertEquals("host/path", TheiaCloudDeploymentUtil.extractHost("https://host/path/"));
-    }
-
-    @Test
-    void extractHost_httpUrl() {
-        assertEquals("host/path", TheiaCloudDeploymentUtil.extractHost("http://host/path/"));
-    }
-
-    @Test
-    void extractHost_httpsSubdomain() {
-        assertEquals("uid.ws.apps-crc.testing", TheiaCloudDeploymentUtil.extractHost("https://uid.ws.apps-crc.testing/"));
-    }
-
-    @Test
-    void extractHost_httpSubdomain() {
-        assertEquals("uid.ws.apps-crc.testing", TheiaCloudDeploymentUtil.extractHost("http://uid.ws.apps-crc.testing/"));
-    }
-
-    @Test
-    void extractHost_noTrailingSlash() {
-        assertEquals("host/path", TheiaCloudDeploymentUtil.extractHost("https://host/path"));
-    }
-
-    @Test
-    void extractHost_instanceBasedUrl() {
-        assertEquals("my-app-0.ws.apps-crc.testing",
-                TheiaCloudDeploymentUtil.extractHost("http://my-app-0.ws.apps-crc.testing/"));
-    }
-
-    @Test
     void normalizeExternalBaseUrl_httpSubdomain() {
         assertEquals("http://uid.ws.apps-crc.testing",
                 TheiaCloudDeploymentUtil.normalizeExternalBaseUrl("http://uid.ws.apps-crc.testing/"));

@@ -21,13 +21,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
-import org.eclipse.theia.cloud.common.k8s.resource.ResourceEdit;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.util.LabelsUtil;
@@ -38,6 +39,7 @@ import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
 import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.openshift.api.model.Route;
@@ -47,14 +49,21 @@ import io.fabric8.openshift.client.OpenShiftClient;
 /**
  * OpenShift Route-based implementation of {@link SessionRoutingStrategy}.
  * <p>
- * Instead of managing IngressRules on a shared Ingress resource, this strategy creates individual OpenShift Route
- * objects for each session from a classpath YAML template ({@code templateRoute.yaml}). Routes are deleted when
+ * Instead of managing IngressRules on a shared Ingress resource, this strategy
+ * creates individual OpenShift Route
+ * objects for each session from a classpath YAML template
+ * ({@code templateRoute.yaml}). Routes are deleted when
  * sessions end.
  * <p>
- * TLS settings and custom annotations are read from the {@code openshift-route-config} ConfigMap deployed by the Helm
+ * TLS settings and custom annotations are read from the
+ * {@code openshift-route-config} ConfigMap deployed by the Helm
  * chart.
  * <p>
- * Only subdomain-based routing ({@code usePaths: false}) is supported on OpenShift.
+ * Only subdomain-based routing ({@code usePaths: false}) is supported on
+ * OpenShift. This strategy does not currently
+ * create the dynamic wildcard hosts configured through
+ * {@code ingressHostnamePrefixes}; see the OpenShift deployment
+ * documentation for the current limitation and workaround.
  */
 public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
 
@@ -69,10 +78,9 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
     @Inject
     private TheiaCloudOperatorArguments arguments;
 
-    private boolean initialized;
     private OpenShiftClient osClient;
     private boolean useTls;
-    private Map<String, String> routeAnnotations;
+    private Map<String, String> routeAnnotations = Map.of();
 
     /** Package-private constructor for unit tests. */
     OpenShiftRouteRoutingStrategy(TheiaCloudOperatorArguments arguments) {
@@ -82,53 +90,81 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
     OpenShiftRouteRoutingStrategy() {
     }
 
-    private synchronized void ensureInitialized() {
-        if (initialized) {
-            return;
+    private synchronized void ensureOpenShiftClient() {
+        if (osClient == null) {
+            osClient = client.kubernetes().adapt(OpenShiftClient.class);
         }
-        osClient = client.kubernetes().adapt(OpenShiftClient.class);
-        String namespace = client.namespace();
-        ConfigMap cm = client.kubernetes().configMaps().inNamespace(namespace).withName(ROUTE_CONFIG_CM_NAME).get();
-        if (cm == null) {
-            LOGGER.warn(formatLogMessage("INIT", "ConfigMap '" + ROUTE_CONFIG_CM_NAME + "' not found in namespace "
-                    + namespace + ". Using defaults (no TLS, no annotations)."));
-            this.useTls = false;
-            this.routeAnnotations = Map.of();
-            this.initialized = true;
-            return;
-        }
-        this.useTls = Boolean.parseBoolean(cm.getData().getOrDefault("useTls", "false"));
-        String annotationsYaml = cm.getData().get("annotations");
-        if (annotationsYaml != null && !annotationsYaml.isBlank()) {
-            try {
-                @SuppressWarnings("unchecked")
-                Map<String, String> parsed = Serialization.unmarshal(annotationsYaml, Map.class);
-                this.routeAnnotations = parsed != null ? parsed : Map.of();
-            } catch (Exception e) {
-                LOGGER.warn(formatLogMessage("INIT", "Failed to parse annotations from ConfigMap '"
-                        + ROUTE_CONFIG_CM_NAME + "'. Using empty annotations."), e);
-                this.routeAnnotations = Map.of();
-            }
-        } else {
-            this.routeAnnotations = Map.of();
-        }
-        this.initialized = true;
     }
 
-    private String protocol() {
+    private void refreshRouteConfiguration(String correlationId) {
+        String namespace = client.namespace();
+        ConfigMap configMap = client.kubernetes().configMaps().inNamespace(namespace).withName(ROUTE_CONFIG_CM_NAME)
+                .get();
+        if (configMap == null) {
+            LOGGER.warn(formatLogMessage(correlationId, "ConfigMap '" + ROUTE_CONFIG_CM_NAME
+                    + "' not found in namespace " + namespace + ". Using defaults (no TLS, no annotations)."));
+        }
+        applyRouteConfiguration(configMap, correlationId);
+    }
+
+    void applyRouteConfiguration(ConfigMap configMap) {
+        applyRouteConfiguration(configMap, "TEST");
+    }
+
+    private void applyRouteConfiguration(ConfigMap configMap, String correlationId) {
+        Map<String, String> data = configMap == null || configMap.getData() == null ? Map.of() : configMap.getData();
+        this.useTls = Boolean.parseBoolean(data.getOrDefault("useTls", "false"));
+        String annotationsYaml = data.get("annotations");
+        if (annotationsYaml == null || annotationsYaml.isBlank()) {
+            this.routeAnnotations = Map.of();
+            return;
+        }
+        try {
+            Map<?, ?> parsed = Serialization.unmarshal(annotationsYaml, Map.class);
+            if (parsed == null) {
+                this.routeAnnotations = Map.of();
+                return;
+            }
+            Map<String, String> annotations = new HashMap<>();
+            for (Map.Entry<?, ?> entry : parsed.entrySet()) {
+                if (!(entry.getKey() instanceof String key) || entry.getValue() == null
+                        || entry.getValue() instanceof Map<?, ?> || entry.getValue() instanceof List<?>) {
+                    LOGGER.warn(formatLogMessage(correlationId, "Ignoring non-scalar annotation from ConfigMap '"
+                            + ROUTE_CONFIG_CM_NAME + "'."));
+                    continue;
+                }
+                annotations.put(key, String.valueOf(entry.getValue()));
+            }
+            this.routeAnnotations = annotations;
+        } catch (Exception e) {
+            LOGGER.warn(formatLogMessage(correlationId, "Failed to parse annotations from ConfigMap '"
+                    + ROUTE_CONFIG_CM_NAME + "'. Using empty annotations."), e);
+            this.routeAnnotations = Map.of();
+        }
+    }
+
+    String protocol() {
         return useTls ? "https://" : "http://";
+    }
+
+    String protocol(Route route) {
+        return route.getSpec().getTls() == null ? "http://" : "https://";
+    }
+
+    Map<String, String> routeAnnotations() {
+        return routeAnnotations;
     }
 
     @Override
     public boolean ensureRoutingResourceExists(AppDefinition appDefinition, String correlationId) {
-        ensureInitialized();
         return true;
     }
 
     @Override
     public synchronized String addSessionRouting(Session session, AppDefinition appDefinition, Service service,
             String correlationId) {
-        ensureInitialized();
+        ensureOpenShiftClient();
+        refreshRouteConfiguration(correlationId);
         String routeName = NamingUtil.createNameWithSuffix(session, "route");
         String hostname = computeSessionHostname(session);
         return createRoute(routeName, hostname, session, appDefinition, service, correlationId);
@@ -137,7 +173,8 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
     @Override
     public synchronized String addSessionRouting(Session session, AppDefinition appDefinition, Service service,
             int instance, String correlationId) {
-        ensureInitialized();
+        ensureOpenShiftClient();
+        refreshRouteConfiguration(correlationId);
         String routeName = computeInstanceRouteName(appDefinition, instance);
         String hostname = computeInstanceHostname(appDefinition, instance);
         return createRoute(routeName, hostname, session, appDefinition, service, correlationId);
@@ -146,7 +183,7 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
     @Override
     public synchronized boolean removeSessionRouting(Session session, AppDefinition appDefinition,
             String correlationId) {
-        ensureInitialized();
+        ensureOpenShiftClient();
         String routeName = NamingUtil.createNameWithSuffix(session, "route");
         return deleteRoute(routeName, correlationId);
     }
@@ -154,20 +191,20 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
     @Override
     public synchronized boolean removeSessionRouting(Session session, AppDefinition appDefinition, int instance,
             String correlationId) {
-        ensureInitialized();
+        ensureOpenShiftClient();
         String routeName = computeInstanceRouteName(appDefinition, instance);
         return deleteRoute(routeName, correlationId);
     }
 
     @Override
     public synchronized String getSessionURL(AppDefinition appDefinition, Session session) {
-        ensureInitialized();
+        refreshRouteConfiguration("GET_SESSION_URL");
         return protocol() + computeSessionHostname(session) + "/";
     }
 
     @Override
     public synchronized String getSessionURL(AppDefinition appDefinition, int instance) {
-        ensureInitialized();
+        refreshRouteConfiguration("GET_SESSION_URL");
         return protocol() + computeInstanceHostname(appDefinition, instance) + "/";
     }
 
@@ -178,9 +215,13 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
 
         Route existingRoute = osClient.routes().inNamespace(namespace).withName(routeName).get();
         if (existingRoute != null) {
+            osClient.routes().inNamespace(namespace).withName(routeName).edit(route -> {
+                updateSessionOwnerReference(route, session);
+                return route;
+            });
             LOGGER.info(formatLogMessage(correlationId, "Route '" + routeName + "' already exists with host '"
                     + existingRoute.getSpec().getHost() + "'"));
-            return protocol() + existingRoute.getSpec().getHost() + "/";
+            return protocol(existingRoute) + existingRoute.getSpec().getHost() + "/";
         }
 
         Map<String, String> replacements = new HashMap<>();
@@ -216,14 +257,13 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
         labels.put("app", serviceName);
         route.getMetadata().setLabels(labels);
 
-        ResourceEdit.<Route> updateOwnerReference(0, Session.API, Session.KIND, session.getMetadata().getName(),
-                session.getMetadata().getUid(), correlationId).accept(route);
+        updateSessionOwnerReference(route, session);
 
         if (useTls) {
             route.getSpec().setTls(new TLSConfigBuilder().withTermination("edge").build());
         }
 
-        if (routeAnnotations != null && !routeAnnotations.isEmpty()) {
+        if (!routeAnnotations.isEmpty()) {
             Map<String, String> annotations = route.getMetadata().getAnnotations();
             if (annotations == null) {
                 annotations = new HashMap<>();
@@ -242,6 +282,34 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
         }
 
         return protocol() + hostname + "/";
+    }
+
+    void updateSessionOwnerReference(Route route, Session session) {
+        List<OwnerReference> ownerReferences = route.getMetadata().getOwnerReferences();
+        if (ownerReferences == null) {
+            ownerReferences = new ArrayList<>();
+            route.getMetadata().setOwnerReferences(ownerReferences);
+        }
+
+        OwnerReference sessionOwner = null;
+        for (int index = ownerReferences.size() - 1; index >= 0; index--) {
+            OwnerReference ownerReference = ownerReferences.get(index);
+            if (ownerReference != null && Session.KIND.equals(ownerReference.getKind())) {
+                if (sessionOwner == null) {
+                    sessionOwner = ownerReference;
+                } else {
+                    ownerReferences.remove(index);
+                }
+            }
+        }
+        if (sessionOwner == null) {
+            sessionOwner = new OwnerReference();
+            ownerReferences.add(sessionOwner);
+        }
+        sessionOwner.setApiVersion(Session.API);
+        sessionOwner.setKind(Session.KIND);
+        sessionOwner.setName(session.getMetadata().getName());
+        sessionOwner.setUid(session.getMetadata().getUid());
     }
 
     private boolean deleteRoute(String routeName, String correlationId) {
@@ -266,7 +334,8 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
     }
 
     /**
-     * Compute the hostname for a session Route. Uses the full session UID to create a unique subdomain under the
+     * Compute the hostname for a session Route. Uses the full session UID to create
+     * a unique subdomain under the
      * instances host.
      * <p>
      * For example: {@code <full-uid>.ws.apps-crc.testing}

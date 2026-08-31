@@ -39,18 +39,6 @@ public final class TheiaCloudDeploymentUtil {
     private TheiaCloudDeploymentUtil() {
     }
 
-    /**
-     * Extract the host portion from a full URL by stripping the protocol scheme and
-     * trailing slash.
-     *
-     * @param url a URL such as {@code https://host/path/}
-     * @return the host+path without scheme or trailing slash, e.g.
-     *         {@code host/path}
-     */
-    public static String extractHost(String url) {
-        return url.replaceFirst("^https?://", "").replaceFirst("/$", "");
-    }
-
     public static String normalizeExternalBaseUrl(String url) {
         return url.replaceFirst("/$", "");
     }

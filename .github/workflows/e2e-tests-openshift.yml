@@ -413,7 +413,7 @@ jobs:
 
       - name: Verify TheiaCloud realm metadata
         run: |
-          URL="https://keycloak.apps-microshift.testing/realms/TheiaCloud/.well-known/openid-configuration"
+          URL="https://keycloak.apps-microshift.testing/keycloak/realms/TheiaCloud/.well-known/openid-configuration"
           for i in $(seq 1 12); do
             if curl -sk --max-time 10 -o /tmp/oidc.json "$URL"; then
               if jq -e '.issuer' /tmp/oidc.json >/dev/null 2>&1; then
@@ -520,9 +520,9 @@ jobs:
       # ----------------------------------------------------------------
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version-file: theia-cloud/node/.nvmrc
 
       - name: Install dependencies and run e2e tests
         working-directory: theia-cloud/node

@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
@@ -30,11 +31,15 @@ import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
+import io.fabric8.openshift.api.model.Route;
+import io.fabric8.openshift.api.model.RouteBuilder;
 
 /**
- * Unit tests for {@link OpenShiftRouteRoutingStrategy} hostname and route name
- * computation methods.
+ * Unit tests for {@link OpenShiftRouteRoutingStrategy}.
  */
 class OpenShiftRouteRoutingStrategyTests {
 
@@ -50,6 +55,137 @@ class OpenShiftRouteRoutingStrategyTests {
         instancesHostField.set(args, INSTANCES_HOST);
 
         strategy = new OpenShiftRouteRoutingStrategy(args);
+    }
+
+    @Test
+    void applyRouteConfiguration_missingConfigMap_usesDefaults() {
+        strategy.applyRouteConfiguration(null);
+
+        assertEquals("http://", strategy.protocol());
+        assertEquals(Map.of(), strategy.routeAnnotations());
+    }
+
+    @Test
+    void applyRouteConfiguration_nullData_usesDefaults() {
+        strategy.applyRouteConfiguration(new ConfigMapBuilder().withNewMetadata().withName("config").endMetadata()
+                .build());
+
+        assertEquals("http://", strategy.protocol());
+        assertEquals(Map.of(), strategy.routeAnnotations());
+    }
+
+    @Test
+    void applyRouteConfiguration_tlsEnabled_usesHttps() {
+        strategy.applyRouteConfiguration(configMap(Map.of("useTls", "true")));
+
+        assertEquals("https://", strategy.protocol());
+    }
+
+    @Test
+    void applyRouteConfiguration_validAnnotations_parsesAnnotations() {
+        strategy.applyRouteConfiguration(configMap(Map.of("annotations", "router.openshift.io/cookie_name: session\n"
+                + "haproxy.router.openshift.io/timeout: 60s")));
+
+        assertEquals(Map.of("router.openshift.io/cookie_name", "session",
+                "haproxy.router.openshift.io/timeout", "60s"), strategy.routeAnnotations());
+    }
+
+    @Test
+    void applyRouteConfiguration_missingAnnotations_usesEmptyAnnotations() {
+        strategy.applyRouteConfiguration(configMap(Map.of("useTls", "true")));
+
+        assertEquals(Map.of(), strategy.routeAnnotations());
+    }
+
+    @Test
+    void applyRouteConfiguration_blankAnnotations_usesEmptyAnnotations() {
+        strategy.applyRouteConfiguration(configMap(Map.of("annotations", "  \n")));
+
+        assertEquals(Map.of(), strategy.routeAnnotations());
+    }
+
+    @Test
+    void applyRouteConfiguration_malformedAnnotations_usesEmptyAnnotations() {
+        strategy.applyRouteConfiguration(configMap(Map.of("annotations", "[not: valid")));
+
+        assertEquals(Map.of(), strategy.routeAnnotations());
+    }
+
+    @Test
+    void applyRouteConfiguration_nonStringScalarAnnotation_convertsToString() {
+        strategy.applyRouteConfiguration(
+                configMap(Map.of("annotations", "router.openshift.io/haproxy.health.check.interval: 30")));
+
+        assertEquals(Map.of("router.openshift.io/haproxy.health.check.interval", "30"), strategy.routeAnnotations());
+    }
+
+    @Test
+    void applyRouteConfiguration_nestedAnnotation_ignoresEntry() {
+        strategy.applyRouteConfiguration(configMap(Map.of("annotations", "invalid:\n  nested: value")));
+
+        assertEquals(Map.of(), strategy.routeAnnotations());
+    }
+
+    @Test
+    void applyRouteConfiguration_secondConfigReplacesFirstConfig() {
+        strategy.applyRouteConfiguration(configMap(Map.of("useTls", "true", "annotations", "first: value")));
+        strategy.applyRouteConfiguration(configMap(Map.of("useTls", "false", "annotations", "second: updated")));
+
+        assertEquals("http://", strategy.protocol());
+        assertEquals(Map.of("second", "updated"), strategy.routeAnnotations());
+    }
+
+    @Test
+    void protocol_existingRoute_usesRouteTlsConfiguration() {
+        Route insecureRoute = new RouteBuilder().withNewSpec().endSpec().build();
+        Route secureRoute = new RouteBuilder().withNewSpec().withNewTls().withTermination("edge").endTls().endSpec()
+                .build();
+
+        assertEquals("http://", strategy.protocol(insecureRoute));
+        assertEquals("https://", strategy.protocol(secureRoute));
+    }
+
+    @Test
+    void updateSessionOwnerReference_replacesExistingSessionOwner() {
+        Route route = new RouteBuilder().withNewMetadata().withName("route")
+                .withOwnerReferences(new OwnerReferenceBuilder().withApiVersion(Session.API).withKind(Session.KIND)
+                        .withName("old-session").withUid("old-uid").build())
+                .endMetadata().build();
+        Session session = createSession("current-uid");
+
+        strategy.updateSessionOwnerReference(route, session);
+
+        assertEquals(1, route.getMetadata().getOwnerReferences().size());
+        assertEquals(Session.API, route.getMetadata().getOwnerReferences().get(0).getApiVersion());
+        assertEquals(Session.KIND, route.getMetadata().getOwnerReferences().get(0).getKind());
+        assertEquals("session-current-uid", route.getMetadata().getOwnerReferences().get(0).getName());
+        assertEquals("current-uid", route.getMetadata().getOwnerReferences().get(0).getUid());
+    }
+
+    @Test
+    void updateSessionOwnerReference_missingOwnerReferences_addsSessionOwner() {
+        Route route = new RouteBuilder().withNewMetadata().withName("route").endMetadata().build();
+        route.getMetadata().setOwnerReferences(null);
+        Session session = createSession("current-uid");
+
+        strategy.updateSessionOwnerReference(route, session);
+
+        assertEquals(1, route.getMetadata().getOwnerReferences().size());
+        assertEquals("session-current-uid", route.getMetadata().getOwnerReferences().get(0).getName());
+        assertEquals("current-uid", route.getMetadata().getOwnerReferences().get(0).getUid());
+    }
+
+    @Test
+    void updateSessionOwnerReference_emptyOwnerReferences_addsSessionOwner() {
+        Route route = new RouteBuilder().withNewMetadata().withName("route").withOwnerReferences().endMetadata()
+                .build();
+        Session session = createSession("current-uid");
+
+        strategy.updateSessionOwnerReference(route, session);
+
+        assertEquals(1, route.getMetadata().getOwnerReferences().size());
+        assertEquals("session-current-uid", route.getMetadata().getOwnerReferences().get(0).getName());
+        assertEquals("current-uid", route.getMetadata().getOwnerReferences().get(0).getUid());
     }
 
     @Test
@@ -155,9 +291,14 @@ class OpenShiftRouteRoutingStrategyTests {
                 "Subdomain label must be at most 63 characters but was " + subdomainLabel.length());
     }
 
+    private ConfigMap configMap(Map<String, String> data) {
+        return new ConfigMapBuilder().withNewMetadata().withName("config").endMetadata().withData(data).build();
+    }
+
     private Session createSession(String uid) {
         Session session = new Session();
         ObjectMeta meta = new ObjectMeta();
+        meta.setName("session-" + uid);
         meta.setUid(uid);
         session.setMetadata(meta);
         SessionSpec spec = new SessionSpec("test-session", "test-app", "user@example.org");

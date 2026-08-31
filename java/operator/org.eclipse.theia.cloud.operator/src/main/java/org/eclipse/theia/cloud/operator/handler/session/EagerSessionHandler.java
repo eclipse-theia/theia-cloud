@@ -239,16 +239,16 @@ public class EagerSessionHandler implements SessionHandler {
         }
 
         /* adjust the routing */
-        String host;
+        String sessionUrl;
         try {
-            host = routingStrategy.addSessionRouting(session, appDefinition.get(), serviceToUse.get(), instance,
+            sessionUrl = routingStrategy.addSessionRouting(session, appDefinition.get(), serviceToUse.get(), instance,
                     correlationId);
         } catch (KubernetesClientException e) {
             LOGGER.error(formatLogMessage(correlationId,
                     "Error while updating routing for session " + session.getMetadata().getName()), e);
             return false;
         }
-        if (host == null) {
+        if (sessionUrl == null) {
             LOGGER.error(formatLogMessage(correlationId,
                     "Failed to add routing for session " + session.getMetadata().getName()));
             return false;
@@ -256,7 +256,8 @@ public class EagerSessionHandler implements SessionHandler {
 
         /* Update session resource */
         try {
-            AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), host, correlationId);
+            AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
+                    correlationId);
         } catch (KubernetesClientException e) {
             LOGGER.error(
                     formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),

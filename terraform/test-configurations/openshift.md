@@ -170,6 +170,22 @@ OpenShift Local exposes routes at `*.apps-crc.testing`. The expected Theia Cloud
 > (e.g. `*.ws.example.com`), or set `hosts.configuration.instance` such that session
 > hostnames stay within your existing wildcard.
 
+### Webview hostname limitation
+
+`AppDefinition.spec.ingressHostnamePrefixes` is supported by the Kubernetes Ingress routing strategy, but the current `OpenShiftRouteRoutingStrategy` creates only an exact per-session Route and does not create additional prefixed or wildcard hosts.
+
+Theia's default external webview endpoint is `{{uuid}}.webview.{{hostname}}`. On OpenShift this produces dynamic hosts below the session hostname, for example `<uuid>.webview.<session-uid>.ws.example.com`, which are not covered by the exact session Route.
+
+As a temporary application-image workaround, set:
+
+```text
+THEIA_WEBVIEW_EXTERNAL_ENDPOINT={{hostname}}
+```
+
+This makes webviews share the session hostname. It removes the intended per-webview origin separation, can reduce isolation between webview content and the workbench, and may trigger Theia security warnings. Evaluate that trade-off before using the workaround.
+
+Native support requires a wildcard Route for each session, wildcard Route admission (`WildcardsAllowed`) on the OpenShift Ingress Controller, suitable wildcard DNS, and TLS certificate coverage for the resulting hosts. If you need native OpenShift webview routing, contact the Theia Cloud project or open an issue describing your OpenShift router, DNS, and TLS setup so the requirements can be collected before implementation.
+
 ## Step 5: Teardown
 
 ```bash

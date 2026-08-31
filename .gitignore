@@ -7,4 +7,3 @@ node/e2e-tests/test-results/.last-run.json
 **/terraform.tfstate
 **/terraform.tfstate.backup
 **/.terraform/
-**/.terraform.lock.hcl

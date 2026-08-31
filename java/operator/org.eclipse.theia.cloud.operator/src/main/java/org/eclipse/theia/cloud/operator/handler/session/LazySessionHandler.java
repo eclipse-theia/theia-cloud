@@ -259,9 +259,9 @@ public class LazySessionHandler implements SessionHandler {
                 storageName, arguments.isUseKeycloak(), labelsToAdd);
 
         /* adjust the routing */
-        String host;
+        String sessionUrl;
         try {
-            host = routingStrategy.addSessionRouting(session, appDefinition, serviceToUse.get(), correlationId);
+            sessionUrl = routingStrategy.addSessionRouting(session, appDefinition, serviceToUse.get(), correlationId);
         } catch (KubernetesClientException e) {
             LOGGER.error(formatLogMessage(correlationId,
                     "Error while updating routing for session " + session.getMetadata().getName()), e);
@@ -271,7 +271,7 @@ public class LazySessionHandler implements SessionHandler {
             });
             return false;
         }
-        if (host == null) {
+        if (sessionUrl == null) {
             LOGGER.error(formatLogMessage(correlationId,
                     "Failed to add routing for session " + session.getMetadata().getName()));
             client.sessions().updateStatus(correlationId, session, s -> {
@@ -283,7 +283,8 @@ public class LazySessionHandler implements SessionHandler {
 
         /* Update session resource */
         try {
-            AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), host, correlationId);
+            AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
+                    correlationId);
         } catch (KubernetesClientException e) {
             LOGGER.error(
                     formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),
