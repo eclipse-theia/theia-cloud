@@ -19,6 +19,7 @@ package org.eclipse.theia.cloud.operator.util;
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 import static org.eclipse.theia.cloud.common.util.NamingUtil.asValidName;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -65,6 +66,7 @@ public final class TheiaCloudHandlerUtil {
         return asValidName(session.getSpec().getName() + "-" + session.getMetadata().getUid());
     }
 
+    /** Adds the given session as an additional owner of the item (in memory only; callers must persist). */
     public static <T extends HasMetadata> T addOwnerReferenceToItem(String correlationId, String sessionResourceName,
             String sessionResourceUID, T item) {
         OwnerReference serviceOwnerReference = createOwnerReference(sessionResourceName, sessionResourceUID);
@@ -87,6 +89,49 @@ public final class TheiaCloudHandlerUtil {
         return item;
     }
 
+    /**
+     * Sets the given session as the single Session owner of the item, replacing any existing Session owner
+     * references. Non-Session owner references are left untouched. Unlike
+     * {@link #addOwnerReferenceToItem}, this does not accumulate owners: it is meant for resources that are
+     * owned by exactly one Session (e.g. OpenShift Routes), where a stale owner with a deleted UID would
+     * otherwise cause the garbage collector to remove the resource.
+     * <p>
+     * Only mutates the item in memory. Callers must persist the change, e.g. via a client {@code edit(...)}
+     * call or by passing the item to {@code create()}.
+     */
+    public static <T extends HasMetadata> T setSessionOwnerReference(String correlationId,
+            String sessionResourceName, String sessionResourceUID, T item) {
+        LOGGER.info(formatLogMessage(correlationId,
+                "Setting session owner reference on " + item.getMetadata().getName()));
+        List<OwnerReference> ownerReferences = item.getMetadata().getOwnerReferences();
+        if (ownerReferences == null) {
+            ownerReferences = new ArrayList<>();
+            item.getMetadata().setOwnerReferences(ownerReferences);
+        }
+
+        OwnerReference sessionOwner = null;
+        for (int index = ownerReferences.size() - 1; index >= 0; index--) {
+            OwnerReference ownerReference = ownerReferences.get(index);
+            if (ownerReference != null && Session.KIND.equals(ownerReference.getKind())) {
+                if (sessionOwner == null) {
+                    sessionOwner = ownerReference;
+                } else {
+                    ownerReferences.remove(index);
+                }
+            }
+        }
+        if (sessionOwner == null) {
+            ownerReferences.add(createOwnerReference(sessionResourceName, sessionResourceUID));
+        } else {
+            sessionOwner.setApiVersion(HasMetadata.getApiVersion(Session.class));
+            sessionOwner.setKind(Session.KIND);
+            sessionOwner.setName(sessionResourceName);
+            sessionOwner.setUid(sessionResourceUID);
+        }
+        return item;
+    }
+
+    /** Creates an OwnerReference pointing at the Session with the given name and UID. */
     public static OwnerReference createOwnerReference(String sessionResourceName, String sessionResourceUID) {
         OwnerReference ownerReference = new OwnerReference();
         ownerReference.setApiVersion(HasMetadata.getApiVersion(Session.class));

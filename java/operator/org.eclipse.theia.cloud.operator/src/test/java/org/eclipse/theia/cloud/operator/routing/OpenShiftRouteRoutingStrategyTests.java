@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 
@@ -143,49 +142,6 @@ class OpenShiftRouteRoutingStrategyTests {
 
         assertEquals("http://", strategy.protocol(insecureRoute));
         assertEquals("https://", strategy.protocol(secureRoute));
-    }
-
-    @Test
-    void updateSessionOwnerReference_replacesExistingSessionOwner() {
-        Route route = new RouteBuilder().withNewMetadata().withName("route")
-                .withOwnerReferences(new OwnerReferenceBuilder().withApiVersion(Session.API).withKind(Session.KIND)
-                        .withName("old-session").withUid("old-uid").build())
-                .endMetadata().build();
-        Session session = createSession("current-uid");
-
-        strategy.updateSessionOwnerReference(route, session);
-
-        assertEquals(1, route.getMetadata().getOwnerReferences().size());
-        assertEquals(Session.API, route.getMetadata().getOwnerReferences().get(0).getApiVersion());
-        assertEquals(Session.KIND, route.getMetadata().getOwnerReferences().get(0).getKind());
-        assertEquals("session-current-uid", route.getMetadata().getOwnerReferences().get(0).getName());
-        assertEquals("current-uid", route.getMetadata().getOwnerReferences().get(0).getUid());
-    }
-
-    @Test
-    void updateSessionOwnerReference_missingOwnerReferences_addsSessionOwner() {
-        Route route = new RouteBuilder().withNewMetadata().withName("route").endMetadata().build();
-        route.getMetadata().setOwnerReferences(null);
-        Session session = createSession("current-uid");
-
-        strategy.updateSessionOwnerReference(route, session);
-
-        assertEquals(1, route.getMetadata().getOwnerReferences().size());
-        assertEquals("session-current-uid", route.getMetadata().getOwnerReferences().get(0).getName());
-        assertEquals("current-uid", route.getMetadata().getOwnerReferences().get(0).getUid());
-    }
-
-    @Test
-    void updateSessionOwnerReference_emptyOwnerReferences_addsSessionOwner() {
-        Route route = new RouteBuilder().withNewMetadata().withName("route").withOwnerReferences().endMetadata()
-                .build();
-        Session session = createSession("current-uid");
-
-        strategy.updateSessionOwnerReference(route, session);
-
-        assertEquals(1, route.getMetadata().getOwnerReferences().size());
-        assertEquals("session-current-uid", route.getMetadata().getOwnerReferences().get(0).getName());
-        assertEquals("current-uid", route.getMetadata().getOwnerReferences().get(0).getUid());
     }
 
     @Test

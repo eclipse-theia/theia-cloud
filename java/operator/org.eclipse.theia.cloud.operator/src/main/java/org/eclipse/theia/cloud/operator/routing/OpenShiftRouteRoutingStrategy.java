@@ -21,7 +21,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,12 +34,13 @@ import org.eclipse.theia.cloud.common.util.LabelsUtil;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.util.JavaResourceUtil;
+import org.eclipse.theia.cloud.operator.util.TheiaCloudHandlerUtil;
 
 import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.TLSConfigBuilder;
@@ -208,6 +208,11 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
         return protocol() + computeInstanceHostname(appDefinition, instance) + "/";
     }
 
+    /**
+     * Creates the Route for the given session or, if a Route with that name already exists (e.g. left over
+     * from a previous session on the same eager instance), re-owns it by the current session. Returns the
+     * full session URL or {@code null} if the Route could not be created/updated.
+     */
     private String createRoute(String routeName, String hostname, Session session, AppDefinition appDefinition,
             Service service, String correlationId) {
         String namespace = client.namespace();
@@ -215,10 +220,17 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
 
         Route existingRoute = osClient.routes().inNamespace(namespace).withName(routeName).get();
         if (existingRoute != null) {
-            osClient.routes().inNamespace(namespace).withName(routeName).edit(route -> {
-                updateSessionOwnerReference(route, session);
-                return route;
-            });
+            // Re-own the existing Route so that a previous (possibly already deleted)
+            // Session owner cannot trigger garbage collection of the Route.
+            try {
+                osClient.routes().inNamespace(namespace).withName(routeName)
+                        .edit(route -> TheiaCloudHandlerUtil.setSessionOwnerReference(correlationId,
+                                session.getMetadata().getName(), session.getMetadata().getUid(), route));
+            } catch (KubernetesClientException e) {
+                LOGGER.error(formatLogMessage(correlationId,
+                        "Error while updating owner reference of existing Route '" + routeName + "'"), e);
+                return null;
+            }
             LOGGER.info(formatLogMessage(correlationId, "Route '" + routeName + "' already exists with host '"
                     + existingRoute.getSpec().getHost() + "'"));
             return protocol(existingRoute) + existingRoute.getSpec().getHost() + "/";
@@ -257,7 +269,8 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
         labels.put("app", serviceName);
         route.getMetadata().setLabels(labels);
 
-        updateSessionOwnerReference(route, session);
+        TheiaCloudHandlerUtil.setSessionOwnerReference(correlationId, session.getMetadata().getName(),
+                session.getMetadata().getUid(), route);
 
         if (useTls) {
             route.getSpec().setTls(new TLSConfigBuilder().withTermination("edge").build());
@@ -282,34 +295,6 @@ public class OpenShiftRouteRoutingStrategy implements SessionRoutingStrategy {
         }
 
         return protocol() + hostname + "/";
-    }
-
-    void updateSessionOwnerReference(Route route, Session session) {
-        List<OwnerReference> ownerReferences = route.getMetadata().getOwnerReferences();
-        if (ownerReferences == null) {
-            ownerReferences = new ArrayList<>();
-            route.getMetadata().setOwnerReferences(ownerReferences);
-        }
-
-        OwnerReference sessionOwner = null;
-        for (int index = ownerReferences.size() - 1; index >= 0; index--) {
-            OwnerReference ownerReference = ownerReferences.get(index);
-            if (ownerReference != null && Session.KIND.equals(ownerReference.getKind())) {
-                if (sessionOwner == null) {
-                    sessionOwner = ownerReference;
-                } else {
-                    ownerReferences.remove(index);
-                }
-            }
-        }
-        if (sessionOwner == null) {
-            sessionOwner = new OwnerReference();
-            ownerReferences.add(sessionOwner);
-        }
-        sessionOwner.setApiVersion(Session.API);
-        sessionOwner.setKind(Session.KIND);
-        sessionOwner.setName(session.getMetadata().getName());
-        sessionOwner.setUid(session.getMetadata().getUid());
     }
 
     private boolean deleteRoute(String routeName, String correlationId) {
