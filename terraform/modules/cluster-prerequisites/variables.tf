@@ -111,6 +111,29 @@ variable "keycloak_resource_limits_memory" {
   default     = "2Gi"
 }
 
+variable "keycloak_ready_timeout_seconds" {
+  description = "Maximum seconds to wait for Keycloak to serve requests after the Kubernetes resources report Ready"
+  type        = number
+  default     = 600
+
+  validation {
+    condition     = var.keycloak_ready_timeout_seconds >= 5
+    error_message = "keycloak_ready_timeout_seconds must be at least 5 seconds."
+  }
+}
+
+variable "keycloak_ready_check_in_cluster" {
+  description = "Whether to verify the Keycloak master realm from inside the Keycloak pod after Kubernetes readiness"
+  type        = bool
+  default     = true
+}
+
+variable "keycloak_ready_check_external" {
+  description = "Whether to verify Keycloak through the ingress or OpenShift Route before exporting keycloak_url"
+  type        = bool
+  default     = true
+}
+
 variable "ingress_controller_type" {
   description = "Type of ingress controller to use (nginx or haproxy)"
   type        = string

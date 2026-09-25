@@ -396,6 +396,7 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform apply (4_openshift-setup)
+        id: openshift_prerequisites
         working-directory: theia-cloud/terraform/test-configurations/4_openshift-setup
         env:
           TF_VAR_openshift_server: https://127.0.0.1:6443
@@ -405,6 +406,15 @@ jobs:
           rm -f terraform.tfstate terraform.tfstate.backup
           terraform init
           terraform apply -auto-approve
+
+      - name: Keycloak diagnostics after setup failure
+        if: failure() && steps.openshift_prerequisites.conclusion == 'failure'
+        run: |
+          chmod +x theia-cloud/.github/scripts/keycloak-diagnostics.sh
+          theia-cloud/.github/scripts/keycloak-diagnostics.sh \
+            keycloak \
+            "https://keycloak.apps-microshift.testing/keycloak" \
+            openshift
 
       - name: Verify Keycloak pods Ready
         run: |
@@ -603,6 +613,15 @@ jobs:
             || kubectl -n kube-system logs -l k8s-app=kube-dns --tail=100 2>/dev/null \
             || true
           echo ""
+          if [ "${{ steps.openshift_prerequisites.conclusion }}" != "failure" ]; then
+            echo "=== Keycloak diagnostics ==="
+            chmod +x theia-cloud/.github/scripts/keycloak-diagnostics.sh
+            theia-cloud/.github/scripts/keycloak-diagnostics.sh \
+              keycloak \
+              "https://keycloak.apps-microshift.testing/keycloak" \
+              openshift
+            echo ""
+          fi
           echo "=== theia-cloud pod logs (tail 100 each) ==="
           for d in operator-deployment service-deployment landing-page-deployment conversion-webhook; do
             echo "--- $d ---"

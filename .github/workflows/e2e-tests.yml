@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.37.0, v1.34.11] # https://kubernetes.io/releases/ — 1.34 EOL 2026-10-27
+        kubernetes: [v1.37.0, v1.34.11] # https://kubernetes.io/releases/
         paths: [true, false]
         ephemeral: [true, false]
         keycloak: [true, false]
@@ -138,6 +138,15 @@ jobs:
             -var="ingress_controller_type=${{ matrix.ingress }}" \
             -var="eager_start=${{ matrix.eagerStart }}" \
             -auto-approve
+
+      - name: Keycloak diagnostics after first Terraform failure
+        if: steps.terraform_apply.outcome == 'failure'
+        run: |
+          chmod +x theia-cloud/.github/scripts/keycloak-diagnostics.sh
+          theia-cloud/.github/scripts/keycloak-diagnostics.sh \
+            keycloak \
+            "https://${{ env.INGRESS_HOST }}.nip.io/keycloak" \
+            "${{ matrix.ingress }}"
 
       - name: Retry Terraform Apply
         if: steps.terraform_apply.outcome == 'failure'
@@ -250,6 +259,14 @@ jobs:
           else
             kubectl logs -n ingress-haproxy deployment/haproxy-ingress --tail=200
           fi
+
+          echo ""
+          echo "=== Keycloak diagnostics ==="
+          chmod +x theia-cloud/.github/scripts/keycloak-diagnostics.sh
+          theia-cloud/.github/scripts/keycloak-diagnostics.sh \
+            keycloak \
+            "https://${{ env.INGRESS_HOST }}.nip.io/keycloak" \
+            "${{ matrix.ingress }}"
 
           echo ""
           echo "=== Sessions in theia-cloud namespace ==="

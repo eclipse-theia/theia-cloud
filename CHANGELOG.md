@@ -8,7 +8,7 @@
 - [node/monitor] Update Express 5, @vscode/vsce 4 and webpack-cli 7 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [demo] Update Theia IDE demo image to 1.74.100 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [ci] Update minikube 1.39, Kubernetes e2e matrix 1.37/1.34, Terraform 1.16 and pin GitHub Actions to commit SHAs [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
-- [terraform] Update cert-manager v1.21.2, Keycloak 26.7.2, haproxy-ingress 0.16.2, ingress-nginx 4.15.1 and Kubernetes v1.37; default ingress controller is now HAProxy [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [terraform] Update cert-manager v1.21.2, Keycloak 26.7.2, haproxy-ingress 0.16.2, ingress-nginx 4.15.1 and Kubernetes v1.37; install all Keycloak 26.7 operator CRDs; default ingress controller is now HAProxy; wait for Keycloak application and ingress/Route readiness before configuring realms with configurable in-cluster, external, and timeout checks [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [java/operator] Add `--oAuth2ProxyImage` operator argument to override the full oauth2-proxy image path (defaults to `quay.io/oauth2-proxy/oauth2-proxy`). This enables pulling the image from a private registry in air-gapped or corporate networks, instead of only configuring the tag via `--oAuth2ProxyVersion`.
 - [all components] Update Node.js from 20 to 24 (LTS)
 - [theia] Update TypeScript from 5.4.5 to 5.9.3 to match the TypeScript version required by `@types/node` 24

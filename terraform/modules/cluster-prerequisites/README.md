@@ -6,7 +6,8 @@ The module offers various customization options via variables including skipping
 ## Features
 
 - Installs Keycloak Operator without Operator Lifecycle Manager (OLM)
-- Configurable Keycloak operator version (default: v26.7.2)
+- Installs all CRDs required by the selected operator version, including the OIDC and SAML client CRDs introduced in Keycloak 26.7. Versions below 26.7 skip these CRDs; downgrading removes them and any resources that use them.
+- Configurable Keycloak operator version (default: 26.7.2)
 - Deploys Keycloak with configurable resources and replicas
 - Optional integrated PostgreSQL database deployment
 - Kubernetes Ingress support with TLS
@@ -133,6 +134,9 @@ module "cluster-prerequisites" {
 | `keycloak_resource_requests_memory` | `string` | `"1Gi"`        | Memory resource requests                                               |
 | `keycloak_resource_limits_cpu`      | `string` | `"1"`          | CPU resource limits                                                    |
 | `keycloak_resource_limits_memory`   | `string` | `"2Gi"`        | Memory resource limits                                                 |
+| `keycloak_ready_timeout_seconds`    | `number` | `600`          | Maximum seconds to wait for Keycloak to serve requests                 |
+| `keycloak_ready_check_in_cluster`   | `bool`   | `true`         | Verify the master realm from inside the Keycloak pod                   |
+| `keycloak_ready_check_external`     | `bool`   | `true`         | Verify Keycloak through the ingress or OpenShift Route                 |
 
 ### PostgreSQL Configuration
 
@@ -226,7 +230,7 @@ This module replaces the deprecated Bitnami Helm chart with the official Keycloa
 Check the operator logs:
 
 ```bash
-kubectl logs -n keycloak -l app=keycloak-operator
+kubectl logs -n keycloak -l app.kubernetes.io/name=keycloak-operator
 ```
 
 Check Keycloak resource status:
@@ -234,6 +238,38 @@ Check Keycloak resource status:
 ```bash
 kubectl get keycloak -n keycloak keycloak -o yaml
 ```
+
+If the operator logs report `Couldn't start informer` and `Not Found` for `keycloakoidcclients` or `keycloaksamlclients`, verify that all operator CRDs are installed:
+
+```bash
+kubectl get crd \
+  keycloaks.k8s.keycloak.org \
+  keycloakrealmimports.k8s.keycloak.org \
+  keycloakoidcclients.k8s.keycloak.org \
+  keycloaksamlclients.k8s.keycloak.org
+```
+
+### Keycloak Returns 503 After Pods Are Ready
+
+Keycloak can report Kubernetes readiness before the master realm is ready to serve requests. The module therefore waits for both the in-cluster realm endpoint and, when enabled, the external ingress or OpenShift Route.
+
+The Terraform output reports both checks on every attempt:
+
+```text
+[1/120] in-cluster: realms/master=503 health/ready=200
+[2/120] external https://keycloak.example.com/keycloak/realms/master -> HTTP 503
+```
+
+If either check cannot run in the local environment, disable it explicitly:
+
+```hcl
+keycloak_ready_check_in_cluster = false
+keycloak_ready_check_external   = false
+```
+
+The readiness provisioners require a POSIX-compatible shell. On Windows, run Terraform from WSL or Git Bash. The two flags disable the HTTP probes when `kubectl exec` or external routing cannot be used, but the provisioners still require a POSIX shell. Kubernetes resource, pod, and service endpoint readiness checks always run.
+
+Use `keycloak_ready_timeout_seconds` to change the default 600-second timeout; values below 5 seconds are rejected. On failure, inspect the response headers and body to identify whether the 503 came from Keycloak or the ingress/router, then check the Keycloak service endpoints and pod logs.
 
 ### Database Connection Issues
 
