@@ -21,6 +21,10 @@ resource "helm_release" "theia-cloud-base" {
     {
       name  = "issuer.email"
       value = var.cert_manager_issuer_email
+    },
+    {
+      name  = "operator.cloudProvider"
+      value = var.cloud_provider
     }
   ]
 }

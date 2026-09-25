@@ -45,6 +45,9 @@ import org.eclipse.theia.cloud.operator.plugins.OperatorPlugin;
 import org.eclipse.theia.cloud.operator.pv.DefaultPersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.pv.MinikubePersistentVolumeCreator;
 import org.eclipse.theia.cloud.operator.pv.PersistentVolumeCreator;
+import org.eclipse.theia.cloud.operator.routing.IngressRoutingStrategy;
+import org.eclipse.theia.cloud.operator.routing.OpenShiftRouteRoutingStrategy;
+import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 import org.eclipse.theia.cloud.operator.replacements.DefaultDeploymentTemplateReplacements;
 import org.eclipse.theia.cloud.operator.replacements.DefaultPersistentVolumeTemplateReplacements;
 import org.eclipse.theia.cloud.operator.replacements.DeploymentTemplateReplacements;
@@ -70,6 +73,7 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
         bind(BandwidthLimiter.class).to(bindBandwidthLimiter()).in(Singleton.class);
         bind(PersistentVolumeCreator.class).to(bindPersistentVolumeHandler()).in(Singleton.class);
+        bind(SessionRoutingStrategy.class).to(bindSessionRoutingStrategy()).in(Singleton.class);
         bind(IngressPathProvider.class).to(bindIngressPathProvider()).in(Singleton.class);
         bind(DeploymentTemplateReplacements.class).to(bindDeploymentTemplateReplacements()).in(Singleton.class);
         bind(PersistentVolumeTemplateReplacements.class).to(bindPersistentVolumeTemplateReplacements())
@@ -102,6 +106,17 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
         case K8S:
         default:
             return DefaultPersistentVolumeCreator.class;
+        }
+    }
+
+    protected Class<? extends SessionRoutingStrategy> bindSessionRoutingStrategy() {
+        switch (arguments.getCloudProvider()) {
+        case OPENSHIFT:
+            return OpenShiftRouteRoutingStrategy.class;
+        case K8S:
+        case MINIKUBE:
+        default:
+            return IngressRoutingStrategy.class;
         }
     }
 

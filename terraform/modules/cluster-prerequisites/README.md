@@ -13,7 +13,7 @@ The module offers various customization options via variables including skipping
 - **Optional cert-manager installation** (can be disabled if already installed)
 - Cert-manager integration for automatic certificate generation
 - Optional self-signed ClusterIssuer for local development
-- Support for Minikube and generic Kubernetes clusters
+- Support for Minikube, OpenShift, and generic Kubernetes clusters
 - Configurable HTTP relative path (e.g., `/keycloak/`)
 
 ## Prerequisites
@@ -170,9 +170,9 @@ module "cluster-prerequisites" {
 
 ### Other Configuration
 
-| Name             | Type     | Default | Description                              |
-| ---------------- | -------- | ------- | ---------------------------------------- |
-| `cloud_provider` | `string` | `"K8S"` | Cloud provider type (MINIKUBE, GKE, K8S) |
+| Name             | Type     | Default | Description                                    |
+| ---------------- | -------- | ------- | ---------------------------------------------- |
+| `cloud_provider` | `string` | `"K8S"` | Cloud provider type (MINIKUBE, K8S, OPENSHIFT) |
 
 ## Outputs
 

@@ -517,6 +517,40 @@ resource "kubernetes_ingress_v1" "keycloak" {
   ]
 }
 
+resource "kubectl_manifest" "keycloak_route" {
+  count = var.cloud_provider == "OPENSHIFT" ? 1 : 0
+
+  yaml_body = yamlencode({
+    apiVersion = "route.openshift.io/v1"
+    kind       = "Route"
+    metadata = {
+      name      = "keycloak"
+      namespace = local.keycloak_ns
+    }
+    spec = {
+      host = var.hostname
+      to = {
+        kind   = "Service"
+        name   = "keycloak-service"
+        weight = 100
+      }
+      port = {
+        targetPort = 8080
+      }
+      wildcardPolicy = "None"
+      tls = {
+        termination                   = "edge"
+        insecureEdgeTerminationPolicy = "Redirect"
+      }
+    }
+  })
+
+  depends_on = [
+    kubectl_manifest.keycloak_instance,
+    terraform_data.wait_for_keycloak_instance
+  ]
+}
+
 resource "terraform_data" "wait_for_keycloak_instance" {
   provisioner "local-exec" {
     command = <<-EOT
@@ -534,6 +568,30 @@ resource "terraform_data" "wait_for_keycloak_instance" {
 
   depends_on = [
     kubectl_manifest.keycloak_instance
+  ]
+}
+
+resource "terraform_data" "wait_for_keycloak_route" {
+  count = var.cloud_provider == "OPENSHIFT" ? 1 : 0
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Waiting for Keycloak OpenShift Route to serve traffic..."
+      for i in $(seq 1 60); do
+        if curl -sf -o /dev/null -k ${trimsuffix("https://${var.hostname}${var.keycloak_http_relative_path}", "/")}/realms/master; then
+          echo "Keycloak OpenShift Route is ready!"
+          exit 0
+        fi
+        echo "Waiting for Keycloak OpenShift Route..."
+        sleep 5
+      done
+      echo "Timed out waiting for Keycloak OpenShift Route" >&2
+      exit 1
+    EOT
+  }
+
+  depends_on = [
+    kubectl_manifest.keycloak_route
   ]
 }
 

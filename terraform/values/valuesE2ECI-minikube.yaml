@@ -1,0 +1,33 @@
+# Minikube-specific overlay for the [E2E Tests] Minikube workflow.
+# Layered on top of valuesE2ECI-base.yaml. See e2e_tests.tf in
+# terraform/ci-configurations/.
+
+imagePullPolicy: IfNotPresent
+
+hosts:
+  allWildcardInstances: ["*.webview."]
+  configuration:
+    baseHost: 192.168.39.173.nip.io
+
+landingPage:
+  image: theiacloud/theia-cloud-landing-page:minikube-ci-e2e
+
+keycloak:
+  enable: false
+  authUrl: "https://keycloak.url/auth/"
+
+operator:
+  image: theiacloud/theia-cloud-operator:minikube-ci-e2e
+  cloudProvider: "MINIKUBE"
+  wondershaperImage: theiacloud/theia-cloud-wondershaper:minikube-ci-e2e
+  storageClassName: "default"
+
+service:
+  image: theiacloud/theia-cloud-service:minikube-ci-e2e
+
+ingress:
+  certManagerAnnotations: true
+  clusterIssuer: theia-cloud-selfsigned-issuer
+  theiaCloudCommonName: true
+  tls: true
+  addTLSSecretName: true

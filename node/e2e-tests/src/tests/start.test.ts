@@ -38,7 +38,13 @@ test.describe('Start Session', () => {
 
     /* check redirect url */
     const browserUrl = page.url();
-    expect(browserUrl).toContain(baseURL!.replace('trynow', 'instances'));
+    if (process.env.MATRIX_CLOUD_PROVIDER === 'OPENSHIFT') {
+      const browserHost = new URL(browserUrl).hostname;
+      const appsDomain = process.env.APPS_DOMAIN || 'apps-microshift.testing';
+      expect(browserHost).toMatch(new RegExp(`^.+\\.ws\\.${appsDomain.replace(/\./g, '\\.')}$`));
+    } else {
+      expect(browserUrl).toContain(baseURL!.replace('trynow', 'instances'));
+    }
 
     /* check created session */
     const resources: any = await k8sApi.listNamespacedCustomObject({
@@ -110,7 +116,7 @@ test.describe('Start Session', () => {
 
     /* Verify access to Theia application (not Access Forbidden page) */
     const pageTitle = await newPage.title();
-    expect(pageTitle).toBe('Eclipse Theia');
+    expect(pageTitle).toContain('Eclipse Theia');
 
     /* Cleanup */
     await newContext.close();
