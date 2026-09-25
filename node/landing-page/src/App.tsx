@@ -26,7 +26,7 @@ let initialAppName = '';
 let initialAppDefinition = '';
 let keycloakConfig: KeycloakConfig | undefined = undefined;
 
-function App(): JSX.Element {
+function App(): React.JSX.Element {
   const [config] = useState(() => getTheiaCloudConfig());
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
@@ -160,20 +160,20 @@ function App(): JSX.Element {
         TheiaCloud.launchAndRedirect(
           config.useEphemeralStorage
             ? LaunchRequest.ephemeral(
-                config.serviceUrl,
-                TheiaCloudConfig.getServiceAuthToken(config),
-                appDefinition,
-                5,
-                email
-              )
+              config.serviceUrl,
+              TheiaCloudConfig.getServiceAuthToken(config),
+              appDefinition,
+              5,
+              email
+            )
             : LaunchRequest.createWorkspace(
-                config.serviceUrl,
-                TheiaCloudConfig.getServiceAuthToken(config),
-                appDefinition,
-                5,
-                email,
-                workspace
-              ),
+              config.serviceUrl,
+              TheiaCloudConfig.getServiceAuthToken(config),
+              appDefinition,
+              5,
+              email,
+              workspace
+            ),
           { timeout: 60000, retries: 5, accessToken: token }
         )
           .catch((err: Error) => {

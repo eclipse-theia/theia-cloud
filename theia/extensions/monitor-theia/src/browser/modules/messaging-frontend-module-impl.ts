@@ -46,7 +46,7 @@ export class MessagingFrontendContribution implements FrontendApplicationContrib
     }
 
     // Workaround to make sure that the backend module is initialized
-    // eslint-disable-next-line no-unused-expressions
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.messagingBackendModule;
   }
 }

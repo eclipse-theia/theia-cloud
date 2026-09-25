@@ -21,7 +21,7 @@ variable "enable_keycloak" {
 variable "ingress_controller_type" {
   description = "Type of ingress controller to use (nginx or haproxy)"
   type        = string
-  default     = "nginx"
+  default     = "haproxy"
 }
 
 variable "eager_start" {

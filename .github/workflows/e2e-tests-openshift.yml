@@ -87,14 +87,14 @@ jobs:
         run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=${{ inputs.theia-cloud-helm-branch || 'main' }}" >> $GITHUB_ENV
 
       - name: Checkout Theia Cloud
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: ./theia-cloud
 
       - name: Checkout Theia Cloud Helm
         # Required by 5-02_openshift_ci/theia_cloud.tf which loads
         # the chart via `chart = "../../../../theia-cloud-helm/charts/...`.
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: eclipse-theia/theia-cloud-helm
           ref: ${{ env.INPUT_THEIA_CLOUD_HELM_BRANCH }}
@@ -390,12 +390,13 @@ jobs:
           echo "OPENSHIFT_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
-          terraform_version: "1.13.0"
+          terraform_version: "1.16.4"
           terraform_wrapper: false
 
       - name: Terraform apply (4_openshift-setup)
+        id: openshift_prerequisites
         working-directory: theia-cloud/terraform/test-configurations/4_openshift-setup
         env:
           TF_VAR_openshift_server: https://127.0.0.1:6443
@@ -520,7 +521,7 @@ jobs:
       # ----------------------------------------------------------------
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: theia-cloud/node/.nvmrc
 
@@ -538,7 +539,7 @@ jobs:
 
       - name: Upload Playwright artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-failure-keycloak-${{ matrix.keycloak }}-ephemeral-${{ matrix.ephemeral }}-eagerstart-${{ matrix.eagerStart }}
           path: theia-cloud/node/e2e-tests/test-results/**/*.png
