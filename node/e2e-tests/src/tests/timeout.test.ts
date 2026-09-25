@@ -64,7 +64,9 @@ test.describe.skip('Session Timeout', () => {
     await cleanupAllResources();
   });
 
-  test.afterEach(async (_fixtures, testInfo: TestInfo) => {
+  // Playwright requires the first callback argument to use object destructuring.
+  // eslint-disable-next-line no-empty-pattern
+  test.afterEach(async ({}, testInfo: TestInfo) => {
     /* Collect pod logs if test failed */
     if (testInfo.status !== 'passed' && currentSessionName) {
       console.log(`\nTest '${testInfo.title}' failed. Collecting pod logs for session '${currentSessionName}'...`);

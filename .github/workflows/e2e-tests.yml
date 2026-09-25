@@ -139,15 +139,6 @@ jobs:
             -var="eager_start=${{ matrix.eagerStart }}" \
             -auto-approve
 
-      - name: Keycloak diagnostics after first Terraform failure
-        if: steps.terraform_apply.outcome == 'failure'
-        run: |
-          chmod +x theia-cloud/.github/scripts/keycloak-diagnostics.sh
-          theia-cloud/.github/scripts/keycloak-diagnostics.sh \
-            keycloak \
-            "https://${{ env.INGRESS_HOST }}.nip.io/keycloak" \
-            "${{ matrix.ingress }}"
-
       - name: Retry Terraform Apply
         if: steps.terraform_apply.outcome == 'failure'
         run: |
@@ -259,14 +250,6 @@ jobs:
           else
             kubectl logs -n ingress-haproxy deployment/haproxy-ingress --tail=200
           fi
-
-          echo ""
-          echo "=== Keycloak diagnostics ==="
-          chmod +x theia-cloud/.github/scripts/keycloak-diagnostics.sh
-          theia-cloud/.github/scripts/keycloak-diagnostics.sh \
-            keycloak \
-            "https://${{ env.INGRESS_HOST }}.nip.io/keycloak" \
-            "${{ matrix.ingress }}"
 
           echo ""
           echo "=== Sessions in theia-cloud namespace ==="
