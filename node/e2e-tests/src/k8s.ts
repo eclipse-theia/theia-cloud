@@ -75,7 +75,9 @@ export async function collectSessionPodLogs(sessionName: string): Promise<Sessio
 
   for (const pod of pods) {
     const podName = pod.metadata?.name;
-    if (!podName) continue;
+    if (!podName) {
+      continue;
+    }
 
     const podLogs: PodLogs = {
       podName,
@@ -89,7 +91,9 @@ export async function collectSessionPodLogs(sessionName: string): Promise<Sessio
 
     for (const container of allContainers) {
       const containerName = container.name;
-      if (!containerName) continue;
+      if (!containerName) {
+        continue;
+      }
 
       const logs = await getPodLogs(podName, containerName);
       podLogs.containers.push({
@@ -235,7 +239,9 @@ export async function deleteAllTheiaCloudPVCs(): Promise<void> {
   });
   for (const pvc of pvcs.items) {
     const name = pvc.metadata?.name;
-    if (!name) continue;
+    if (!name) {
+      continue;
+    }
     try {
       await coreV1Api.deleteNamespacedPersistentVolumeClaim({ name, namespace });
     } catch (error: any) {
@@ -250,9 +256,13 @@ export async function deleteAllTheiaCloudPVs(): Promise<void> {
   const pvs = await coreV1Api.listPersistentVolume({});
   for (const pv of pvs.items) {
     const name = pv.metadata?.name;
-    if (!name || !name.startsWith('ws-')) continue;
+    if (!name || !name.startsWith('ws-')) {
+      continue;
+    }
     const claimRef = pv.spec?.claimRef;
-    if (claimRef?.namespace !== namespace) continue;
+    if (claimRef?.namespace !== namespace) {
+      continue;
+    }
     try {
       await coreV1Api.deletePersistentVolume({ name });
     } catch (error: any) {
@@ -307,9 +317,9 @@ export async function waitForPVDeletion(timeoutMs: number = 30000, intervalMs: n
     return name && name.startsWith('ws-') && pv.spec?.claimRef?.namespace === namespace;
   });
   if (theiaCloudPVs.length > 0) {
-    const pvInfo = theiaCloudPVs.map(p => {
-      return `${p.metadata?.name} (phase=${p.status?.phase}, reclaim=${p.spec?.persistentVolumeReclaimPolicy})`;
-    }).join(', ');
+    const pvInfo = theiaCloudPVs.map(p =>
+      `${p.metadata?.name} (phase=${p.status?.phase}, reclaim=${p.spec?.persistentVolumeReclaimPolicy})`
+    ).join(', ');
     throw new Error(`PVs still exist after ${timeoutMs / 1000}s timeout: ${pvInfo}`);
   }
 }

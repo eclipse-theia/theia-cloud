@@ -7,7 +7,7 @@ interface HeaderProps {
   logoutUrl: string | undefined;
 }
 
-export const Header = ({ email, authenticate, logoutUrl }: HeaderProps): JSX.Element => (
+export const Header = ({ email, authenticate, logoutUrl }: HeaderProps): React.JSX.Element => (
   <div className='header'>
     {email ? (
       <p>{email}</p>

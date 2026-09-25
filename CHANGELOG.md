@@ -2,6 +2,13 @@
 
 ## [1.3.0] - unreleased
 
+- [java] Update to Java 25, Quarkus 3.39.5, Fabric8 kubernetes-client 7.8.0, webhooks-framework 3.0.5 and other Maven dependencies [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [node][theia] Update Theia dependencies to 1.74.1, Vite 8, React 19 (landing page), @kubernetes/client-node 2, Playwright 1.63 and typescript-eslint 8 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [node/common] Add a TypeScript 5.9 compatibility patch to the generated Axios request helper; re-apply it after regenerating the OpenAPI client [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [node/monitor] Update Express 5, @vscode/vsce 4 and webpack-cli 7 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [demo] Update Theia IDE demo image to 1.74.100 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [ci] Update minikube 1.39, Kubernetes e2e matrix 1.37/1.34, Terraform 1.16 and pin GitHub Actions to commit SHAs [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [terraform] Update cert-manager v1.21.2, Keycloak 26.7.2, haproxy-ingress 0.16.2, ingress-nginx 4.15.1 and Kubernetes v1.37; default ingress controller is now HAProxy [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [java/operator] Add `--oAuth2ProxyImage` operator argument to override the full oauth2-proxy image path (defaults to `quay.io/oauth2-proxy/oauth2-proxy`). This enables pulling the image from a private registry in air-gapped or corporate networks, instead of only configuring the tag via `--oAuth2ProxyVersion`.
 - [all components] Update Node.js from 20 to 24 (LTS)
 - [theia] Update TypeScript from 5.4.5 to 5.9.3 to match the TypeScript version required by `@types/node` 24
@@ -9,6 +16,8 @@
 
 ### Breaking Changes in 1.3.0
 
+- [java] Java 25 is now required to build and run the Java components; Docker images use Eclipse Temurin 25.
+- [terraform] The default `ingress_controller_type` changed from `nginx` to `haproxy` in all modules.
 - [node][theia] Node.js 24 or later is now required to build the `node/` and `theia/` packages. `engine-strict` is enabled in `node/.npmrc`, so `npm ci` fails on older Node versions.
 - [docker/demo] The `theia-cloud-activity-demo-theia` image now runs on Node 24 (`node:24-bookworm-slim`) instead of Node 20.
 - [java/operator] Ingress and session URL logic extracted from `LazySessionHandler` and `EagerSessionHandler` into the new `SessionRoutingStrategy` interface. Custom operator extensions that override or extend these handlers may need to inject `SessionRoutingStrategy` instead of directly using `IngressPathProvider` and `TheiaCloudIngressUtil`.

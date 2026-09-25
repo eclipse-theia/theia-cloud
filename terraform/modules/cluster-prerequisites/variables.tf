@@ -72,7 +72,7 @@ variable "keycloak_namespace" {
 variable "keycloak_version" {
   description = "Keycloak operator version (tag from keycloak-k8s-resources repository)"
   type        = string
-  default     = "26.4.5"
+  default     = "26.7.2"
 }
 
 variable "keycloak_http_relative_path" {
@@ -114,7 +114,7 @@ variable "keycloak_resource_limits_memory" {
 variable "ingress_controller_type" {
   description = "Type of ingress controller to use (nginx or haproxy)"
   type        = string
-  default     = "nginx"
+  default     = "haproxy"
 
   validation {
     condition     = contains(["nginx", "haproxy"], var.ingress_controller_type)
@@ -131,7 +131,7 @@ variable "ingress_enabled" {
 variable "ingress_class_name" {
   description = "Ingress class name"
   type        = string
-  default     = "nginx"
+  default     = "haproxy"
 }
 
 variable "ingress_tls_enabled" {
@@ -186,7 +186,7 @@ variable "install_cert_manager" {
 variable "cert_manager_version" {
   description = "Version of cert-manager to install"
   type        = string
-  default     = "v1.17.4"
+  default     = "v1.21.2"
 }
 
 variable "cert_manager_namespace" {
@@ -214,13 +214,13 @@ variable "install_ingress_controller" {
 }
 
 variable "ingress_controller_version" {
-  description = "Version of ingress controller to install"
+  description = "Version of the ingress-nginx chart to install when ingress_controller_type is nginx"
   type        = string
-  default     = "4.13.0"
+  default     = "4.15.1"
 }
 
 variable "ingress_controller_namespace" {
-  description = "Namespace for ingress controller installation"
+  description = "Namespace for ingress-nginx installation when ingress_controller_type is nginx"
   type        = string
   default     = "ingress-nginx"
 }

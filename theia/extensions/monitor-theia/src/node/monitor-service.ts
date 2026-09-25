@@ -26,14 +26,14 @@ export class DefaultTheiaCloudBackendMonitorService implements TheiaCloudBackend
     if (serviceAuthToken) {
       return serviceAuthToken;
     }
-    
+
     const appId = process.env.THEIACLOUD_APP_ID;
     if (appId) {
       console.warn('Using deprecated environment variable \'THEIACLOUD_APP_ID\'. ' +
                    'Please migrate to \'THEIACLOUD_SERVICE_AUTH_TOKEN\' in your configuration.');
       return appId;
     }
-    
+
     return undefined;
   }
 

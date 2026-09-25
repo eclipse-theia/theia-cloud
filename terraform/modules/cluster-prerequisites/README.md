@@ -6,7 +6,7 @@ The module offers various customization options via variables including skipping
 ## Features
 
 - Installs Keycloak Operator without Operator Lifecycle Manager (OLM)
-- Configurable Keycloak operator version (default: v26.4.5)
+- Configurable Keycloak operator version (default: v26.7.2)
 - Deploys Keycloak with configurable resources and replicas
 - Optional integrated PostgreSQL database deployment
 - Kubernetes Ingress support with TLS
@@ -126,7 +126,7 @@ module "cluster-prerequisites" {
 | ----------------------------------- | -------- | -------------- | ---------------------------------------------------------------------- |
 | `keycloak_admin_username`           | `string` | `"admin"`      | Keycloak admin username                                                |
 | `keycloak_namespace`                | `string` | `"keycloak"`   | Kubernetes namespace for Keycloak                                      |
-| `keycloak_version`                  | `string` | `"26.4.5"`     | Keycloak operator version (tag from keycloak-k8s-resources repository) |
+| `keycloak_version`                  | `string` | `"26.7.2"`     | Keycloak operator version (tag from keycloak-k8s-resources repository) |
 | `keycloak_http_relative_path`       | `string` | `"/keycloak/"` | HTTP relative path for Keycloak                                        |
 | `keycloak_replicas`                 | `number` | `1`            | Number of Keycloak replicas                                            |
 | `keycloak_resource_requests_cpu`    | `string` | `"500m"`       | CPU resource requests                                                  |
@@ -148,22 +148,27 @@ module "cluster-prerequisites" {
 
 ### Ingress Configuration
 
-| Name                                  | Type          | Default   | Description                                  |
-| ------------------------------------- | ------------- | --------- | -------------------------------------------- |
-| `ingress_enabled`                     | `bool`        | `true`    | Whether to create Kubernetes Ingress         |
-| `ingress_class_name`                  | `string`      | `"nginx"` | Ingress class name                           |
-| `ingress_tls_enabled`                 | `bool`        | `true`    | Whether to enable TLS for ingress            |
-| `ingress_cert_manager_cluster_issuer` | `string`      | `""`      | Cert-manager cluster issuer for TLS          |
-| `ingress_cert_manager_common_name`    | `string`      | `""`      | The common name for the certificate          |
-| `ingress_annotations`                 | `map(string)` | `{}`      | Additional annotations for ingress           |
-| `ingress_tls_secret_name`             | `string`      | `""`      | Name of TLS secret (auto-generated if empty) |
+| Name                                  | Type          | Default           | Description                                    |
+| ------------------------------------- | ------------- | ----------------- | ---------------------------------------------- |
+| `ingress_controller_type`             | `string`      | `"haproxy"`       | Type of ingress controller to use              |
+| `ingress_enabled`                     | `bool`        | `true`            | Whether to create Kubernetes Ingress           |
+| `ingress_class_name`                  | `string`      | `"haproxy"`       | Ingress class name                             |
+| `ingress_tls_enabled`                 | `bool`        | `true`            | Whether to enable TLS for ingress              |
+| `ingress_cert_manager_cluster_issuer` | `string`      | `""`              | Cert-manager cluster issuer for TLS            |
+| `ingress_cert_manager_common_name`    | `string`      | `""`              | The common name for the certificate            |
+| `ingress_annotations`                 | `map(string)` | `{}`              | Additional annotations for ingress             |
+| `ingress_tls_secret_name`             | `string`      | `""`              | Name of TLS secret (auto-generated if empty)   |
+| `install_ingress_controller`          | `bool`        | `false`           | Whether to install the ingress controller      |
+| `ingress_controller_version`          | `string`      | `"4.15.1"`        | ingress-nginx chart version (nginx only)       |
+| `ingress_controller_namespace`        | `string`      | `"ingress-nginx"` | ingress-nginx namespace (nginx only)           |
+| `load_balancer_ip`                    | `string`      | `""`              | External IP for the ingress controller service |
 
 ### Cert-Manager Configuration
 
 | Name                        | Type     | Default          | Description                                                    |
 | --------------------------- | -------- | ---------------- | -------------------------------------------------------------- |
 | `install_cert_manager`      | `bool`   | `true`           | Whether to install cert-manager                                |
-| `cert_manager_version`      | `string` | `"v1.17.4"`      | Version of cert-manager to install                             |
+| `cert_manager_version`      | `string` | `"v1.21.2"`      | Version of cert-manager to install                             |
 | `cert_manager_namespace`    | `string` | `"cert-manager"` | Namespace for cert-manager installation                        |
 | `install_selfsigned_issuer` | `bool`   | `false`          | Whether to install self-signed ClusterIssuer for Keycloak      |
 | `cert_manager_issuer_email` | `string` | `""`             | Email address for certificates (required for letsencrypt-prod) |

@@ -64,7 +64,7 @@ test.describe.skip('Session Timeout', () => {
     await cleanupAllResources();
   });
 
-  test.afterEach(async ({}, testInfo: TestInfo) => {
+  test.afterEach(async (_fixtures, testInfo: TestInfo) => {
     /* Collect pod logs if test failed */
     if (testInfo.status !== 'passed' && currentSessionName) {
       console.log(`\nTest '${testInfo.title}' failed. Collecting pod logs for session '${currentSessionName}'...`);
@@ -109,12 +109,12 @@ test.describe.skip('Session Timeout', () => {
   });
 
   test('session should be terminated after inactivity timeout (Theia monitor)', async ({ page, baseURL }) => {
-  test.setTimeout(600_000);
+    test.setTimeout(600_000);
     expect(baseURL).toBeDefined();
     const sessionName = await loginAndStartSession(page, baseURL!, 'theia-cloud-monitor-theia-timeout');
     /* timeoutAfter=4, monitorInterval=1 → session killed ~4-5 min after creation */
     /* No popup will appear (notifyAfter=15 > timeoutAfter=4) */
-	await waitForSessionDeletion(sessionName, 180_000, 480_000, 30_000);
+    await waitForSessionDeletion(sessionName, 180_000, 480_000, 30_000);
     console.log('DEBUG: Theia monitor session deleted by inactivity');
   });
 
