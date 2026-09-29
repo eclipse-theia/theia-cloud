@@ -142,7 +142,7 @@ export const toPathString = function (url: URL) {
  *
  * @export
  */
-// Manual patch on generated code: explicit Promise<R> is required for TypeScript 5.9 declaration emit; re-apply after regeneration (see documentation/OpenAPI.md).
+// Manual patch on generated code: axios >= 1.20 typings need an explicit return type for declaration emit (TS2527); re-apply after regeneration (see documentation/OpenAPI.md).
 export const createRequestFunction = function (axiosArgs: RequestArgs, globalAxios: AxiosInstance, BASE_PATH: string, configuration?: Configuration): <T = unknown, R = AxiosResponse<T>>(axios?: AxiosInstance, basePath?: string) => Promise<R> {
     return <T = unknown, R = AxiosResponse<T>>(axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
         const axiosRequestArgs = {...axiosArgs.options, url: (axios.defaults.baseURL ? '' : configuration?.basePath ?? basePath) + axiosArgs.url};

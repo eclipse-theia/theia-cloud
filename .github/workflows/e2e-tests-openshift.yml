@@ -396,7 +396,6 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform apply (4_openshift-setup)
-        id: openshift_prerequisites
         working-directory: theia-cloud/terraform/test-configurations/4_openshift-setup
         env:
           TF_VAR_openshift_server: https://127.0.0.1:6443

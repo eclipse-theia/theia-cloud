@@ -3,8 +3,8 @@
 ## [1.3.0] - unreleased
 
 - [java] Update to Java 25, Quarkus 3.39.5, Fabric8 kubernetes-client 7.8.0, webhooks-framework 3.0.5 and other Maven dependencies [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
-- [node][theia] Update Theia dependencies to 1.74.1, Vite 8, React 19 (landing page), @kubernetes/client-node 2, Playwright 1.63 and typescript-eslint 8 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
-- [node/common] Add a TypeScript 5.9 compatibility patch to the generated Axios request helper; re-apply it after regenerating the OpenAPI client [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [node][theia] Update Theia dependencies to 1.74.1, Vite 8, React 19 (landing page and testing page), @kubernetes/client-node 2, Playwright 1.63 and typescript-eslint 8 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [node/common] Update axios to 1.20 and uuid to 11; patch the generated Axios request helper with an explicit return type required by the axios 1.20 typings [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [node/monitor] Update Express 5, @vscode/vsce 4 and webpack-cli 7 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [demo] Update Theia IDE demo image to 1.74.100 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [ci] Update minikube 1.39, Kubernetes e2e matrix 1.37/1.34, Terraform 1.16 and pin GitHub Actions to commit SHAs [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
