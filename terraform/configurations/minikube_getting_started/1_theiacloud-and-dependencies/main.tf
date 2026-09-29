@@ -68,7 +68,7 @@ resource "helm_release" "haproxy-ingress-controller" {
   name             = "haproxy-ingress"
   repository       = "https://haproxy-ingress.github.io/charts"
   chart            = "haproxy-ingress"
-  version          = "0.15.1"
+  version          = "0.16.2"
   namespace        = "ingress-haproxy"
   create_namespace = true
 

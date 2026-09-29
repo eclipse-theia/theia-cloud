@@ -14,7 +14,7 @@ Located in `java/` with subfolders:
 - `service/org.eclipse.theia.cloud.service/` - Quarkus-based REST API
 - `conversion/` - CRD conversion webhook
 
-**Java Stack**: Java 21, Maven, Guice (DI), Fabric8 Kubernetes Client, Quarkus (service only), Picocli (CLI), Log4j2
+**Java Stack**: Java 25, Maven, Guice (DI), Fabric8 Kubernetes Client, Quarkus (service only), Picocli (CLI), Log4j2
 
 ### Node.js Components (`node/`)
 NPM workspaces monorepo with packages:

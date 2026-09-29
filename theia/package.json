@@ -21,9 +21,9 @@
   "devDependencies": {
     "@eclipse-dash/nodejs-wrapper": "^0.0.1",
     "@types/node": "^24.13.3",
-    "@typescript-eslint/eslint-plugin": "^6.18.1",
-    "@typescript-eslint/parser": "^6.18.1",
-    "eslint": "^8.20.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@typescript-eslint/parser": "^8.70.1",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-header": "^3.1.1",
     "eslint-plugin-import": "^2.26.0",
@@ -31,7 +31,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-simple-import-sort": "^7.0.0",
-    "lerna": "^8.1.9",
+    "lerna": "^10.0.1",
     "prettier": "^2.6.2",
     "typescript": "~5.9.3"
   },
@@ -42,6 +42,6 @@
     "extensions/monitor-theia"
   ],
   "resolutions": {
-    "inversify": "6.0.3"
+    "inversify": "6.2.2"
   }
 }

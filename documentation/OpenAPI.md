@@ -51,6 +51,9 @@ Use the `openapi-generator-cli` from the root of this repository:
 openapi-generator-cli generate -g typescript-axios -i ./documentation/openapi.json -o node/common/src/client/ --additional-properties=supportsES6=true,typescriptThreePlus=true --skip-validate-spec
 ```
 
+After generating, re-apply the manual patch to `createRequestFunction` in `node/common/src/client/common.ts`.
+The axios typings (since 1.20) reference a `unique symbol` in `AxiosResponse`, so the generated function needs an explicit return type (`<T = unknown, R = AxiosResponse<T>>(axios?: AxiosInstance, basePath?: string) => Promise<R>`) or the declaration build fails with TS2527.
+
 ## Generate API Documentation
 
 Documentation for the service API can be generated as markdown files.
