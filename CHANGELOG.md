@@ -18,6 +18,7 @@
 
 - [java] Java 25 is now required to build and run the Java components; Docker images use Eclipse Temurin 25.
 - [terraform] The default `ingress_controller_type` changed from `nginx` to `haproxy` in all modules.
+- [terraform] The `cluster-prerequisites` module now requires a POSIX-compatible shell for its `local-exec` provisioners, even with `keycloak_ready_check_in_cluster` and `keycloak_ready_check_external` disabled. On Windows, run Terraform from WSL or Git Bash.
 - [node][theia] Node.js 24 or later is now required to build the `node/` and `theia/` packages. `engine-strict` is enabled in `node/.npmrc`, so `npm ci` fails on older Node versions.
 - [docker/demo] The `theia-cloud-activity-demo-theia` image now runs on Node 24 (`node:24-bookworm-slim`) instead of Node 20.
 - [java/operator] Ingress and session URL logic extracted from `LazySessionHandler` and `EagerSessionHandler` into the new `SessionRoutingStrategy` interface. Custom operator extensions that override or extend these handlers may need to inject `SessionRoutingStrategy` instead of directly using `IngressPathProvider` and `TheiaCloudIngressUtil`.
