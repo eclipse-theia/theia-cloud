@@ -12,6 +12,7 @@
     "header",
     "import",
     "no-null",
+    "node-security",
     "react",
     "simple-import-sort",
     "prettier"
