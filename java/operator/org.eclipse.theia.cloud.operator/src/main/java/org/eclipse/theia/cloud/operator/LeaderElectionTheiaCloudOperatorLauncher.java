@@ -26,6 +26,7 @@ import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
@@ -106,7 +107,7 @@ public abstract class LeaderElectionTheiaCloudOperatorLauncher extends TheiaClou
     }
 
     protected void startOperatorAsLeader(TheiaCloudOperatorArguments arguments) {
-        AbstractTheiaCloudOperatorModule module = createModule(arguments);
+        Module module = customizeModule(createModule(arguments));
         LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
 
         Injector injector = Guice.createInjector(module);
