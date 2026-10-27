@@ -40,15 +40,15 @@ _Note_: Ensure your local `kubectl` is set to the correct namespace (e.g., `thei
 
 A shared library for building Theia Cloud Kubernetes operators.
 
-#### Customizing injected dependencies
+#### Customizing the injected client
 
-Override `customizeModule(Module)` in your launcher to replace bindings with
-`Modules.override(original).with(overrides)`. The hook receives the module returned by
-`createModule()` and must return the effective, non-null module used to create the injector.
-It runs once per injector-creation/startup invocation, including when the operator starts as
-leader. Its default implementation returns the original module unchanged.
+Override `createTheiaCloudClient(NamespacedKubernetesClient)` in your operator module
+to supply a custom client. The existing Guice provider delegates to this factory and
+keeps the client a singleton within each injector. Leave the inherited `@Provides`
+method unchanged, and do not annotate the factory with `@Provides`.
 
-For example, the following launcher injects a client that logs unsuccessful session IP lookups:
+For example, the following launcher uses a custom `DefaultTheiaCloudOperatorModule`
+that adds logging when a session's ClusterIP cannot be found:
 
 ```java
 package example;
@@ -60,12 +60,9 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.defaultoperator.DefaultTheiaCloudOperatorLauncher;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.util.Modules;
+import org.eclipse.theia.cloud.defaultoperator.DefaultTheiaCloudOperatorModule;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
+import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
@@ -76,14 +73,20 @@ public class CustomTheiaCloudOperatorLauncher extends DefaultTheiaCloudOperatorL
     }
 
     @Override
-    protected Module customizeModule(Module module) {
-        return Modules.override(module).with(new AbstractModule() {
-            @Provides
-            @Singleton
-            TheiaCloudClient provideCustomTheiaCloudClient(NamespacedKubernetesClient client) {
-                return new LoggingTheiaCloudClient(client);
-            }
-        });
+    public AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments) {
+        return new CustomTheiaCloudOperatorModule(arguments);
+    }
+
+    public static class CustomTheiaCloudOperatorModule extends DefaultTheiaCloudOperatorModule {
+
+        public CustomTheiaCloudOperatorModule(TheiaCloudOperatorArguments arguments) {
+            super(arguments);
+        }
+
+        @Override
+        protected TheiaCloudClient createTheiaCloudClient(NamespacedKubernetesClient client) {
+            return new LoggingTheiaCloudClient(client);
+        }
     }
 
     public static class LoggingTheiaCloudClient extends DefaultTheiaCloudClient {
@@ -105,11 +108,6 @@ public class CustomTheiaCloudOperatorLauncher extends DefaultTheiaCloudOperatorL
     }
 }
 ```
-
-The provider belongs to a separate override module. Do not override an inherited `@Provides`
-method or add a competing provider to the original module: Guice rejects those approaches.
-The custom provider keeps the client singleton-scoped and receives the existing Kubernetes
-client through injection.
 
 Save this example as `example/CustomTheiaCloudOperatorLauncher.java` in your downstream
 application, with the default operator and its dependencies on the classpath. Launch

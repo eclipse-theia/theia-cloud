@@ -22,12 +22,9 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.client.DefaultTheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.defaultoperator.DefaultTheiaCloudOperatorLauncher;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.util.Modules;
+import org.eclipse.theia.cloud.defaultoperator.DefaultTheiaCloudOperatorModule;
+import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
+import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
@@ -38,14 +35,20 @@ public class CustomTheiaCloudOperatorLauncher extends DefaultTheiaCloudOperatorL
     }
 
     @Override
-    protected Module customizeModule(Module module) {
-        return Modules.override(module).with(new AbstractModule() {
-            @Provides
-            @Singleton
-            TheiaCloudClient provideCustomTheiaCloudClient(NamespacedKubernetesClient client) {
-                return new LoggingTheiaCloudClient(client);
-            }
-        });
+    public AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments) {
+        return new CustomTheiaCloudOperatorModule(arguments);
+    }
+
+    public static class CustomTheiaCloudOperatorModule extends DefaultTheiaCloudOperatorModule {
+
+        public CustomTheiaCloudOperatorModule(TheiaCloudOperatorArguments arguments) {
+            super(arguments);
+        }
+
+        @Override
+        protected TheiaCloudClient createTheiaCloudClient(NamespacedKubernetesClient client) {
+            return new LoggingTheiaCloudClient(client);
+        }
     }
 
     public static class LoggingTheiaCloudClient extends DefaultTheiaCloudClient {

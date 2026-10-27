@@ -24,7 +24,6 @@ import org.eclipse.theia.cloud.operator.di.AbstractTheiaCloudOperatorModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Module;
 
 import picocli.CommandLine;
 
@@ -38,7 +37,7 @@ public abstract class TheiaCloudOperatorLauncher {
 
     public void runMain(String[] args) throws InterruptedException {
         this.args = createArguments(args);
-        Module module = customizeModule(createModule(this.args));
+        AbstractTheiaCloudOperatorModule module = createModule(this.args);
         LOGGER.info(formatLogMessage(COR_ID_INIT, "Using " + module.getClass().getName() + " as DI module"));
 
         Injector injector = Guice.createInjector(module);
@@ -53,19 +52,6 @@ public abstract class TheiaCloudOperatorLauncher {
         commandLine.parseArgs(args);
         LOGGER.info(formatLogMessage(COR_ID_INIT, "Parsed args: " + arguments));
         return arguments;
-    }
-
-    /**
-     * Customize the dependency injection module before creating the operator's injector.
-     * Called once per injector-creation/startup invocation, including leader startup.
-     * The default implementation returns the original module unchanged. Subclasses can
-     * return a composed module, for example using {@code Modules.override(module).with(overrides)}.
-     *
-     * @param module the original module returned by {@link #createModule(TheiaCloudOperatorArguments)}
-     * @return the effective, non-null module to use when creating the injector
-     */
-    protected Module customizeModule(Module module) {
-        return module;
     }
 
     abstract AbstractTheiaCloudOperatorModule createModule(TheiaCloudOperatorArguments arguments);

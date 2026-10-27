@@ -35,12 +35,9 @@ import org.eclipse.theia.cloud.operator.messaging.MonitorMessagingServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.google.inject.util.Modules;
 
 import io.fabric8.kubernetes.client.Config;
@@ -70,16 +67,16 @@ class TheiaCloudClientInjectionTests {
     }
 
     @Test
-    void separateOverrideModule_providesCustomSingletonUsingSuppliedKubernetesClient() {
+    void factoryHook_providesCustomSingletonUsingSuppliedKubernetesClient() {
         try (NamespacedKubernetesClient kubernetes = offlineClient()) {
-            CustomClientModule override = new CustomClientModule(Optional.of(SENTINEL_IP), Optional.empty());
-            Injector injector = Guice.createInjector(Modules.override(offlineModule(kubernetes)).with(override));
+            CustomClientModule module = new CustomClientModule(Optional.of(SENTINEL_IP), Optional.empty());
+            Injector injector = Guice.createInjector(offlineModule(kubernetes, module));
 
             try (TheiaCloudClient client = injector.getInstance(TheiaCloudClient.class)) {
                 assertInstanceOf(CustomTheiaCloudClient.class, client);
                 assertSame(client, injector.getInstance(TheiaCloudClient.class));
                 assertSame(kubernetes, client.kubernetes());
-                assertEquals(1, override.provisionCount);
+                assertEquals(1, module.provisionCount);
             }
         }
     }
@@ -103,8 +100,7 @@ class TheiaCloudClientInjectionTests {
     private void assertMonitorUrl(Optional<String> ip, Optional<AppDefinition> appDefinition,
             Optional<String> expectedUrl) {
         try (NamespacedKubernetesClient kubernetes = offlineClient()) {
-            Injector injector = Guice.createInjector(Modules.override(offlineModule(kubernetes))
-                    .with(new CustomClientModule(ip, appDefinition)));
+            Injector injector = Guice.createInjector(offlineModule(kubernetes, new CustomClientModule(ip, appDefinition)));
 
             try (TheiaCloudClient client = injector.getInstance(TheiaCloudClient.class)) {
                 CustomTheiaCloudClient customClient = assertInstanceOf(CustomTheiaCloudClient.class, client);
@@ -122,14 +118,23 @@ class TheiaCloudClientInjectionTests {
     }
 
     private static Module offlineModule(NamespacedKubernetesClient kubernetes) {
-        TheiaCloudOperatorArguments arguments = new TheiaCloudOperatorArguments();
-        new CommandLine(arguments).parseArgs("--instancesHost", "example.test", "--cloudProvider", "K8S");
-        AbstractTheiaCloudOperatorModule operatorModule = new AbstractTheiaCloudOperatorModule(arguments) {
+        AbstractTheiaCloudOperatorModule operatorModule = new AbstractTheiaCloudOperatorModule(arguments()) {
             @Override
             protected Class<? extends TheiaCloudOperator> bindTheiaCloudOperator() {
                 return InertOperator.class;
             }
         };
+        return offlineModule(kubernetes, operatorModule);
+    }
+
+    private static TheiaCloudOperatorArguments arguments() {
+        TheiaCloudOperatorArguments arguments = new TheiaCloudOperatorArguments();
+        new CommandLine(arguments).parseArgs("--instancesHost", "example.test", "--cloudProvider", "K8S");
+        return arguments;
+    }
+
+    private static Module offlineModule(NamespacedKubernetesClient kubernetes,
+            AbstractTheiaCloudOperatorModule operatorModule) {
         // Replace the binding itself so the production CRD-validating provider is never invoked.
         return Modules.override(operatorModule)
                 .with((Module) binder -> binder.bind(NamespacedKubernetesClient.class).toInstance(kubernetes));
@@ -153,19 +158,24 @@ class TheiaCloudClientInjectionTests {
         }
     }
 
-    private static class CustomClientModule extends AbstractModule {
+    private static class CustomClientModule extends AbstractTheiaCloudOperatorModule {
         private final Optional<String> ip;
         private final Optional<AppDefinition> appDefinition;
         private int provisionCount;
 
         CustomClientModule(Optional<String> ip, Optional<AppDefinition> appDefinition) {
+            super(arguments());
             this.ip = ip;
             this.appDefinition = appDefinition;
         }
 
-        @Provides
-        @Singleton
-        TheiaCloudClient provideCustomClient(NamespacedKubernetesClient kubernetes) {
+        @Override
+        protected Class<? extends TheiaCloudOperator> bindTheiaCloudOperator() {
+            return InertOperator.class;
+        }
+
+        @Override
+        protected TheiaCloudClient createTheiaCloudClient(NamespacedKubernetesClient kubernetes) {
             provisionCount++;
             return new CustomTheiaCloudClient(kubernetes, ip, appDefinition);
         }
