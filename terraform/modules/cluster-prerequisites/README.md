@@ -253,10 +253,10 @@ kubectl get crd \
 
 Keycloak can report Kubernetes readiness before the master realm is ready to serve requests. The module therefore waits for both the in-cluster realm endpoint and, when enabled, the external ingress or OpenShift Route.
 
-The Terraform output reports both checks on every attempt:
+The in-cluster check queries the Keycloak pod through the Kubernetes API server proxy (`kubectl get --raw .../pods/<pod>:8080/proxy/...`), so it needs neither `kubectl exec` nor any tooling inside the Keycloak image, but the Terraform user needs `get` permission on `pods/proxy`. The Terraform output reports each failed attempt:
 
 ```text
-[1/120] in-cluster: realms/master=503 health/ready=200
+[1/120] in-cluster: realms/master not ready: Error from server (ServiceUnavailable): the server is currently unable to handle the request
 [2/120] external https://keycloak.example.com/keycloak/realms/master -> HTTP 503
 ```
 
@@ -267,7 +267,7 @@ keycloak_ready_check_in_cluster = false
 keycloak_ready_check_external   = false
 ```
 
-The readiness provisioners require a POSIX-compatible shell. On Windows, run Terraform from WSL or Git Bash. The two flags disable the HTTP probes when `kubectl exec` or external routing cannot be used, but the provisioners still require a POSIX shell. Kubernetes resource, pod, and service endpoint readiness checks always run.
+The readiness provisioners require a POSIX-compatible shell. On Windows, run Terraform from WSL or Git Bash. The two flags disable the HTTP probes when the API server pod proxy or external routing cannot be used, but the provisioners still require a POSIX shell. Kubernetes resource, pod, and service endpoint readiness checks always run.
 
 Use `keycloak_ready_timeout_seconds` to change the default 600-second timeout; values below 5 seconds are rejected. On failure, inspect the response headers and body to identify whether the 503 came from Keycloak or the ingress/router, then check the Keycloak service endpoints and pod logs.
 

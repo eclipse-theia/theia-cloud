@@ -423,7 +423,6 @@ locals {
   keycloak_protocol       = var.ingress_tls_enabled ? "https://" : "http://"
   keycloak_base_path      = trimsuffix(var.keycloak_http_relative_path, "/")
   keycloak_realm_path     = "${local.keycloak_base_path}/realms/master"
-  keycloak_health_path    = "${local.keycloak_base_path}/health/ready"
   keycloak_external_url   = "${local.keycloak_protocol}${var.hostname}"
   keycloak_ready_attempts = ceil(var.keycloak_ready_timeout_seconds / 5)
 
@@ -646,16 +645,10 @@ resource "terraform_data" "wait_for_keycloak_instance" {
         exit 0
       fi
 
-      keycloak_status() {
-        PORT=$1
-        REQUEST_PATH=$2
-        POD_NAME=$3
-        STATUS=$(kubectl exec -n ${local.keycloak_ns} "$POD_NAME" -c keycloak -- bash -c "exec 3<>/dev/tcp/127.0.0.1/$PORT && printf 'GET $REQUEST_PATH HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && head -n1 <&3" 2>/dev/null | tr -d '\r' | cut -d' ' -f2)
-        if [ -n "$STATUS" ]; then
-          echo "$STATUS"
-        else
-          echo "000"
-        fi
+      # Query the pod via the API server proxy: needs no tooling inside the Keycloak image
+      # and no kubectl exec. On failure, prints the error (stdout is discarded, stderr captured).
+      keycloak_get() {
+        kubectl get --raw "/api/v1/namespaces/${local.keycloak_ns}/pods/$1:$2/proxy$3" 2>&1 >/dev/null
       }
 
       echo "Waiting up to ${var.keycloak_ready_timeout_seconds}s for Keycloak to serve ${local.keycloak_realm_path} in-cluster..."
@@ -667,14 +660,13 @@ resource "terraform_data" "wait_for_keycloak_instance" {
           continue
         fi
 
-        REALM_STATUS=$(keycloak_status 8080 ${local.keycloak_realm_path} "$POD")
-        HEALTH_STATUS=$(keycloak_status 9000 ${local.keycloak_health_path} "$POD")
-        echo "[$i/${local.keycloak_ready_attempts}] in-cluster: realms/master=$REALM_STATUS health/ready=$HEALTH_STATUS"
-        if [ "$REALM_STATUS" = "200" ]; then
+        # The assignment takes the exit status of keycloak_get; on failure REALM_ERR holds the error message.
+        if REALM_ERR=$(keycloak_get "$POD" 8080 ${local.keycloak_realm_path}); then
           echo "Keycloak application is ready in-cluster."
           kubectl logs -n ${local.keycloak_ns} "$POD" -c keycloak | grep -m1 'started in' || true
           exit 0
         fi
+        echo "[$i/${local.keycloak_ready_attempts}] in-cluster: realms/master not ready: $REALM_ERR"
         sleep 5
       done
 
