@@ -22,7 +22,8 @@
     ],
     "no-sequences": "error",
     "no-throw-literal": "error",
-    "no-unused-expressions": [
+    "no-unused-expressions": "off",
+    "@typescript-eslint/no-unused-expressions": [
       "error",
       {
         "allowShortCircuit": true,
@@ -46,7 +47,13 @@
       }
     ],
     "no-underscore-dangle": "off",
-    "quotes": "off", // typescript-eslint rule activated instead
+    "quotes": [
+      "error",
+      "single",
+      {
+        "avoidEscape": true
+      }
+    ],
     "space-before-function-paren": [
       "error",
       {
@@ -88,14 +95,7 @@
         "args": "none"
       }
     ],
-    "@typescript-eslint/quotes": [
-      "error",
-      "single",
-      {
-        "avoidEscape": true
-      }
-    ],
-    "@typescript-eslint/semi": [
+    "semi": [
       "error",
       "always"
     ],

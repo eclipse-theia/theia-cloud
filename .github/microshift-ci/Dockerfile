@@ -24,8 +24,8 @@
 #     at `mirror.openshift.com`, which serves the same MicroShift bits
 #     Red Hat ships under subscription, on two anonymous yum repos.
 #     No GPG keys are published alongside, so `gpgcheck=0` is required.
-#   - Reproducibility: pin to a specific RC tag (e.g. `4.18.0-rc.10`),
-#     NOT the moving `latest-4.18` symlink.
+#   - Reproducibility: pin to a specific RC tag (e.g. `4.22.0-rc.5`),
+#     NOT the moving `latest-4.22` symlink.
 #   - microshift shells out to `/bin/hostname` at startup; the package
 #     must be installed explicitly because it is not in the minimal
 #     base nor pulled transitively by any microshift-* dep.
@@ -45,14 +45,14 @@
 #     fix this.
 
 ARG BASE_IMAGE=quay.io/centos/centos:stream9
-# MicroShift release tag to pin (e.g. 4.18.0-rc.10). Browse
+# MicroShift release tag to pin (e.g. 4.22.0-rc.5). Browse
 # https://mirror.openshift.com/pub/openshift-v4/x86_64/microshift/ocp/
 # for available RC directories. There are no GA dirs in the public
 # mirror; only `*-rc.*` and (in `…/ocp-dev-preview/…`) `*-ec.*`.
-ARG MICROSHIFT_RELEASE=4.18.0-rc.10
+ARG MICROSHIFT_RELEASE=4.22.0-rc.5
 # Minor line corresponding to MICROSHIFT_RELEASE. Used both in the local
 # repo `[id]` and in the dependencies-repo URL.
-ARG MICROSHIFT_LINE=4.18
+ARG MICROSHIFT_LINE=4.22
 
 FROM ${BASE_IMAGE}
 
@@ -101,8 +101,8 @@ RUN systemctl mask \
 # from the workflow (defense in depth — with literal mirror URLs an
 # empty value would surface as a 404, but pinning is too important to
 # rely on that alone).
-RUN : "${MICROSHIFT_RELEASE:=4.18.0-rc.10}" && \
-    : "${MICROSHIFT_LINE:=4.18}" && \
+RUN : "${MICROSHIFT_RELEASE:=4.22.0-rc.5}" && \
+    : "${MICROSHIFT_LINE:=4.22}" && \
     cat > /etc/yum.repos.d/microshift.repo <<EOF
 [microshift-${MICROSHIFT_LINE}]
 name=MicroShift ${MICROSHIFT_LINE}

@@ -6,11 +6,19 @@ This folder contains a simple test app that allows to login via Keycloak and tri
 
 First, adapt the constants `KEYCLOAK_CONFIG` and `SERVICE_URL` at the top of [App.tsx](./src/App.tsx) to fit your deployment.
 
-Install dependencies and start app:
+Install dependencies and build the monorepo in the parent directory. This also builds and links the common package:
 
 ```bash
+cd ..
 npm ci
-npm start
+npm run build
+```
+
+Start the app's dev server:
+
+```bash
+cd testing-page
+npm run dev
 ```
 
 Open <http://localhost:3000>
@@ -26,8 +34,4 @@ Return values of outgoing requests are also logged to the console.
 
 ## Tech Stack
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+The page is based on [ViteJS](https://vitejs.dev/) with React and Typescript.
