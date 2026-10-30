@@ -140,15 +140,15 @@ module "cluster-prerequisites" {
 
 ### PostgreSQL Configuration
 
-| Name                          | Type     | Default         | Description                                        |
-| ----------------------------- | -------- | --------------- | -------------------------------------------------- |
-| `postgres_enabled`            | `bool`   | `true`          | Whether to deploy PostgreSQL database              |
-| `postgres_database`           | `string` | `"keycloak"`    | PostgreSQL database name                           |
-| `postgres_username`           | `string` | `"keycloak"`    | PostgreSQL username                                |
-| `postgres_storage_class`      | `string` | `""`            | Storage class for PostgreSQL PVC (empty = default) |
-| `postgres_storage_size`       | `string` | `"10Gi"`        | Storage size for PostgreSQL PVC                    |
-| `postgres_volume_permissions` | `bool`   | `false`         | Enable init container for volume permissions       |
-| `postgres_image`              | `string` | `"postgres:17"` | PostgreSQL Docker image                            |
+| Name                          | Type     | Default                           | Description                                        |
+| ----------------------------- | -------- | --------------------------------- | -------------------------------------------------- |
+| `postgres_enabled`            | `bool`   | `true`                            | Whether to deploy PostgreSQL database              |
+| `postgres_database`           | `string` | `"keycloak"`                      | PostgreSQL database name                           |
+| `postgres_username`           | `string` | `"keycloak"`                      | PostgreSQL username                                |
+| `postgres_storage_class`      | `string` | `""`                              | Storage class for PostgreSQL PVC (empty = default) |
+| `postgres_storage_size`       | `string` | `"10Gi"`                          | Storage size for PostgreSQL PVC                    |
+| `postgres_volume_permissions` | `bool`   | `false`                           | Enable init container for volume permissions       |
+| `postgres_image`              | `string` | `"docker.io/library/postgres:17"` | PostgreSQL Docker image                            |
 
 ### Ingress Configuration
 

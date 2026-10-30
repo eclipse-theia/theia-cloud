@@ -60,7 +60,7 @@ variable "postgres_volume_permissions" {
 variable "postgres_image" {
   description = "PostgreSQL Docker image. See Keycloak database compatibility at https://www.keycloak.org/server/db#_supported_databases"
   type        = string
-  default     = "postgres:17"
+  default     = "docker.io/library/postgres:17"
 }
 
 variable "keycloak_namespace" {

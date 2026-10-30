@@ -302,7 +302,7 @@ resource "kubernetes_deployment_v1" "postgres" {
           for_each = var.postgres_volume_permissions ? [1] : []
           content {
             name  = "volume-permissions"
-            image = "busybox:latest"
+            image = "docker.io/library/busybox:latest"
             command = [
               "sh",
               "-c",

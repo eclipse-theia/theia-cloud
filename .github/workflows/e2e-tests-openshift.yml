@@ -338,7 +338,9 @@ jobs:
           # container. Install rancher's local-path-provisioner as a
           # shim. (The terraform module remains CRC-compatible because
           # this lives in the workflow, not in the module.)
-          kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.30/deploy/local-path-storage.yaml
+          # Requires >= v0.0.36: older manifests use short image names,
+          # which CRI-O >= 1.34 (MicroShift >= 4.21) rejects as ambiguous.
+          kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.37/deploy/local-path-storage.yaml
 
           # The provisioner pod and its on-demand helper pods bind-mount
           # hostPath, which the restricted SCC blocks. Grant `privileged`
