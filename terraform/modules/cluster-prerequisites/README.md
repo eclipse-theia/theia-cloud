@@ -256,8 +256,8 @@ Keycloak can report Kubernetes readiness before the master realm is ready to ser
 The in-cluster check queries the Keycloak pod through the Kubernetes API server proxy (`kubectl get --raw .../pods/<pod>:8080/proxy/...`), so it needs neither `kubectl exec` nor any tooling inside the Keycloak image, but the Terraform user needs `get` permission on `pods/proxy`. The Terraform output reports each failed attempt:
 
 ```text
-[1/120] in-cluster: realms/master not ready: Error from server (ServiceUnavailable): the server is currently unable to handle the request
-[2/120] external https://keycloak.example.com/keycloak/realms/master -> HTTP 503
+[1, 0s/600s] in-cluster: realms/master not ready: Error from server (ServiceUnavailable): the server is currently unable to handle the request
+[1, 10s/600s] external https://keycloak.example.com/keycloak/realms/master -> HTTP 503
 ```
 
 If either check cannot run in the local environment, disable it explicitly:
