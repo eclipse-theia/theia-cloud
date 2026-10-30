@@ -4,6 +4,7 @@
 
 - [java] Update to Java 25, Quarkus 3.39.5, Fabric8 kubernetes-client 7.8.0, webhooks-framework 3.0.5 and other Maven dependencies [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [node][theia] Update Theia dependencies to 1.74.1, Vite 8, React 19 (landing page and testing page), @kubernetes/client-node 2, Playwright 1.63 and typescript-eslint 8 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
+- [node/testing-page] Migrate the testing page from Create React App (`react-scripts`) to Vite 8 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [node/common] Update axios to 1.20 and uuid to 11; patch the generated Axios request helper with an explicit return type required by the axios 1.20 typings [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [node/monitor] Update Express 5, @vscode/vsce 4 and webpack-cli 7 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
 - [demo] Update Theia IDE demo image to 1.74.100 [#488](https://github.com/eclipse-theia/theia-cloud/pull/488)
