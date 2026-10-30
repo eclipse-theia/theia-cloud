@@ -135,7 +135,7 @@ module "cluster-prerequisites" {
 | `keycloak_resource_limits_cpu`      | `string` | `"1"`          | CPU resource limits                                                    |
 | `keycloak_resource_limits_memory`   | `string` | `"2Gi"`        | Memory resource limits                                                 |
 | `keycloak_ready_timeout_seconds`    | `number` | `600`          | Maximum seconds to wait for Keycloak to serve requests                 |
-| `keycloak_ready_check_in_cluster`   | `bool`   | `true`         | Verify the master realm from inside the Keycloak pod                   |
+| `keycloak_ready_check_in_cluster`   | `bool`   | `true`         | Verify the master realm through the Kubernetes API server pod proxy    |
 | `keycloak_ready_check_external`     | `bool`   | `true`         | Verify Keycloak through the ingress or OpenShift Route                 |
 
 ### PostgreSQL Configuration
@@ -267,7 +267,7 @@ keycloak_ready_check_in_cluster = false
 keycloak_ready_check_external   = false
 ```
 
-The readiness provisioners require a POSIX-compatible shell. On Windows, run Terraform from WSL or Git Bash. The two flags disable the HTTP probes when the API server pod proxy or external routing cannot be used, but the provisioners still require a POSIX shell. Kubernetes resource, pod, and service endpoint readiness checks always run.
+The readiness provisioners require a POSIX-compatible shell. On Windows, run Terraform from WSL. Starting a Windows `terraform.exe` from Git Bash is not enough, because `local-exec` still runs commands with `cmd`. The two flags disable the HTTP probes when the API server pod proxy or external routing cannot be used, but the provisioners still require a POSIX shell. Kubernetes resource, pod, and service endpoint readiness checks always run.
 
 Use `keycloak_ready_timeout_seconds` to change the default 600-second timeout; values below 5 seconds are rejected. On failure, inspect the response headers and body to identify whether the 503 came from Keycloak or the ingress/router, then check the Keycloak service endpoints and pod logs.
 

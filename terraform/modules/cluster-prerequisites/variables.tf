@@ -123,7 +123,7 @@ variable "keycloak_ready_timeout_seconds" {
 }
 
 variable "keycloak_ready_check_in_cluster" {
-  description = "Whether to verify the Keycloak master realm from inside the Keycloak pod after Kubernetes readiness"
+  description = "Whether to verify the Keycloak master realm through the Kubernetes API server pod proxy after Kubernetes readiness"
   type        = bool
   default     = true
 }
