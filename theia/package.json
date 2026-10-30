@@ -42,6 +42,7 @@
     "extensions/monitor-theia"
   ],
   "resolutions": {
-    "inversify": "6.2.2"
+    "inversify": "6.2.2",
+    "**/nx/undici": "^7.30.1"
   }
 }
