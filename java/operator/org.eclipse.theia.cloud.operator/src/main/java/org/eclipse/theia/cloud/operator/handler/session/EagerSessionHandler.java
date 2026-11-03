@@ -46,6 +46,7 @@ import org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil;
 
 import com.google.inject.Inject;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
@@ -76,6 +77,9 @@ public class EagerSessionHandler implements SessionHandler {
 
     @Override
     public boolean sessionAdded(Session session, String correlationId) {
+        if (arguments.isUseKeycloak() && session.getNonNullStatus().hasUrl()) {
+            return true;
+        }
         SessionSpec spec = session.getSpec();
         LOGGER.info(formatLogMessage(correlationId, "Handling sessionAdded " + spec));
 
@@ -106,7 +110,7 @@ public class EagerSessionHandler implements SessionHandler {
         Entry<Optional<Service>, Boolean> reserveServiceResult = reserveService(client.kubernetes(), client.namespace(),
                 appDefinitionResourceName, appDefinitionResourceUID, appDefinitionID, sessionResourceName,
                 sessionResourceUID, correlationId);
-        if (reserveServiceResult.getValue()) {
+        if (reserveServiceResult.getValue() && !arguments.isUseKeycloak()) {
             LOGGER.info(formatLogMessage(correlationId, "Found an already reserved service"));
             return true;
         }
@@ -121,7 +125,7 @@ public class EagerSessionHandler implements SessionHandler {
         Entry<Optional<Service>, Boolean> reserveInternalServiceResult = reserveInternalService(client.kubernetes(),
                 client.namespace(), appDefinitionResourceName, appDefinitionResourceUID, appDefinitionID,
                 sessionResourceName, sessionResourceUID, correlationId);
-        if (reserveInternalServiceResult.getValue()) {
+        if (reserveInternalServiceResult.getValue() && !arguments.isUseKeycloak()) {
             LOGGER.info(formatLogMessage(correlationId, "Found an already reserved internal service"));
             return true;
         }
@@ -129,6 +133,15 @@ public class EagerSessionHandler implements SessionHandler {
         if (internalServiceToUse.isEmpty()) {
             LOGGER.error(formatLogMessage(correlationId,
                     "No Internal Service for app definition " + appDefinitionID + " found."));
+            return false;
+        }
+
+        if (arguments.isUseKeycloak()
+                && (!TheiaCloudServiceUtil.selectsSameApplication(serviceToUse.get(), internalServiceToUse.get())
+                        || !isReservedFor(serviceToUse.get(), appDefinitionResourceUID, sessionResourceUID)
+                        || !isReservedFor(internalServiceToUse.get(), appDefinitionResourceUID, sessionResourceUID))) {
+            LOGGER.error(formatLogMessage(correlationId,
+                    "Reserved Services must select the same application and belong to this Session UID"));
             return false;
         }
 
@@ -179,8 +192,18 @@ public class EagerSessionHandler implements SessionHandler {
 
         final String deploymentName = TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance);
         try {
-            client.kubernetes().apps().deployments().withName(deploymentName).edit(deployment -> TheiaCloudHandlerUtil
-                    .addOwnerReferenceToItem(correlationId, sessionResourceName, sessionResourceUID, deployment));
+            client.kubernetes().apps().deployments().withName(deploymentName).edit(deployment -> {
+                if (arguments.isUseKeycloak()) {
+                    if (!canReserve(deployment, appDefinitionResourceUID, sessionResourceUID)) {
+                        throw new KubernetesClientException("Deployment is reserved by another session");
+                    }
+                    if (isReservedFor(deployment, appDefinitionResourceUID, sessionResourceUID)) {
+                        return deployment;
+                    }
+                }
+                return TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, sessionResourceName,
+                        sessionResourceUID, deployment);
+            });
         } catch (KubernetesClientException e) {
             LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
                     + (appDefinitionID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
@@ -223,6 +246,9 @@ public class EagerSessionHandler implements SessionHandler {
 
                         LOGGER.debug(formatLogMessage(correlationId,
                                 "Adding update annotation to pod " + pod.getMetadata().getName()));
+                        if (pod.getMetadata().getAnnotations() == null) {
+                            pod.getMetadata().setAnnotations(new HashMap<>());
+                        }
                         pod.getMetadata().getAnnotations().put(EAGER_START_REFRESH_ANNOTATION,
                                 Instant.now().toString());
                         // Apply the changes
@@ -256,8 +282,13 @@ public class EagerSessionHandler implements SessionHandler {
 
         /* Update session resource */
         try {
-            AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
-                    correlationId);
+            if (arguments.isUseKeycloak()) {
+                AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
+                        internalServiceToUse.get(), correlationId);
+            } else {
+                AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
+                        correlationId);
+            }
         } catch (KubernetesClientException e) {
             LOGGER.error(
                     formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),
@@ -277,6 +308,25 @@ public class EagerSessionHandler implements SessionHandler {
         // Filter for external services (those without "-int" suffix)
         List<Service> existingExternalServices = existingServices.stream()
                 .filter(service -> !service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
+
+        if (arguments.isUseKeycloak()) {
+            // A replay can encounter only the internal half of a reservation. Resume that instance as well.
+            boolean hasPublicReservation = existingExternalServices.stream()
+                    .anyMatch(service -> isReservedFor(service, appDefinitionResourceUID, sessionResourceUID));
+            if (!hasPublicReservation) {
+                Optional<Service> reservedInternal = existingServices.stream()
+                        .filter(service -> service.getMetadata().getName().endsWith("-int"))
+                        .filter(service -> isReservedFor(service, appDefinitionResourceUID, sessionResourceUID))
+                        .findFirst();
+                if (reservedInternal.isPresent()) {
+                    existingExternalServices = existingExternalServices.stream()
+                            .filter(service -> TheiaCloudServiceUtil.selectsSameApplication(service, reservedInternal.get()))
+                            .collect(Collectors.toList());
+                }
+            }
+            return reserveAuthenticatedService(client, namespace, appDefinitionResourceUID, sessionResourceName,
+                    sessionResourceUID, existingExternalServices, correlationId);
+        }
 
         Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
                 sessionResourceUID, existingExternalServices);
@@ -313,6 +363,22 @@ public class EagerSessionHandler implements SessionHandler {
         List<Service> existingInternalServices = existingServices.stream()
                 .filter(service -> service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
 
+        if (arguments.isUseKeycloak()) {
+            Optional<Service> external = existingServices.stream()
+                    .filter(service -> !service.getMetadata().getName().endsWith("-int"))
+                    .filter(service -> isReservedFor(service, appDefinitionResourceUID, sessionResourceUID))
+                    .findFirst();
+            if (external.isEmpty()) {
+                LOGGER.error(formatLogMessage(correlationId, "No public Service reserved for this Session UID"));
+                return JavaUtil.tuple(Optional.empty(), false);
+            }
+            List<Service> matching = existingInternalServices.stream()
+                    .filter(service -> TheiaCloudServiceUtil.selectsSameApplication(external.get(), service))
+                    .collect(Collectors.toList());
+            return reserveAuthenticatedService(client, namespace, appDefinitionResourceUID, sessionResourceName,
+                    sessionResourceUID, matching, correlationId);
+        }
+
         Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
                 sessionResourceUID, existingInternalServices);
         if (alreadyReservedService.isPresent()) {
@@ -336,6 +402,59 @@ public class EagerSessionHandler implements SessionHandler {
             return JavaUtil.tuple(Optional.empty(), false);
         }
         return JavaUtil.tuple(serviceToUse, false);
+    }
+
+    private Entry<Optional<Service>, Boolean> reserveAuthenticatedService(NamespacedKubernetesClient client,
+            String namespace, String appDefinitionUID, String sessionName, String sessionUID,
+            List<Service> candidates, String correlationId) {
+        Optional<Service> reserved = candidates.stream()
+                .filter(service -> isReservedFor(service, appDefinitionUID, sessionUID)).findFirst();
+        if (reserved.isPresent()) {
+            return JavaUtil.tuple(reserved, true);
+        }
+        Optional<Service> candidate = candidates.stream()
+                .filter(service -> canReserve(service, appDefinitionUID, sessionUID)).findFirst();
+        if (candidate.isEmpty()) {
+            LOGGER.warn(formatLogMessage(correlationId, "No matching Service is available for this Session UID"));
+            return JavaUtil.tuple(Optional.empty(), false);
+        }
+        try {
+            Service updated = client.services().inNamespace(namespace).withName(candidate.get().getMetadata().getName())
+                    .edit(service -> {
+                        // Fabric8 may retry this callback after a conflict: recheck the fresh object each time.
+                        if (!canReserve(service, appDefinitionUID, sessionUID)
+                                || !TheiaCloudServiceUtil.selectsSameApplication(candidate.get(), service)) {
+                            throw new KubernetesClientException("Service ownership or application selector changed");
+                        }
+                        if (!isReservedFor(service, appDefinitionUID, sessionUID)) {
+                            TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, sessionName, sessionUID, service);
+                        }
+                        return service;
+                    });
+            return JavaUtil.tuple(Optional.ofNullable(updated), false);
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Could not reserve Service "
+                    + candidate.get().getMetadata().getName()), e);
+            return JavaUtil.tuple(Optional.empty(), false);
+        }
+    }
+
+    private static boolean canReserve(HasMetadata resource, String appDefinitionUID, String sessionUID) {
+        if (resource == null || resource.getMetadata() == null || appDefinitionUID == null || sessionUID == null) {
+            return false;
+        }
+        var owners = resource.getMetadata().getOwnerReferences();
+        return owners != null
+                && owners.stream().anyMatch(owner -> AppDefinition.KIND.equals(owner.getKind())
+                        && appDefinitionUID.equals(owner.getUid()))
+                && owners.stream().noneMatch(owner -> Session.KIND.equals(owner.getKind())
+                        && !sessionUID.equals(owner.getUid()));
+    }
+
+    private static boolean isReservedFor(HasMetadata resource, String appDefinitionUID, String sessionUID) {
+        return canReserve(resource, appDefinitionUID, sessionUID)
+                && resource.getMetadata().getOwnerReferences().stream()
+                        .anyMatch(owner -> Session.KIND.equals(owner.getKind()) && sessionUID.equals(owner.getUid()));
     }
 
     @Override

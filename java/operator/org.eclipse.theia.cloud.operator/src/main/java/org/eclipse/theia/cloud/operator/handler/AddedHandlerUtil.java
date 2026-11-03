@@ -62,6 +62,7 @@ import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.SecretEnvSource;
+import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
@@ -70,6 +71,10 @@ public final class AddedHandlerUtil {
     private static final Logger LOGGER = LogManager.getLogger(AddedHandlerUtil.class);
 
     private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+
+    private static final AuthenticatedSessionAvailability AUTHENTICATED_AVAILABILITY =
+            new AuthenticatedSessionAvailability(EXECUTOR, Thread::sleep,
+                    uri -> (HttpURLConnection) uri.toURL().openConnection());
 
     public static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     public static final String TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML = "/templateServiceWithoutOAuthProxy.yaml";
@@ -171,12 +176,7 @@ public final class AddedHandlerUtil {
                 int code;
 
                 try {
-                    if (connection instanceof HttpsURLConnection httpsConn) {
-                        httpsConn.setHostnameVerifier(ALL_GOOD_HOSTNAME_VERIFIER);
-                        SSLContext sc = SSLContext.getInstance("SSL");
-                        sc.init(null, new TrustManager[] { TRUST_ALL_MANAGER }, new java.security.SecureRandom());
-                        httpsConn.setSSLSocketFactory(sc.getSocketFactory());
-                    }
+                    configurePublicConnection(connection);
                     connection.connect();
                     code = connection.getResponseCode();
                 } catch (IOException e) {
@@ -215,6 +215,26 @@ public final class AddedHandlerUtil {
 
         });
 
+    }
+
+    /**
+     * Checks both the public URL and the application behind the internal Service before publishing the URL.
+     * The existing overload retains the public-only behavior for sessions without Keycloak.
+     */
+    public static void updateSessionURLAsync(SessionResourceClient sessions, Session session, String namespace,
+            String url, Service internalService, String correlationId) {
+        AUTHENTICATED_AVAILABILITY.updateSessionURLAsync(sessions, session, namespace, url, internalService,
+                correlationId);
+    }
+
+    static void configurePublicConnection(HttpURLConnection connection)
+            throws NoSuchAlgorithmException, KeyManagementException {
+        if (connection instanceof HttpsURLConnection httpsConn) {
+            httpsConn.setHostnameVerifier(ALL_GOOD_HOSTNAME_VERIFIER);
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, new TrustManager[] { TRUST_ALL_MANAGER }, new java.security.SecureRandom());
+            httpsConn.setSSLSocketFactory(sc.getSocketFactory());
+        }
     }
 
     public static void removeEmptyResources(Deployment deployment) {
