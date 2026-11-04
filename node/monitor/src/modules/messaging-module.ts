@@ -16,12 +16,14 @@ export class MessagingModule implements MonitorModule {
     messagingRouter.post('', (req, res) => {
       if (isAuthorized(req)) {
         const body = req.body;
-        if (body.level && body.message) {
-          if (body.fullscreen) {
-            createFullscreenMessage(body.level, body.message, body.detail);
-          } else {
-            createMessage(body.level, body.message);
-          }
+        if (!body?.level || !body?.message) {
+          res.status(400).end("Body missing 'level' or 'message' fields");
+          return;
+        }
+        if (body.fullscreen) {
+          createFullscreenMessage(body.level, body.message, body.detail);
+        } else {
+          createMessage(body.level, body.message);
         }
         res.status(200);
         res.end('success');

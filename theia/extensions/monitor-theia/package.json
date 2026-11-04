@@ -35,6 +35,7 @@
     "prepare": "npm run clean && npm run build",
     "clean": "rimraf lib",
     "build": "tsc",
+    "test": "npm run build && node --test test/*.test.cjs",
     "watch": "tsc -w",
     "lint": "eslint -c ../../.eslintrc.js --ext .ts ./src",
     "prepublishOnly": "npm run build",
