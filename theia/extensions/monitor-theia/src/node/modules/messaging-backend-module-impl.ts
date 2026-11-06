@@ -16,12 +16,11 @@ export class MessagingBackendModuleImpl implements MessagingBackendModule {
     messagingRouter.post('', (req, res) => {
       if (isAuthorized(req)) {
         const body = req.body;
-        if (body.level && body.message) {
-          this.displayMessage(body.level, body.message, body.detail, body.fullscreen);
-        } else {
-          res.end("Body missing 'level' or 'message' fields");
-          res.status(400);
+        if (!body?.level || !body?.message) {
+          res.status(400).end("Body missing 'level' or 'message' fields");
+          return;
         }
+        this.displayMessage(body.level, body.message, body.detail, body.fullscreen);
         res.status(200);
         res.end('success');
       } else {
