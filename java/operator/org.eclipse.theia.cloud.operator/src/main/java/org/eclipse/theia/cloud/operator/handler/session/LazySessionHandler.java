@@ -283,8 +283,17 @@ public class LazySessionHandler implements SessionHandler {
 
         /* Update session resource */
         try {
-            AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
-                    correlationId);
+            if (arguments.isUseKeycloak()) {
+                if (!TheiaCloudServiceUtil.selectsSameApplication(serviceToUse.get(), internalServiceToUse.get())) {
+                    LOGGER.error(formatLogMessage(correlationId, "Internal Service does not select the session application"));
+                    return false;
+                }
+                AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
+                        internalServiceToUse.get(), correlationId);
+            } else {
+                AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
+                        correlationId);
+            }
         } catch (KubernetesClientException e) {
             LOGGER.error(
                     formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),

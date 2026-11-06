@@ -189,8 +189,20 @@ public class IngressRoutingStrategy implements SessionRoutingStrategy {
     private void addSingleIngressRule(Ingress ingress, Service service, int port, String path, String correlationId) {
         final String host = arguments.getInstancesHost();
         String serviceName = service.getMetadata().getName();
-        client.ingresses().edit(correlationId, ingress.getMetadata().getName(),
-                ingressToUpdate -> addIngressRule(ingressToUpdate, host, serviceName, port, path));
+        client.ingresses().edit(correlationId, ingress.getMetadata().getName(), ingressToUpdate -> {
+            if (arguments.isUseKeycloak()) {
+                // Authenticated eager setup can resume after a partial reservation or an operator restart.
+                String fullPath = path + arguments.getIngressPathSuffix();
+                ingressToUpdate.getSpec().getRules().removeIf(rule -> {
+                    if (!host.equals(rule.getHost()) || rule.getHttp() == null) {
+                        return false;
+                    }
+                    rule.getHttp().getPaths().removeIf(existing -> fullPath.equals(existing.getPath()));
+                    return rule.getHttp().getPaths().isEmpty();
+                });
+            }
+            addIngressRule(ingressToUpdate, host, serviceName, port, path);
+        });
     }
 
     private void addIngressRule(Ingress ingress, String host, String serviceName, int port, String path) {
