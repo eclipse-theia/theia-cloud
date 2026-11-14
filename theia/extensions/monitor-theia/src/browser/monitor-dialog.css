@@ -1,0 +1,30 @@
+.theia-cloud-monitor-dialog {
+  display: flex;
+  gap: var(--theia-ui-padding);
+  max-width: min(66vw, 800px);
+}
+
+.theia-cloud-monitor-dialog > div {
+  max-height: min(66vh, 600px);
+  overflow: auto;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  user-select: text;
+}
+
+.theia-cloud-monitor-dialog p {
+  margin-bottom: 0;
+  color: var(--theia-descriptionForeground);
+}
+
+.theia-cloud-monitor-dialog .codicon-info {
+  color: var(--theia-editorInfo-foreground);
+}
+
+.theia-cloud-monitor-dialog .codicon-warning {
+  color: var(--theia-editorWarning-foreground);
+}
+
+.theia-cloud-monitor-dialog .codicon-error {
+  color: var(--theia-editorError-foreground);
+}
