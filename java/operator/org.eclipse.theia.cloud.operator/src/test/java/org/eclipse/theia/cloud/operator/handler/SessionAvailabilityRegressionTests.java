@@ -17,17 +17,11 @@
 package org.eclipse.theia.cloud.operator.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -41,89 +35,74 @@ import org.eclipse.theia.cloud.common.k8s.client.SessionResourceClient;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
-import org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import com.sun.net.httpserver.HttpServer;
 
-import io.fabric8.kubernetes.api.model.Service;
-
-/** Exercises the public production entry point, its executor, HTTP requests and status publication. */
 class SessionAvailabilityRegressionTests {
     @ParameterizedTest
-    @ValueSource(ints = {200, 404, 503})
-    void doesNotPublishBeforeBothEndpointsRecover(int failure) throws Exception {
-        HttpServer proxy = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        HttpServer app = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        AtomicInteger publicCode = new AtomicInteger(failure == 200 ? 302 : 401);
-        AtomicInteger appCode = new AtomicInteger(failure == 200 ? 503 : 200);
+    @CsvSource({"404,503,302", "503,403,200"})
+    void waitsForTheApplicationAndPublishesThePublicUrl(int publicFailure, int internalFailure, int internalSuccess)
+            throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         AtomicInteger publicRequests = new AtomicInteger();
-        CountDownLatch exercised = new CountDownLatch(2);
-        CountDownLatch published = new CountDownLatch(1);
-        proxy.createContext("/", exchange -> {
-            int code = publicCode.get();
-            publicRequests.incrementAndGet();
-            if (code == 302) exchange.getResponseHeaders().add("Location", "/login");
+        AtomicInteger internalRequests = new AtomicInteger();
+        AtomicInteger followedInternalRedirects = new AtomicInteger();
+        server.createContext("/public", exchange -> {
+            int attempt = publicRequests.incrementAndGet();
+            // Reach the login page first, then exercise the public fallback around a failed request.
+            int code = switch (attempt) {
+                case 1 -> 302;
+                case 2, 4, 5 -> 401;
+                case 3 -> publicFailure;
+                default -> 200;
+            };
+            exchange.getResponseHeaders().add("Location", "/login");
             exchange.sendResponseHeaders(code, -1);
             exchange.close();
-            if (code == 401) publicCode.set(failure);
-            exercised.countDown();
         });
-        proxy.createContext("/login", exchange -> {
+        server.createContext("/login", exchange -> {
             exchange.sendResponseHeaders(200, -1);
             exchange.close();
         });
-        app.createContext("/", exchange -> {
-            exchange.sendResponseHeaders(appCode.get(), -1);
+        server.createContext("/internal", exchange -> {
+            int code = internalRequests.incrementAndGet() == 1 ? internalFailure : internalSuccess;
+            exchange.getResponseHeaders().add("Location", "/redirect-target");
+            exchange.sendResponseHeaders(code, -1);
             exchange.close();
         });
-        proxy.start();
-        app.start();
-        String publicUrl = "http://127.0.0.1:" + proxy.getAddress().getPort() + "/";
-        URI internalUrl = URI.create("http://127.0.0.1:" + app.getAddress().getPort() + "/");
-        Session session = new Session();
-        session.getMetadata().setName("regression-" + failure);
-        session.getMetadata().setUid("regression-uid-" + failure);
-        session.setSpec(new SessionSpec("session", "app", "user@example.com"));
-        session.setStatus(new SessionStatus());
-        SessionResourceClient sessions = mock(SessionResourceClient.class);
-        doAnswer(invocation -> {
-            Consumer<SessionStatus> update = invocation.getArgument(2);
-            update.accept(session.getStatus());
-            published.countDown();
-            return session;
-        }).when(sessions).updateStatus(anyString(), eq(session), any());
-        when(sessions.get(session.getMetadata().getName())).thenReturn(Optional.of(session));
-        doAnswer(invocation -> {
-            Consumer<Session> update = invocation.getArgument(2);
-            update.accept(session);
-            if (session.getNonNullStatus().hasUrl()) published.countDown();
-            return session;
-        }).when(sessions).editStatus(anyString(), eq(session.getMetadata().getName()), any());
-        Service service = new Service();
+        server.createContext("/redirect-target", exchange -> {
+            followedInternalRedirects.incrementAndGet();
+            exchange.sendResponseHeaders(503, -1);
+            exchange.close();
+        });
+        server.start();
         try {
-            // Only replace cluster DNS discovery. The production polling and publication logic remain intact.
-            try (var serviceUrls = mockStatic(TheiaCloudServiceUtil.class)) {
-                serviceUrls.when(() -> TheiaCloudServiceUtil.getInternalServiceURL(service)).thenReturn(internalUrl);
-                AddedHandlerUtil.updateSessionURLAsync(sessions, session, "regression", publicUrl, service, "test");
-            }
-            exercised.await(7, TimeUnit.SECONDS);
-            // Give the response reader time to process the second response before examining publication.
-            assertFalse(published.await(1, TimeUnit.SECONDS), "URL published while an endpoint was unavailable");
-            assertTrue(publicRequests.get() >= 2);
-            publicCode.set(200);
-            appCode.set(200);
-            assertTrue(published.await(8, TimeUnit.SECONDS), "URL was not published after recovery");
-            assertEquals(publicUrl, session.getStatus().getUrl());
-            verify(sessions, times(1)).editStatus(anyString(), eq(session.getMetadata().getName()), any());
+            URI base = URI.create("http://127.0.0.1:" + server.getAddress().getPort());
+            String publicUrl = base.resolve("/public").toString();
+            Session session = new Session();
+            session.setSpec(new SessionSpec("session", "app", "user@example.com"));
+            SessionStatus status = new SessionStatus();
+            CountDownLatch published = new CountDownLatch(1);
+            SessionResourceClient sessions = mock(SessionResourceClient.class);
+            doAnswer(invocation -> {
+                Consumer<SessionStatus> update = invocation.getArgument(2);
+                update.accept(status);
+                published.countDown();
+                return session;
+            }).when(sessions).updateStatus(eq("test"), eq(session), any());
+
+            AddedHandlerUtil.updateSessionURLAsync(sessions, session, "sessions", publicUrl,
+                    Optional.of(base.resolve("/internal")), "test");
+
+            assertTrue(published.await(25, TimeUnit.SECONDS), "Timed out waiting for URL publication");
+            assertEquals(5, publicRequests.get());
+            assertEquals(2, internalRequests.get());
+            assertEquals(0, followedInternalRedirects.get());
+            assertEquals(publicUrl, status.getUrl());
         } finally {
-            // Let a still-running production worker finish before closing the local servers.
-            publicCode.set(200);
-            appCode.set(200);
-            published.await(8, TimeUnit.SECONDS);
-            proxy.stop(0);
-            app.stop(0);
+            server.stop(0);
         }
     }
 }

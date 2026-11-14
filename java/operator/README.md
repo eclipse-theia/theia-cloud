@@ -36,6 +36,8 @@ To debug the Default Theia Cloud Operator, follow these steps:
 
 _Note_: Ensure your local `kubectl` is set to the correct namespace (e.g., `theia-cloud`), as the debuggable operator will interact with your local Kubernetes cluster.
 
+With Keycloak enabled, the operator checks both the public URL and the application’s internal Kubernetes Service before publishing the session URL. Run the operator in the cluster, or configure your local debugging environment to resolve Service DNS names and reach the Services on port 3001. Without that access, the session URL stays unset.
+
 ### Theia Cloud Operator Library
 
 A shared library for building Theia Cloud Kubernetes operators.

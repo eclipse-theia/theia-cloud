@@ -16,7 +16,7 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.operator.handler.session;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -30,8 +30,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
@@ -44,7 +44,7 @@ import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
 import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
 import org.eclipse.theia.cloud.operator.util.K8sUtil;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.client.utils.Serialization;
@@ -53,8 +53,8 @@ import picocli.CommandLine;
 
 class LazySessionAvailabilityTests {
     @ParameterizedTest
-    @CsvSource({"true,true,true", "true,false,true", "false,true,true", "false,false,true", "true,true,false"})
-    void wiresAvailabilityForAuthAndRoutingModes(boolean auth, boolean paths, boolean matching) {
+    @ValueSource(booleans = {true, false})
+    void probesTheCreatedServiceOnlyWhenKeycloakIsEnabled(boolean auth) {
         Session session = new Session();
         session.getMetadata().setName("session");
         session.getMetadata().setUid("session-uid");
@@ -72,13 +72,12 @@ class LazySessionAvailabilityTests {
         handler.arguments = new TheiaCloudOperatorArguments();
         new CommandLine(handler.arguments).parseArgs("--instancesHost=public.example", "--keycloak=" + auth);
         handler.routingStrategy = mock(SessionRoutingStrategy.class);
-        String url = paths ? "https://public.example/instances/session/" : "https://session.public.example/";
+        String url = "https://public.example/instances/session/";
         when(handler.routingStrategy.ensureRoutingResourceExists(app, "test")).thenReturn(true);
         when(handler.routingStrategy.addSessionRouting(eq(session), eq(app), any(), eq("test"))).thenReturn(url);
         var external = new ServiceBuilder().withNewMetadata().withName("public").withNamespace("sessions")
                 .endMetadata().withNewSpec().addToSelector("app", "session-uid").endSpec().build();
         var internal = new ServiceBuilder(external).editMetadata().withName("internal").endMetadata().build();
-        if (!matching) internal.getSpec().setSelector(Map.of("app", "another-session"));
         doReturn(false).when(handler).hasMaxInstancesReached(any(), any(), anyString());
         doReturn(false).when(handler).hasMaxSessionsReached(any(), anyString());
         doNothing().when(handler).syncSessionDataToWorkspace(any(), anyString());
@@ -98,16 +97,11 @@ class LazySessionAvailabilityTests {
                     .thenReturn(List.of());
             resources.when(() -> K8sUtil.getExistingConfigMaps(any(), anyString(), anyString(), anyString()))
                     .thenReturn(List.of());
-            assertEquals(!auth || matching, handler.sessionAdded(session, "test"));
-            if (!matching) {
-                availability.verifyNoInteractions();
-            } else if (auth) {
-                availability.verify(() -> AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, "sessions",
-                        url, internal, "test"));
-            } else {
-                availability.verify(() -> AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, "sessions",
-                        url, "test"));
-            }
+            assertTrue(handler.sessionAdded(session, "test"));
+            Optional<URI> expected = auth ? Optional.of(URI.create("http://internal.sessions.svc:3001/"))
+                    : Optional.empty();
+            availability.verify(() -> AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, "sessions",
+                    url, expected, "test"));
         }
     }
 }

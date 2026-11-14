@@ -31,10 +31,10 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
+import org.eclipse.theia.cloud.common.util.SessionUtil;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServicePort;
 
 public final class TheiaCloudServiceUtil {
 
@@ -64,38 +64,9 @@ public final class TheiaCloudServiceUtil {
         return NamingUtil.createNameWithSuffix(appDefinition, instance, "int");
     }
 
-    /** Returns the application root using the internal Service's exposed port, not its targetPort. */
-    public static URI getInternalServiceURL(Service service) {
-        if (service == null || service.getMetadata() == null || service.getSpec() == null) {
-            throw new IllegalArgumentException("Internal Service metadata and spec are required");
-        }
-        String name = service.getMetadata().getName();
-        String namespace = service.getMetadata().getNamespace();
-        if (name == null || name.isBlank() || namespace == null || namespace.isBlank()) {
-            throw new IllegalArgumentException("Internal Service name and namespace are required");
-        }
-        List<ServicePort> ports = service.getSpec().getPorts();
-        ServicePort port = ports == null ? null : ports.stream()
-                .filter(candidate -> "http-internal".equals(candidate.getName())).findFirst().orElse(null);
-        if (port == null || port.getPort() == null || port.getPort() < 1 || port.getPort() > 65535
-                || (port.getProtocol() != null && !"TCP".equals(port.getProtocol()))) {
-            throw new IllegalArgumentException("Internal Service " + name + " needs a valid TCP http-internal port");
-        }
-        URI uri = URI.create("http://" + name + "." + namespace + ".svc:" + port.getPort() + "/");
-        if (uri.getHost() == null || uri.getUserInfo() != null || !"/".equals(uri.getPath())) {
-            throw new IllegalArgumentException("Invalid internal Service name or namespace");
-        }
-        return uri;
-    }
-
-    /** Both Services must select exactly the same application pods. */
-    public static boolean selectsSameApplication(Service external, Service internal) {
-        return external != null && internal != null && external.getSpec() != null && internal.getSpec() != null
-                && external.getSpec().getSelector() != null && !external.getSpec().getSelector().isEmpty()
-                && external.getSpec().getSelector().equals(internal.getSpec().getSelector())
-                && external.getMetadata() != null && internal.getMetadata() != null
-                && external.getMetadata().getNamespace() != null
-                && external.getMetadata().getNamespace().equals(internal.getMetadata().getNamespace());
+    public static URI getInternalServiceURL(String serviceName, String namespace) {
+        int port = SessionUtil.getInternalPort().orElseThrow();
+        return URI.create("http://" + serviceName + "." + namespace + ".svc:" + port + "/");
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Service service) {
