@@ -34,6 +34,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MonitorMessagingServiceImpl implements MonitorMessagingService {
 
@@ -41,6 +42,9 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
     private static final String POST_MESSAGE = "/message";
 
     private static final Logger LOGGER = LogManager.getLogger(MonitorMessagingServiceImpl.class);
+
+    @Inject
+    private OkHttpClient client;
 
     @Inject
     private TheiaCloudClient resourceClient;
@@ -72,8 +76,6 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
     }
 
     protected void postMessage(Session session, String level, String message, boolean fullscreen, String detail) {
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-
         Optional<String> postMessageURL = getURL(session);
         if (postMessageURL.isPresent()) {
             MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
@@ -84,8 +86,11 @@ public class MonitorMessagingServiceImpl implements MonitorMessagingService {
             Request postRequest = new Request.Builder().url(postMessageURL.get())
                     .addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).method("POST", body)
                     .build();
-            try {
-                client.newCall(postRequest).execute();
+            try (Response response = client.newCall(postRequest).execute()) {
+                if (!response.isSuccessful()) {
+                    LOGGER.info("[{}] Could not send message to extension: HTTP {}", session.getSpec().getName(),
+                            response.code());
+                }
             } catch (IOException e) {
                 LOGGER.info("[" + session.getSpec().getName() + "] Could not send message to extension:" + e);
             }
