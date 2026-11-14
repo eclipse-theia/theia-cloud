@@ -61,6 +61,9 @@ public class MonitorActivityTracker implements OperatorPlugin {
     private static final String COR_ID_NOACTIVITYPREFIX = "no-activity-";
 
     @Inject
+    private OkHttpClient client;
+
+    @Inject
     private TheiaCloudClient resourceClient;
 
     @Inject
@@ -109,16 +112,13 @@ public class MonitorActivityTracker implements OperatorPlugin {
             int notifyAfter) {
         String sessionName = session.getSpec().getName();
         logInfo(sessionName, "Pinging session at " + sessionURL);
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
 
         String getActivityURL = getURL(sessionURL, port, GET_ACTIVITY);
         logInfo(sessionName, "GET " + getActivityURL);
 
         Request getActivityRequest = new Request.Builder().url(getActivityURL)
                 .addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).get().build();
-        Response getActivityResponse;
-        try {
-            getActivityResponse = client.newCall(getActivityRequest).execute();
+        try (Response getActivityResponse = client.newCall(getActivityRequest).execute()) {
             ResponseBody body = getActivityResponse.body();
             if (getActivityResponse.code() == 200 && body != null) {
                 long lastReportedMilliseconds = Long.valueOf(body.string());
@@ -151,8 +151,10 @@ public class MonitorActivityTracker implements OperatorPlugin {
                 Request postRequest = new Request.Builder().url(postPopupURL)
                         .addHeader("Authorization", "Bearer " + session.getSpec().getSessionSecret()).post(body)
                         .build();
-                try {
-                    client.newCall(postRequest).execute();
+                try (Response response = client.newCall(postRequest).execute()) {
+                    if (!response.isSuccessful()) {
+                        logInfo(sessionName, "POST " + postPopupURL + " returned HTTP " + response.code());
+                    }
                 } catch (IOException e) {
                     logInfo(sessionName, "REQUEST FAILED: " + "POST " + postPopupURL);
                 }
