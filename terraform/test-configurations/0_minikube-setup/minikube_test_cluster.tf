@@ -1,6 +1,6 @@
 variable "kubernetes_version" {
   description = "Kubernetes version to use"
-  default     = "v1.34.0"
+  default     = "v1.37.0"
 }
 
 variable "ingress_controller_type" {

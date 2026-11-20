@@ -8,12 +8,12 @@
     "ui-tests": "npm run build && playwright test --config=./configs/playwright.config.ts"
   },
   "dependencies": {
-    "@kubernetes/client-node": "^1.4.0",
-    "@playwright/test": "^1.41.2",
-    "@theia/playwright": "^1.64.0"
+    "@kubernetes/client-node": "^2.0.0",
+    "@playwright/test": "^1.63.0",
+    "@theia/playwright": "~1.74.1"
   },
   "devDependencies": {
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.13.3",
     "cross-env": "^7.0.3"
   }
 }

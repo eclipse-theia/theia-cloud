@@ -35,11 +35,11 @@ on:
   workflow_dispatch:
     inputs:
       microshift_release:
-        description: "MicroShift release tag (e.g. 4.18.0-rc.10). Leave empty to use the Dockerfile default."
+        description: "MicroShift release tag (e.g. 4.22.0-rc.5). Leave empty to use the Dockerfile default."
         type: string
         default: ""
       microshift_line:
-        description: "MicroShift minor line (e.g. 4.18). Leave empty to use the Dockerfile default."
+        description: "MicroShift minor line (e.g. 4.22). Leave empty to use the Dockerfile default."
         type: string
         default: ""
       theia-cloud-helm-branch:
@@ -87,14 +87,14 @@ jobs:
         run: echo "INPUT_THEIA_CLOUD_HELM_BRANCH=${{ inputs.theia-cloud-helm-branch || 'main' }}" >> $GITHUB_ENV
 
       - name: Checkout Theia Cloud
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: ./theia-cloud
 
       - name: Checkout Theia Cloud Helm
         # Required by 5-02_openshift_ci/theia_cloud.tf which loads
         # the chart via `chart = "../../../../theia-cloud-helm/charts/...`.
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: eclipse-theia/theia-cloud-helm
           ref: ${{ env.INPUT_THEIA_CLOUD_HELM_BRANCH }}
@@ -338,7 +338,9 @@ jobs:
           # container. Install rancher's local-path-provisioner as a
           # shim. (The terraform module remains CRC-compatible because
           # this lives in the workflow, not in the module.)
-          kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.30/deploy/local-path-storage.yaml
+          # Requires >= v0.0.36: older manifests use short image names,
+          # which CRI-O >= 1.34 (MicroShift >= 4.21) rejects as ambiguous.
+          kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.37/deploy/local-path-storage.yaml
 
           # The provisioner pod and its on-demand helper pods bind-mount
           # hostPath, which the restricted SCC blocks. Grant `privileged`
@@ -390,9 +392,9 @@ jobs:
           echo "OPENSHIFT_TOKEN=${TOKEN}" >> "$GITHUB_ENV"
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
-          terraform_version: "1.13.0"
+          terraform_version: "1.16.4"
           terraform_wrapper: false
 
       - name: Terraform apply (4_openshift-setup)
@@ -520,7 +522,7 @@ jobs:
       # ----------------------------------------------------------------
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: theia-cloud/node/.nvmrc
 
@@ -538,7 +540,7 @@ jobs:
 
       - name: Upload Playwright artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: playwright-failure-keycloak-${{ matrix.keycloak }}-ephemeral-${{ matrix.ephemeral }}-eagerstart-${{ matrix.eagerStart }}
           path: theia-cloud/node/e2e-tests/test-results/**/*.png

@@ -57,7 +57,7 @@ public class ApplicationLifecycleListener {
         Map<String, Object> quarkusProperties = StreamSupport
                 .stream(configuration.getPropertyNames().spliterator(), false).filter(this::isQuarkusProperty) //
                 .collect(Collectors.toMap(Function.identity(),
-                        property -> configuration.getValue(property, String.class)));
+                        property -> configuration.getOptionalValue(property, String.class).orElse("")));
         logger.info("Resulting Quarkus Configuration");
         logger.info(new JsonObject(quarkusProperties).encodePrettily());
     }

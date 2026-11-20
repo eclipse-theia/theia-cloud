@@ -8,7 +8,7 @@ interface FooterProps {
   setSelectedAppDefinition: (value: React.SetStateAction<string>) => void
 }
 
-export const Footer = ({appDefinition, appName, additionalApps, setSelectedAppName, setSelectedAppDefinition}: FooterProps): JSX.Element => (
+export const Footer = ({appDefinition, appName, additionalApps, setSelectedAppName, setSelectedAppDefinition}: FooterProps): React.JSX.Element => (
   <div className='App__footer'>
     {additionalApps.length > 0 && (
       <p>

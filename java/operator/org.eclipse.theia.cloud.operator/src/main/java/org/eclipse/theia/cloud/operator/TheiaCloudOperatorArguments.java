@@ -56,7 +56,7 @@ public class TheiaCloudOperatorArguments {
     private BandwidthLimiter bandwidthLimiter;
 
     @Option(names = { "--wondershaperImage" }, description = "Wondershaper Image", required = false)
-    private String wondershaperImage = "theiacloud/theia-cloud-wondershaper";
+    private String wondershaperImage = "docker.io/theiacloud/theia-cloud-wondershaper";
 
     @Option(names = { "--serviceUrl" }, description = "URL of the Theia Cloud Service", required = false)
     private String serviceUrl;

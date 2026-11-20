@@ -65,6 +65,7 @@ test.describe('Start Session', () => {
 
   test('should require login when accessing session URL in new browser context', async ({ page, baseURL, browser }) => {
     test.skip(process.env.MATRIX_KEYCLOAK !== 'true', 'Skipping test because keycloak not enabled');
+    test.setTimeout(120000);
 
     expect(baseURL).toBeDefined();
 
@@ -88,7 +89,7 @@ test.describe('Start Session', () => {
     /* Wait for loading animation to appear then disappear */
     const loadingAnimation = page.locator('.Loading__description');
     await expect(loadingAnimation).toBeVisible();
-    await expect(loadingAnimation).toBeHidden({ timeout: 180000 });
+    await expect(loadingAnimation).toBeHidden({ timeout: 60000 });
 
     /* Save the session URL */
     const sessionUrl = page.url();
@@ -124,6 +125,7 @@ test.describe('Start Session', () => {
 
   test('should deny access when different user tries to access session URL', async ({ page, baseURL, browser }) => {
     test.skip(process.env.MATRIX_KEYCLOAK !== 'true', 'Skipping test because keycloak not enabled');
+    test.setTimeout(120000);
 
     expect(baseURL).toBeDefined();
 
@@ -147,7 +149,7 @@ test.describe('Start Session', () => {
     /* Wait for loading animation to appear then disappear */
     const loadingAnimation = page.locator('.Loading__description');
     await expect(loadingAnimation).toBeVisible();
-    await expect(loadingAnimation).toBeHidden({ timeout: 180000 });
+    await expect(loadingAnimation).toBeHidden({ timeout: 60000 });
 
     /* Save the session URL */
     const sessionUrl = page.url();

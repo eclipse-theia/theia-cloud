@@ -186,6 +186,19 @@ This makes webviews share the session hostname. It removes the intended per-webv
 
 Native support requires a wildcard Route for each session, wildcard Route admission (`WildcardsAllowed`) on the OpenShift Ingress Controller, suitable wildcard DNS, and TLS certificate coverage for the resulting hosts. If you need native OpenShift webview routing, contact the Theia Cloud project or open an issue describing your OpenShift router, DNS, and TLS setup so the requirements can be collected before implementation.
 
+### Fully qualified image names
+
+Starting with OpenShift 4.21 (CRI-O 1.34), CRI-O enforces short-name resolution by default. If a node's `registries.conf` lists more than one unqualified search registry, a short image name such as `theiacloud/theia-cloud-demo:1.3.0-next` is rejected as ambiguous unless it has a short-name alias, and the pod fails with `ImageInspectError`:
+
+```text
+short name mode is enforcing, but image name theiacloud/theia-cloud-demo:1.3.0-next returns ambiguous list
+```
+
+Use fully qualified image names, e.g. `docker.io/theiacloud/theia-cloud-demo:1.3.0-next`, for:
+
+- `spec.image` in AppDefinitions; the operator passes the value through to the session deployment unchanged
+- image overrides in Helm values (`operator.image`, `service.image`, `landingPage.image`, `operator.wondershaperImage`, `conversion.image`, `demoApplication.name`)
+
 ## Step 5: Teardown
 
 ```bash

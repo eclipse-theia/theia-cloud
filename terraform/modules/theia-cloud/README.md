@@ -6,9 +6,9 @@ This module installs Theia Cloud components in a Kubernetes cluster via Helm.
 
 Before using this module, ensure the following are already installed in your cluster:
 
-- **Cert Manager** (v1.17.4 or compatible) - Required for certificate management
+- **Cert Manager** (v1.21.2 or compatible) - Required for certificate management
 - **HAProxy or NGINX Ingress Controller** - Required for ingress routing
-- **Keycloak** (v26.4.5 or compatible) - Required for authentication. **Note:** If you want to use Theia Cloud without authentication, you can use this module to install `theia-cloud-base` and `theia-cloud-crds` but need to install the `theia-cloud` chart separately to configure it to not use authentication.
+- **Keycloak** (v26.7.2 or compatible) - Required for authentication. **Note:** If you want to use Theia Cloud without authentication, you can use this module to install `theia-cloud-base` and `theia-cloud-crds` but need to install the `theia-cloud` chart separately to configure it to not use authentication.
 
 ## What This Module Installs
 

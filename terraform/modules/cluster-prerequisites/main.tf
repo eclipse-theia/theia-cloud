@@ -54,7 +54,7 @@ resource "helm_release" "haproxy-ingress-controller" {
   name             = "haproxy-ingress"
   repository       = "https://haproxy-ingress.github.io/charts"
   chart            = "haproxy-ingress"
-  version          = "0.15.1"
+  version          = "0.16.2"
   namespace        = "ingress-haproxy"
   create_namespace = true
 
@@ -96,6 +96,13 @@ resource "kubernetes_namespace_v1" "keycloak" {
 
 data "http" "keycloak_crd" {
   url = "https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${var.keycloak_version}/kubernetes/keycloaks.k8s.keycloak.org-v1.yml"
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Failed to download the Keycloak CRD for version ${var.keycloak_version}."
+    }
+  }
 }
 
 resource "kubectl_manifest" "keycloak_crd" {
@@ -107,6 +114,13 @@ resource "kubectl_manifest" "keycloak_crd" {
 
 data "http" "keycloak_realm_import_crd" {
   url = "https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${var.keycloak_version}/kubernetes/keycloakrealmimports.k8s.keycloak.org-v1.yml"
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Failed to download the KeycloakRealmImport CRD for version ${var.keycloak_version}."
+    }
+  }
 }
 
 resource "kubectl_manifest" "keycloak_realm_import_crd" {
@@ -116,8 +130,51 @@ resource "kubectl_manifest" "keycloak_realm_import_crd" {
   ]
 }
 
+data "http" "keycloak_oidc_client_crd" {
+  count = local.keycloak_client_crds_available ? 1 : 0
+  url   = "https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${var.keycloak_version}/kubernetes/keycloakoidcclients.k8s.keycloak.org-v1.yml"
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Failed to download the KeycloakOIDCClient CRD for version ${var.keycloak_version}."
+    }
+  }
+}
+
+resource "kubectl_manifest" "keycloak_oidc_client_crd" {
+  count     = local.keycloak_client_crds_available ? 1 : 0
+  yaml_body = data.http.keycloak_oidc_client_crd[0].response_body
+  depends_on = [
+    kubernetes_namespace_v1.keycloak
+  ]
+}
+
+data "http" "keycloak_saml_client_crd" {
+  count = local.keycloak_client_crds_available ? 1 : 0
+  url   = "https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${var.keycloak_version}/kubernetes/keycloaksamlclients.k8s.keycloak.org-v1.yml"
+
+  lifecycle {
+    postcondition {
+      condition     = self.status_code == 200
+      error_message = "Failed to download the KeycloakSAMLClient CRD for version ${var.keycloak_version}."
+    }
+  }
+}
+
+resource "kubectl_manifest" "keycloak_saml_client_crd" {
+  count     = local.keycloak_client_crds_available ? 1 : 0
+  yaml_body = data.http.keycloak_saml_client_crd[0].response_body
+  depends_on = [
+    kubernetes_namespace_v1.keycloak
+  ]
+}
+
 locals {
   keycloak_ns = kubernetes_namespace_v1.keycloak.metadata[0].name
+
+  keycloak_version_components    = try(regex("^v?([0-9]+)\\.([0-9]+)", var.keycloak_version), ["999", "999"])
+  keycloak_client_crds_available = tonumber(local.keycloak_version_components[0]) > 26 || (tonumber(local.keycloak_version_components[0]) == 26 && tonumber(local.keycloak_version_components[1]) >= 7)
 
   # local_exec_quotes is a helper function to deal with different handling of
   # quotes between linux and windows. On linux, it will output "'". On windows,
@@ -136,10 +193,24 @@ resource "terraform_data" "keycloak_operator" {
     version   = var.keycloak_version
   }
 
+  triggers_replace = [
+    var.keycloak_namespace,
+    var.keycloak_version,
+    local.keycloak_client_crds_available
+  ]
+
   provisioner "local-exec" {
     command = <<-EOT
+      set -e
+      kubectl wait customresourcedefinition/keycloaks.k8s.keycloak.org --for=condition=Established --timeout=2m
+      kubectl wait customresourcedefinition/keycloakrealmimports.k8s.keycloak.org --for=condition=Established --timeout=2m
+      if [ "${local.keycloak_client_crds_available}" = "true" ]; then
+        kubectl wait customresourcedefinition/keycloakoidcclients.k8s.keycloak.org --for=condition=Established --timeout=2m
+        kubectl wait customresourcedefinition/keycloaksamlclients.k8s.keycloak.org --for=condition=Established --timeout=2m
+      fi
       kubectl apply -n ${var.keycloak_namespace} -f https://raw.githubusercontent.com/keycloak/keycloak-k8s-resources/${var.keycloak_version}/kubernetes/kubernetes.yml
       kubectl patch clusterrolebinding keycloak-operator-clusterrole-binding --type='json' -p='[{"op": "replace", "path": "/subjects/0/namespace", "value":"${var.keycloak_namespace}"}]'
+      kubectl rollout status deployment/keycloak-operator -n ${var.keycloak_namespace} --timeout=5m
     EOT
   }
 
@@ -153,7 +224,9 @@ resource "terraform_data" "keycloak_operator" {
   depends_on = [
     kubernetes_namespace_v1.keycloak,
     kubectl_manifest.keycloak_crd,
-    kubectl_manifest.keycloak_realm_import_crd
+    kubectl_manifest.keycloak_realm_import_crd,
+    kubectl_manifest.keycloak_oidc_client_crd,
+    kubectl_manifest.keycloak_saml_client_crd
   ]
 }
 
@@ -229,7 +302,7 @@ resource "kubernetes_deployment_v1" "postgres" {
           for_each = var.postgres_volume_permissions ? [1] : []
           content {
             name  = "volume-permissions"
-            image = "busybox:latest"
+            image = "docker.io/library/busybox:latest"
             command = [
               "sh",
               "-c",
@@ -347,7 +420,10 @@ resource "kubernetes_service_v1" "postgres" {
 locals {
   tls_secret_name = var.ingress_tls_secret_name != "" ? var.ingress_tls_secret_name : "${var.hostname}-tls"
 
-  keycloak_protocol = var.ingress_tls_enabled ? "https://" : "http://"
+  keycloak_protocol     = var.ingress_tls_enabled ? "https://" : "http://"
+  keycloak_base_path    = trimsuffix(var.keycloak_http_relative_path, "/")
+  keycloak_realm_path   = "${local.keycloak_base_path}/realms/master"
+  keycloak_external_url = "${local.keycloak_protocol}${var.hostname}"
 
   ingress_controller_annotations = var.ingress_controller_type == "nginx" ? {
     "nginx.ingress.kubernetes.io/proxy-buffer-size"       = "128k"
@@ -546,23 +622,68 @@ resource "kubectl_manifest" "keycloak_route" {
   })
 
   depends_on = [
-    kubectl_manifest.keycloak_instance,
-    terraform_data.wait_for_keycloak_instance
+    kubectl_manifest.keycloak_instance
   ]
 }
 
+# Kubernetes readiness can become true before Keycloak 26.x has finished
+# initializing the master realm. Wait for the application endpoint as well.
 resource "terraform_data" "wait_for_keycloak_instance" {
   provisioner "local-exec" {
     command = <<-EOT
+      set -e
       echo "Waiting for Keycloak resource to report ready..."
       kubectl wait keycloak/keycloak -n ${local.keycloak_ns} --for=condition=Ready --timeout=3m
       echo "Waiting for Keycloak pods to be ready..."
       kubectl wait pods -n ${local.keycloak_ns} -l app=keycloak --for=condition=Ready --timeout=3m
       echo "Waiting for Keycloak service endpoint..."
       kubectl wait --for=jsonpath='{.subsets[0].addresses[0].ip}' endpoints/keycloak-service -n ${local.keycloak_ns} --timeout=2m
-      echo "Keycloak is ready!"
-      echo "Waiting additional 5s for Keycloak authentication to be fully initialized..."
-      sleep 5
+
+      if [ "${var.keycloak_ready_check_in_cluster}" != "true" ]; then
+        echo "Skipping the in-cluster Keycloak application readiness check."
+        exit 0
+      fi
+
+      # Query the pod via the API server proxy: needs no tooling inside the Keycloak image
+      # and no kubectl exec. On failure, prints the error (stdout is discarded, stderr captured).
+      keycloak_get() {
+        kubectl get --raw "/api/v1/namespaces/${local.keycloak_ns}/pods/$1:$2/proxy$3" --request-timeout=10s 2>&1 >/dev/null
+      }
+
+      echo "Waiting up to ${var.keycloak_ready_timeout_seconds}s for Keycloak to serve ${local.keycloak_realm_path} in-cluster..."
+      # Retry until a deadline rather than a fixed attempt count, since each request also takes time.
+      # Uses date because dash (/bin/sh on Debian/Ubuntu) has no $SECONDS.
+      START=$(date +%s)
+      DEADLINE=$((START + ${var.keycloak_ready_timeout_seconds}))
+      i=0
+      while [ "$(date +%s)" -lt "$DEADLINE" ]; do
+        i=$((i + 1))
+        POD=$(kubectl get pods -n ${local.keycloak_ns} -l app=keycloak -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+        if [ -z "$POD" ]; then
+          echo "[$i, $(($(date +%s) - START))s/${var.keycloak_ready_timeout_seconds}s] in-cluster: Keycloak pod not found"
+          sleep 5
+          continue
+        fi
+
+        # The assignment takes the exit status of keycloak_get; on failure REALM_ERR holds the error message.
+        if REALM_ERR=$(keycloak_get "$POD" 8080 ${local.keycloak_realm_path}); then
+          echo "Keycloak application is ready in-cluster."
+          kubectl logs -n ${local.keycloak_ns} "$POD" -c keycloak | grep -m1 'started in' || true
+          exit 0
+        fi
+        echo "[$i, $(($(date +%s) - START))s/${var.keycloak_ready_timeout_seconds}s] in-cluster: realms/master not ready: $REALM_ERR"
+        sleep 5
+      done
+
+      echo "Timed out waiting for Keycloak application readiness" >&2
+      kubectl get keycloak -n ${local.keycloak_ns} keycloak -o jsonpath='{.status.conditions}' || true
+      echo
+      kubectl get pods -n ${local.keycloak_ns} -o wide || true
+      POD=$(kubectl get pods -n ${local.keycloak_ns} -l app=keycloak -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+      if [ -n "$POD" ]; then
+        kubectl logs -n ${local.keycloak_ns} "$POD" -c keycloak --tail=200 || true
+      fi
+      exit 1
     EOT
   }
 
@@ -571,27 +692,52 @@ resource "terraform_data" "wait_for_keycloak_instance" {
   ]
 }
 
-resource "terraform_data" "wait_for_keycloak_route" {
-  count = var.cloud_provider == "OPENSHIFT" ? 1 : 0
+moved {
+  from = terraform_data.wait_for_keycloak_route
+  to   = terraform_data.wait_for_keycloak_endpoint
+}
+
+resource "terraform_data" "wait_for_keycloak_endpoint" {
+  count = var.keycloak_ready_check_external && (var.cloud_provider == "OPENSHIFT" || var.ingress_enabled) ? 1 : 0
 
   provisioner "local-exec" {
     command = <<-EOT
-      echo "Waiting for Keycloak OpenShift Route to serve traffic..."
-      for i in $(seq 1 60); do
-        if curl -sf -o /dev/null -k ${trimsuffix("https://${var.hostname}${var.keycloak_http_relative_path}", "/")}/realms/master; then
-          echo "Keycloak OpenShift Route is ready!"
+      echo "Waiting up to ${var.keycloak_ready_timeout_seconds}s for Keycloak at ${local.keycloak_external_url}..."
+      # Retry until a deadline rather than a fixed attempt count, since each request also takes time.
+      # Uses date because dash (/bin/sh on Debian/Ubuntu) has no $SECONDS.
+      START=$(date +%s)
+      DEADLINE=$((START + ${var.keycloak_ready_timeout_seconds}))
+      i=0
+      while [ "$(date +%s)" -lt "$DEADLINE" ]; do
+        i=$((i + 1))
+        HTTP_CODE=$(curl -skL -o /dev/null -w '%%{http_code}' --max-time 10 "${local.keycloak_external_url}${local.keycloak_realm_path}" || true)
+        if [ -z "$HTTP_CODE" ]; then
+          HTTP_CODE="000"
+        fi
+        echo "[$i, $(($(date +%s) - START))s/${var.keycloak_ready_timeout_seconds}s] external ${local.keycloak_external_url}${local.keycloak_realm_path} -> HTTP $HTTP_CODE"
+        if [ "$HTTP_CODE" = "200" ]; then
+          echo "Keycloak is reachable through the ingress or Route."
           exit 0
         fi
-        echo "Waiting for Keycloak OpenShift Route..."
         sleep 5
       done
-      echo "Timed out waiting for Keycloak OpenShift Route" >&2
+
+      echo "Timed out waiting for the external Keycloak endpoint" >&2
+      curl -kisS --max-time 10 "${local.keycloak_external_url}${local.keycloak_realm_path}" | head -40 || true
+      kubectl get endpoints -n ${local.keycloak_ns} keycloak-service -o yaml || true
+      kubectl describe ingress -n ${local.keycloak_ns} keycloak || true
+      kubectl describe route -n ${local.keycloak_ns} keycloak || true
+      kubectl logs -n ${local.keycloak_ns} -l app=keycloak -c keycloak --tail=100 || true
       exit 1
     EOT
   }
 
   depends_on = [
-    kubectl_manifest.keycloak_route
+    terraform_data.wait_for_keycloak_instance,
+    kubectl_manifest.keycloak_route,
+    kubernetes_ingress_v1.keycloak,
+    terraform_data.wait_for_certificate,
+    terraform_data.patch_ingress_controller
   ]
 }
 
@@ -611,7 +757,7 @@ resource "terraform_data" "patch_ingress_controller" {
   count = var.ingress_enabled && var.ingress_tls_enabled && var.ingress_controller_type == "nginx" ? 1 : 0
 
   provisioner "local-exec" {
-    command = "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ingress-nginx -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ingress-nginx wait --for condition=available deploy/ingress-nginx-controller --timeout=90s"
+    command = "kubectl patch deploy ingress-nginx-controller --type=${local.local_exec_quotes}json${local.local_exec_quotes} -n ${var.ingress_controller_namespace} -p ${local.local_exec_quotes}${local.jsonpatch}${local.local_exec_quotes} && kubectl -n ${var.ingress_controller_namespace} rollout status deploy/ingress-nginx-controller --timeout=180s"
   }
 
   depends_on = [
