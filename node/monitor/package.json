@@ -33,6 +33,7 @@
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
     "build": "npm install && npm run webpack",
+    "test": "tsc --outDir lib && node --test test/*.test.cjs",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch",
     "lint": "eslint -c ../.eslintrc.js --ext .ts ./src",

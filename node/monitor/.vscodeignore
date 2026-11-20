@@ -1,6 +1,8 @@
 .vscode
 node_modules
 src/**
+lib/**
+test/**
 package-lock.json
 tsconfig.json
 webpack.config.js

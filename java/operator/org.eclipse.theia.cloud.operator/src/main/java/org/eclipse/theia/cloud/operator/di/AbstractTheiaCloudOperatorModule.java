@@ -177,6 +177,18 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
     @Provides
     @Singleton
     protected TheiaCloudClient provideTheiaCloudClient(final NamespacedKubernetesClient client) {
+        return createTheiaCloudClient(client);
+    }
+
+    /**
+     * Creates the client used by the operator. Override this factory to customize the
+     * client without overriding the annotated Guice provider. The provider retains
+     * singleton scope within each injector.
+     *
+     * @param client the Kubernetes client supplied by dependency injection
+     * @return the Theia Cloud client to use
+     */
+    protected TheiaCloudClient createTheiaCloudClient(final NamespacedKubernetesClient client) {
         return new DefaultTheiaCloudClient(client);
     }
 }
