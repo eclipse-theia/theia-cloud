@@ -1,32 +1,24 @@
 import { MessageService } from '@theia/core';
 import { FrontendApplicationContribution } from '@theia/core/lib/browser';
 import { inject, injectable } from '@theia/core/shared/inversify';
-import { MessageType, ModalNotification } from '@theia/plugin-ext/lib/main/browser/dialogs/modal-notification';
 
 import { MessageLevel, MessagingBackendModule, MessagingFrontendModule } from '../../common/modules/messaging-module';
 import { TheiaCloudBackendMonitorService } from '../../common/monitor-protocol';
+import { MonitorDialog } from '../monitor-dialog';
 
 @injectable()
 export class MessagingFrontendModuleImpl implements MessagingFrontendModule {
   constructor(@inject(MessageService) private readonly messageService: MessageService) {}
 
   displayMessage(level: MessageLevel, message: string, detail: string, fullscreen: boolean): void {
-    switch (level) {
-      case MessageLevel.WARN:
-        fullscreen ? this.displayModalDialog(MessageType.Warning, message, detail) : this.messageService.warn(message);
-        break;
-      case MessageLevel.ERROR:
-        fullscreen ? this.displayModalDialog(MessageType.Error, message, detail) : this.messageService.error(message);
-        break;
-      default:
-        fullscreen ? this.displayModalDialog(MessageType.Info, message, detail) : this.messageService.warn(message);
-        break;
+    if (fullscreen) {
+      const severity = level === MessageLevel.WARN ? 'warning' : level === MessageLevel.ERROR ? 'error' : 'info';
+      new MonitorDialog(severity, message, detail).open();
+    } else if (level === MessageLevel.ERROR) {
+      this.messageService.error(message);
+    } else {
+      this.messageService.warn(message);
     }
-  }
-
-  displayModalDialog(type: MessageType, message: string, detail: string): void {
-    const modalNotification = new ModalNotification();
-    modalNotification.showDialog(type, message, { modal: true, detail }, []);
   }
 }
 

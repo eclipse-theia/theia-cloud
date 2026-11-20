@@ -1,13 +1,13 @@
 import { CommandRegistry } from '@theia/core';
 import { FrontendApplicationContribution } from '@theia/core/lib/browser';
 import { inject, injectable } from '@theia/core/shared/inversify';
-import { MessageType, ModalNotification } from '@theia/plugin-ext/lib/main/browser/dialogs/modal-notification';
 
 import {
   ActivityTrackerBackendModule,
   ActivityTrackerFrontendModule
 } from '../../common/modules/activity-tracker-module';
 import { COMMAND_ACTIVITY_REPORT_TITLE, TheiaCloudBackendMonitorService } from '../../common/monitor-protocol';
+import { MonitorDialog } from '../monitor-dialog';
 
 @injectable()
 export class ActivityTrackerFrontendModuleImpl implements ActivityTrackerFrontendModule {
@@ -17,19 +17,15 @@ export class ActivityTrackerFrontendModuleImpl implements ActivityTrackerFronten
   ) {}
 
   displayPopup(): void {
-    const modalNotification = new ModalNotification();
-    modalNotification
-      .showDialog(
-        MessageType.Warning,
-        'Are you still here?',
-        {
-          modal: true,
-          detail: 'This session has been inactive for a while and will be shut down soon.'
-        },
-        [{ title: 'I am still here', isCloseAffordance: true }]
-      )
-      .then((action: string | undefined) => {
-        if (action === 'I am still here') {
+    new MonitorDialog(
+      'warning',
+      'Are you still here?',
+      'This session has been inactive for a while and will be shut down soon.',
+      'I am still here'
+    )
+      .open()
+      .then(confirmed => {
+        if (confirmed) {
           this.commandRegistry.executeCommand(COMMAND_ACTIVITY_REPORT_TITLE);
         }
       });
