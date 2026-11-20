@@ -195,7 +195,6 @@ public class IngressRoutingStrategy implements SessionRoutingStrategy {
 
     private void addIngressRule(Ingress ingress, String host, String serviceName, int port, String path) {
         IngressRule ingressRule = new IngressRule();
-        ingress.getSpec().getRules().add(ingressRule);
         ingressRule.setHost(host);
 
         HTTPIngressRuleValue http = new HTTPIngressRuleValue();
@@ -216,6 +215,10 @@ public class IngressRoutingStrategy implements SessionRoutingStrategy {
         ServiceBackendPort serviceBackendPort = new ServiceBackendPort();
         ingressServiceBackend.setPort(serviceBackendPort);
         serviceBackendPort.setNumber(port);
+
+        if (!ingress.getSpec().getRules().contains(ingressRule)) {
+            ingress.getSpec().getRules().add(ingressRule);
+        }
     }
 
     @Override
