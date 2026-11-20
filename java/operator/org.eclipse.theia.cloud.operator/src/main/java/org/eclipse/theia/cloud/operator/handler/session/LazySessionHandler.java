@@ -20,6 +20,7 @@ import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessag
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatMetric;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.Collections;
@@ -283,8 +284,12 @@ public class LazySessionHandler implements SessionHandler {
 
         /* Update session resource */
         try {
+            Optional<URI> internalUrl = arguments.isUseKeycloak()
+                    ? Optional.of(TheiaCloudServiceUtil.getInternalServiceURL(
+                            internalServiceToUse.get().getMetadata().getName(), client.namespace()))
+                    : Optional.empty();
             AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
-                    correlationId);
+                    internalUrl, correlationId);
         } catch (KubernetesClientException e) {
             LOGGER.error(
                     formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),

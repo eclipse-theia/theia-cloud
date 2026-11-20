@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.operator.handler.session;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -256,8 +257,12 @@ public class EagerSessionHandler implements SessionHandler {
 
         /* Update session resource */
         try {
+            Optional<URI> internalUrl = arguments.isUseKeycloak()
+                    ? Optional.of(TheiaCloudServiceUtil.getInternalServiceURL(
+                            TheiaCloudServiceUtil.getInternalServiceName(appDefinition.get(), instance), client.namespace()))
+                    : Optional.empty();
             AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
-                    correlationId);
+                    internalUrl, correlationId);
         } catch (KubernetesClientException e) {
             LOGGER.error(
                     formatLogMessage(correlationId, "Error while editing session " + session.getMetadata().getName()),

@@ -71,6 +71,8 @@ public final class AddedHandlerUtil {
 
     private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
+    private static final int INTERNAL_PROBE_TIMEOUT_MILLIS = 5000;
+
     public static final String TEMPLATE_SERVICE_YAML = "/templateService.yaml";
     public static final String TEMPLATE_SERVICE_WITHOUT_AOUTH2_PROXY_YAML = "/templateServiceWithoutOAuthProxy.yaml";
     public static final String TEMPLATE_INTERNAL_SERVICE_YAML = "/templateInternalService.yaml";
@@ -138,6 +140,11 @@ public final class AddedHandlerUtil {
 
     public static void updateSessionURLAsync(SessionResourceClient sessions, Session session, String namespace,
             String url, String correlationId) {
+        updateSessionURLAsync(sessions, session, namespace, url, Optional.empty(), correlationId);
+    }
+
+    public static void updateSessionURLAsync(SessionResourceClient sessions, Session session, String namespace,
+            String url, Optional<URI> internalUrl, String correlationId) {
         EXECUTOR.execute(() -> {
             boolean updateURL = false;
             for (int i = 1; i <= 100; i++) {
@@ -161,6 +168,11 @@ public final class AddedHandlerUtil {
                     /* silent */
                 }
 
+                // An authenticated session needs a fresh successful public check before probing its application.
+                boolean retryingPublicResponse = updateURL;
+                if (internalUrl.isPresent()) {
+                    updateURL = false;
+                }
                 HttpURLConnection connection;
                 try {
                     connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
@@ -192,16 +204,22 @@ public final class AddedHandlerUtil {
 
                 if (code == 200) {
                     updateURL = true;
-                } else if (code != 404 && code != 503 && !updateURL) {
+                } else if (code != 404 && code != 503 && (code >= 100 || internalUrl.isEmpty())) {
                     /*
                      * we don't get a 404 or 503, so something is available. Try accessing the URL once more then update
                      * URL anyway
                      */
                     updateURL = true;
-                    continue;
+                    if (!retryingPublicResponse) {
+                        continue;
+                    }
                 }
 
                 if (updateURL) {
+                    if (internalUrl.isPresent() && !isInternalServiceAvailable(internalUrl.get(), correlationId)) {
+                        updateURL = false;
+                        continue;
+                    }
                     LOGGER.info(formatLogMessage(correlationId, url + " is available."));
                     sessions.updateStatus(correlationId, session, status -> status.setUrl(url));
                     LOGGER.info(
@@ -215,6 +233,25 @@ public final class AddedHandlerUtil {
 
         });
 
+    }
+
+    private static boolean isInternalServiceAvailable(URI url, String correlationId) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) url.toURL().openConnection();
+            try {
+                connection.setConnectTimeout(INTERNAL_PROBE_TIMEOUT_MILLIS);
+                connection.setReadTimeout(INTERNAL_PROBE_TIMEOUT_MILLIS);
+                connection.setInstanceFollowRedirects(false);
+                int code = connection.getResponseCode();
+                LOGGER.trace(formatLogMessage(correlationId, url + " has response code " + code));
+                return code >= 200 && code < 400;
+            } finally {
+                connection.disconnect();
+            }
+        } catch (IOException e) {
+            LOGGER.debug(formatLogMessage(correlationId, url + " is not available yet."), e);
+            return false;
+        }
     }
 
     public static void removeEmptyResources(Deployment deployment) {

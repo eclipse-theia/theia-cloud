@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.operator.util;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
+import org.eclipse.theia.cloud.common.util.SessionUtil;
 
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Service;
@@ -60,6 +62,11 @@ public final class TheiaCloudServiceUtil {
 
     public static String getInternalServiceName(AppDefinition appDefinition, int instance) {
         return NamingUtil.createNameWithSuffix(appDefinition, instance, "int");
+    }
+
+    public static URI getInternalServiceURL(String serviceName, String namespace) {
+        int port = SessionUtil.getInternalPort().orElseThrow();
+        return URI.create("http://" + serviceName + "." + namespace + ".svc:" + port + "/");
     }
 
     public static Integer getId(String correlationId, AppDefinition appDefinition, Service service) {
