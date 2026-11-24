@@ -17,7 +17,8 @@ import { DefaultTheiaCloudBackendMonitorService } from './monitor-service';
 
 export default new ContainerModule(bind => {
   // bind TheiaCloudBackendMonitorService
-  bind(TheiaCloudBackendMonitorService).to(DefaultTheiaCloudBackendMonitorService).inSingletonScope();
+  bind(DefaultTheiaCloudBackendMonitorService).toSelf().inSingletonScope();
+  bind(TheiaCloudBackendMonitorService).toService(DefaultTheiaCloudBackendMonitorService);
 
   // handle default service
   bind(ConnectionHandler)
