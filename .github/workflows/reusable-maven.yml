@@ -47,9 +47,22 @@ jobs:
           mvn verify -fae --no-transfer-progress
 
       - name: Check mvn licenses
+        shell: bash
+        working-directory: java/${{ inputs.path_to_package }}
+        env:
+          DASH_LICENSES_PAT: ${{ secrets.DASH_LICENSES_PAT }}
         run: |
-          cd ${{ inputs.path_to_package }}
-          mvn org.eclipse.dash:license-tool-plugin:license-check -Ddash.iplab.token=${{ secrets.DASH_LICENSES_PAT }} -Ddash.projectId=ecd.theia
+          check_licenses() {
+            mvn org.eclipse.dash:license-tool-plugin:license-check -Ddash.iplab.token="$DASH_LICENSES_PAT" -Ddash.projectId=ecd.theia
+          }
+          log="$RUNNER_TEMP/dash-license-check.log"
+          if ! check_licenses 2>&1 | tee "$log"; then
+            # Dash leaves approvedLicenses unset when its catalog request returns a non-200 response.
+            grep -Fq 'because "this.approvedLicenses" is null' "$log" || exit 1
+            echo "::warning::Dash could not load the approved-license catalog. Retrying in 10 seconds."
+            sleep 10
+            check_licenses
+          fi
 
   publish:
     runs-on: ubuntu-latest
