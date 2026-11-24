@@ -9,6 +9,7 @@
 
 ### Breaking Changes in 1.3.0
 
+- [java/operator] `EagerSessionHandler.reserveService()` and `reserveInternalService()` have been replaced by the protected `reserveServicePair()`, which reserves the external and internal Services of the same instance in one step and returns a public `ServicePair`. The unused `TheiaCloudServiceUtil.getServiceOwnedBySession()` and both `getUnusedService()` overloads have been removed. [#510](https://github.com/eclipse-theia/theia-cloud/pull/510)
 - [node][theia] Node.js 24 or later is now required to build the `node/` and `theia/` packages. `engine-strict` is enabled in `node/.npmrc`, so `npm ci` fails on older Node versions.
 - [docker/demo] The `theia-cloud-activity-demo-theia` image now runs on Node 24 (`node:24-bookworm-slim`) instead of Node 20.
 - [java/operator] Ingress and session URL logic extracted from `LazySessionHandler` and `EagerSessionHandler` into the new `SessionRoutingStrategy` interface. Custom operator extensions that override or extend these handlers may need to inject `SessionRoutingStrategy` instead of directly using `IngressPathProvider` and `TheiaCloudIngressUtil`.

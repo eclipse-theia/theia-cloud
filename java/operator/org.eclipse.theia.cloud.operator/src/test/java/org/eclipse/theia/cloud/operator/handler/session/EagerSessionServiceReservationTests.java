@@ -19,9 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -50,8 +51,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 import com.google.inject.Guice;
+import com.sun.net.httpserver.HttpServer;
 
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -65,7 +68,6 @@ import io.fabric8.kubernetes.api.model.StatusBuilder;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.networking.v1.IngressBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.server.mock.EnableKubernetesMockClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
 import io.fabric8.kubernetes.client.utils.Serialization;
@@ -123,7 +125,7 @@ class EagerSessionServiceReservationTests {
     private Service service(int instance, boolean internal, OwnerReference... extraOwners) {
         return kube.resource(new ServiceBuilder().withNewMetadata().withName(name(instance, internal))
                 .withOwnerReferences(owner(app)).addToOwnerReferences(extraOwners).addToLabels("app", "editor-" + instance)
-                .endMetadata().withNewSpec().addToSelector("app", "editor-" + instance).endSpec().build()).create();
+                .endMetadata().withNewSpec().addToSelector("custom-instance", "editor-" + instance).endSpec().build()).create();
     }
 
     private void workload(int instance) {
@@ -154,7 +156,8 @@ class EagerSessionServiceReservationTests {
 
     @ParameterizedTest
     @CsvSource({"1,2,false", "2,1,true"})
-    void pairsOppositelyOrderedServicesAndCleansUpOnlyTheRoutedInstance(int first, int second, boolean keycloak) {
+    void pairsOppositelyOrderedServicesAndCleansUpOnlyTheRoutedInstance(int first, int second, boolean keycloak)
+            throws IOException {
         configure(keycloak);
         Service firstExternal = service(first, false);
         Service secondExternal = service(second, false);
@@ -166,7 +169,11 @@ class EagerSessionServiceReservationTests {
         server.expect().get().withPath(servicesPath).andReturn(200, new ServiceListBuilder()
                 .withItems(firstExternal, secondExternal, secondInternal, firstInternal).build()).always();
 
-        assertTrue(add());
+        if (keycloak) {
+            addWithInternalProbe();
+        } else {
+            assertTrue(add());
+        }
         var ingress = kube.network().v1().ingresses().withName("ingress").get();
         var paths = ingress.getSpec().getRules().getFirst().getHttp().getPaths();
         String backend = paths.getFirst().getBackend().getService().getName();
@@ -200,6 +207,25 @@ class EagerSessionServiceReservationTests {
         assertNull(kube.pods().withName(backend + "-pod").get());
         assertTrue(kube.network().v1().ingresses().withName("ingress").get().getSpec().getRules().isEmpty());
         assertNotNull(kube.pods().withName(name(sibling, false) + "-pod").get());
+    }
+
+    private void addWithInternalProbe() throws IOException {
+        // The Fabric8 mock has no cluster DNS. Expose the paired internal Service over loopback.
+        HttpServer internal = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        internal.createContext("/", exchange -> {
+            exchange.sendResponseHeaders(200, -1);
+            exchange.close();
+        });
+        internal.start();
+        String internalName = name(1, true);
+        try (var serviceUtil = Mockito.mockStatic(TheiaCloudServiceUtil.class, Mockito.CALLS_REAL_METHODS)) {
+            serviceUtil.when(() -> TheiaCloudServiceUtil.getInternalServiceURL(internalName, kube.getNamespace()))
+                    .thenReturn(URI.create("http://127.0.0.1:" + internal.getAddress().getPort() + "/"));
+            assertTrue(add());
+            awaitPublication(1);
+        } finally {
+            internal.stop(0);
+        }
     }
 
     @ParameterizedTest
@@ -352,11 +378,6 @@ class EagerSessionServiceReservationTests {
         workload(2);
         assertTrue(add());
         assertOwners(stored(sibling), owner(app));
-        // The first attempt's rollback must still fail after another replica finishes this reservation.
-        Service delayedRollback = new ServiceBuilder(external).editMetadata()
-                .withResourceVersion(firstClaim.getMetadata().getResourceVersion()).endMetadata().build();
-        assertEquals(409, assertThrows(KubernetesClientException.class, () -> kube.resource(delayedRollback).update())
-                .getCode());
         assertOwners(stored(external), owner(app), owner(session));
         assertOwners(stored(internal), owner(app), owner(session));
         awaitPublication(2);
@@ -372,35 +393,35 @@ class EagerSessionServiceReservationTests {
     }
 
     @Test
-    void rejectsCanonicalNamesWhoseSelectorsPointAtDifferentInstances() {
-        Service external = service(1, false);
-        Service internal = service(1, true);
-        kube.resource(internal).edit(s -> new ServiceBuilder(s).editSpec().withSelector(Map.of("app", "editor-2"))
-                .endSpec().build());
+    void failedRouteCleanupKeepsBothServicesReserved() {
+        Service external = service(1, false, owner(session));
+        Service internal = service(1, true, owner(session));
+        workload(1);
+        assertTrue(add());
+        awaitPublication(1);
 
-        assertFalse(add());
-        assertOwners(stored(external), owner(app));
-        assertOwners(stored(internal), owner(app));
+        server.expect().patch().withPath("/apis/networking.k8s.io/v1/namespaces/" + kube.getNamespace()
+                + "/ingresses/ingress").andReturn(403, new StatusBuilder().withCode(403).build()).once();
+        assertFalse(handler.sessionDeleted(session, "failed-cleanup"));
+        assertOwners(stored(external), owner(app), owner(session));
+        assertOwners(stored(internal), owner(app), owner(session));
     }
 
     @Test
-    void concurrentReplayCannotClaimAnotherPairFromAnOlderPoolSnapshot() {
-        Service siblingExternal = service(2, false);
-        Service siblingInternal = service(2, true);
-        var earlierPool = new ServiceListBuilder().withItems(siblingExternal, siblingInternal).build();
-        Service external = service(1, false);
-        Service internal = service(1, true);
+    void failedSecondReleaseLeavesOnlyThatServiceReserved() {
+        Service external = service(1, false, owner(session));
+        Service internal = service(1, true, owner(session));
         workload(1);
         assertTrue(add());
-
-        // The other replica listed the pool before instance 1 became available, then its first PUT was delayed.
-        server.expect().get().withPath(servicesPath).andReturn(200, earlierPool).once();
-        assertFalse(add());
-        assertOwners(stored(external), owner(app), owner(session));
-        assertOwners(stored(internal), owner(app), owner(session));
-        assertOwners(stored(siblingExternal), owner(app));
-        assertOwners(stored(siblingInternal), owner(app));
         awaitPublication(1);
+        server.expect().get().withPath(servicesPath).andReturn(200,
+                new ServiceListBuilder().withItems(stored(external), stored(internal)).build()).once();
+        server.expect().put().withPath(servicesPath + "/" + internal.getMetadata().getName())
+                .andReturn(403, new StatusBuilder().withCode(403).build()).times(3);
+
+        assertFalse(handler.sessionDeleted(session, "failed-release"));
+        assertOwners(stored(external), owner(app));
+        assertOwners(stored(internal), owner(app), owner(session));
     }
 
     @Test

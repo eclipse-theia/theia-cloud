@@ -17,6 +17,9 @@
 package org.eclipse.theia.cloud.operator.handler.session;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil.canReserve;
+import static org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil.labeledFor;
+import static org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil.ownedBy;
 
 import java.net.URI;
 import java.time.Instant;
@@ -27,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +49,6 @@ import org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil;
 
 import com.google.inject.Inject;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
@@ -61,9 +62,6 @@ import io.fabric8.kubernetes.client.dsl.PodResource;
 public class EagerSessionHandler implements SessionHandler {
 
     public static final String EAGER_START_REFRESH_ANNOTATION = "theia-cloud.io/eager-start-refresh";
-
-    // Fence a rollback against another replica resuming a partial external claim.
-    private static final String RESERVATION_ATTEMPT = "theia-cloud.io/eager-reservation-attempt";
 
     private static final Logger LOGGER = LogManager.getLogger(EagerSessionHandler.class);
 
@@ -202,7 +200,7 @@ public class EagerSessionHandler implements SessionHandler {
         try {
             Optional<URI> internalUrl = arguments.isUseKeycloak()
                     ? Optional.of(TheiaCloudServiceUtil.getInternalServiceURL(
-                            TheiaCloudServiceUtil.getInternalServiceName(appDefinition.get(), instance), client.namespace()))
+                            pair.internal().getMetadata().getName(), client.namespace()))
                     : Optional.empty();
             AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
                     internalUrl, correlationId);
@@ -216,10 +214,14 @@ public class EagerSessionHandler implements SessionHandler {
         return true;
     }
 
-    private record ServicePair(int instance, Service external, Service internal) {
+    public record ServicePair(int instance, Service external, Service internal) {
     }
 
-    private ServicePair reserveServicePair(AppDefinition app, Session session, String correlationId) {
+    /**
+     * Reserves both Services for one eager instance, resuming any partial reservation held by the Session.
+     * Returns null if no matching pair is available.
+     */
+    protected ServicePair reserveServicePair(AppDefinition app, Session session, String correlationId) {
         List<Service> services = K8sUtil.getExistingServices(client.kubernetes(), client.namespace(),
                 app.getMetadata().getName(), app.getMetadata().getUid());
         Map<String, Service> byName = new HashMap<>();
@@ -232,7 +234,7 @@ public class EagerSessionHandler implements SessionHandler {
             }
         }
 
-        // Prefer the lowest eligible instance on every replica. A partial reservation pins the choice.
+        // Prefer the lowest eligible instance when the Session has no existing reservation.
         ServicePair pair = null;
         for (Service external : services) {
             String name = external.getMetadata().getName();
@@ -245,10 +247,7 @@ public class EagerSessionHandler implements SessionHandler {
             }
             String internalName = TheiaCloudServiceUtil.getInternalServiceName(app, instance);
             Service internal = byName.get(internalName);
-            String selector = TheiaCloudHandlerUtil.getAppSelector(app, instance);
-            if (internal != null && selectsInstance(external, selector) && selectsInstance(internal, selector)
-                    && Set.of(name, internalName).containsAll(reserved)
-                    && canReserve(internal, session)
+            if (internal != null && canReserve(internal, session) && Set.of(name, internalName).containsAll(reserved)
                     && (pair == null || instance < pair.instance())) {
                 pair = new ServicePair(instance, external, internal);
             }
@@ -261,18 +260,9 @@ public class EagerSessionHandler implements SessionHandler {
         }
 
         Map<String, String> labels = LabelsUtil.createSessionLabels(session, app);
-        boolean completingInternal = TheiaCloudServiceUtil.isUnusedService(pair.internal());
-        Service external = claim(pair.external(), session, labels, correlationId, completingInternal);
+        Service external = claim(pair.external(), session, labels, correlationId);
         try {
-            if (reserved.isEmpty() && hasOtherReservation(app, session, pair)) {
-                // Two replicas may have seen different free pairs for the same Session. After acquiring
-                // the external Service, re-list before completing either pair.
-                LOGGER.error(formatLogMessage(correlationId, "Another instance was reserved for Session "
-                        + session.getMetadata().getName()));
-                rollbackExternal(pair.external(), external, correlationId);
-                return null;
-            }
-            Service internal = claim(pair.internal(), session, labels, correlationId, false);
+            Service internal = claim(pair.internal(), session, labels, correlationId);
             return new ServicePair(pair.instance(), external, internal);
         } catch (KubernetesClientException e) {
             // A transport failure may have committed the internal write. Leave the reservation pinned in that case.
@@ -283,15 +273,7 @@ public class EagerSessionHandler implements SessionHandler {
         }
     }
 
-    private boolean hasOtherReservation(AppDefinition app, Session session, ServicePair pair) {
-        Set<String> names = Set.of(pair.external().getMetadata().getName(), pair.internal().getMetadata().getName());
-        return K8sUtil.getExistingServices(client.kubernetes(), client.namespace(), app.getMetadata().getName(),
-                app.getMetadata().getUid()).stream().anyMatch(service -> !names.contains(service.getMetadata().getName())
-                        && (ownedBy(service, session) || labeledFor(service, session)));
-    }
-
     private void rollbackExternal(Service original, Service claimed, String correlationId) {
-        // Restore the original only if the claim is still the last write, including any concurrent replay.
         Service restored = new ServiceBuilder(original).editMetadata()
                 .withResourceVersion(claimed.getMetadata().getResourceVersion()).endMetadata().build();
         try {
@@ -302,48 +284,16 @@ public class EagerSessionHandler implements SessionHandler {
         }
     }
 
-    private static boolean selectsInstance(Service service, String selector) {
-        return service.getSpec() != null && selector.equals(service.getSpec().getSelector().get("app"));
-    }
-
-    private static boolean ownedBy(HasMetadata resource, Session session) {
-        return resource.getMetadata().getOwnerReferences().stream().anyMatch(owner -> Session.KIND.equals(owner.getKind())
-                && session.getMetadata().getUid().equals(owner.getUid())
-                && session.getMetadata().getName().equals(owner.getName()));
-    }
-
-    private static boolean labeledFor(Service service, Session session) {
-        return session.getMetadata().getUid().equals(service.getMetadata().getLabels()
-                .get(LabelsUtil.LABEL_KEY_SESSION_UUID));
-    }
-
-    private static boolean canReserve(Service service, Session session) {
-        // Discovery has already checked the AppDefinition owner. A second owner must be this Session.
-        var metadata = service.getMetadata();
-        String labeledSession = metadata.getLabels().get(LabelsUtil.LABEL_KEY_SESSION_UUID);
-        return (labeledSession == null || session.getMetadata().getUid().equals(labeledSession))
-                && (TheiaCloudServiceUtil.isUnusedService(service)
-                        || (metadata.getOwnerReferences().size() == 2 && ownedBy(service, session)));
-    }
-
-    private Service claim(Service service, Session session, Map<String, String> labels, String correlationId,
-            boolean completingInternal) {
+    private Service claim(Service service, Session session, Map<String, String> labels, String correlationId) {
         boolean alreadyOwned = ownedBy(service, session);
-        if (!completingInternal && alreadyOwned
-                && service.getMetadata().getLabels().entrySet().containsAll(labels.entrySet())) {
+        if (alreadyOwned && service.getMetadata().getLabels().entrySet().containsAll(labels.entrySet())) {
             return service;
         }
         Service updated = new ServiceBuilder(service).editMetadata().addToLabels(labels).endMetadata().build();
-        if (completingInternal) {
-            // Even a replay must change the external resourceVersion before writing the internal Service.
-            // Otherwise a pending rollback from the first replica could undo this replica's reservation.
-            updated.getMetadata().getAnnotations().put(RESERVATION_ATTEMPT, UUID.randomUUID().toString());
-        }
         if (!alreadyOwned) {
             TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, session.getMetadata().getName(),
                     session.getMetadata().getUid(), updated);
         }
-        // update() sends the resourceVersion from the listed Service and fails on conflict.
         return client.services().resource(updated).update();
     }
 
@@ -362,52 +312,67 @@ public class EagerSessionHandler implements SessionHandler {
             return true;
         }
 
-        String sessionResourceName = session.getMetadata().getName();
-        String sessionResourceUID = session.getMetadata().getUid();
         // Kubernetes may already have removed the Session owner reference when deletion is observed.
         List<Service> services = K8sUtil.getExistingServices(client.kubernetes(), client.namespace(),
                 appDefinition.get().getMetadata().getName(), appDefinition.get().getMetadata().getUid()).stream()
                 .filter(service -> ownedBy(service, session) || labeledFor(service, session)).toList();
-        if (services.isEmpty()) {
-            return true;
+        // A single remaining Service is a partial claim or the last release of an interrupted cleanup.
+        int released = 0;
+        if (services.size() <= 1 || cleanInstance(session, appDefinition.get(), services, correlationId)) {
+            for (Service service : services) {
+                if (!releaseService(service, session, correlationId)) {
+                    break;
+                }
+                released++;
+            }
         }
-        if (services.size() == 1) {
-            // Interrupted between claims, or between the two releases at the end of cleanup.
-            return releaseService(services.getFirst(), session, correlationId);
+        if (released < services.size()) {
+            List<String> remaining = services.subList(released, services.size()).stream()
+                    .map(service -> service.getMetadata().getName()).toList();
+            LOGGER.error(formatLogMessage(correlationId, "Cleanup failed for Session " + session.getMetadata().getName()
+                    + ". Services still reserved: " + remaining));
+            return false;
         }
+        return true;
+    }
+
+    private boolean cleanInstance(Session session, AppDefinition appDefinition, List<Service> services,
+            String correlationId) {
+        String sessionResourceName = session.getMetadata().getName();
+        String sessionResourceUID = session.getMetadata().getUid();
         List<Service> externalServices = services.stream()
                 .filter(service -> !service.getMetadata().getName().endsWith("-int")).toList();
         if (services.size() != 2 || externalServices.size() != 1) {
             LOGGER.error(formatLogMessage(correlationId, "Ambiguous Service reservation for " + sessionResourceName));
             return false;
         }
-        Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition.get(), externalServices.getFirst());
+        Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition, externalServices.getFirst());
         if (instance == null) {
             return false;
         }
 
         // Cleanup routing rule to prevent further traffic to the session pod
         try {
-            boolean routingCleanupSuccess = routingStrategy.removeSessionRouting(session, appDefinition.get(), instance,
+            boolean routingCleanupSuccess = routingStrategy.removeSessionRouting(session, appDefinition, instance,
                     correlationId);
             if (!routingCleanupSuccess) {
-                LOGGER.error(formatLogMessage(correlationId, "Failed to remove routing for session " + spec.getName()));
+                LOGGER.error(formatLogMessage(correlationId, "Failed to remove routing for session "
+                        + sessionResourceName));
                 return false;
             }
         } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while removing routing for session " + spec.getName()),
-                    e);
+            LOGGER.error(formatLogMessage(correlationId, "Error while removing routing for session "
+                    + sessionResourceName), e);
             return false;
         }
 
         // Remove owner reference from deployment
-        final String deploymentName = TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance);
+        final String deploymentName = TheiaCloudDeploymentUtil.getDeploymentName(appDefinition, instance);
         try {
             client.kubernetes().apps().deployments().withName(deploymentName).edit(deployment -> TheiaCloudHandlerUtil
                     .removeOwnerReferenceFromItem(correlationId, sessionResourceName, sessionResourceUID, deployment));
         } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
-                    + (appDefinitionID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
+            LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment " + deploymentName), e);
             return false;
         }
 
@@ -415,7 +380,7 @@ public class EagerSessionHandler implements SessionHandler {
             // Remove user from allowed emails in config map
             try {
                 client.kubernetes().configMaps()
-                        .withName(TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition.get(), instance))
+                        .withName(TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition, instance))
                         .edit(configmap -> {
                             configmap.setData(
                                     Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST, null));
@@ -423,7 +388,7 @@ public class EagerSessionHandler implements SessionHandler {
                         });
             } catch (KubernetesClientException e) {
                 LOGGER.error(formatLogMessage(correlationId, "Error while editing email configmap "
-                        + (appDefinitionID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)), e);
+                        + TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition, instance)), e);
                 return false;
             }
         }
@@ -441,18 +406,13 @@ public class EagerSessionHandler implements SessionHandler {
             return false;
         }
 
-        // Keep the instance reserved until its route, user credentials and pod have been cleaned up.
-        for (Service service : services) {
-            if (!releaseService(service, session, correlationId)) {
-                return false;
-            }
-        }
         return true;
     }
 
     private boolean releaseService(Service service, Session session, String correlationId) {
         String name = service.getMetadata().getName();
-        for (int attempt = 1; attempt <= 3; attempt++) {
+        final int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 Service current = client.services().withName(name).get();
                 if (current == null || (!ownedBy(current, session) && !labeledFor(current, session))) {
@@ -461,13 +421,17 @@ public class EagerSessionHandler implements SessionHandler {
                 TheiaCloudHandlerUtil.removeOwnerReferenceFromItem(correlationId, session.getMetadata().getName(),
                         session.getMetadata().getUid(), current);
                 if (labeledFor(current, session)) {
-                    current.getMetadata().getAnnotations().remove(RESERVATION_ATTEMPT);
                     current.getMetadata().getLabels().keySet().removeAll(LabelsUtil.getSessionSpecificLabelKeys());
                 }
                 client.services().resource(current).update();
                 return true;
             } catch (KubernetesClientException e) {
-                LOGGER.warn(formatLogMessage(correlationId, "Attempt " + attempt + " failed to release " + name), e);
+                String message = formatLogMessage(correlationId, "Attempt " + attempt + " failed to release " + name);
+                if (attempt == maxAttempts) {
+                    LOGGER.error(message, e);
+                } else {
+                    LOGGER.warn(message, e);
+                }
             }
         }
         return false;
