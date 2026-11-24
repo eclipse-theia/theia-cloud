@@ -1,13 +1,18 @@
-import { injectable } from '@theia/core/shared/inversify';
+import { inject, injectable } from '@theia/core/shared/inversify';
 
 import { MONITOR_ENABLE_ACTIVITY_TRACKER } from '../common/env-variables';
+import { ActivityTrackerBackendModule } from '../common/modules/activity-tracker-module';
+import { MessagingBackendModule } from '../common/modules/messaging-module';
 import { MonitorBackendModule } from '../common/monitor-backend-module';
 import { TheiaCloudBackendMonitorService } from '../common/monitor-protocol';
-import { ActivityTrackerBackendModuleImpl } from './modules/activity-tracker-backend-module-impl';
-import { MessagingBackendModuleImpl } from './modules/messaging-backend-module-impl';
 
 @injectable()
 export class DefaultTheiaCloudBackendMonitorService implements TheiaCloudBackendMonitorService {
+  constructor(
+    @inject(MessagingBackendModule) protected readonly messagingBackendModule: MessagingBackendModule,
+    @inject(ActivityTrackerBackendModule) protected readonly activityTrackerBackendModule: ActivityTrackerBackendModule
+  ) {}
+
   /**
    * Returns true if ran in theia cloud context
    */
@@ -26,21 +31,21 @@ export class DefaultTheiaCloudBackendMonitorService implements TheiaCloudBackend
     if (serviceAuthToken) {
       return serviceAuthToken;
     }
-    
+
     const appId = process.env.THEIACLOUD_APP_ID;
     if (appId) {
       console.warn('Using deprecated environment variable \'THEIACLOUD_APP_ID\'. ' +
                    'Please migrate to \'THEIACLOUD_SERVICE_AUTH_TOKEN\' in your configuration.');
       return appId;
     }
-    
+
     return undefined;
   }
 
   async getEnabledBackendModules(): Promise<MonitorBackendModule[]> {
-    const modules: MonitorBackendModule[] = [new MessagingBackendModuleImpl()];
+    const modules: MonitorBackendModule[] = [this.messagingBackendModule];
     if (process.env[MONITOR_ENABLE_ACTIVITY_TRACKER] === 'true') {
-      modules.push(new ActivityTrackerBackendModuleImpl());
+      modules.push(this.activityTrackerBackendModule);
     }
     return modules;
   }

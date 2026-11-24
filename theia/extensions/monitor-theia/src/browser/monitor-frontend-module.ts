@@ -30,20 +30,22 @@ export default new ContainerModule(bind => {
   bind(MessagingFrontendModule).toService(MessagingFrontendModuleImpl);
   bind(MessagingBackendModule)
     .toDynamicValue(context => {
-      const client = context.container.get(MessagingFrontendModuleImpl);
+      const client = context.container.get<MessagingFrontendModule>(MessagingFrontendModule);
       return WebSocketConnectionProvider.createProxy(context.container, MESSAGING_SERVICE_PATH, client);
     })
     .inSingletonScope();
-  bind(FrontendApplicationContribution).to(MessagingFrontendContribution);
+  bind(MessagingFrontendContribution).toSelf().inSingletonScope();
+  bind(FrontendApplicationContribution).toService(MessagingFrontendContribution);
 
   // activity tracker service
   bind(ActivityTrackerFrontendModuleImpl).toSelf().inSingletonScope();
   bind(ActivityTrackerFrontendModule).toService(ActivityTrackerFrontendModuleImpl);
   bind(ActivityTrackerBackendModule)
     .toDynamicValue(context => {
-      const client = context.container.get(ActivityTrackerFrontendModuleImpl);
+      const client = context.container.get<ActivityTrackerFrontendModule>(ActivityTrackerFrontendModule);
       return WebSocketConnectionProvider.createProxy(context.container, ACTIVITY_TRACKER_SERVICE_PATH, client);
     })
     .inSingletonScope();
-  bind(FrontendApplicationContribution).to(ActivityTrackerFrontendContribution);
+  bind(ActivityTrackerFrontendContribution).toSelf().inSingletonScope();
+  bind(FrontendApplicationContribution).toService(ActivityTrackerFrontendContribution);
 });
