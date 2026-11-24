@@ -17,16 +17,19 @@
 package org.eclipse.theia.cloud.operator.handler.session;
 
 import static org.eclipse.theia.cloud.common.util.LogMessageUtil.formatLogMessage;
+import static org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil.canReserve;
+import static org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil.labeledFor;
+import static org.eclipse.theia.cloud.operator.util.TheiaCloudServiceUtil.ownedBy;
 
 import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +37,6 @@ import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
-import org.eclipse.theia.cloud.common.util.JavaUtil;
 import org.eclipse.theia.cloud.common.util.LabelsUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
@@ -49,12 +51,9 @@ import com.google.inject.Inject;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceList;
+import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
-import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.PodResource;
-import io.fabric8.kubernetes.client.dsl.ServiceResource;
 
 /**
  * A {@link SessionAddedHandler} that relies on the fact that the app definition handler created spare deployments to
@@ -93,9 +92,6 @@ public class EagerSessionHandler implements SessionHandler {
             return false;
         }
 
-        String appDefinitionResourceName = appDefinition.get().getMetadata().getName();
-        String appDefinitionResourceUID = appDefinition.get().getMetadata().getUid();
-
         /* check routing resource exists */
         if (!routingStrategy.ensureRoutingResourceExists(appDefinition.get(), correlationId)) {
             LOGGER.error(formatLogMessage(correlationId,
@@ -103,85 +99,30 @@ public class EagerSessionHandler implements SessionHandler {
             return false;
         }
 
-        /* get a service to use */
-        Entry<Optional<Service>, Boolean> reserveServiceResult = reserveService(client.kubernetes(), client.namespace(),
-                appDefinitionResourceName, appDefinitionResourceUID, appDefinitionID, sessionResourceName,
-                sessionResourceUID, correlationId);
-        if (reserveServiceResult.getValue()) {
-            LOGGER.info(formatLogMessage(correlationId, "Found an already reserved service"));
+        ServicePair pair;
+        try {
+            pair = reserveServicePair(appDefinition.get(), session, correlationId);
+        } catch (KubernetesClientException e) {
+            LOGGER.error(formatLogMessage(correlationId, "Error reserving Services for " + sessionResourceName), e);
+            return false;
+        }
+        if (pair == null) {
+            return false;
+        }
+        if (session.getNonNullStatus().hasUrl()) {
             return true;
         }
-        Optional<Service> serviceToUse = reserveServiceResult.getKey();
-        if (serviceToUse.isEmpty()) {
-            LOGGER.error(
-                    formatLogMessage(correlationId, "No Service for app definition " + appDefinitionID + " found."));
-            return false;
-        }
 
-        /* get an internal service to use */
-        Entry<Optional<Service>, Boolean> reserveInternalServiceResult = reserveInternalService(client.kubernetes(),
-                client.namespace(), appDefinitionResourceName, appDefinitionResourceUID, appDefinitionID,
-                sessionResourceName, sessionResourceUID, correlationId);
-        if (reserveInternalServiceResult.getValue()) {
-            LOGGER.info(formatLogMessage(correlationId, "Found an already reserved internal service"));
-            return true;
-        }
-        Optional<Service> internalServiceToUse = reserveInternalServiceResult.getKey();
-        if (internalServiceToUse.isEmpty()) {
-            LOGGER.error(formatLogMessage(correlationId,
-                    "No Internal Service for app definition " + appDefinitionID + " found."));
-            return false;
-        }
-
-        try {
-            client.services().inNamespace(client.namespace()).withName(serviceToUse.get().getMetadata().getName())
-                    .edit(service -> {
-                        LOGGER.debug("Setting session labels");
-                        Map<String, String> labels = service.getMetadata().getLabels();
-                        if (labels == null) {
-                            labels = new HashMap<>();
-                            service.getMetadata().setLabels(labels);
-                        }
-                        Map<String, String> newLabels = LabelsUtil.createSessionLabels(session, appDefinition.get());
-                        labels.putAll(newLabels);
-                        return service;
-                    });
-        } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId,
-                    "Error while adding labels to service " + (serviceToUse.get().getMetadata().getName())), e);
-            return false;
-        }
-
-        try {
-            client.services().inNamespace(client.namespace())
-                    .withName(internalServiceToUse.get().getMetadata().getName()).edit(service -> {
-                        LOGGER.debug("Setting session labels on internal service");
-                        Map<String, String> labels = service.getMetadata().getLabels();
-                        if (labels == null) {
-                            labels = new HashMap<>();
-                            service.getMetadata().setLabels(labels);
-                        }
-                        Map<String, String> newLabels = LabelsUtil.createSessionLabels(session, appDefinition.get());
-                        labels.putAll(newLabels);
-                        return service;
-                    });
-        } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while adding labels to internal service "
-                    + (internalServiceToUse.get().getMetadata().getName())), e);
-            return false;
-        }
-
-        /* get the deployment for the service and add as owner */
-        Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition.get(), serviceToUse.get());
-        if (instance == null) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while getting instance from Service"));
-            return false;
-        }
-
+        int instance = pair.instance();
         final String deploymentName = TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance);
         try {
-            client.kubernetes().apps().deployments().withName(deploymentName).edit(deployment -> TheiaCloudHandlerUtil
-                    .addOwnerReferenceToItem(correlationId, sessionResourceName, sessionResourceUID, deployment));
+            client.kubernetes().apps().deployments().withName(deploymentName).edit(deployment -> {
+                if (!ownedBy(deployment, session)) {
+                    TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, sessionResourceName, sessionResourceUID,
+                            deployment);
+                }
+                return deployment;
+            });
         } catch (KubernetesClientException e) {
             LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
                     + (appDefinitionID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
@@ -242,7 +183,7 @@ public class EagerSessionHandler implements SessionHandler {
         /* adjust the routing */
         String sessionUrl;
         try {
-            sessionUrl = routingStrategy.addSessionRouting(session, appDefinition.get(), serviceToUse.get(), instance,
+            sessionUrl = routingStrategy.addSessionRouting(session, appDefinition.get(), pair.external(), instance,
                     correlationId);
         } catch (KubernetesClientException e) {
             LOGGER.error(formatLogMessage(correlationId,
@@ -259,7 +200,7 @@ public class EagerSessionHandler implements SessionHandler {
         try {
             Optional<URI> internalUrl = arguments.isUseKeycloak()
                     ? Optional.of(TheiaCloudServiceUtil.getInternalServiceURL(
-                            TheiaCloudServiceUtil.getInternalServiceName(appDefinition.get(), instance), client.namespace()))
+                            pair.internal().getMetadata().getName(), client.namespace()))
                     : Optional.empty();
             AddedHandlerUtil.updateSessionURLAsync(client.sessions(), session, client.namespace(), sessionUrl,
                     internalUrl, correlationId);
@@ -273,74 +214,87 @@ public class EagerSessionHandler implements SessionHandler {
         return true;
     }
 
-    protected synchronized Entry<Optional<Service>, Boolean> reserveService(NamespacedKubernetesClient client,
-            String namespace, String appDefinitionResourceName, String appDefinitionResourceUID, String appDefinitionID,
-            String sessionResourceName, String sessionResourceUID, String correlationId) {
-        List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
-                appDefinitionResourceUID);
-
-        // Filter for external services (those without "-int" suffix)
-        List<Service> existingExternalServices = existingServices.stream()
-                .filter(service -> !service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
-
-        Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
-                sessionResourceUID, existingExternalServices);
-        if (alreadyReservedService.isPresent()) {
-            return JavaUtil.tuple(alreadyReservedService, true);
-        }
-
-        Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingExternalServices,
-                appDefinitionResourceUID);
-        if (serviceToUse.isEmpty()) {
-            return JavaUtil.tuple(serviceToUse, false);
-        }
-
-        /* add our session as owner to the service */
-        try {
-            client.services().inNamespace(namespace).withName(serviceToUse.get().getMetadata().getName())
-                    .edit(service -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, sessionResourceName,
-                            sessionResourceUID, service));
-        } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId,
-                    "Error while editing service " + (serviceToUse.get().getMetadata().getName())), e);
-            return JavaUtil.tuple(Optional.empty(), false);
-        }
-        return JavaUtil.tuple(serviceToUse, false);
+    public record ServicePair(int instance, Service external, Service internal) {
     }
 
-    protected synchronized Entry<Optional<Service>, Boolean> reserveInternalService(NamespacedKubernetesClient client,
-            String namespace, String appDefinitionResourceName, String appDefinitionResourceUID, String appDefinitionID,
-            String sessionResourceName, String sessionResourceUID, String correlationId) {
-        List<Service> existingServices = K8sUtil.getExistingServices(client, namespace, appDefinitionResourceName,
-                appDefinitionResourceUID);
-
-        // Filter for internal services (those with "-int" suffix)
-        List<Service> existingInternalServices = existingServices.stream()
-                .filter(service -> service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
-
-        Optional<Service> alreadyReservedService = TheiaCloudServiceUtil.getServiceOwnedBySession(sessionResourceName,
-                sessionResourceUID, existingInternalServices);
-        if (alreadyReservedService.isPresent()) {
-            return JavaUtil.tuple(alreadyReservedService, true);
+    /**
+     * Reserves both Services for one eager instance, resuming any partial reservation held by the Session.
+     * Returns null if no matching pair is available.
+     */
+    protected ServicePair reserveServicePair(AppDefinition app, Session session, String correlationId) {
+        List<Service> services = K8sUtil.getExistingServices(client.kubernetes(), client.namespace(),
+                app.getMetadata().getName(), app.getMetadata().getUid());
+        Map<String, Service> byName = new HashMap<>();
+        Set<String> reserved = new HashSet<>();
+        for (Service service : services) {
+            String name = service.getMetadata().getName();
+            byName.put(name, service);
+            if (ownedBy(service, session) || labeledFor(service, session)) {
+                reserved.add(name);
+            }
         }
 
-        Optional<Service> serviceToUse = TheiaCloudServiceUtil.getUnusedService(existingInternalServices,
-                appDefinitionResourceUID);
-        if (serviceToUse.isEmpty()) {
-            return JavaUtil.tuple(serviceToUse, false);
+        // Prefer the lowest eligible instance when the Session has no existing reservation.
+        ServicePair pair = null;
+        for (Service external : services) {
+            String name = external.getMetadata().getName();
+            if (!canReserve(external, session)) {
+                continue;
+            }
+            Integer instance = TheiaCloudServiceUtil.getId(correlationId, app, external);
+            if (instance == null || !name.equals(TheiaCloudServiceUtil.getServiceName(app, instance))) {
+                continue;
+            }
+            String internalName = TheiaCloudServiceUtil.getInternalServiceName(app, instance);
+            Service internal = byName.get(internalName);
+            if (internal != null && canReserve(internal, session) && Set.of(name, internalName).containsAll(reserved)
+                    && (pair == null || instance < pair.instance())) {
+                pair = new ServicePair(instance, external, internal);
+            }
+        }
+        if (pair == null || (session.getNonNullStatus().hasUrl() && reserved.isEmpty())) {
+            LOGGER.error(formatLogMessage(correlationId, "No matching Service pair available for Session "
+                    + session.getMetadata().getName() + " of " + app.getMetadata().getName()
+                    + ". Services already reserved by this Session: " + reserved));
+            return null;
         }
 
-        /* add our session as owner to the internal service */
+        Map<String, String> labels = LabelsUtil.createSessionLabels(session, app);
+        Service external = claim(pair.external(), session, labels, correlationId);
         try {
-            client.services().inNamespace(namespace).withName(serviceToUse.get().getMetadata().getName())
-                    .edit(service -> TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, sessionResourceName,
-                            sessionResourceUID, service));
+            Service internal = claim(pair.internal(), session, labels, correlationId);
+            return new ServicePair(pair.instance(), external, internal);
         } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId,
-                    "Error while editing internal service " + (serviceToUse.get().getMetadata().getName())), e);
-            return JavaUtil.tuple(Optional.empty(), false);
+            // A transport failure may have committed the internal write. Leave the reservation pinned in that case.
+            if (!ownedBy(pair.external(), session) && e.getCode() >= 400 && e.getCode() < 500) {
+                rollbackExternal(pair.external(), external, correlationId);
+            }
+            throw e;
         }
-        return JavaUtil.tuple(serviceToUse, false);
+    }
+
+    private void rollbackExternal(Service original, Service claimed, String correlationId) {
+        Service restored = new ServiceBuilder(original).editMetadata()
+                .withResourceVersion(claimed.getMetadata().getResourceVersion()).endMetadata().build();
+        try {
+            client.services().resource(restored).update();
+        } catch (KubernetesClientException e) {
+            LOGGER.warn(formatLogMessage(correlationId, "Could not release " + original.getMetadata().getName()
+                    + " after failing to reserve its internal Service"), e);
+        }
+    }
+
+    private Service claim(Service service, Session session, Map<String, String> labels, String correlationId) {
+        boolean alreadyOwned = ownedBy(service, session);
+        if (alreadyOwned && service.getMetadata().getLabels().entrySet().containsAll(labels.entrySet())) {
+            return service;
+        }
+        Service updated = new ServiceBuilder(service).editMetadata().addToLabels(labels).endMetadata().build();
+        if (!alreadyOwned) {
+            TheiaCloudHandlerUtil.addOwnerReferenceToItem(correlationId, session.getMetadata().getName(),
+                    session.getMetadata().getUid(), updated);
+        }
+        return client.services().resource(updated).update();
     }
 
     @Override
@@ -358,155 +312,85 @@ public class EagerSessionHandler implements SessionHandler {
             return true;
         }
 
-        // Find external and internal services by first filtering all services by the session's corresponding session
-        // labels (as added in
-        // sessionCreated) and then checking if the service has an owner reference to the session
+        // Kubernetes may already have removed the Session owner reference when deletion is observed.
+        List<Service> services = K8sUtil.getExistingServices(client.kubernetes(), client.namespace(),
+                appDefinition.get().getMetadata().getName(), appDefinition.get().getMetadata().getUid()).stream()
+                .filter(service -> ownedBy(service, session) || labeledFor(service, session)).toList();
+        // A single remaining Service is a partial claim or the last release of an interrupted cleanup.
+        int released = 0;
+        if (services.size() <= 1 || cleanInstance(session, appDefinition.get(), services, correlationId)) {
+            for (Service service : services) {
+                if (!releaseService(service, session, correlationId)) {
+                    break;
+                }
+                released++;
+            }
+        }
+        if (released < services.size()) {
+            List<String> remaining = services.subList(released, services.size()).stream()
+                    .map(service -> service.getMetadata().getName()).toList();
+            LOGGER.error(formatLogMessage(correlationId, "Cleanup failed for Session " + session.getMetadata().getName()
+                    + ". Services still reserved: " + remaining));
+            return false;
+        }
+        return true;
+    }
+
+    private boolean cleanInstance(Session session, AppDefinition appDefinition, List<Service> services,
+            String correlationId) {
         String sessionResourceName = session.getMetadata().getName();
         String sessionResourceUID = session.getMetadata().getUid();
-        Map<String, String> sessionLabels = LabelsUtil.createSessionLabels(session, appDefinition.get());
-        // Filtering by withLabels(sessionLabels) because the method requires an exact match of the labels.
-        // Additional labels on the service prevent a match and the service has an additional app label.
-        // Thus, filter by each session label separately.
-        // We rely on the fact that the session labels are unique for each session.
-        // We cannot rely on owner references because they might have been cleaned up automatically by Kubernetes.
-        // While this should not happen, it did on Minikube.
-        FilterWatchListDeletable<Service, ServiceList, ServiceResource<Service>> servicesFilter = client.services();
-        for (Entry<String, String> entry : sessionLabels.entrySet()) {
-            servicesFilter = servicesFilter.withLabel(entry.getKey(), entry.getValue());
-        }
-        List<Service> services = servicesFilter.list().getItems();
-        if (services.isEmpty()) {
-            LOGGER.error(formatLogMessage(correlationId, "No Services owned by session " + spec.getName() + " found."));
-            return false;
-        }
-
-        // Separate external and internal services
         List<Service> externalServices = services.stream()
-                .filter(service -> !service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
-        List<Service> internalServices = services.stream()
-                .filter(service -> service.getMetadata().getName().endsWith("-int")).collect(Collectors.toList());
-
-        if (externalServices.size() != 1) {
-            LOGGER.error(formatLogMessage(correlationId, "Expected exactly one external service owned by session "
-                    + spec.getName() + " but found " + externalServices.size()));
+                .filter(service -> !service.getMetadata().getName().endsWith("-int")).toList();
+        if (services.size() != 2 || externalServices.size() != 1) {
+            LOGGER.error(formatLogMessage(correlationId, "Ambiguous Service reservation for " + sessionResourceName));
             return false;
         }
-        if (internalServices.size() != 1) {
-            LOGGER.error(formatLogMessage(correlationId, "Expected exactly one internal service owned by session "
-                    + spec.getName() + " but found " + internalServices.size()));
-            return false;
-        }
-
-        Service ownedService = externalServices.get(0);
-        Service ownedInternalService = internalServices.get(0);
-        String serviceName = ownedService.getMetadata().getName();
-
-        // Remove owner reference and user specific labels from the service
-        // Allow retries because in rare cases the update fails. It is not clear why but might be caused by the owner
-        // reference being removed by Kubernetes garbage collection.
-        // The retries aim to stabilize the clean up process.
-        Service cleanedService = null;
-        int editServiceAttempts = 0;
-        boolean editServiceSuccess = false;
-        while (editServiceAttempts < 3 && !editServiceSuccess) {
-            try {
-                cleanedService = client.services().withName(serviceName).edit(service -> {
-                    TheiaCloudHandlerUtil.removeOwnerReferenceFromItem(correlationId, sessionResourceName,
-                            sessionResourceUID, service);
-                    service.getMetadata().getLabels().keySet().removeAll(LabelsUtil.getSessionSpecificLabelKeys());
-                    return service;
-                });
-                LOGGER.info(formatLogMessage(correlationId,
-                        "Removed owner reference and user-specific session labels from service: " + serviceName));
-                editServiceSuccess = true;
-            } catch (KubernetesClientException e) {
-                editServiceAttempts++;
-                if (editServiceAttempts < 3) {
-                    LOGGER.warn(
-                            formatLogMessage(correlationId,
-                                    "Attempt " + editServiceAttempts + " failed while editing service " + serviceName),
-                            e);
-                } else {
-                    LOGGER.error(formatLogMessage(correlationId, "Error while editing service " + serviceName
-                            + " after " + editServiceAttempts + " attempts"), e);
-                    return false;
-                }
-            }
-        }
-
-        // Remove owner reference and user specific labels from the internal service
-        String internalServiceName = ownedInternalService.getMetadata().getName();
-        Service cleanedInternalService = null;
-        int editInternalServiceAttempts = 0;
-        boolean editInternalServiceSuccess = false;
-        while (editInternalServiceAttempts < 3 && !editInternalServiceSuccess) {
-            try {
-                cleanedInternalService = client.services().withName(internalServiceName).edit(service -> {
-                    TheiaCloudHandlerUtil.removeOwnerReferenceFromItem(correlationId, sessionResourceName,
-                            sessionResourceUID, service);
-                    service.getMetadata().getLabels().keySet().removeAll(LabelsUtil.getSessionSpecificLabelKeys());
-                    return service;
-                });
-                LOGGER.info(formatLogMessage(correlationId,
-                        "Removed owner reference and user-specific session labels from internal service: "
-                                + internalServiceName));
-                editInternalServiceSuccess = true;
-            } catch (KubernetesClientException e) {
-                editInternalServiceAttempts++;
-                if (editInternalServiceAttempts < 3) {
-                    LOGGER.warn(formatLogMessage(correlationId, "Attempt " + editInternalServiceAttempts
-                            + " failed while editing internal service " + internalServiceName), e);
-                } else {
-                    LOGGER.error(formatLogMessage(correlationId, "Error while editing internal service "
-                            + internalServiceName + " after " + editInternalServiceAttempts + " attempts"), e);
-                    return false;
-                }
-            }
-        }
-        Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition.get(), cleanedService);
+        Integer instance = TheiaCloudServiceUtil.getId(correlationId, appDefinition, externalServices.getFirst());
         if (instance == null) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while getting instance from Service"));
             return false;
         }
 
         // Cleanup routing rule to prevent further traffic to the session pod
         try {
-            boolean routingCleanupSuccess = routingStrategy.removeSessionRouting(session, appDefinition.get(), instance,
+            boolean routingCleanupSuccess = routingStrategy.removeSessionRouting(session, appDefinition, instance,
                     correlationId);
             if (!routingCleanupSuccess) {
-                LOGGER.error(formatLogMessage(correlationId, "Failed to remove routing for session " + spec.getName()));
+                LOGGER.error(formatLogMessage(correlationId, "Failed to remove routing for session "
+                        + sessionResourceName));
                 return false;
             }
         } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while removing routing for session " + spec.getName()),
-                    e);
+            LOGGER.error(formatLogMessage(correlationId, "Error while removing routing for session "
+                    + sessionResourceName), e);
             return false;
         }
 
         // Remove owner reference from deployment
-        final String deploymentName = TheiaCloudDeploymentUtil.getDeploymentName(appDefinition.get(), instance);
+        final String deploymentName = TheiaCloudDeploymentUtil.getDeploymentName(appDefinition, instance);
         try {
             client.kubernetes().apps().deployments().withName(deploymentName).edit(deployment -> TheiaCloudHandlerUtil
                     .removeOwnerReferenceFromItem(correlationId, sessionResourceName, sessionResourceUID, deployment));
         } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment "
-                    + (appDefinitionID + TheiaCloudDeploymentUtil.DEPLOYMENT_NAME + instance)), e);
+            LOGGER.error(formatLogMessage(correlationId, "Error while editing deployment " + deploymentName), e);
             return false;
         }
 
-        // Remove user from allowed emails in config map
-        try {
-            client.kubernetes().configMaps()
-                    .withName(TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition.get(), instance))
-                    .edit(configmap -> {
-                        configmap.setData(
-                                Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST, null));
-                        return configmap;
-                    });
-        } catch (KubernetesClientException e) {
-            LOGGER.error(formatLogMessage(correlationId, "Error while editing email configmap "
-                    + (appDefinitionID + TheiaCloudConfigMapUtil.CONFIGMAP_EMAIL_NAME + instance)), e);
-            return false;
+        if (arguments.isUseKeycloak()) {
+            // Remove user from allowed emails in config map
+            try {
+                client.kubernetes().configMaps()
+                        .withName(TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition, instance))
+                        .edit(configmap -> {
+                            configmap.setData(
+                                    Collections.singletonMap(AddedHandlerUtil.FILENAME_AUTHENTICATED_EMAILS_LIST, null));
+                            return configmap;
+                        });
+            } catch (KubernetesClientException e) {
+                LOGGER.error(formatLogMessage(correlationId, "Error while editing email configmap "
+                        + TheiaCloudConfigMapUtil.getEmailConfigName(appDefinition, instance)), e);
+                return false;
+            }
         }
 
         // Delete the pod to clean temporary workspace files. The deployment recreates a fresh pod automatically.
@@ -523,6 +407,34 @@ public class EagerSessionHandler implements SessionHandler {
         }
 
         return true;
+    }
+
+    private boolean releaseService(Service service, Session session, String correlationId) {
+        String name = service.getMetadata().getName();
+        final int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                Service current = client.services().withName(name).get();
+                if (current == null || (!ownedBy(current, session) && !labeledFor(current, session))) {
+                    return true;
+                }
+                TheiaCloudHandlerUtil.removeOwnerReferenceFromItem(correlationId, session.getMetadata().getName(),
+                        session.getMetadata().getUid(), current);
+                if (labeledFor(current, session)) {
+                    current.getMetadata().getLabels().keySet().removeAll(LabelsUtil.getSessionSpecificLabelKeys());
+                }
+                client.services().resource(current).update();
+                return true;
+            } catch (KubernetesClientException e) {
+                String message = formatLogMessage(correlationId, "Attempt " + attempt + " failed to release " + name);
+                if (attempt == maxAttempts) {
+                    LOGGER.error(message, e);
+                } else {
+                    LOGGER.warn(message, e);
+                }
+            }
+        }
+        return false;
     }
 
 }

@@ -22,7 +22,6 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,10 +29,11 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
+import org.eclipse.theia.cloud.common.util.LabelsUtil;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 import org.eclipse.theia.cloud.common.util.SessionUtil;
 
-import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Service;
 
 public final class TheiaCloudServiceUtil {
@@ -146,64 +146,27 @@ public final class TheiaCloudServiceUtil {
         }
     }
 
-    public static Optional<Service> getServiceOwnedBySession(String sessionResourceName, String sessionResourceUID,
-            List<Service> existingServices) {
-        Optional<Service> alreadyReservedService = existingServices.stream()//
-                .filter(service -> {
-                    if (isUnusedService(service)) {
-                        return false;
-                    }
-                    for (OwnerReference ownerReference : service.getMetadata().getOwnerReferences()) {
-                        if (sessionResourceName.equals(ownerReference.getName())
-                                && sessionResourceUID.equals(ownerReference.getUid())) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })//
-                .findAny();
-        return alreadyReservedService;
-    }
-
     public static boolean isUnusedService(Service service) {
         return service.getMetadata().getOwnerReferences().size() == 1;
     }
 
-    /**
-     * Returns an unused service.
-     * 
-     * @param existingServices
-     * @return
-     * @deprecated Use {@link #getUnusedService(List, String)} instead: Services should be owned by the corresponding
-     *             app definition.
-     */
-    @Deprecated
-    public static Optional<Service> getUnusedService(List<Service> existingServices) {
-        Optional<Service> serviceToUse = existingServices.stream()//
-                .filter(TheiaCloudServiceUtil::isUnusedService)//
-                .findAny();
-        return serviceToUse;
+    public static boolean ownedBy(HasMetadata resource, Session session) {
+        return resource.getMetadata().getOwnerReferences().stream().anyMatch(owner -> Session.KIND.equals(owner.getKind())
+                && session.getMetadata().getUid().equals(owner.getUid())
+                && session.getMetadata().getName().equals(owner.getName()));
     }
 
-    /**
-     * Returns an unused service that is owned by the given app definition.
-     * 
-     * @param existingServices         The list of services to search in.
-     * @param appDefinitionResourceUID The UID of the app definition that should own the service.
-     * @return The unused service that is owned by the given app definition or nothing if none is available.
-     */
-    public static Optional<Service> getUnusedService(List<Service> existingServices, String appDefinitionResourceUID) {
-        Optional<Service> serviceToUse = existingServices.stream()//
-                .filter(TheiaCloudServiceUtil::isUnusedService)//
-                .filter(service -> {
-                    for (OwnerReference ownerReference : service.getMetadata().getOwnerReferences()) {
-                        if (appDefinitionResourceUID.equals(ownerReference.getUid())) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })//
-                .findAny();
-        return serviceToUse;
-    };
+    public static boolean labeledFor(Service service, Session session) {
+        return session.getMetadata().getUid().equals(service.getMetadata().getLabels()
+                .get(LabelsUtil.LABEL_KEY_SESSION_UUID));
+    }
+
+    public static boolean canReserve(Service service, Session session) {
+        // Discovery has already checked the AppDefinition owner. A second owner must be this Session.
+        var metadata = service.getMetadata();
+        String labeledSession = metadata.getLabels().get(LabelsUtil.LABEL_KEY_SESSION_UUID);
+        return (labeledSession == null || session.getMetadata().getUid().equals(labeledSession))
+                && (isUnusedService(service)
+                        || (metadata.getOwnerReferences().size() == 2 && ownedBy(service, session)));
+    }
 }

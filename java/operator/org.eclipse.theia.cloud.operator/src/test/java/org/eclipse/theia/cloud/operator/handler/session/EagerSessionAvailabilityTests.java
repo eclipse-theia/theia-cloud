@@ -30,7 +30,6 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
-import org.eclipse.theia.cloud.common.util.JavaUtil;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.handler.AddedHandlerUtil;
 import org.eclipse.theia.cloud.operator.routing.SessionRoutingStrategy;
@@ -41,14 +40,10 @@ import org.mockito.Mockito;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.PodListBuilder;
-import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.RollableScalableResource;
-import io.fabric8.kubernetes.client.dsl.ServiceResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 
 class EagerSessionAvailabilityTests {
@@ -58,10 +53,6 @@ class EagerSessionAvailabilityTests {
     @ValueSource(booleans = {true, false})
     void probesTheRoutedInstanceOnlyWhenKeycloakIsEnabled(boolean keycloak) throws Exception {
         var client = mock(TheiaCloudClient.class, RETURNS_DEEP_STUBS);
-        NonNamespaceOperation<Service, ServiceList, ServiceResource<Service>> services = mock(NonNamespaceOperation.class);
-        when(client.services().inNamespace("sessions")).thenReturn(services);
-        ServiceResource<Service> service = mock(ServiceResource.class);
-        when(services.withName(Mockito.anyString())).thenReturn(service);
         when(client.namespace()).thenReturn("sessions");
         when(client.kubernetes().pods().list()).thenReturn(new PodListBuilder().build());
         var app = new AppDefinition();
@@ -86,18 +77,15 @@ class EagerSessionAvailabilityTests {
 
         var external = new ServiceBuilder().withNewMetadata()
                 .withName(TheiaCloudServiceUtil.getServiceName(app, 1)).endMetadata().build();
-        // The separate internal reservation can select a sibling of the publicly routed instance.
-        var sibling = new ServiceBuilder().withNewMetadata()
-                .withName(TheiaCloudServiceUtil.getInternalServiceName(app, 2)).endMetadata().build();
+        var internal = new ServiceBuilder().withNewMetadata()
+                .withName(TheiaCloudServiceUtil.getInternalServiceName(app, 1)).endMetadata().build();
         var kubernetes = client.kubernetes();
         RollableScalableResource<Deployment> deployment = mock(RollableScalableResource.class);
         when(kubernetes.apps().deployments().withName(Mockito.anyString())).thenReturn(deployment);
         Resource<ConfigMap> configMap = mock(Resource.class);
         when(kubernetes.configMaps().withName(Mockito.anyString())).thenReturn(configMap);
-        Mockito.doReturn(JavaUtil.tuple(Optional.of(external), false)).when(handler).reserveService(
-                kubernetes, "sessions", "app", appUid, "app", "session", "session-uid", "test");
-        Mockito.doReturn(JavaUtil.tuple(Optional.of(sibling), false)).when(handler).reserveInternalService(
-                kubernetes, "sessions", "app", appUid, "app", "session", "session-uid", "test");
+        Mockito.doReturn(new EagerSessionHandler.ServicePair(1, external, internal)).when(handler)
+                .reserveServicePair(app, session, "test");
         String publicUrl = "https://public.example/session/";
         when(handler.routingStrategy.addSessionRouting(session, app, external, 1, "test")).thenReturn(publicUrl);
         String expectedName = TheiaCloudServiceUtil.getInternalServiceName(app, 1);
