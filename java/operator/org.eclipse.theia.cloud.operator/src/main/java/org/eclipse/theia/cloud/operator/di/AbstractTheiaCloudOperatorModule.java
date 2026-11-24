@@ -85,7 +85,6 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
         bind(WorkspaceHandler.class).to(bindWorkspaceHandler()).in(Singleton.class);
 
         configure(MultiBinding.create(OperatorPlugin.class), this::bindOperatorPlugins);
-        bind(OkHttpClient.class).in(Singleton.class);
         bind(MonitorMessagingService.class).to(bindMonitorMessagingService()).in(Singleton.class);
         bind(TheiaCloudOperatorArguments.class).toInstance(arguments);
     }
@@ -164,6 +163,17 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
         } else {
             return LazySessionHandler.class;
         }
+    }
+
+    @Provides
+    @Singleton
+    protected OkHttpClient provideMonitorHttpClient() {
+        return createMonitorHttpClient();
+    }
+
+    /** Creates the shared HTTP client for requests to session monitors. */
+    protected OkHttpClient createMonitorHttpClient() {
+        return new OkHttpClient();
     }
 
     @Provides

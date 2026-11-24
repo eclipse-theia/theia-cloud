@@ -16,6 +16,7 @@
 package org.eclipse.theia.cloud.operator.di;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -128,7 +129,12 @@ class TheiaCloudClientInjectionTests {
         int port = server.getAddress().getPort();
         try (NamespacedKubernetesClient kubernetes = offlineClient()) {
             AppDefinition definition = applicationDefinition(port);
-            CustomClientModule module = new CustomClientModule(Optional.of("127.0.0.1"), Optional.of(definition));
+            CustomClientModule module = new CustomClientModule(Optional.of("127.0.0.1"), Optional.of(definition)) {
+                @Override
+                protected OkHttpClient createMonitorHttpClient() {
+                    return new OkHttpClient.Builder().followRedirects(false).build();
+                }
+            };
             Injector injector = Guice.createInjector(offlineModule(kubernetes, module));
             Session session = new Session();
             session.setSpec(new SessionSpec(SESSION_NAME, APP_DEFINITION_NAME, "test-user"));
@@ -141,7 +147,10 @@ class TheiaCloudClientInjectionTests {
             assertEquals(List.of("POST /monitor/message", "GET /monitor/activity/lastActivity",
                     "POST /monitor/activity/popup"), requests);
             assertEquals(1, connections.size());
-            var pool = injector.getInstance(OkHttpClient.class).connectionPool();
+            OkHttpClient client = injector.getInstance(OkHttpClient.class);
+            assertFalse(client.followRedirects());
+            assertSame(client, injector.getInstance(OkHttpClient.class));
+            var pool = client.connectionPool();
             assertEquals(1, pool.connectionCount());
             assertEquals(1, pool.idleConnectionCount());
         } finally {
