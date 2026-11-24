@@ -16,10 +16,17 @@
 package org.eclipse.theia.cloud.operator.di;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.theia.cloud.common.k8s.client.AppDefinitionResourceClient;
 import org.eclipse.theia.cloud.common.k8s.client.DefaultAppDefinitionResourceClient;
@@ -29,21 +36,27 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionStatus;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperator;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
 import org.eclipse.theia.cloud.operator.messaging.MonitorMessagingServiceImpl;
+import org.eclipse.theia.cloud.operator.plugins.MonitorActivityTracker;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import com.sun.net.httpserver.HttpServer;
 
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import okhttp3.OkHttpClient;
 import picocli.CommandLine;
 
 class TheiaCloudClientInjectionTests {
@@ -83,18 +96,66 @@ class TheiaCloudClientInjectionTests {
 
     @Test
     void monitorUrl_usesCustomClientIpAndApplicationDefinitionPort() throws Exception {
-        assertMonitorUrl(Optional.of(SENTINEL_IP), Optional.of(applicationDefinition()),
+        assertMonitorUrl(Optional.of(SENTINEL_IP), Optional.of(applicationDefinition(3001)),
                 Optional.of("http://192.0.2.42:3001/monitor/message"));
     }
 
     @Test
     void monitorUrl_missingCustomClientIpReturnsEmpty() throws Exception {
-        assertMonitorUrl(Optional.empty(), Optional.of(applicationDefinition()), Optional.empty());
+        assertMonitorUrl(Optional.empty(), Optional.of(applicationDefinition(3001)), Optional.empty());
     }
 
     @Test
     void monitorUrl_missingApplicationDefinitionReturnsEmpty() {
         assertMonitorUrl(Optional.of(SENTINEL_IP), Optional.empty(), Optional.empty());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 200, 503 })
+    void monitorRequestsReleaseTheirConnection(int status) throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        List<String> requests = new CopyOnWriteArrayList<>();
+        Set<InetSocketAddress> connections = ConcurrentHashMap.newKeySet();
+        server.createContext("/monitor/", exchange -> {
+            try (exchange) {
+                connections.add(exchange.getRemoteAddress());
+                requests.add(exchange.getRequestMethod() + " " + exchange.getRequestURI().getPath());
+                exchange.getRequestBody().readAllBytes();
+                exchange.sendResponseHeaders(status, 1);
+                exchange.getResponseBody().write('0');
+            }
+        });
+        server.start();
+        int port = server.getAddress().getPort();
+        try (NamespacedKubernetesClient kubernetes = offlineClient()) {
+            AppDefinition definition = applicationDefinition(port);
+            CustomClientModule module = new CustomClientModule(Optional.of("127.0.0.1"), Optional.of(definition)) {
+                @Override
+                protected OkHttpClient createMonitorHttpClient() {
+                    return new OkHttpClient.Builder().followRedirects(false).build();
+                }
+            };
+            Injector injector = Guice.createInjector(offlineModule(kubernetes, module));
+            Session session = new Session();
+            session.setSpec(new SessionSpec(SESSION_NAME, APP_DEFINITION_NAME, "test-user"));
+            session.setStatus(new SessionStatus());
+            session.getStatus().setLastActivity(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(5));
+
+            injector.getInstance(UrlInspectingMonitorMessagingService.class).postMessage(session);
+            injector.getInstance(TestActivityTracker.class).ping(session, port);
+
+            assertEquals(List.of("POST /monitor/message", "GET /monitor/activity/lastActivity",
+                    "POST /monitor/activity/popup"), requests);
+            assertEquals(1, connections.size());
+            OkHttpClient client = injector.getInstance(OkHttpClient.class);
+            assertFalse(client.followRedirects());
+            assertSame(client, injector.getInstance(OkHttpClient.class));
+            var pool = client.connectionPool();
+            assertEquals(1, pool.connectionCount());
+            assertEquals(1, pool.idleConnectionCount());
+        } finally {
+            server.stop(0);
+        }
     }
 
     private void assertMonitorUrl(Optional<String> ip, Optional<AppDefinition> appDefinition,
@@ -146,9 +207,9 @@ class TheiaCloudClientInjectionTests {
         return new KubernetesClientBuilder().withConfig(config).build().adapt(NamespacedKubernetesClient.class);
     }
 
-    private static AppDefinition applicationDefinition() throws Exception {
+    private static AppDefinition applicationDefinition(int port) throws Exception {
         AppDefinition appDefinition = new AppDefinition();
-        appDefinition.setSpec(new ObjectMapper().readValue("{\"monitor\":{\"port\":3001}}", AppDefinitionSpec.class));
+        appDefinition.setSpec(new ObjectMapper().readValue("{\"monitor\":{\"port\":" + port + "}}", AppDefinitionSpec.class));
         return appDefinition;
     }
 
@@ -213,8 +274,18 @@ class TheiaCloudClientInjectionTests {
     }
 
     public static class UrlInspectingMonitorMessagingService extends MonitorMessagingServiceImpl {
+        void postMessage(Session session) {
+            postMessage(session, "info", "Test message", true, "");
+        }
+
         Optional<String> url(Session session) {
             return getURL(session);
+        }
+    }
+
+    public static class TestActivityTracker extends MonitorActivityTracker {
+        void ping(Session session, int port) {
+            pingSession("test", session, "127.0.0.1", port, 10, 1);
         }
     }
 }

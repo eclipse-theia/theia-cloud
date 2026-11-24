@@ -58,6 +58,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import okhttp3.OkHttpClient;
 
 public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
 
@@ -162,6 +163,17 @@ public abstract class AbstractTheiaCloudOperatorModule extends AbstractModule {
         } else {
             return LazySessionHandler.class;
         }
+    }
+
+    @Provides
+    @Singleton
+    protected OkHttpClient provideMonitorHttpClient() {
+        return createMonitorHttpClient();
+    }
+
+    /** Creates the shared HTTP client for requests to session monitors. */
+    protected OkHttpClient createMonitorHttpClient() {
+        return new OkHttpClient();
     }
 
     @Provides
