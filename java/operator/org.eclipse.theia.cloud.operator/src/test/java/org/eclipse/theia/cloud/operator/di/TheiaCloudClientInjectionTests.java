@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.operator.di;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 
@@ -29,8 +30,12 @@ import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinition;
 import org.eclipse.theia.cloud.common.k8s.resource.appdefinition.AppDefinitionSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.operator.BasicTheiaCloudOperator;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperator;
 import org.eclipse.theia.cloud.operator.TheiaCloudOperatorArguments;
+import org.eclipse.theia.cloud.operator.handler.appdef.AppDefinitionHandler;
+import org.eclipse.theia.cloud.operator.handler.session.SessionHandler;
+import org.eclipse.theia.cloud.operator.handler.ws.WorkspaceHandler;
 import org.eclipse.theia.cloud.operator.messaging.MonitorMessagingServiceImpl;
 import org.junit.jupiter.api.Test;
 
@@ -114,6 +119,28 @@ class TheiaCloudClientInjectionTests {
                 assertEquals(APP_DEFINITION_NAME, customClient.requestedAppDefinitionName);
                 assertSame(kubernetes, customClient.kubernetes());
             }
+        }
+    }
+
+    @Test
+    void downstreamOperatorCanAccessInjectedDependenciesAndWatchState() {
+        try (NamespacedKubernetesClient kubernetes = offlineClient()) {
+            Injector injector = Guice.createInjector(offlineModule(kubernetes));
+            injector.getInstance(CustomOperator.class).verifyInheritedFields(injector);
+        }
+    }
+
+    static class CustomOperator extends BasicTheiaCloudOperator {
+        void verifyInheritedFields(Injector injector) {
+            assertSame(injector.getInstance(TheiaCloudClient.class), resourceClient);
+            assertSame(injector.getInstance(AppDefinitionHandler.class), appDefinitionAddedHandler);
+            assertSame(injector.getInstance(WorkspaceHandler.class), workspaceHandler);
+            assertSame(injector.getInstance(SessionHandler.class), sessionHandler);
+            assertSame(injector.getInstance(TheiaCloudOperatorArguments.class), arguments);
+            assertTrue(appDefinitionCache.isEmpty());
+            assertTrue(workspaceCache.isEmpty());
+            assertTrue(sessionCache.isEmpty());
+            assertTrue(watches.isEmpty());
         }
     }
 
