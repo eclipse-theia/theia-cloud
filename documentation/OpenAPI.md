@@ -71,3 +71,16 @@ openapi-generator-cli generate -g markdown -i ./documentation/openapi.json -o ./
 > [!TIP]
 > The Open API generator supports generating code and documentation in various languages.
 > Execute `openapi-generator-cli list` to see all of them.
+
+## Identifying a running session
+
+Pass `sessionLabel` when creating an ephemeral or workspace-backed session through
+`POST /service` or `POST /service/session`. For example, a landing page can send
+`"sessionLabel": "Exercise 42 / Étape 1"` and find that text in the `label` field
+returned by `GET /service/session/{appId}/{user}`.
+
+The label belongs to the session at creation. Reconnecting to an existing session
+preserves its label. Labels can repeat, so applications that need to identify a
+single session should choose a value that is unique within the user's sessions.
+The launch request's `label` field names the workspace. Ephemeral launches ignore
+`workspaceName`.

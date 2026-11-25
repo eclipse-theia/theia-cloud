@@ -17,6 +17,8 @@ package org.eclipse.theia.cloud.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,12 +49,33 @@ class RootResourceTests {
     @InjectMock
     TheiaCloudUser user;
 
+    @InjectMock
+    K8sUtil k8sUtil;
+
     @Inject
     RootResource fixture;
 
     @BeforeEach
     void mockApplicationProperties() {
         Mockito.when(applicationProperties.isUseKeycloak()).thenReturn(true);
+    }
+
+    @Test
+    void ephemeralLaunchForwardsSessionLabelAndIgnoresWorkspaceName() {
+        mockUser(false, TEST_USER);
+        LaunchRequest request = new LaunchRequest();
+        request.appId = APP_ID;
+        request.appDefinition = "editor";
+        request.ephemeral = true;
+        request.workspaceName = "unused";
+        request.label = "workspace label";
+        request.sessionLabel = "Exercise 42 / Étape ★";
+        Mockito.when(k8sUtil.hasAppDefinition(request.appDefinition)).thenReturn(true);
+
+        fixture.launch(request);
+
+        Mockito.verify(k8sUtil).launchEphemeralSession(anyString(), eq(request.appDefinition), eq(TEST_USER),
+                eq(request.timeout), eq(request.env), eq(request.sessionLabel));
     }
 
     @Test

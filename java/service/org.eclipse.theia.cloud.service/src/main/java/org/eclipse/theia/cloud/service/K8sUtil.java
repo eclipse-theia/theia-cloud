@@ -90,23 +90,20 @@ public final class K8sUtil {
     }
 
     public String launchEphemeralSession(String correlationId, String appDefinition, String user, int timeout,
-            EnvironmentVars env) {
+            EnvironmentVars env, String sessionLabel) {
         SessionSpec sessionSpec = new SessionSpec(getSessionName(user, appDefinition, false), appDefinition, user);
-        sessionSpec = sessionSpecWithEnv(sessionSpec, env);
-
-        return launchSession(correlationId, sessionSpec, timeout);
+        return launchSession(correlationId, sessionSpecWithEnv(sessionSpec, env), timeout, sessionLabel);
     }
 
     public String launchWorkspaceSession(String correlationId, UserWorkspace workspace, int timeout,
-            EnvironmentVars env) {
+            EnvironmentVars env, String sessionLabel) {
         SessionSpec sessionSpec = new SessionSpec(getSessionName(workspace.name), workspace.appDefinition,
                 workspace.user, workspace.name);
-        sessionSpec = sessionSpecWithEnv(sessionSpec, env);
-
-        return launchSession(correlationId, sessionSpec, timeout);
+        return launchSession(correlationId, sessionSpecWithEnv(sessionSpec, env), timeout, sessionLabel);
     }
 
-    private String launchSession(String correlationId, SessionSpec sessionSpec, int timeout) {
+    private String launchSession(String correlationId, SessionSpec sessionSpec, int timeout, String sessionLabel) {
+        sessionSpec.setLabel(sessionLabel);
         SessionStatus status = CLIENT.sessions().launch(correlationId, sessionSpec, timeout).getNonNullStatus();
         TheiaCloudWebException.throwIfErroneous(status);
         return status.getUrl();

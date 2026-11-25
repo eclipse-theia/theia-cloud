@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.common.k8s.resource.session.v1beta6;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
@@ -45,6 +46,9 @@ public class SessionV1beta6Spec implements UserScopedSpec {
 
     @JsonProperty("error")
     private String error;
+
+    @JsonProperty("label")
+    private String label;
 
     @JsonProperty("workspace")
     private String workspace;
@@ -105,6 +109,7 @@ public class SessionV1beta6Spec implements UserScopedSpec {
         this.user = fromHub.getUser().orElse(null);
         this.url = fromHub.getUrl().orElse(null);
         this.error = fromHub.getError().orElse(null);
+        this.label = fromHub.getLabel().orElse(null);
         this.workspace = fromHub.getWorkspace().orElse(null);
         this.lastActivity = fromHub.getLastActivity().orElse((long) 0);
         this.sessionSecret = fromHub.getSessionSecret().orElse(null);
@@ -174,6 +179,10 @@ public class SessionV1beta6Spec implements UserScopedSpec {
         this.lastActivity = lastActivity;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
     public String getWorkspace() {
         return workspace;
     }
@@ -199,6 +208,7 @@ public class SessionV1beta6Spec implements UserScopedSpec {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + Objects.hashCode(label);
         result = prime * result + ((appDefinition == null) ? 0 : appDefinition.hashCode());
         result = prime * result + ((user == null) ? 0 : user.hashCode());
         result = prime * result + ((workspace == null) ? 0 : workspace.hashCode());
@@ -215,6 +225,8 @@ public class SessionV1beta6Spec implements UserScopedSpec {
         if (getClass() != obj.getClass())
             return false;
         SessionV1beta6Spec other = (SessionV1beta6Spec) obj;
+        if (!Objects.equals(label, other.label))
+            return false;
         if (appDefinition == null) {
             if (other.appDefinition != null)
                 return false;

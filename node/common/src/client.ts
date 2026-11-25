@@ -70,9 +70,10 @@ export namespace LaunchRequest {
     serviceAuthToken: string,
     appDefinition: string,
     timeout?: number,
-    user: string = createUser()
+    user: string = createUser(),
+    sessionLabel?: string
   ): LaunchRequest {
-    return { serviceUrl, appId: serviceAuthToken, appDefinition, user, ephemeral: true, timeout };
+    return { serviceUrl, appId: serviceAuthToken, appDefinition, user, sessionLabel, ephemeral: true, timeout };
   }
 
   export function createWorkspace(
@@ -82,9 +83,13 @@ export namespace LaunchRequest {
     timeout?: number,
     user: string = createUser(),
     workspaceName?: string,
-    label?: string
+    label?: string,
+    sessionLabel?: string
   ): LaunchRequest {
-    return { serviceUrl, appId: serviceAuthToken, appDefinition, user, label, workspaceName, ephemeral: false, timeout };
+    return {
+      serviceUrl, appId: serviceAuthToken, appDefinition, user, label, sessionLabel, workspaceName,
+      ephemeral: false, timeout
+    };
   }
 
   // eslint-disable-next-line max-len
@@ -94,9 +99,10 @@ export namespace LaunchRequest {
     workspaceName: string,
     timeout?: number,
     appDefinition?: string,
-    user: string = createUser()
+    user: string = createUser(),
+    sessionLabel?: string
   ): LaunchRequest {
-    return { serviceUrl, appId: serviceAuthToken, workspaceName, appDefinition, user, timeout };
+    return { serviceUrl, appId: serviceAuthToken, workspaceName, appDefinition, user, sessionLabel, timeout };
   }
   
   /** @deprecated Use ephemeral() instead */

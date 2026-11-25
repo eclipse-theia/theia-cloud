@@ -6,6 +6,7 @@
 | **name** | **String** |  | [optional] [default to null] |
 | **appDefinition** | **String** |  | [optional] [default to null] |
 | **user** | **String** |  | [optional] [default to null] |
+| **label** | **String** |  | [optional] [default to null] |
 | **workspace** | **String** |  | [optional] [default to null] |
 | **sessionSecret** | **String** |  | [optional] [default to null] |
 | **options** | **Map** |  | [optional] [default to null] |

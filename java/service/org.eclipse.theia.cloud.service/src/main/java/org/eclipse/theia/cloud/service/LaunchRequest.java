@@ -24,8 +24,11 @@ public class LaunchRequest extends UserScopedServiceRequest {
     @Schema(description = "The app to launch. Needs to be set if a new or ephemeral session should be launched. For an existing workspace the last app definition will be used if none is given.", required = false)
     public String appDefinition;
 
-    @Schema(description = "The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched.", required = false)
+    @Schema(description = "The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched. Ignored for ephemeral launches.", required = false)
     public String workspaceName;
+
+    @Schema(description = "Free-text label for identifying the session in the session list.", required = false)
+    public String sessionLabel;
 
     @Schema(description = "The label of the workspace to mount/create. If no label is given, a default label will be generated.", required = false)
     public String label;
