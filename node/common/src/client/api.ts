@@ -361,11 +361,17 @@ export interface LaunchRequest {
      */
     'appDefinition'?: string;
     /**
-     * The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched.
+     * The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched. Ignored for ephemeral launches.
      * @type {string}
      * @memberof LaunchRequest
      */
     'workspaceName'?: string;
+    /**
+     * Free-text label for identifying the session in the session list.
+     * @type {string}
+     * @memberof LaunchRequest
+     */
+    'sessionLabel'?: string;
     /**
      * The label of the workspace to mount/create. If no label is given, a default label will be generated.
      * @type {string}
@@ -750,6 +756,11 @@ export interface SessionSpec {
      */
     'user'?: string;
     /**
+     * @type {string}
+     * @memberof SessionSpec
+     */
+    'label'?: string;
+    /**
      * 
      * @type {string}
      * @memberof SessionSpec
@@ -816,6 +827,12 @@ export interface SessionStartRequest {
      * @memberof SessionStartRequest
      */
     'workspaceName'?: string;
+    /**
+     * Free-text label for identifying the session in the session list.
+     * @type {string}
+     * @memberof SessionStartRequest
+     */
+    'sessionLabel'?: string;
     /**
      * Number of minutes to wait for session launch. Default is 3 Minutes.
      * @type {number}

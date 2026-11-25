@@ -237,7 +237,11 @@
           },
           "workspaceName": {
             "type": "string",
-            "description": "The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched."
+            "description": "The name of the workspace to mount/create. Needs to be set if an existing workspace should be launched. Ignored for ephemeral launches."
+          },
+          "sessionLabel": {
+            "type": "string",
+            "description": "Free-text label for identifying the session in the session list."
           },
           "label": {
             "type": "string",
@@ -496,6 +500,9 @@
           "user": {
             "type": "string"
           },
+          "label": {
+            "type": "string"
+          },
           "workspace": {
             "type": "string"
           },
@@ -548,6 +555,10 @@
           "workspaceName": {
             "type": "string",
             "description": "The name of the workspace to mount/create."
+          },
+          "sessionLabel": {
+            "type": "string",
+            "description": "Free-text label for identifying the session in the session list."
           },
           "timeout": {
             "type": "integer",

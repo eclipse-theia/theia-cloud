@@ -18,6 +18,7 @@ package org.eclipse.theia.cloud.common.k8s.resource.session;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.theia.cloud.common.k8s.resource.UserScopedSpec;
 import org.eclipse.theia.cloud.common.k8s.resource.session.hub.SessionHub;
@@ -37,6 +38,9 @@ public class SessionSpec implements UserScopedSpec {
 
     @JsonProperty("user")
     private String user;
+
+    @JsonProperty("label")
+    private String label;
 
     @JsonProperty("workspace")
     private String workspace;
@@ -94,6 +98,7 @@ public class SessionSpec implements UserScopedSpec {
         this.name = fromHub.getName().orElse(null);
         this.appDefinition = fromHub.getAppDefinition().orElse(null);
         this.user = fromHub.getUser().orElse(null);
+        this.label = fromHub.getLabel().orElse(null);
         this.workspace = fromHub.getWorkspace().orElse(null);
         this.sessionSecret = fromHub.getSessionSecret().orElse(null);
         this.envVars = fromHub.getEnvVars().orElse(null);
@@ -127,6 +132,14 @@ public class SessionSpec implements UserScopedSpec {
         this.sessionSecret = sessionSecret;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
     public String getWorkspace() {
         return workspace;
     }
@@ -156,6 +169,7 @@ public class SessionSpec implements UserScopedSpec {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + Objects.hashCode(label);
         result = prime * result + ((appDefinition == null) ? 0 : appDefinition.hashCode());
         result = prime * result + ((user == null) ? 0 : user.hashCode());
         result = prime * result + ((workspace == null) ? 0 : workspace.hashCode());
@@ -172,6 +186,8 @@ public class SessionSpec implements UserScopedSpec {
         if (getClass() != obj.getClass())
             return false;
         SessionSpec other = (SessionSpec) obj;
+        if (!Objects.equals(label, other.label))
+            return false;
         if (appDefinition == null) {
             if (other.appDefinition != null)
                 return false;

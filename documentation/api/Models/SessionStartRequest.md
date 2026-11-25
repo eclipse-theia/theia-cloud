@@ -7,6 +7,7 @@
 | **user** | **String** | The user identification, usually the email address. | [default to null] |
 | **appDefinition** | **String** | The app to launch. | [default to null] |
 | **workspaceName** | **String** | The name of the workspace to mount/create. | [optional] [default to null] |
+| **sessionLabel** | **String** | Free-text label for identifying the session in the session list. | [optional] [default to null] |
 | **timeout** | **Integer** | Number of minutes to wait for session launch. Default is 3 Minutes. | [optional] [default to null] |
 | **env** | [**EnvironmentVars**](EnvironmentVars.md) | Environment variables | [optional] [default to null] |
 

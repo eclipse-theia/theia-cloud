@@ -30,6 +30,8 @@ import java.util.Optional;
 
 import org.eclipse.theia.cloud.common.k8s.resource.session.Session;
 import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
 import org.eclipse.theia.cloud.common.util.TheiaCloudError;
 import org.eclipse.theia.cloud.service.ApplicationProperties;
 import org.eclipse.theia.cloud.service.K8sUtil;
@@ -387,6 +389,21 @@ class SessionResourceTests {
     }
 
     @Test
+    void startWithExistingWorkspaceForwardsSessionLabel() {
+        mockUser(false, TEST_USER);
+        SessionStartRequest request = new SessionStartRequest(APP_ID, TEST_USER, null, "workspace", 3);
+        request.sessionLabel = "Exercise 42 / Étape ★";
+        Workspace workspace = new Workspace();
+        workspace.setSpec(new WorkspaceSpec("workspace", "Workspace label", TEST_APP_DEFINITION, TEST_USER));
+        Mockito.when(k8sUtil.getWorkspace(TEST_USER, "workspace")).thenReturn(Optional.of(workspace));
+
+        fixture.start(request);
+
+        Mockito.verify(k8sUtil).launchWorkspaceSession(anyString(), any(), eq(3), eq(request.env),
+                eq(request.sessionLabel));
+    }
+
+    @Test
     void start_noKeycloak_throwForbidden() {
         // Prepare
         mockUser(true, null);
@@ -400,7 +417,7 @@ class SessionResourceTests {
 
         // Assert
         Mockito.verify(k8sUtil, never()).getWorkspace(anyString(), anyString());
-        Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any());
+        Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any(), any());
         assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 
@@ -423,7 +440,7 @@ class SessionResourceTests {
 
         // Assert
         Mockito.verify(k8sUtil, never()).getWorkspace(anyString(), anyString());
-        Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any());
+        Mockito.verify(k8sUtil, never()).launchWorkspaceSession(anyString(), any(), anyInt(), any(), any());
         assertEquals(Status.FORBIDDEN.getStatusCode(), exception.getResponse().getStatus());
     }
 

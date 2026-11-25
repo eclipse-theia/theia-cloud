@@ -30,6 +30,9 @@ public class SessionStartRequest extends UserScopedServiceRequest {
     @Schema(description = "The name of the workspace to mount/create.", required = false)
     public String workspaceName;
 
+    @Schema(description = "Free-text label for identifying the session in the session list.", required = false)
+    public String sessionLabel;
+
     @Schema(description = "Number of minutes to wait for session launch. Default is 3 Minutes.", required = false)
     public int timeout = 3;
 

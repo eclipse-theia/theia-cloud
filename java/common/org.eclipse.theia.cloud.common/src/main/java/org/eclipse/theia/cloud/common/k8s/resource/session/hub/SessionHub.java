@@ -32,6 +32,7 @@ public class SessionHub {
     final Optional<String> url;
     final Optional<String> error;
 
+    final Optional<String> label;
     final Optional<String> workspace;
     final Optional<Long> lastActivity;
     final Optional<String> sessionSecret;
@@ -49,6 +50,7 @@ public class SessionHub {
         this.name = Optional.ofNullable(toHub.getSpec().getName());
         this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
         this.user = Optional.ofNullable(toHub.getSpec().getUser());
+        this.label = Optional.ofNullable(toHub.getSpec().getLabel());
         this.workspace = Optional.ofNullable(toHub.getSpec().getWorkspace());
         this.sessionSecret = Optional.ofNullable(toHub.getSpec().getSessionSecret());
         this.options = Optional.ofNullable(toHub.getSpec().getOptions());
@@ -77,6 +79,7 @@ public class SessionHub {
         this.name = Optional.ofNullable(toHub.getSpec().getName());
         this.appDefinition = Optional.ofNullable(toHub.getSpec().getAppDefinition());
         this.user = Optional.ofNullable(toHub.getSpec().getUser());
+        this.label = Optional.ofNullable(toHub.getSpec().getLabel());
         this.workspace = Optional.ofNullable(toHub.getSpec().getWorkspace());
         this.sessionSecret = Optional.ofNullable(toHub.getSpec().getSessionSecret());
         this.options = Optional.empty();
@@ -107,6 +110,7 @@ public class SessionHub {
         this.user = Optional.ofNullable(toHub.getSpec().getUser());
         this.url = Optional.ofNullable(toHub.getSpec().getUrl());
         this.error = Optional.ofNullable(toHub.getSpec().getError());
+        this.label = Optional.ofNullable(toHub.getSpec().getLabel());
         this.workspace = Optional.ofNullable(toHub.getSpec().getWorkspace());
         this.lastActivity = Optional.ofNullable(toHub.getSpec().getLastActivity());
         this.sessionSecret = Optional.ofNullable(toHub.getSpec().getSessionSecret());
@@ -146,6 +150,10 @@ public class SessionHub {
 
     public Optional<String> getError() {
         return error;
+    }
+
+    public Optional<String> getLabel() {
+        return label;
     }
 
     public Optional<String> getWorkspace() {
