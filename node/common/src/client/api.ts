@@ -890,6 +890,18 @@ export interface UserWorkspace {
      * @memberof UserWorkspace
      */
     'active': boolean;
+    /**
+     * Time the operator last observed the workspace enter or leave use by a running session.
+     * @type {string}
+     * @memberof UserWorkspace
+     */
+    'lastUsed'?: string;
+    /**
+     * Whether a running session uses this workspace.
+     * @type {boolean}
+     * @memberof UserWorkspace
+     */
+    'inUse'?: boolean;
 }
 /**
  * Request to create a new workspace.

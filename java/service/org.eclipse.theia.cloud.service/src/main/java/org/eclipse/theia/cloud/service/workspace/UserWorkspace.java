@@ -23,6 +23,7 @@ import static org.eclipse.theia.cloud.common.util.WorkspaceUtil.generateWorkspac
 import java.util.Optional;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
 
 @Schema(name = "UserWorkspace", description = "Description of a user workspace")
@@ -42,6 +43,21 @@ public class UserWorkspace {
 
     @Schema(description = "Whether the workspace is in use at the moment.", required = true)
     public boolean active;
+
+    @Schema(description = "Time the operator last observed the workspace enter or leave use by a running session.", format = "date-time")
+    public String lastUsed;
+
+    @Schema(description = "Whether a running session uses this workspace.")
+    public boolean inUse;
+
+    public static UserWorkspace fromWorkspace(Workspace workspace) {
+        UserWorkspace result = new UserWorkspace(workspace.getSpec());
+        if (workspace.getStatus() != null) {
+            result.lastUsed = workspace.getStatus().getLastUsed();
+            result.inUse = workspace.getStatus().isInUse();
+        }
+        return result;
+    }
 
     public UserWorkspace() {
     }

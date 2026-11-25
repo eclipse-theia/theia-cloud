@@ -15,8 +15,8 @@
  ********************************************************************************/
 package org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta3;
 
-import org.eclipse.theia.cloud.common.k8s.resource.ResourceStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.StatusStep;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceUsageStatus;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.hub.WorkspaceHub;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Deprecated
 @JsonDeserialize
-public class WorkspaceV1beta3Status extends ResourceStatus {
+public class WorkspaceV1beta3Status extends WorkspaceUsageStatus {
 
     @JsonProperty("volumeClaim")
     private StatusStep volumeClaim;
@@ -39,6 +39,7 @@ public class WorkspaceV1beta3Status extends ResourceStatus {
     }
 
     public WorkspaceV1beta3Status(WorkspaceHub fromHub) {
+        super(fromHub);
         if (fromHub.getOperatorMessage().isPresent()) {
             this.setOperatorMessage(fromHub.getOperatorMessage().get());
         }

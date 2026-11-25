@@ -24,6 +24,9 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 
 public class WorkspaceHub {
 
+    private final String lastUsed;
+    private final boolean inUse;
+
     final Optional<ObjectMeta> metadata;
     final Optional<String> name;
     final Optional<String> label;
@@ -42,6 +45,8 @@ public class WorkspaceHub {
     final Optional<Map<String, String>> options;
 
     public WorkspaceHub(Workspace toHub) {
+        this.lastUsed = toHub.getNonNullStatus().getLastUsed();
+        this.inUse = toHub.getNonNullStatus().isInUse();
         this.metadata = Optional.ofNullable(toHub.getMetadata());
         this.name = Optional.ofNullable(toHub.getSpec().getName());
         this.label = Optional.ofNullable(toHub.getSpec().getLabel());
@@ -81,6 +86,8 @@ public class WorkspaceHub {
 
     @SuppressWarnings("deprecation")
     public WorkspaceHub(org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta4.WorkspaceV1beta4 toHub) {
+        this.lastUsed = toHub.getNonNullStatus().getLastUsed();
+        this.inUse = toHub.getNonNullStatus().isInUse();
         this.metadata = Optional.ofNullable(toHub.getMetadata());
         this.name = Optional.ofNullable(toHub.getSpec().getName());
         this.label = Optional.ofNullable(toHub.getSpec().getLabel());
@@ -120,6 +127,8 @@ public class WorkspaceHub {
 
     @SuppressWarnings("deprecation")
     public WorkspaceHub(org.eclipse.theia.cloud.common.k8s.resource.workspace.v1beta3.WorkspaceV1beta3 toHub) {
+        this.lastUsed = toHub.getNonNullStatus().getLastUsed();
+        this.inUse = toHub.getNonNullStatus().isInUse();
         this.metadata = Optional.ofNullable(toHub.getMetadata());
         this.name = Optional.ofNullable(toHub.getSpec().getName());
         this.label = Optional.ofNullable(toHub.getSpec().getLabel());
@@ -154,6 +163,14 @@ public class WorkspaceHub {
             this.operatorMessage = Optional.empty();
 
         }
+    }
+
+    public String getLastUsed() {
+        return lastUsed;
+    }
+
+    public boolean isInUse() {
+        return inUse;
     }
 
     public Optional<ObjectMeta> getMetadata() {

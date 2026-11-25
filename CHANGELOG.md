@@ -2,6 +2,8 @@
 
 ## [1.3.0] - unreleased
 
+- [operator] Track when a workspace enters or leaves use (`status.lastUsed`) and whether a running session uses it (`status.inUse`).
+
 - [java/operator] Add `--oAuth2ProxyImage` operator argument to override the full oauth2-proxy image path (defaults to `quay.io/oauth2-proxy/oauth2-proxy`). This enables pulling the image from a private registry in air-gapped or corporate networks, instead of only configuring the tag via `--oAuth2ProxyVersion`.
 - [all components] Update Node.js from 20 to 24 (LTS)
 - [theia] Update TypeScript from 5.4.5 to 5.9.3 to match the TypeScript version required by `@types/node` 24

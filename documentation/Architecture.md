@@ -65,6 +65,8 @@ A workspace is a cross-section for a specific application definition, user, and 
 | user          | string | The user ID that created that workspace                            |
 | storage       | string | The name of the persistent storage that is used for this workspace |
 
+The operator sets `status.inUse` when the first session referencing the workspace publishes its ready URL. It clears the flag when the last running session is deleted, including after a timeout. The UTC timestamp `status.lastUsed` records when the operator observed either transition. It is absent until the operator observes use. A session heartbeat or an operator restart with the same running sessions preserves the timestamp.
+
 ### Session
 
 A concrete session associated with a user for a given workspace.
