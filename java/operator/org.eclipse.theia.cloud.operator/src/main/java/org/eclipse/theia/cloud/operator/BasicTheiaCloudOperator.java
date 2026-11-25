@@ -70,6 +70,9 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
     private WorkspaceHandler workspaceHandler;
 
     @Inject
+    private WorkspaceUsageTracker workspaceUsage;
+
+    @Inject
     private SessionHandler sessionHandler;
 
     @Inject
@@ -123,10 +126,13 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
 
     protected SpecWatch<Session> initSessionsAndWatchForChanges() {
         try {
-            resourceClient.sessions().list().forEach(this::initSession);
+            var sessions = resourceClient.sessions().operation().list();
+            sessions.getItems().forEach(this::initSession);
+            workspaceUsage.reconcileAfterRestart(workspaceCache.values(), TheiaCloudOperatorLauncher.COR_ID_INIT);
             SpecWatch<Session> watcher = new SpecWatch<>(sessionCache, this::handleSessionEvent, "Session",
                     COR_ID_SESSIONPREFIX);
-            resourceClient.sessions().operation().watch(watcher);
+            resourceClient.sessions().operation().withResourceVersion(sessions.getMetadata().getResourceVersion())
+                    .watch(watcher);
             return watcher;
         } catch (Exception e) {
             LOGGER.error(
@@ -185,12 +191,15 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
             Session session = sessionCache.get(uid);
             switch (action) {
             case ADDED:
+                workspaceUsage.sessionChanged(session, false, correlationId);
                 sessionHandler.sessionAdded(session, correlationId);
                 break;
             case DELETED:
+                workspaceUsage.sessionChanged(session, true, correlationId);
                 sessionHandler.sessionDeleted(session, correlationId);
                 break;
             case MODIFIED:
+                workspaceUsage.sessionChanged(session, false, correlationId);
                 sessionHandler.sessionModified(session, correlationId);
                 break;
             case ERROR:
@@ -266,6 +275,7 @@ public class BasicTheiaCloudOperator implements TheiaCloudOperator {
      */
     protected void lookForIdleWatches() {
         String correlationId = generateCorrelationId();
+        workspaceUsage.retryPending(correlationId);
         long now = System.currentTimeMillis();
         for (SpecWatch<?> watch : watches) {
             long idleForMs = now - watch.getLastActive();

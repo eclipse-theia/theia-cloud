@@ -74,7 +74,7 @@ public class WorkspaceResource extends BaseResource {
         Workspace workspace = k8sUtil.createWorkspace(correlationId,
                 new UserWorkspace(request.appDefinition, evaluatedRequest.getUser(), request.label));
         TheiaCloudWebException.throwIfErroneous(workspace);
-        return new UserWorkspace(workspace.getSpec());
+        return UserWorkspace.fromWorkspace(workspace);
     }
 
     @Operation(summary = "Delete workspace", description = "Deletes a workspace.")

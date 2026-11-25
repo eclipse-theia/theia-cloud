@@ -604,6 +604,15 @@
           "active": {
             "type": "boolean",
             "description": "Whether the workspace is in use at the moment."
+          },
+          "lastUsed": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time the operator last observed the workspace enter or leave use by a running session."
+          },
+          "inUse": {
+            "type": "boolean",
+            "description": "Whether a running session uses this workspace."
           }
         }
       },

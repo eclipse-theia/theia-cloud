@@ -22,6 +22,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -145,14 +146,16 @@ public final class K8sUtil {
     public List<UserWorkspace> listWorkspaces(String user) {
         List<Workspace> workspaces = CLIENT.workspaces().list(user);
 
-        List<UserWorkspace> userWorkspaces = workspaces.stream()
-                .map(workspace -> new UserWorkspace(workspace.getSpec())).collect(Collectors.toList());
-
-        for (UserWorkspace userWorkspace : userWorkspaces) {
-            String sessionName = getSessionName(userWorkspace.name);
-            userWorkspace.active = CLIENT.sessions().has(sessionName);
+        if (workspaces.isEmpty()) {
+            return List.of();
         }
-        return userWorkspaces;
+        Set<String> activeWorkspaces = listSessions(user).stream().map(SessionSpec::getWorkspace)
+                .collect(Collectors.toSet());
+        return workspaces.stream().map(workspace -> {
+            UserWorkspace result = UserWorkspace.fromWorkspace(workspace);
+            result.active = activeWorkspaces.contains(result.name);
+            return result;
+        }).collect(Collectors.toList());
     }
 
     public SessionPerformance reportPerformance(String sessionName) {

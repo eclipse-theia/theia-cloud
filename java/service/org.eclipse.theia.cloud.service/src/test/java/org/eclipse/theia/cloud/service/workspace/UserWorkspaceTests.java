@@ -16,17 +16,62 @@
 package org.eclipse.theia.cloud.service.workspace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.util.List;
+
+import org.eclipse.theia.cloud.common.k8s.client.SessionResourceClient;
+import org.eclipse.theia.cloud.common.k8s.client.TheiaCloudClient;
+import org.eclipse.theia.cloud.common.k8s.client.WorkspaceResourceClient;
+import org.eclipse.theia.cloud.common.k8s.resource.session.SessionSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.Workspace;
 import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceSpec;
+import org.eclipse.theia.cloud.common.k8s.resource.workspace.WorkspaceStatus;
 import org.eclipse.theia.cloud.common.util.NamingUtil;
 import org.eclipse.theia.cloud.common.util.WorkspaceUtil;
+import org.eclipse.theia.cloud.service.K8sUtil;
 import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link UserWorkspace}.
  */
 class UserWorkspaceTests {
+
+    @Test
+    void listIncludesPendingSessionWithIndependentResourceName() {
+        Workspace workspace = new Workspace();
+        workspace.setSpec(new WorkspaceSpec("ws", "Label", "app", "user"));
+        K8sUtil service = mock(K8sUtil.class, CALLS_REAL_METHODS);
+        service.CLIENT = mock(TheiaCloudClient.class);
+        WorkspaceResourceClient workspaces = mock(WorkspaceResourceClient.class);
+        SessionResourceClient sessions = mock(SessionResourceClient.class);
+        when(service.CLIENT.workspaces()).thenReturn(workspaces);
+        when(service.CLIENT.sessions()).thenReturn(sessions);
+        when(workspaces.list("user")).thenReturn(List.of(workspace));
+        when(sessions.specs("user")).thenReturn(List.of(new SessionSpec("another-name", "app", "user", "ws")));
+
+        UserWorkspace result = service.listWorkspaces("user").get(0);
+        assertTrue(result.active);
+        assertFalse(result.inUse);
+    }
+
+    @Test
+    void fromWorkspaceIncludesObservedUsage() {
+        Workspace workspace = new Workspace();
+        workspace.setSpec(new WorkspaceSpec("ws", "Label", "app", "user"));
+        WorkspaceStatus status = new WorkspaceStatus();
+        status.setInUse(true);
+        status.setLastUsed("2026-01-01T10:00:00Z");
+        workspace.setStatus(status);
+
+        UserWorkspace result = UserWorkspace.fromWorkspace(workspace);
+        assertTrue(result.inUse);
+        assertEquals(status.getLastUsed(), result.lastUsed);
+    }
 
     @Test
     void constructor_longExternalName_cappedAtWorkspaceNameLimit() {
